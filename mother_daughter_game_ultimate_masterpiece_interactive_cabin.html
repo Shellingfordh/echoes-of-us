@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《长大以后，我还记得你》—— 核心机制路演与全功能互动体验舱（终极融合版）</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        p { margin: 0; margin-bottom: 12px; }
+
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle at 50% 50%, #151515 0%, #000000 100%);
+            color: #e0e0e0;
+            font-family: 'Noto Sans SC', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 15px;
+        }
+
+        .master-nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .master-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Noto Sans SC', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .master-btn.active {
+            background: #00d2ff;
+            color: #000;
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+        }
+
+        .view-section {
+            display: none;
+            width: 100%;
+            max-width: 1280px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .view-section.active {
+            display: flex;
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slides-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .slide-container {
+            align-items: center;
+            background-color: #121212;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            font-family: 'Noto Sans SC', sans-serif;
+            height: 720px;
+            justify-content: center;
+            overflow: hidden;
+            padding: 50px 60px;
+            position: relative;
+            width: 100%;
+            max-width: 1280px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .slide-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.04) 0%, rgba(0, 0, 0, 0) 60%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .slide-container > * { position: relative; z-index: 1; }
+
+        .slide-container h1, .slide-container h2, .slide-container h3 {
+            color: #ffffff;
+            font-family: 'Outfit', 'Noto Sans SC', sans-serif;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .slide-container h1 { font-size: 58px; font-weight: 900; line-height: 1.1; background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .slide-container .slide-title { font-size: 38px; font-weight: 700; margin-bottom: 25px; text-align: left; width: 100%; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 12px; }
+        .slide-container h3 { font-size: 22px; font-weight: 500; margin-bottom: 10px; color: #00d2ff; }
+
+        .slide-container p, .slide-container li, .slide-container .subtitle {
+            color: #b0b0b0;
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .slide-container .subtitle { font-size: 19px; font-weight: 300; margin: 20px auto; color: #00d2ff; max-width: 900px; }
+        .slide-container .content-area { align-items: center; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; width: 100%; }
+
+        .title-layout { text-align: center; }
+        .two-column { align-items: flex-start; display: grid; grid-template-columns: 1fr 1fr; gap: 35px; width: 100%; }
+        .two-column.tiled > div { background-color: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); padding: 22px; text-align: left; }
+        .two-column ul { list-style: none; margin: 0; padding: 0; }
+        .two-column li { margin-bottom: 10px; padding-left: 18px; position: relative; font-size: 15px; }
+        .two-column li::before { content: '→'; position: absolute; left: 0; color: #00d2ff; font-weight: bold; }
+
+        .tiled-content { align-items: stretch; display: flex; gap: 20px; justify-content: center; width: 100%; }
+        .tile { background-color: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; flex: 1; padding: 22px; text-align: left; }
+        .tile .icon { color: #00d2ff; font-size: 28px; margin-bottom: 12px; }
+
+        .section-title-layout { align-items: center; display: flex; flex-direction: column; height: 100%; justify-content: center; text-align: center; width: 100%; }
+        .section-title-layout h2 { font-size: 52px; margin-bottom: 18px; }
+        .section-title-layout p { font-size: 19px; margin: 0 auto; max-width: 800px; color: #00d2ff; }
+        .section-title-layout hr { background: linear-gradient(90deg, transparent, #00d2ff, transparent); border: none; height: 2px; margin: 22px auto; width: 160px; }
+
+        .quote-layout { margin: 0 auto; text-align: center; width: 85%; }
+        .quote-layout blockquote { color: #ffffff; font-size: 36px; font-weight: 300; line-height: 1.4; margin: 0 0 22px 0; }
+        .quote-layout blockquote span { color: #00d2ff; font-weight: 700; }
+        .quote-layout cite { color: #888; font-size: 16px; font-style: normal; text-transform: uppercase; letter-spacing: 2px; }
+
+        .code-text { font-family: monospace; background: rgba(0, 210, 255, 0.1); color: #00d2ff; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }
+
+        @keyframes blockShift { 0% { transform: translateX(0); } 50% { transform: translateX(12px); background: #00d2ff; color: #000; } 100% { transform: translateX(0); } }
+        .demo-box { background: rgba(0, 210, 255, 0.05); border: 1px dashed rgba(0, 210, 255, 0.3); border-radius: 10px; padding: 15px; text-align: center; margin-top: 10px; }
+        .anim-block { display: inline-block; padding: 6px 12px; background: #1e1e1e; border: 1px solid #00d2ff; color: #00d2ff; border-radius: 6px; font-family: monospace; animation: blockShift 3s infinite ease-in-out; }
+
+        .cabin-layout {
+            width: 100%;
+            max-width: 1280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: 'Noto Sans SC', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: rgba(0, 210, 255, 0.1);
+            color: #00d2ff;
+            border-color: rgba(0, 210, 255, 0.3);
+        }
+
+        .tab-btn.active {
+            background: #00d2ff;
+            color: #000;
+            font-weight: 700;
+            border-color: #00d2ff;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+        }
+
+        .demo-container {
+            width: 100%;
+            max-width: 1280px;
+            background: #121212;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            overflow: hidden;
+            position: relative;
+            min-height: 580px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mechanic-panel {
+            display: none;
+            padding: 35px;
+            flex-grow: 1;
+            flex-direction: column;
+            justify-content: space-between;
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+
+        .mechanic-panel.active {
+            display: flex;
+        }
+
+        .panel-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+        }
+
+        .panel-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-header h2 span {
+            font-size: 14px;
+            background: rgba(0, 210, 255, 0.15);
+            color: #00d2ff;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .panel-header p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .interactive-screen {
+            background: #0a0a0a;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 340px;
+        }
+
+        .control-bar {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: #1e1e1e;
+            border: 1px solid #00d2ff;
+            color: #00d2ff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .action-btn:hover {
+            background: #00d2ff;
+            color: #000;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+        }
+
+        .log-box {
+            margin-top: 15px;
+            background: #000;
+            border: 1px solid #222;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #00d2ff;
+            width: 100%;
+            text-align: center;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Specific interactive widgets */
+        #room-view { width: 100%; height: 260px; background: #181818; border-radius: 8px; position: relative; transition: all 0.6s ease; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 20px; overflow: hidden; }
+        .furniture { background: #333; border-radius: 6px; transition: all 0.6s ease; position: absolute; display: flex; align-items: center; justify-content: center; color: #777; font-size: 12px; }
+        .timeline-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
+        .time-card { background: #161616; border: 1px solid #333; border-radius: 8px; padding: 15px; text-align: left; }
+        .time-card h4 { color: #00d2ff; margin-bottom: 8px; font-size: 15px; }
+        .slider-group { width: 100%; max-width: 400px; text-align: left; margin-bottom: 15px; }
+        .slider-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 5px; }
+        .slider-group input { width: 100%; accent-color: #00d2ff; cursor: pointer; }
+        .daughter-avatar { width: 60px; height: 60px; background: #00d2ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 20px; transition: all 0.5s; position: relative; }
+        .item-grid { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+        .arch-item { background: #222; border: 1px solid #444; border-radius: 8px; padding: 15px; width: 130px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .arch-item:hover { border-color: #00d2ff; background: rgba(0,210,255,0.05); }
+        .arch-item i { font-size: 28px; color: #00d2ff; margin-bottom: 8px; }
+        .arch-item span { font-size: 12px; color: #ccc; display: block; }
+        .album-tiles { display: flex; gap: 15px; justify-content: center; }
+        .puzzle-tile { width: 120px; height: 120px; background: #222; border: 2px dashed #555; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; color: #aaa; transition: 0.3s; }
+        .puzzle-tile.matched { border-style: solid; border-color: #00d2ff; background: rgba(0,210,255,0.1); color: #fff; }
+        .canvas-draw-box { background: #1a1a1a; border: 1px solid #444; width: 100%; height: 200px; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; cursor: crosshair; }
+        .memory-console { background: #000; border: 1px solid #333; border-radius: 8px; padding: 20px; width: 100%; text-align: left; font-family: monospace; font-size: 14px; max-height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+    <div class="master-nav">
+        <button class="master-btn active" onclick="switchMasterView('slides')"><i class="fa-solid fa-person-chalkboard"></i> 路演幻灯片模式 (15 Slides)</button>
+        <button class="master-btn" onclick="switchMasterView('cabin')"><i class="fa-solid fa-gamepad"></i> 机制互动体验舱 (8 Mechanics)</button>
+    </div>
+
+    <!-- VIEW 1: SLIDES PRESENTATION -->
+    <div class="view-section active" id="view-slides">
+        <div class="slides-wrapper">
+
+            <!-- Slide 1 -->
+            <div class="slide-container">
+                <div class="title-layout">
+                    <h1>“卧槽，游戏原来可以这样玩”</h1>
+                    <p class="subtitle">母女游戏核心机制与全套创新路演（完整深度版）<br>主策划带队：打破平庸养成，用独立游戏思维定义亲子玩法。</p>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="slide-container">
+                <div class="content-area">
+                    <div class="quote-layout">
+                        <blockquote>母女关系能不能产生一种只有在<span>母女主题</span>下才能成立的独特游戏规则？</blockquote>
+                        <cite>主策划核心灵魂拷问：拒绝平庸的“母女+普通养成+AI”套路</cite>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="slide-container">
+                <h2 class="slide-title">核心设计公式：Mechanic Revelation（纪念碑谷模式）</h2>
+                <div class="content-area">
+                    <div class="two-column tiled">
+                        <div>
+                            <h3>1. 视觉悖论与物理直觉</h3>
+                            <p>常规认知认为“断开的路无法通行”。玩家面对视觉错觉产生空间困惑。</p>
+                            <div class="demo-box"><span style="color:#ff4d4d;">断开路径</span> ⟶ <span style="color:#00d2ff;">旋转建筑重合</span></div>
+                        </div>
+                        <div>
+                            <h3>2. 亲手创造法则</h3>
+                            <p>玩家通过旋转拖拽连接路径，瞬间领悟底层物理规律，体验由“Discovery（发现）”带来的震撼。</p>
+                            <div class="demo-box"><span class="anim-block">视觉连接 = 真实通行</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4 -->
+            <div class="slide-container">
+                <h2 class="slide-title">规则即实体：《Baba Is You》式动态规则流</h2>
+                <div class="content-area">
+                    <div class="two-column">
+                        <div>
+                            <p>将母女关系演变直接转化为<strong>物理规则方块</strong>，让剧情推进等于玩法更迭：</p>
+                            <ul>
+                                <li><span class="code-text">MOTHER PROTECTS DAUGHTER</span>：初期妈妈自动拦截所有伤害。</li>
+                                <li><span class="code-text">DAUGHTER IS INDEPENDENT</span>：中期方块分离，女儿脱离妈妈控制。</li>
+                                <li><span class="code-text">RELATIONSHIP SHIFT</span>：后期重组成全新叙事与玩法。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <div class="demo-box" style="padding: 40px;">
+                                <div class="anim-block">MOTHER = IS = SHIELD</div>
+                                <p style="margin-top: 15px; font-size: 14px;">推动规则方块，实时改变游戏物理定律</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5 -->
+            <div class="slide-container">
+                <h2 class="slide-title">认知决定物理：《Superliminal》透视差与年龄视角</h2>
+                <div class="content-area">
+                    <div class="two-column">
+                        <div>
+                            <h3>年纪与视角的双重空间</h3>
+                            <p>成年人与儿童对世界尺度的感知存在巨大鸿沟。我们将其转化为空间解谜：</p>
+                            <p><strong>母亲视角：</strong>客厅茶几是阻挡前行的普通家具。</p>
+                            <p><strong>6岁女儿视角：</strong>客厅化作需要艰难攀爬的宏大雪山与堡垒。</p>
+                            <p><strong>同一空间，基于认知产生两种平行物理现实。</strong></p>
+                        </div>
+                        <div style="display:flex; justify-content:center; align-items:center;">
+                            <div class="demo-box" style="width:100%; padding:30px;">
+                                <p style="color:#00d2ff; font-weight:bold;">切换视角 = 重构世界尺度</p>
+                                <p style="font-size:14px; margin:0;">茶几 ⇌ 宏伟高山 / 衣柜 ⇌ 黑暗森林</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 6 -->
+            <div class="slide-container">
+                <h2 class="slide-title">嵌套与双时空：《Gorogoa》相册机关</h2>
+                <div class="content-area">
+                    <p style="width: 100%; text-align: left; margin-bottom: 20px;">母亲活在现实（2026），女儿活在记忆（2008）。将记忆面板拖拽嵌套进现实，空间瞬间打通。</p>
+                    <div class="tiled-content">
+                        <div class="tile">
+                            <h3>现实 (2026)</h3>
+                            <p>孤寂冷清的现代精装客厅。</p>
+                        </div>
+                        <div class="tile" style="text-align: center; justify-content: center;">
+                            <div style="font-size: 32px; color: #00d2ff; margin-bottom: 10px;"><i class="fa-solid fa-layer-group"></i></div>
+                            <h3 style="color: #fff; font-size: 18px;">嵌套重合</h3>
+                            <p style="font-size: 13px;">旧相框与现代墙面合一，开启过去通路。</p>
+                        </div>
+                        <div class="tile">
+                            <h3>记忆 (2008)</h3>
+                            <p>杂乱温暖充满烟火气的旧居。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 7 -->
+            <div class="slide-container">
+                <div class="section-title-layout">
+                    <hr>
+                    <h2>知识即升级：《Outer Wilds》式记忆回收</h2>
+                    <p>没有数值膨胀，没有无聊经验值。玩家解锁新区域的唯一凭据，是终于听懂并理解了十年前一句晦涩的话。记忆成为可探索的地图钥匙。</p>
+                </div>
+            </div>
+
+            <!-- Slide 8 -->
+            <div class="slide-container">
+                <h2 class="slide-title">物品讲故事与家庭记忆考古（Unpacking & Obra Dinn）</h2>
+                <div class="content-area">
+                    <div class="two-column">
+                        <div class="tile" style="height:100%;">
+                            <h3>生活痕迹的物理考据</h3>
+                            <p>核心循环不是抽卡，而是对成长物品的摆放：2005年手工发卡、2012年叛逆日记、2018年行李箱。摆放物件本身就是解谜，揭开她为何离去、因何相爱的真相。</p>
+                        </div>
+                        <div class="tile" style="height:100%;">
+                            <h3>家庭记忆考古</h3>
+                            <p>通过老照片、日历、聊天记录、旧语音与旧物，玩家自己推理出一段家庭往事，获得“我竟然自己把妈妈的人生拼出来了”的巨大成就感。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 9 -->
+            <div class="slide-container">
+                <h2 class="slide-title">控制权的叛逆：《It Takes Two》关系机制演进</h2>
+                <div class="content-area">
+                    <div class="tiled-content">
+                        <div class="tile">
+                            <div class="icon"><i class="fa-solid fa-child-reaching"></i></div>
+                            <h3>1. 绝对掌控</h3>
+                            <p>游戏初期。玩家扮演母亲，AI女儿完美跟随所有指令协同解谜。</p>
+                        </div>
+                        <div class="tile">
+                            <div class="icon"><i class="fa-solid fa-hand-paper"></i></div>
+                            <h3>2. 叛逆与失控</h3>
+                            <p>青春期阶段。点击“过来”，AI女儿选择反抗走开。控制权的丧失是核心挑战。</p>
+                        </div>
+                        <div class="tile">
+                            <div class="icon"><i class="fa-solid fa-people-arrows"></i></div>
+                            <h3>3. 理解与共鸣</h3>
+                            <p>输入指令不再等于机械执行。玩家必须学会倾听与沟通，而非简单下达命令。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 10 -->
+            <div class="slide-container">
+                <h2 class="slide-title">同输入异结果：时间维度的系统反馈</h2>
+                <div class="content-area">
+                    <div class="two-column">
+                        <div>
+                            <div style="font-size: 80px; font-weight:900; color:#00d2ff; line-height:1;">1</div>
+                            <div style="font-size: 18px; font-weight:600; color:#fff; margin-top:5px;">相同按钮输入：“你决定吧。”</div>
+                            <p style="margin-top:15px;">随着女儿年龄增长，按下同一个对话按钮将触发截然不同的系统剧本。</p>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #00d2ff;">
+                            <p style="margin-bottom:8px; font-size:15px;"><strong>6岁：</strong> “太好了！我想去吃冰淇淋！”</p>
+                            <p style="margin-bottom:8px; font-size:15px;"><strong>12岁：</strong> “你根本就不在乎我。”</p>
+                            <p style="margin-bottom:8px; font-size:15px;"><strong>18岁：</strong> “随便，反正你的人生也是这样。”</p>
+                            <p style="margin:0; font-size:15px;"><strong>25岁：</strong> <i>长久的沉默。</i></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 11 -->
+            <div class="slide-container">
+                <h2 class="slide-title">第四墙破次元与“记忆存档”机制（Inscryption / DDLC）</h2>
+                <div class="content-area">
+                    <div class="two-column">
+                        <div class="tile">
+                            <h3>游戏系统意识到玩家</h3>
+                            <p>女儿不仅是NPC。第二次玩时，她会说：“妈妈，你昨天来过。”她开始记住玩家过去的选择，甚至在卸载重装后说：“你走了很久。”这才是高级的第四墙。</p>
+                        </div>
+                        <div class="tile">
+                            <h3>存档就是记忆</h3>
+                            <p>拒绝冰冷的 SAVE / LOAD。我们用<strong>“记住这一刻”</strong>与<strong>“想起那一天”</strong>。读取旧存档时，女儿会知道：“妈妈，我们以前来过这里。”产生催泪情绪共鸣。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 12 -->
+            <div class="slide-container">
+                <h2 class="slide-title">用户共创与照片变地图（Demo Moment）</h2>
+                <div class="content-area">
+                    <div class="two-column">
+                        <div class="tile">
+                            <h3>玩家绘画生成地图</h3>
+                            <p>让玩家或评委现场画一棵树、一间房子、一只小狗。系统实时扫描，30秒后变成游戏里的可探索建筑与NPC，把UGC直接变成核心解谜机制。</p>
+                        </div>
+                        <div class="tile">
+                            <h3>照片变 3D/2D 视差地图</h3>
+                            <p>玩家拍摄现实中的咖啡店或老街照片，游戏通过视差层识别成小型关卡，女儿在里面惊叹：“妈妈，这里我们以前来过。”路演视觉效果极其震撼。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 13 -->
+            <div class="slide-container">
+                <h2 class="slide-title">提炼：精选的 8 大核心独占创新机制</h2>
+                <div class="content-area" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; width: 100%;">
+                    <div class="tile" style="padding:15px;"><h3 style="font-size:16px;">① 年龄透视</h3><p style="font-size:13px; margin:0;">同一房间，不同年龄看到不同世界结构。</p></div>
+                    <div class="tile" style="padding:15px;"><h3 style="font-size:16px;">② 双时间空间</h3><p style="font-size:13px; margin:0;">过去与现在并行，过去行为改变现在路径。</p></div>
+                    <div class="tile" style="padding:15px;"><h3 style="font-size:16px;">③ 关系物理</h3><p style="font-size:13px; margin:0;">信任度决定空间大小，破裂导致地图断层。</p></div>
+                    <div class="tile" style="padding:15px;"><h3 style="font-size:16px;">④ 控制权成长</h3><p style="font-size:13px; margin:0;">女儿从听从到独立，最终甚至无法直接控制。</p></div>
+                    <div class="tile" style="padding:15px;"><h3 style="font-size:16px;">⑤ 记忆考古</h3><p style="font-size:13px; margin:0;">通过旧物、相册、聊天推理家庭过往真相。</p></div>
+                    <div class="tile" style="padding:15px;"><h3 style="font-size:16px;">⑥ 相册拼图</h3><p style="font-size:13px; margin:0;">相册不是剧情CG，照片本身就是机关地图。</p></div>
+                    <div class="tile" style="padding:15px;"><h3 style="font-size:16px;">⑦ 现实输入</h3><p style="font-size:13px; margin:0;">现实中的照片、涂鸦、时间直接进入游戏。</p></div>
+                    <div class="tile" style="padding:15px;"><h3 style="font-size:16px;">⑧ 游戏记忆</h3><p style="font-size:13px; margin:0;">游戏和角色永远记得你的每一次选择与回归。</p></div>
+                </div>
+            </div>
+
+            <!-- Slide 14 -->
+            <div class="slide-container">
+                <h2 class="slide-title">终极 Demo 剧本：现场高潮体验</h2>
+                <div class="content-area">
+                    <div style="background: rgba(0,210,255,0.04); border: 1px solid rgba(0,210,255,0.2); padding: 25px; border-radius: 12px; width: 100%; text-align: left;">
+                        <p style="color:#00d2ff; font-weight:bold; margin-bottom:10px;">【开场演示】普通客厅，妈妈让女儿拿书，女儿够不到。搬椅子，很普通。</p>
+                        <p style="color:#00d2ff; font-weight:bold; margin-bottom:10px;">【转折】切换女儿视角：整个客厅变成巨大世界，书变成大山，桌子变成高原！</p>
+                        <p style="color:#00d2ff; font-weight:bold; margin-bottom:10px;">【机制联动】拿起书下压着的旧照片，切回过去，小女孩把书移开，现在的客厅墙壁豁然打开！</p>
+                        <p style="color:#ffffff; font-weight:bold; margin:0;">成年女儿出现：“你还记得这里吗？” 屏幕冻结，标题浮现：《长大以后，我还记得你》</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 15 -->
+            <div class="slide-container">
+                <div class="content-area" style="text-align: center;">
+                    <h2 style="font-size: 64px; margin-bottom: 20px;">让评委和玩家震撼</h2>
+                    <p style="font-size: 24px; color: #00d2ff; margin-bottom: 40px;">“卧槽，游戏原来可以这样玩。”</p>
+                    <p style="color: #777; font-size: 16px; margin: 0;">项目立项路演圆满结束 | 感谢各位团队成员与评审</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- VIEW 2: INTERACTIVE MECHANICS CABIN -->
+    <div class="view-section" id="view-cabin">
+        <div class="cabin-layout">
+            <header style="text-align: center; margin-bottom: 25px;">
+                <h1>《长大以后，我还记得你》—— 核心玩法互动 Demo 舱</h1>
+                <p style="color:#888; font-size:14px; margin-top:5px;">亲自体验 8 大独占机制：从年龄透视到第四墙持久记忆</p>
+            </header>
+
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab(0)">① 年龄透视</button>
+                <button class="tab-btn" onclick="switchTab(1)">② 双时间空间</button>
+                <button class="tab-btn" onclick="switchTab(2)">③ 关系物理</button>
+                <button class="tab-btn" onclick="switchTab(3)">④ 控制权演进</button>
+                <button class="tab-btn" onclick="switchTab(4)">⑤ 记忆考古</button>
+                <button class="tab-btn" onclick="switchTab(5)">⑥ 相册拼图机关</button>
+                <button class="tab-btn" onclick="switchTab(6)">⑦ 现实感知输入</button>
+                <button class="tab-btn" onclick="switchTab(7)">⑧ 游戏持久记忆</button>
+            </div>
+
+            <div class="demo-container">
+
+                <!-- 1. 年龄透视 (Age Perspective) -->
+                <div class="mechanic-panel active" id="panel-0">
+                    <div class="panel-header">
+                        <h2>机制 ①：年龄透视 (Age Perspective) <span>Superliminal 启发</span></h2>
+                        <p>同一间客厅，成年人眼中的普通家具，在 6 岁女儿眼中化作高耸的雪山与巨大障碍。</p>
+                    </div>
+                    <div class="interactive-screen">
+                        <div id="room-view">
+                            <div id="table-obj" style="width: 140px; height: 50px; bottom: 0px; background: #444;">普通咖啡桌 (成年视角)</div>
+                        </div>
+                    </div>
+                    <div class="control-bar">
+                        <button class="action-btn" onclick="togglePerspective()"><i class="fa-solid fa-eye"></i> 切换至 6岁女儿视角</button>
+                    </div>
+                    <div class="log-box" id="log-0">当前视角：母亲（成年人标准物理尺度）</div>
+                </div>
+
+                <!-- 2. 双时间空间 (Dual Time-Space) -->
+                <div class="mechanic-panel" id="panel-1">
+                    <div class="panel-header">
+                        <h2>机制 ②：双时间空间联动 <span>时空折叠</span></h2>
+                        <p>过去（2008年）女儿留下的动作，实时改变现在（2026年）客厅的墙壁与拓扑结构。</p>
+                    </div>
+                    <div class="interactive-screen">
+                        <div class="timeline-container">
+                            <div class="time-card">
+                                <h4>过去记忆 (2008)</h4>
+                                <p id="past-state">小女孩将书柜向左推动了 1 米。</p>
+                                <button class="action-btn" style="margin-top:10px; font-size:12px; padding:6px 12px;" onclick="shiftPastAction()">更改过去行为</button>
+                            </div>
+                            <div class="time-card">
+                                <h4>现代现实 (2026)</h4>
+                                <p id="present-state" style="color:#00d2ff;">客厅正中间的墙壁因过去的移动而豁然开朗！</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="log-box" id="log-1">时空因果链已激活：过去的行为决定现在的通路。</div>
+                </div>
+
+                <!-- 3. 关系物理 (Relationship Physics) -->
+                <div class="mechanic-panel" id="panel-2">
+                    <div class="mechanic-header panel-header">
+                        <h2>机制 ③：关系物理 (Relationship Physics) <span>信任决定空间</span></h2>
+                        <p>母女之间的信任度直接影响地图的大小与可通行道路的断裂程度。</p>
+                    </div>
+                    <div class="interactive-screen">
+                        <div class="slider-group">
+                            <label>调整母女信任度：<span id="trust-val">75</span>%</label>
+                            <input type="range" id="trust-slider" min="0" max="100" value="75" oninput="updateTrust(this.value)">
+                        </div>
+                        <div id="bridge-visual" style="width: 80%; height: 20px; background: #00d2ff; border-radius: 10px; transition: 0.3s; box-shadow: 0 0 10px rgba(0,210,255,0.5);"></div>
+                        <p id="bridge-status" style="margin-top: 15px; font-size: 14px; color: #fff;">当前状态：桥梁稳固，母女心意相通。</p>
+                    </div>
+                    <div class="log-box" id="log-2">信任度大于 60% 时，隐藏地图区域全境开放。</div>
+                </div>
+
+                <!-- 4. 控制权演进 (Control Evolution) -->
+                <div class="mechanic-panel" id="panel-3">
+                    <div class="panel-header">
+                        <h2>机制 ④：控制权成长与叛逆 <span>It Takes Two 机制演进</span></h2>
+                        <p>女儿从早期无条件跟随，到青春期主动反抗，最后发展为无法直接控制。</p>
+                    </div>
+                    <div class="interactive-screen">
+                        <div class="daughter-avatar" id="avatar">女</div>
+                        <p id="avatar-desc" style="margin-top: 15px; color: #00d2ff; font-weight: 500;">阶段一（6岁）：乖巧跟随，随时听从指令。</p>
+                    </div>
+                    <div class="control-bar">
+                        <button class="action-btn" onclick="nextStage()">切换成长阶段</button>
+                        <button class="action-btn" onclick="clickDaughter()">向女儿发出互动指令</button>
+                    </div>
+                    <div class="log-box" id="log-3">当前阶段：童年期（完美协同）</div>
+                </div>
+
+                <!-- 5. 记忆考古 (Memory Archaeology) -->
+                <div class="mechanic-panel" id="panel-4">
+                    <div class="panel-header">
+                        <h2>机制 ⑤：记忆考古 (Memory Archaeology) <span>Obra Dinn 推理</span></h2>
+                        <p>点击搜集旧物，从细节与陈旧证物中推理出当年家庭离散的真相。</p>
+                    </div>
+                    <div class="interactive-screen">
+                        <div class="item-grid">
+                            <div class="arch-item" onclick="inspectItem(1)"><i class="fa-solid fa-ticket"></i><span>旧火车票</span></div>
+                            <div class="arch-item" onclick="inspectItem(2)"><i class="fa-solid fa-book"></i><span>撕裂的日记</span></div>
+                            <div class="arch-item" onclick="inspectItem(3)"><i class="fa-solid fa-ring"></i><span>生锈的戒指</span></div>
+                        </div>
+                        <p id="arch-desc" style="margin-top: 20px; color: #aaa; font-size: 14px; text-align: center; max-width: 600px;">点击上方任一遗物，揭开尘封的往事线索。</p>
+                    </div>
+                    <div class="log-box" id="log-4">已搜集线索：0 / 3</div>
+                </div>
+
+                <!-- 6. 相册拼图机关 (Gorogoa Album Puzzle) -->
+                <div class="mechanic-panel" id="panel-5">
+                    <div class="panel-header">
+                        <h2>机制 ⑥：相册拼图机关 (Gorogoa) <span>照片即地图</span></h2>
+                        <p>将过去的相框照片拖拽嵌套进现代房间画框，空间瞬间融合。</p>
+                    </div>
+                    <div class="interactive-screen">
+                        <div class="album-tiles">
+                            <div class="puzzle-tile" id="tile-1" onclick="matchTile(1)">
+                                <i class="fa-solid fa-image" style="font-size:24px; margin-bottom:5px;"></i>
+                                <span>2008年旧相框</span>
+                            </div>
+                            <div class="puzzle-tile" id="tile-2" onclick="matchTile(2)">
+                                <i class="fa-solid fa-house" style="font-size:24px; margin-bottom:5px;"></i>
+                                <span>2026年现代墙</span>
+                            </div>
+                        </div>
+                        <p id="puzzle-result" style="margin-top: 15px; color: #aaa; font-size: 14px;">请依次点击两张图进行空间嵌套。</p>
+                    </div>
+                    <div class="log-box" id="log-5">拼图机关状态：等待嵌套融合</div>
+                </div>
+
+                <!-- 7. 现实感知输入 (Real-world Input) -->
+                <div class="mechanic-panel" id="panel-6">
+                    <div class="panel-header">
+                        <h2>机制 ⑦：现实感知输入 (Real-world Input) <span>玩家涂鸦即世界</span></h2>
+                        <p>模拟现实扫描：点击下方按钮生成玩家自定义的房间涂鸦元素进入游戏。</p>
+                    </div>
+                    <div class="interactive-screen">
+                        <div class="canvas-draw-box" id="draw-area">
+                            <span style="color:#666; font-size:14px;"><i class="fa-solid fa-wand-magic-sparkles"></i> 模拟扫描玩家现实手绘与照片</span>
+                        </div>
+                    </div>
+                    <div class="control-bar">
+                        <button class="action-btn" onclick="scanCustomArt()">扫描现实手绘建筑</button>
+                    </div>
+                    <div class="log-box" id="log-6">状态：等待现实输入源...</div>
+                </div>
+
+                <!-- 8. 游戏持久记忆 (Persistent Game Memory) -->
+                <div class="mechanic-panel" id="panel-7">
+                    <div class="panel-header">
+                        <h2>机制 ⑧：游戏持久记忆 (Persistent Memory) <span>永远记得你</span></h2>
+                        <p>游戏与 NPC 拥有跨越会话的记忆。无论过多久重新打开，角色都会记得你的回归。</p>
+                    </div>
+                    <div class="interactive-screen">
+                        <div class="memory-console" id="memory-log-box">
+                            [系统初始化] 载入玩家云端情感存档...<br>
+                            [记忆检索] 距离上次游玩已过去 142 天。<br>
+                            [女儿独白] “妈妈，你离开好久了，那天你说去买苹果，到现在才回来……”
+                        </div>
+                    </div>
+                    <div class="control-bar">
+                        <button class="action-btn" onclick="simulateReturn()">模拟“时隔半年再次打开游戏”</button>
+                    </div>
+                    <div class="log-box" id="log-7">第四墙打破：NPC 实时感知玩家离去时间。</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchMasterView(viewName) {
+            const btnSlides = document.querySelector('.master-btn:nth-child(1)');
+            const btnCabin = document.querySelector('.master-btn:nth-child(2)');
+            const secSlides = document.getElementById('view-slides');
+            const secCabin = document.getElementById('view-cabin');
+
+            if(viewName === 'slides') {
+                btnSlides.classList.add('active');
+                btnCabin.classList.remove('active');
+                secSlides.classList.add('active');
+                secCabin.classList.remove('active');
+            } else {
+                btnCabin.classList.add('active');
+                btnSlides.classList.remove('active');
+                secCabin.classList.add('active');
+                secSlides.classList.remove('active');
+            }
+        }
+
+        function switchTab(index) {
+            const panels = document.querySelectorAll('.mechanic-panel');
+            const btns = document.querySelectorAll('.tab-btn');
+            panels.forEach((p, i) => {
+                p.classList.toggle('active', i === index);
+                btns[i].classList.toggle('active', i === index);
+            });
+        }
+
+        // 1. Age Perspective Logic
+        let isChildView = false;
+        function togglePerspective() {
+            isChildView = !isChildView;
+            const room = document.getElementById('room-view');
+            const table = document.getElementById('table-obj');
+            const log = document.getElementById('log-0');
+            if(isChildView) {
+                room.style.background = '#251b2e';
+                table.style.width = '240px';
+                table.style.height = '140px';
+                table.style.background = '#00d2ff';
+                table.style.color = '#000';
+                table.style.fontWeight = 'bold';
+                table.innerHTML = '巨型雪山高原 (6岁女儿视角)';
+                log.innerText = '视角切换成功：普通茶几在儿童眼中化作不可逾越的雪山！';
+            } else {
+                room.style.background = '#181818';
+                table.style.width = '140px';
+                table.style.height = '50px';
+                table.style.background = '#444';
+                table.style.color = '#777';
+                table.style.fontWeight = 'normal';
+                table.innerHTML = '普通咖啡桌 (成年视角)';
+                log.innerText = '当前视角：母亲（恢复正常标准物理尺度）';
+            }
+        }
+
+        // 2. Dual Time Space Logic
+        let pastStateVal = 0;
+        function shiftPastAction() {
+            pastStateVal = (pastStateVal + 1) % 3;
+            const past = document.getElementById('past-state');
+            const present = document.getElementById('present-state');
+            const log = document.getElementById('log-1');
+            if(pastStateVal === 0) {
+                past.innerText = "小女孩将书柜向左推动了 1 米。";
+                present.innerText = "客厅正中间的墙壁因过去的移动而豁然开朗！";
+            } else if(pastStateVal === 1) {
+                past.innerText = "小女孩在墙上留下了涂鸦：“妈妈最笨”。";
+                present.innerText = "2026年的墙面上赫然浮现斑驳的童年笔迹！";
+            } else {
+                past.innerText = "小女孩埋下了装有愿望的铁盒。";
+                present.innerText = "现代客厅地板自动下沉，暴露出时光铁盒与通往地下室的暗门！";
+            }
+            log.innerText = "时空因果链实时刷新：过去行为已直接重塑现代关卡拓扑。";
+        }
+
+        // 3. Relationship Physics Logic
+        function updateTrust(val) {
+            document.getElementById('trust-val').innerText = val;
+            const bridge = document.getElementById('bridge-visual');
+            const status = document.getElementById('bridge-status');
+            const log = document.getElementById('log-2');
+            
+            bridge.style.width = val + '%';
+            if(val < 35) {
+                bridge.style.background = '#ff4d4d';
+                bridge.style.boxShadow = '0 0 10px rgba(255,77,77,0.5)';
+                status.innerText = "警告：信任崩塌，母女心灵桥梁发生断裂！道路无法通行。";
+                log.innerText = "机制触发：低信任度导致地图产生物理鸿沟。";
+            } else if(val < 70) {
+                bridge.style.background = '#ffa500';
+                bridge.style.boxShadow = '0 0 10px rgba(255,165,0,0.5)';
+                status.innerText = "当前状态：关系疏离，桥梁摇晃但勉强维持。";
+                log.innerText = "机制触发：中等信任度伴随数值动态阻碍。";
+            } else {
+                bridge.style.background = '#00d2ff';
+                bridge.style.boxShadow = '0 0 10px rgba(0,210,255,0.5)';
+                status.innerText = "当前状态：桥梁稳固，母女心意相通。";
+                log.innerText = "机制触发：高信任度解锁全景通关彩蛋。";
+            }
+        }
+
+        // 4. Control Evolution Logic
+        let stage = 1;
+        function nextStage() {
+            stage = (stage % 3) + 1;
+            const avatar = document.getElementById('avatar');
+            const desc = document.getElementById('avatar-desc');
+            const log = document.getElementById('log-3');
+            if(stage === 1) {
+                avatar.style.transform = 'scale(1)';
+                avatar.style.background = '#00d2ff';
+                desc.innerText = "阶段一（6岁）：乖巧跟随，随时听从指令。";
+                log.innerText = "控制权状态：100% 绝对掌控。";
+            } else if(stage === 2) {
+                avatar.style.transform = 'translateX(30px)';
+                avatar.style.background = '#ffa500';
+                desc.innerText = "阶段二（14岁青春期）：叛逆走开，点击指令时会拒绝！";
+                log.innerText = "控制权状态：抗拒与失控（玩家遭遇行为反抗）。";
+            } else {
+                avatar.style.transform = 'translate(60px, -20px)';
+                avatar.style.background = '#ff4d4d';
+                desc.innerText = "阶段三（22岁独立期）：女儿已独立远行，玩家无法直接控制其行动。";
+                log.innerText = "控制权状态：从‘操控角色’转变为‘隔空守护与对话’。";
+            }
+        }
+        function clickDaughter() {
+            const log = document.getElementById('log-3');
+            if(stage === 1) log.innerText = "女儿回应：“好哒妈妈，我们去哪儿？”";
+            else if(stage === 2) log.innerText = "女儿回头喊道：“别管我！烦不烦啊！”（控制权受挫）";
+            else log.innerText = "女儿在远方发来一条微信：“妈，我今晚加班，你早点睡。”（无法直接操控）";
+        }
+
+        // 5. Memory Archaeology Logic
+        let collected = 0;
+        function inspectItem(id) {
+            const desc = document.getElementById('arch-desc');
+            const log = document.getElementById('log-4');
+            if(id === 1) {
+                desc.innerText = "【旧火车票 2012.8】票根目的地是南方海滨城市。推断：那是她第一次离家出走的夏天。";
+                collected = Math.max(collected, 1);
+            } else if(id === 2) {
+                desc.innerText = "【撕裂的日记】“我恨他们无休止的争吵，桌上那张合影让我窒息。”推断：家庭裂痕源于沟通失语。";
+                collected = Math.max(collected, 2);
+            } else if(id === 3) {
+                desc.innerText = "【生锈的戒指】母亲当年遗落的结婚戒指。推断：女儿一直悄悄拾起并珍藏至今。";
+                collected = 3;
+            }
+            log.innerText = `已搜集真相线索：${collected} / 3 档案拼合完毕。`;
+        }
+
+        // 6. Gorogoa Puzzle Logic
+        let selectedTile = null;
+        function matchTile(id) {
+            const t1 = document.getElementById('tile-1');
+            const t2 = document.getElementById('tile-2');
+            const res = document.getElementById('puzzle-result');
+            const log = document.getElementById('log-5');
+            
+            if(id === 1) {
+                t1.style.borderColor = '#00d2ff';
+                t1.style.background = 'rgba(0,210,255,0.2)';
+                selectedTile = 1;
+                res.innerText = "已选中 2008年旧相框，请点击现代墙面进行空间嵌套。";
+            } else if(id === 2 && selectedTile === 1) {
+                t2.style.borderColor = '#00d2ff';
+                t2.style.background = 'rgba(0,210,255,0.2)';
+                t1.classList.add('matched');
+                t2.classList.add('matched');
+                res.innerText = "嵌套成功！两张图完美叠合，时空大门瞬间洞开！";
+                log.innerText = "Gorogoa 核心机关触发：相册照片转化为可通行的3D物理地图。";
+            } else {
+                res.innerText = "请先选择旧相框，再点击现代墙面。";
+            }
+        }
+
+        // 7. Real World Art Scan Logic
+        function scanCustomArt() {
+            const area = document.getElementById('draw-area');
+            const log = document.getElementById('log-6');
+            area.innerHTML = `<div style="color:#00d2ff; font-weight:bold; font-size:16px;"><i class="fa-solid fa-spinner fa-spin"></i> 正在将玩家手绘扫描为 3D 关卡组件...</div>`;
+            setTimeout(() => {
+                area.innerHTML = `<div style="color:#00d2ff; font-weight:bold;"><i class="fa-solid fa-check-circle"></i> 扫描成功！手绘小房子已转化为游戏内可探索的温馨避难所。</div>`;
+                log.innerText = "UGC 实时转化完成：现实涂鸦无缝变成立体游戏关卡。";
+            }, 1200);
+        }
+
+        // 8. Persistent Memory Logic
+        function simulateReturn() {
+            const consoleBox = document.getElementById('memory-log-box');
+            const log = document.getElementById('log-7');
+            consoleBox.innerHTML += `<br>[玩家重新上线] 检测到时间戳更新。<br>[NPC 记忆感知] 女儿迎上前来：“妈妈，上次你走到那一关，说好第二天陪我的，怎么过了这么久才来看我？”`;
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+            log.innerText = "第四墙深度打破：游戏数据库与角色永远记得你的每一次回归。";
+        }
+    </script>
+</body>
+</html>
