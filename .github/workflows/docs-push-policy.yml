@@ -21,74 +21,76 @@ jobs:
       - name: Detect changed files
         id: detect
         run: |
-          echo "before=${{ github.event.before }}"
-          echo "after=${{ github.sha }}"
           before=${{ github.event.before }}
           after=${{ github.sha }}
-          changed=$(git diff --name-only "$before" "$after" || true)
-          echo "changed files:\n$changed"
+          changed=$(git diff --name-only "$before" "$after" 2>/dev/null || echo "")
+          
           if [ -z "$changed" ]; then
-            echo "no files changed"
-            echo "only_docs=true" > /tmp/docs_flag || true
+            echo "No files changed"
+            echo "only_docs=true" >> $GITHUB_OUTPUT
             exit 0
           fi
+          
+          echo "Changed files:"
+          echo "$changed"
+          
           non_docs=$(echo "$changed" | grep -vE '^docs/' || true)
+          
           if [ -z "$non_docs" ]; then
             echo "Only docs changed — allow direct push"
-            echo "only_docs=true" > /tmp/docs_flag
+            echo "only_docs=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          echo "Non-docs files changed:"$non_docs
-          echo "$non_docs" > /tmp/non_docs
+          
+          echo "Non-docs files changed:"
+          echo "$non_docs"
+          echo "non_docs<<EOF" >> $GITHUB_OUTPUT
+          echo "$non_docs" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Restore non-docs to previous main and push branch
-        if: ${{ !always() || (always() && exists('/tmp/non_docs')) }}
+      - name: Restore non-docs to previous main and create PR
+        if: ${{ steps.detect.outputs.non_docs != '' }}
         run: |
-          # exit if only docs
-          if [ -f /tmp/docs_flag ]; then
-            echo "Only docs changed — nothing to do"
-            exit 0
-          fi
           before=${{ github.event.before }}
           after=${{ github.sha }}
-          non_docs=$(cat /tmp/non_docs)
-          echo "Restoring non-docs files to state from $before"
+          non_docs="${{ steps.detect.outputs.non_docs }}"
+          
           branch="fix/restore-nondocs-${after:0:7}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
           git checkout -b "$branch"
-          for f in $non_docs; do
+          
+          echo "$non_docs" | while read -r f; do
             echo "Restoring $f"
             git checkout "$before" -- "$f" || true
           done
+          
           git add -A
-          git commit -m "Restore non-docs files pushed directly to main ($after)" || true
+          git commit -m "Restore non-docs files pushed directly to main ($after)" || exit 0
           git push --set-upstream origin "$branch"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create PR to merge restoration
-        if: ${{ !always() || (always() && exists('/tmp/non_docs')) }}
+        if: ${{ steps.detect.outputs.non_docs != '' }}
         uses: actions/github-script@v6
         with:
           script: |
-            const fs = require('fs')
-            if (fs.existsSync('/tmp/docs_flag')) {
-              core.info('Only docs changed — no PR needed')
-              return
-            }
-            const nonDocs = fs.readFileSync('/tmp/non_docs', 'utf8')
-            const after = process.env.GITHUB_SHA
+            const after = context.payload.after || process.env.GITHUB_SHA
             const branch = `fix/restore-nondocs-${after.substring(0,7)}`
-            const title = `Restore non-docs files pushed directly to main (${after.substring(0,7)})`
-            const body = `This automated PR restores files outside \`docs/\` that were pushed directly to main in ${after}.\n\nDirect pushes to main are allowed only for files under \`docs/\`.\n\nChanged non-docs files:\n\n${nonDocs}`
+            
             const pr = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title,
+              title: `Restore non-docs files pushed directly to main (${after.substring(0,7)})`,
               head: branch,
               base: 'main',
-              body,
+              body: `This automated PR restores files outside \`docs/\` that were pushed directly to main.
+
+Direct pushes to main are allowed **only** for files under \`docs/\`.`,
             })
-            core.setOutput('pr_url', pr.data.html_url)
+            
+            core.notice(`PR created: ${pr.data.html_url}`)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
