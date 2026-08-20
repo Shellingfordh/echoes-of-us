@@ -1,96 +1,45 @@
-name: Enforce docs-only direct pushes
+name: Auto-approve markdown PRs
 
 on:
-  push:
-    branches: [ main ]
+  pull_request:
+    types: [opened, synchronize]
 
 permissions:
-  contents: write
   pull-requests: write
 
 jobs:
-  enforce-docs-only:
-    name: Enforce docs-only direct pushes
+  auto-approve-docs:
+    name: Auto-approve markdown PRs
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
         with:
-          fetch-depth: 0
+          files: |
+            **.md
 
-      - name: Detect changed files
-        id: detect
+      - name: Check if only markdown files changed
+        id: check
         run: |
-          before=${{ github.event.before }}
-          after=${{ github.sha }}
-          changed=$(git diff --name-only "$before" "$after" 2>/dev/null || echo "")
-          
-          if [ -z "$changed" ]; then
-            echo "No files changed"
-            echo "only_docs=true" >> $GITHUB_OUTPUT
-            exit 0
+          if [ "${{ steps.changed-files.outputs.any_modified }}" = "true" ]; then
+            echo "has_md_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_md_changes=false" >> $GITHUB_OUTPUT
           fi
-          
-          echo "Changed files:"
-          echo "$changed"
-          
-          non_docs=$(echo "$changed" | grep -vE '^docs/' || true)
-          
-          if [ -z "$non_docs" ]; then
-            echo "Only docs changed — allow direct push"
-            echo "only_docs=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          
-          echo "Non-docs files changed:"
-          echo "$non_docs"
-          echo "non_docs<<EOF" >> $GITHUB_OUTPUT
-          echo "$non_docs" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Restore non-docs to previous main and create PR
-        if: ${{ steps.detect.outputs.non_docs != '' }}
-        run: |
-          before=${{ github.event.before }}
-          after=${{ github.sha }}
-          non_docs="${{ steps.detect.outputs.non_docs }}"
-          
-          branch="fix/restore-nondocs-${after:0:7}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git checkout -b "$branch"
-          
-          echo "$non_docs" | while read -r f; do
-            echo "Restoring $f"
-            git checkout "$before" -- "$f" || true
-          done
-          
-          git add -A
-          git commit -m "Restore non-docs files pushed directly to main ($after)" || exit 0
-          git push --set-upstream origin "$branch"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create PR to merge restoration
-        if: ${{ steps.detect.outputs.non_docs != '' }}
+      - name: Auto approve PR
+        if: steps.check.outputs.has_md_changes == 'true'
         uses: actions/github-script@v6
         with:
           script: |
-            const after = context.payload.after || process.env.GITHUB_SHA
-            const branch = `fix/restore-nondocs-${after.substring(0,7)}`
-            
-            const pr = await github.rest.pulls.create({
+            github.rest.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Restore non-docs files pushed directly to main (${after.substring(0,7)})`,
-              head: branch,
-              base: 'main',
-              body: `This automated PR restores files outside \`docs/\` that were pushed directly to main.
-
-Direct pushes to main are allowed **only** for files under \`docs/\`.`,
+              pull_number: context.issue.number,
+              event: 'APPROVE',
+              body: 'Auto-approved: Markdown files only ✅'
             })
-            
-            core.notice(`PR created: ${pr.data.html_url}`)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
