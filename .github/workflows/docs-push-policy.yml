@@ -1,0 +1,94 @@
+name: Enforce docs-only direct pushes
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  enforce-docs-only:
+    name: Enforce docs-only direct pushes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed files
+        id: detect
+        run: |
+          echo "before=${{ github.event.before }}"
+          echo "after=${{ github.sha }}"
+          before=${{ github.event.before }}
+          after=${{ github.sha }}
+          changed=$(git diff --name-only "$before" "$after" || true)
+          echo "changed files:\n$changed"
+          if [ -z "$changed" ]; then
+            echo "no files changed"
+            echo "only_docs=true" > /tmp/docs_flag || true
+            exit 0
+          fi
+          non_docs=$(echo "$changed" | grep -vE '^docs/' || true)
+          if [ -z "$non_docs" ]; then
+            echo "Only docs changed — allow direct push"
+            echo "only_docs=true" > /tmp/docs_flag
+            exit 0
+          fi
+          echo "Non-docs files changed:"$non_docs
+          echo "$non_docs" > /tmp/non_docs
+
+      - name: Restore non-docs to previous main and push branch
+        if: ${{ !always() || (always() && exists('/tmp/non_docs')) }}
+        run: |
+          # exit if only docs
+          if [ -f /tmp/docs_flag ]; then
+            echo "Only docs changed — nothing to do"
+            exit 0
+          fi
+          before=${{ github.event.before }}
+          after=${{ github.sha }}
+          non_docs=$(cat /tmp/non_docs)
+          echo "Restoring non-docs files to state from $before"
+          branch="fix/restore-nondocs-${after:0:7}"
+          git checkout -b "$branch"
+          for f in $non_docs; do
+            echo "Restoring $f"
+            git checkout "$before" -- "$f" || true
+          done
+          git add -A
+          git commit -m "Restore non-docs files pushed directly to main ($after)" || true
+          git push --set-upstream origin "$branch"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create PR to merge restoration
+        if: ${{ !always() || (always() && exists('/tmp/non_docs')) }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs')
+            if (fs.existsSync('/tmp/docs_flag')) {
+              core.info('Only docs changed — no PR needed')
+              return
+            }
+            const nonDocs = fs.readFileSync('/tmp/non_docs', 'utf8')
+            const after = process.env.GITHUB_SHA
+            const branch = `fix/restore-nondocs-${after.substring(0,7)}`
+            const title = `Restore non-docs files pushed directly to main (${after.substring(0,7)})`
+            const body = `This automated PR restores files outside \`docs/\` that were pushed directly to main in ${after}.\n\nDirect pushes to main are allowed only for files under \`docs/\`.\n\nChanged non-docs files:\n\n${nonDocs}`
+            const pr = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              head: branch,
+              base: 'main',
+              body,
+            })
+            core.setOutput('pr_url', pr.data.html_url)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
