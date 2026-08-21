@@ -7,6 +7,8 @@ on:
 permissions:
   pull-requests: write
   contents: read
+  checks: read
+  statuses: read
 
 jobs:
   approve-and-merge:
@@ -35,14 +37,11 @@ jobs:
 
             // Define code file patterns or directories that count as code
             const codePatterns = [
-              '/.github/workflows',
+              '.github/workflows',
               'scripts/',
               'scenes/',
-              'scripts/',
               'src/',
-              'project.godot',
-              '.tscn',
-              '.tres',
+              'project.godot'
             ]
 
             const codeExts = [
@@ -53,14 +52,12 @@ jobs:
             ]
 
             function isCodeFile(filename) {
-              // check directories/prefixes
+              const lower = filename.toLowerCase()
               for (const p of codePatterns) {
-                if (filename.startsWith(p.replace(/^\//, ''))) return true
-                if (filename.includes(p)) return true
+                if (filename.startsWith(p) || filename.includes(p)) return true
               }
-              // check extensions
               for (const ext of codeExts) {
-                if (filename.toLowerCase().endsWith(ext)) return true
+                if (lower.endsWith(ext)) return true
               }
               return false
             }
@@ -81,22 +78,51 @@ jobs:
             })
             core.info('PR approved')
 
-            // Fetch PR detailed status and wait for mergeable if necessary
-            let pr
-            const maxAttempts = 12
+            // Get PR to find head SHA
+            const pr = (await github.rest.pulls.get({ owner, repo, pull_number: prNumber })).data
+            const headSha = pr.head.sha
+
+            // Poll for status/checks to succeed
+            const maxAttempts = 24 // total wait up to ~2 minutes (24 * 5s)
+            const delayMs = 5000
+            let ready = false
             for (let i = 0; i < maxAttempts; i++) {
-              pr = (await github.rest.pulls.get({ owner, repo, pull_number: prNumber })).data
-              core.info(`Attempt ${i+1}: mergeable=${pr.mergeable}, mergeable_state=${pr.mergeable_state}`)
-              if (pr.draft) {
-                core.info('PR is a draft — not merging')
+              // Check combined status
+              const combined = await github.rest.repos.getCombinedStatusForRef({ owner, repo, ref: headSha })
+              const state = combined.data.state // 'success', 'pending', 'failure'
+
+              // Check check-runs
+              const checks = await github.rest.checks.listForRef({ owner, repo, ref: headSha })
+              const runs = checks.data.check_runs || []
+
+              core.info(`Attempt ${i+1}: combined state=${state}, check_runs=${runs.length}`)
+
+              // Decide readiness: combined state success OR no check runs and combined state success
+              const runsAllPassed = runs.length === 0 || runs.every(r => ['success','neutral','skipped'].includes(r.conclusion))
+              if ((state === 'success' && runsAllPassed) || runs.length === 0 && state !== 'failure') {
+                ready = true
+                break
+              }
+
+              // If any runs have failure or combined state is failure, abort
+              const anyFailures = runs.some(r => r.conclusion === 'failure') || state === 'failure'
+              if (anyFailures) {
+                core.info('Detected failing checks — will not merge automatically')
+                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: 'Auto-approve succeeded but required checks are failing — please address CI failures before merging.' })
                 return
               }
-              if (pr.mergeable === true || pr.mergeable_state === 'clean') break
-              // If mergeable is null, GitHub is still computing — wait and retry
-              await new Promise(r => setTimeout(r, 5000))
+
+              // wait and retry
+              await new Promise(r => setTimeout(r, delayMs))
             }
 
-            // Try to merge
+            if (!ready) {
+              core.info('Checks did not become ready in time — leaving for manual merge')
+              await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: 'Auto-approve succeeded but checks did not finish in time — please wait or merge manually.' })
+              return
+            }
+
+            // Attempt to merge
             try {
               const mergeRes = await github.rest.pulls.merge({
                 owner,
@@ -107,6 +133,7 @@ jobs:
               })
               if (mergeRes.data.merged) {
                 core.info(`PR merged by automation: ${mergeRes.data.sha}`)
+                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: `Auto-merge completed ✅ (SHA: ${mergeRes.data.sha})` })
               } else {
                 core.info('Merge attempt did not merge the PR: ' + JSON.stringify(mergeRes.data))
                 await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: 'Auto-approve succeeded but automatic merge could not complete — please merge manually.' })
