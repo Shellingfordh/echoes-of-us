@@ -1,4 +1,4 @@
-name: Auto-approve non-code PRs
+name: Auto-approve and merge non-code PRs
 
 on:
   pull_request:
@@ -6,64 +6,112 @@ on:
 
 permissions:
   pull-requests: write
+  contents: read
 
 jobs:
-  auto-approve-non-code:
-    name: Auto-approve non-code PRs
+  approve-and-merge:
+    name: Auto-approve & merge non-code PRs
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v44
-
-      - name: Check if only non-code files changed
-        id: check
-        run: |
-          files="${{ steps.changed-files.outputs.all_changed_files }}"
-          
-          # Define code file extensions/patterns
-          has_code=false
-          
-          for file in $files; do
-            # Skip certain directories/files
-            if [[ "$file" == ".github/workflows"* ]]; then
-              has_code=true
-              break
-            fi
-            
-            # Check code file extensions
-            case "$file" in
-              *.gd|*.gdshader|*.gdscript|\
-              *.cs|*.java|*.py|*.js|*.ts|*.tsx|*.jsx|\
-              *.cpp|*.c|*.h|*.hpp|*.cc|*.cxx|\
-              *.rb|*.go|*.rs|*.php|*.swift|*.kt|\
-              *.lua|*.vim|*.pl|*.sh|*.bash|\
-              *.json|*.yaml|*.yml|*.toml|*.xml|*.config|*.conf|\
-              *.gitignore|project.godot|*.tscn|*.tres)
-                has_code=true
-                break
-                ;;
-            esac
-          done
-          
-          if [ "$has_code" = "false" ]; then
-            echo "only_non_code=true" >> $GITHUB_OUTPUT
-          else
-            echo "only_non_code=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Auto approve PR
-        if: steps.check.outputs.only_non_code == 'true'
+      - name: Auto-approve and merge when only non-code files changed
         uses: actions/github-script@v6
         with:
           script: |
-            github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const prNumber = context.issue.number
+
+            // Fetch PR files (handle pagination)
+            let files = []
+            let page = 1
+            while (true) {
+              const res = await github.rest.pulls.listFiles({ owner, repo, pull_number: prNumber, per_page: 100, page })
+              files = files.concat(res.data.map(f => f.filename))
+              if (res.data.length < 100) break
+              page++
+            }
+
+            core.info(`Files changed (${files.length}):\n${files.join('\n')}`)
+
+            // Define code file patterns or directories that count as code
+            const codePatterns = [
+              '/.github/workflows',
+              'scripts/',
+              'scenes/',
+              'scripts/',
+              'src/',
+              'project.godot',
+              '.tscn',
+              '.tres',
+            ]
+
+            const codeExts = [
+              '.gd', '.gdscript', '.gdshader', '.cs', '.java', '.py', '.js', '.ts', '.tsx', '.jsx',
+              '.cpp', '.c', '.h', '.hpp', '.cc', '.cxx', '.rb', '.go', '.rs', '.php', '.swift', '.kt',
+              '.lua', '.pl', '.sh', '.bash', '.json', '.yaml', '.yml', '.toml', '.xml', '.config', '.conf',
+              '.gitignore', '.tscn', '.tres'
+            ]
+
+            function isCodeFile(filename) {
+              // check directories/prefixes
+              for (const p of codePatterns) {
+                if (filename.startsWith(p.replace(/^\//, ''))) return true
+                if (filename.includes(p)) return true
+              }
+              // check extensions
+              for (const ext of codeExts) {
+                if (filename.toLowerCase().endsWith(ext)) return true
+              }
+              return false
+            }
+
+            const codeFiles = files.filter(isCodeFile)
+            if (codeFiles.length > 0) {
+              core.info('Detected code files in PR — skipping auto-approve/merge:\n' + codeFiles.join('\n'))
+              return
+            }
+
+            // Approve the PR
+            await github.rest.pulls.createReview({
+              owner,
+              repo,
+              pull_number: prNumber,
               event: 'APPROVE',
-              body: 'Auto-approved: Non-code changes only ✅\n\n只包含文档、资源等非代码文件的修改'
+              body: 'Auto-approved: non-code changes only ✅'
             })
+            core.info('PR approved')
+
+            // Fetch PR detailed status and wait for mergeable if necessary
+            let pr
+            const maxAttempts = 12
+            for (let i = 0; i < maxAttempts; i++) {
+              pr = (await github.rest.pulls.get({ owner, repo, pull_number: prNumber })).data
+              core.info(`Attempt ${i+1}: mergeable=${pr.mergeable}, mergeable_state=${pr.mergeable_state}`)
+              if (pr.draft) {
+                core.info('PR is a draft — not merging')
+                return
+              }
+              if (pr.mergeable === true || pr.mergeable_state === 'clean') break
+              // If mergeable is null, GitHub is still computing — wait and retry
+              await new Promise(r => setTimeout(r, 5000))
+            }
+
+            // Try to merge
+            try {
+              const mergeRes = await github.rest.pulls.merge({
+                owner,
+                repo,
+                pull_number: prNumber,
+                commit_title: `Merge pull request #${prNumber} by automation: non-code changes`,
+                merge_method: 'merge'
+              })
+              if (mergeRes.data.merged) {
+                core.info(`PR merged by automation: ${mergeRes.data.sha}`)
+              } else {
+                core.info('Merge attempt did not merge the PR: ' + JSON.stringify(mergeRes.data))
+                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: 'Auto-approve succeeded but automatic merge could not complete — please merge manually.' })
+              }
+            } catch (err) {
+              core.error('Merge failed: ' + err.message)
+              await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: `Auto-approve succeeded but automatic merge failed: ${err.message}` })
+            }
