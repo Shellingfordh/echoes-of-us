@@ -2,11 +2,11 @@ name: Auto-approve and merge non-code PRs
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
 
 permissions:
   pull-requests: write
-  contents: read
+  contents: write
   checks: read
   statuses: read
 
@@ -14,39 +14,96 @@ jobs:
   approve-and-merge:
     name: Auto-approve & merge non-code PRs
     runs-on: ubuntu-latest
+
     steps:
-      - name: Auto-approve and merge when only non-code files changed
-        uses: actions/github-script@v6
+      - name: Auto-approve and merge when only approved non-code files changed
+        uses: actions/github-script@v7
         with:
           script: |
             const owner = context.repo.owner
             const repo = context.repo.repo
             const prNumber = context.issue.number
 
-            // Fetch PR files (handle pagination)
+            // ============================================================
+            // 1. Fetch all changed files
+            // ============================================================
+
             let files = []
             let page = 1
+
             while (true) {
-              const res = await github.rest.pulls.listFiles({ owner, repo, pull_number: prNumber, per_page: 100, page })
-              files = files.concat(res.data.map(f => f.filename))
-              if (res.data.length < 100) break
+              const res = await github.rest.pulls.listFiles({
+                owner,
+                repo,
+                pull_number: prNumber,
+                per_page: 100,
+                page
+              })
+
+              files = files.concat(
+                res.data.map(file => file.filename)
+              )
+
+              if (res.data.length < 100) {
+                break
+              }
+
               page++
             }
 
-            core.info(`Files changed (${files.length}):\n${files.join('\n')}`)
+            core.info(
+              `Files changed (${files.length}):\n${files.join('\n')}`
+            )
 
-            // --- Trust check: only allow automation for repository collaborators or explicit allowlist ---
-            const prData = (await github.rest.pulls.get({ owner, repo, pull_number: prNumber })).data
+            if (files.length === 0) {
+              core.info('No changed files detected — skipping automation')
+              return
+            }
+
+            // ============================================================
+            // 2. Trust check
+            //
+            // Only repository owner, collaborators, or explicit allowlist
+            // users are allowed to trigger auto-approve / auto-merge.
+            // ============================================================
+
+            const prData = (
+              await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: prNumber
+              })
+            ).data
+
             const author = prData.user.login
             const ownerLogin = context.repo.owner
-            const allowlist = ['Shellingfordh']
+
+            // Explicit users that are always trusted.
+            const allowlist = [
+              'Shellingfordh'
+            ]
 
             let trusted = false
-            if (author === ownerLogin || allowlist.includes(author)) {
+
+            // Repository owner
+            if (author === ownerLogin) {
               trusted = true
-            } else {
+            }
+
+            // Explicit allowlist
+            if (allowlist.includes(author)) {
+              trusted = true
+            }
+
+            // Repository collaborator
+            if (!trusted) {
               try {
-                await github.rest.repos.checkCollaborator({ owner, repo, username: author })
+                await github.rest.repos.checkCollaborator({
+                  owner,
+                  repo,
+                  username: author
+                })
+
                 trusted = true
               } catch (e) {
                 trusted = false
@@ -54,116 +111,487 @@ jobs:
             }
 
             if (!trusted) {
-              await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: '自动化仅限仓库的 collaborator 或白名单用户。此 PR 的作者未被信任，自动批准/合并已跳过。' })
-              core.info('Author not trusted — skipping automation')
-              return
-            }
-            // --- End trust check ---
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body:
+                  '自动化仅限仓库 owner、collaborator 或白名单用户。' +
+                  '此 PR 的作者未被信任，自动批准/合并已跳过。'
+              })
 
-            // Define code file patterns or directories that count as code
-            const codePatterns = [
-              '.github/workflows',
-              'scripts/',
-              'scenes/',
-              'src/',
-              'project.godot'
-            ]
+              core.info(
+                `Author "${author}" is not trusted — skipping automation`
+              )
 
-            const codeExts = [
-              '.gd', '.gdscript', '.gdshader', '.cs', '.java', '.py', '.js', '.ts', '.tsx', '.jsx',
-              '.cpp', '.c', '.h', '.hpp', '.cc', '.cxx', '.rb', '.go', '.rs', '.php', '.swift', '.kt',
-              '.lua', '.pl', '.sh', '.bash', '.json', '.yaml', '.yml', '.toml', '.xml', '.config', '.conf',
-              '.gitignore', '.tscn', '.tres'
-            ]
-
-            function isCodeFile(filename) {
-              const lower = filename.toLowerCase()
-              for (const p of codePatterns) {
-                if (filename.startsWith(p) || filename.includes(p)) return true
-              }
-              for (const ext of codeExts) {
-                if (lower.endsWith(ext)) return true
-              }
-              return false
-            }
-
-            const codeFiles = files.filter(isCodeFile)
-            if (codeFiles.length > 0) {
-              core.info('Detected code files in PR — skipping auto-approve/merge:\n' + codeFiles.join('\n'))
               return
             }
 
-            // Approve the PR
-            await github.rest.pulls.createReview({
-              owner,
-              repo,
-              pull_number: prNumber,
-              event: 'APPROVE',
-              body: 'Auto-approved: non-code changes only ✅'
-            })
-            core.info('PR approved')
+            core.info(
+              `Author "${author}" is trusted — continuing`
+            )
 
-            // Get PR to find head SHA
-            const pr = (await github.rest.pulls.get({ owner, repo, pull_number: prNumber })).data
-            const headSha = pr.head.sha
+            // ============================================================
+            // 3. Explicit non-code allowlist
+            //
+            // IMPORTANT:
+            // Anything NOT explicitly allowed here is considered unsafe
+            // and requires manual review.
+            //
+            // This is intentionally an allowlist rather than a blacklist.
+            // ============================================================
 
-            // Poll for status/checks to succeed
-            const maxAttempts = 48 // total wait up to ~4 minutes (48 * 5s)
+            const safeExtensions = [
+              // Documentation
+              '.md',
+              '.mdx',
+              '.txt',
+
+              // Office / operation documents
+              '.doc',
+              '.docx',
+              '.xls',
+              '.xlsx',
+              '.csv',
+
+              // Images / artwork
+              '.png',
+              '.jpg',
+              '.jpeg',
+              '.webp',
+              '.gif',
+              '.svg',
+              '.ico',
+              '.bmp',
+              '.tiff',
+              '.tif',
+
+              // Video / media
+              '.mp4',
+              '.mov',
+              '.webm',
+
+              // Audio
+              '.mp3',
+              '.wav',
+              '.ogg'
+            ]
+
+            // Exact filenames that are explicitly considered safe.
+            const safeExactFiles = [
+              'README',
+              'README.md',
+              'README.txt',
+              'LICENSE',
+              'LICENSE.md',
+              'LICENSE.txt',
+              'NOTICE',
+              'NOTICE.md',
+              'CHANGELOG.md'
+            ]
+
+            // Optional safe directories.
+            //
+            // These directories are still restricted by extension:
+            // a file inside these directories is safe ONLY if its extension
+            // is also in safeExtensions.
+            const safeDirectories = [
+              'docs/',
+              'documentation/',
+              '运营/',
+              '运营文档/',
+              'content/',
+              'assets/',
+              'images/',
+              'image/',
+              'art/',
+              'artwork/',
+              'media/',
+              'design/'
+            ]
+
+            function normalizePath(filename) {
+              return filename
+                .replace(/\\/g, '/')
+                .replace(/^\.\/+/, '')
+            }
+
+            function isSafeNonCodeFile(filename) {
+              const normalized = normalizePath(filename)
+              const lower = normalized.toLowerCase()
+
+              // ----------------------------------------------------------
+              // Exact safe files
+              // ----------------------------------------------------------
+
+              if (
+                safeExactFiles.some(
+                  file => lower === file.toLowerCase()
+                )
+              ) {
+                return true
+              }
+
+              // ----------------------------------------------------------
+              // Safe extensions
+              //
+              // This works with:
+              //
+              // docs/运营文档（1）.md
+              // docs/运营 文档 2.xlsx
+              // assets/角色立绘（最终版）.png
+              //
+              // Chinese characters, spaces and brackets are fine.
+              // ----------------------------------------------------------
+
+              const hasSafeExtension = safeExtensions.some(
+                ext => lower.endsWith(ext)
+              )
+
+              if (!hasSafeExtension) {
+                return false
+              }
+
+              // ----------------------------------------------------------
+              // If the file is inside a safe directory, allow it.
+              //
+              // Files with safe extensions are also allowed outside these
+              // directories, so this check is intentionally permissive.
+              // ----------------------------------------------------------
+
+              const inSafeDirectory = safeDirectories.some(
+                dir => lower.startsWith(dir.toLowerCase())
+              )
+
+              if (inSafeDirectory) {
+                return true
+              }
+
+              // Safe extension is enough even outside the directories.
+              return true
+            }
+
+            // ============================================================
+            // 4. Check every changed file
+            // ============================================================
+
+            const unsafeFiles = files.filter(
+              file => !isSafeNonCodeFile(file)
+            )
+
+            if (unsafeFiles.length > 0) {
+              core.info(
+                'Files outside the non-code allowlist were detected. ' +
+                'Auto-approve and auto-merge will NOT run.'
+              )
+
+              core.info(
+                `Unsafe files:\n${unsafeFiles.join('\n')}`
+              )
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body:
+                  '检测到需要人工审核的文件，因此不会自动批准或合并此 PR。\n\n' +
+                  '需要人工审核的文件：\n' +
+                  unsafeFiles.map(file => `- \`${file}\``).join('\n')
+              })
+
+              return
+            }
+
+            // ============================================================
+            // 5. All files passed the non-code allowlist
+            // ============================================================
+
+            core.info(
+              'All changed files are explicitly allowed non-code files.'
+            )
+
+            core.info(
+              `Safe files:\n${files.join('\n')}`
+            )
+
+            // ============================================================
+            // 6. Approve the PR
+            // ============================================================
+
+            try {
+              await github.rest.pulls.createReview({
+                owner,
+                repo,
+                pull_number: prNumber,
+                event: 'APPROVE',
+                body:
+                  'Auto-approved: approved non-code changes only ✅\n\n' +
+                  '此 PR 仅包含允许自动处理的文档、运营资料或媒体资源。'
+              })
+
+              core.info('PR approved successfully')
+            } catch (err) {
+              core.error(
+                `Failed to approve PR: ${err.message}`
+              )
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body:
+                  `自动批准失败：${err.message}\n\n` +
+                  'PR 将保留为人工处理。'
+              })
+
+              return
+            }
+
+            // ============================================================
+            // 7. Get current PR HEAD SHA
+            // ============================================================
+
+            const currentPr = (
+              await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: prNumber
+              })
+            ).data
+
+            const headSha = currentPr.head.sha
+
+            core.info(
+              `Current PR HEAD SHA: ${headSha}`
+            )
+
+            // ============================================================
+            // 8. Poll GitHub checks
+            //
+            // Wait for checks to finish.
+            //
+            // If there are no checks at all, the PR can proceed.
+            // ============================================================
+
+            const maxAttempts = 48
             const delayMs = 5000
-            let ready = false
-            for (let i = 0; i < maxAttempts; i++) {
-              // Check combined status
-              const combined = await github.rest.repos.getCombinedStatusForRef({ owner, repo, ref: headSha })
-              const state = combined.data.state // 'success', 'pending', 'failure'
 
-              // Check check-runs
-              const checks = await github.rest.checks.listForRef({ owner, repo, ref: headSha })
+            let ready = false
+
+            for (let i = 0; i < maxAttempts; i++) {
+
+              // ----------------------------------------------------------
+              // Combined commit status
+              // ----------------------------------------------------------
+
+              const combined =
+                await github.rest.repos.getCombinedStatusForRef({
+                  owner,
+                  repo,
+                  ref: headSha
+                })
+
+              const state = combined.data.state
+
+              // ----------------------------------------------------------
+              // GitHub check runs
+              // ----------------------------------------------------------
+
+              const checks =
+                await github.rest.checks.listForRef({
+                  owner,
+                  repo,
+                  ref: headSha
+                })
+
               const runs = checks.data.check_runs || []
 
-              core.info(`Attempt ${i+1}: combined state=${state}, check_runs=${runs.length}`)
+              core.info(
+                `Attempt ${i + 1}: ` +
+                `combined state=${state}, ` +
+                `check_runs=${runs.length}`
+              )
 
-              // Decide readiness: combined state success AND (no runs OR all runs are successful/neutral/skipped)
-              const runsAllPassed = runs.length === 0 || runs.every(r => ['success','neutral','skipped'].includes(r.conclusion))
-              if (state === 'success' && runsAllPassed) {
+              // ----------------------------------------------------------
+              // Check for failures
+              // ----------------------------------------------------------
+
+              const anyFailures =
+                state === 'failure' ||
+                runs.some(run =>
+                  ['failure', 'cancelled', 'timed_out', 'action_required']
+                    .includes(run.conclusion)
+                )
+
+              if (anyFailures) {
+
+                core.info(
+                  'Detected failing checks — automatic merge cancelled'
+                )
+
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  body:
+                    '自动批准已完成，但 CI / checks 存在失败，因此不会自动合并。'
+                })
+
+                return
+              }
+
+              // ----------------------------------------------------------
+              // Check whether all runs completed successfully
+              // ----------------------------------------------------------
+
+              const runsAllPassed =
+                runs.length === 0 ||
+                runs.every(run =>
+                  ['success', 'neutral', 'skipped'].includes(
+                    run.conclusion
+                  )
+                )
+
+              if (
+                (state === 'success' || runs.length === 0) &&
+                runsAllPassed
+              ) {
                 ready = true
                 break
               }
 
-              // If any runs have failure or combined state is failure, abort
-              const anyFailures = runs.some(r => r.conclusion === 'failure') || state === 'failure'
-              if (anyFailures) {
-                core.info('Detected failing checks — will not merge automatically')
-                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: 'Auto-approve succeeded but required checks are failing — please address CI failures before merging.' })
-                return
-              }
+              // ----------------------------------------------------------
+              // Still pending — wait
+              // ----------------------------------------------------------
 
-              // wait and retry
-              await new Promise(r => setTimeout(r, delayMs))
+              await new Promise(
+                resolve => setTimeout(resolve, delayMs)
+              )
             }
 
+            // ============================================================
+            // 9. Checks did not finish within timeout
+            // ============================================================
+
             if (!ready) {
-              core.info('Checks did not become ready in time — leaving for manual merge')
-              await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: 'Auto-approve succeeded but checks did not finish in time — please wait or merge manually.' })
+
+              core.info(
+                'Checks did not become ready in time — leaving PR for manual merge'
+              )
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body:
+                  '自动批准已完成，但 checks 未在规定时间内完成。' +
+                  'PR 将保留，请等待 checks 完成后手动合并。'
+              })
+
               return
             }
 
-            // Attempt to merge
+            // ============================================================
+            // 10. Final merge
+            // ============================================================
+
             try {
-              const mergeRes = await github.rest.pulls.merge({
+
+              // Refresh PR immediately before merge.
+              const latestPr =
+                (
+                  await github.rest.pulls.get({
+                    owner,
+                    repo,
+                    pull_number: prNumber
+                  })
+                ).data
+
+              // Make sure PR is still open.
+              if (latestPr.state !== 'open') {
+
+                core.info(
+                  `PR is no longer open: ${latestPr.state}`
+                )
+
+                return
+              }
+
+              // Make sure the head SHA has not changed while we waited.
+              if (latestPr.head.sha !== headSha) {
+
+                core.info(
+                  'PR HEAD changed while waiting — refusing to merge stale commit'
+                )
+
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  body:
+                    'PR 在自动合并等待期间发生了新的提交。' +
+                    '为避免合并旧版本，自动合并已取消，请重新触发 workflow。'
+                })
+
+                return
+              }
+
+              const mergeRes =
+                await github.rest.pulls.merge({
+                  owner,
+                  repo,
+                  pull_number: prNumber,
+                  sha: headSha,
+                  commit_title:
+                    `Merge pull request #${prNumber}: non-code changes`,
+                  merge_method: 'merge'
+                })
+
+              if (mergeRes.data.merged) {
+
+                core.info(
+                  `PR merged successfully: ${mergeRes.data.sha}`
+                )
+
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  body:
+                    `Auto-merge completed ✅\n\n` +
+                    `Merge SHA: \`${mergeRes.data.sha}\``
+                })
+
+              } else {
+
+                core.info(
+                  'Merge attempt did not merge the PR: ' +
+                  JSON.stringify(mergeRes.data)
+                )
+
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  body:
+                    '自动批准成功，但自动合并未完成。' +
+                    '请检查 branch protection / ruleset / merge requirements 后手动合并。'
+                })
+              }
+
+            } catch (err) {
+
+              core.error(
+                `Merge failed: ${err.message}`
+              )
+
+              await github.rest.issues.createComment({
                 owner,
                 repo,
-                pull_number: prNumber,
-                commit_title: `Merge pull request #${prNumber} by automation: non-code changes`,
-                merge_method: 'merge'
+                issue_number: prNumber,
+                body:
+                  `自动批准成功，但自动合并失败：\n\n` +
+                  `\`${err.message}\`\n\n` +
+                  '请检查 Ruleset、branch protection、checks 和 GitHub Actions 权限。'
               })
-              if (mergeRes.data.merged) {
-                core.info(`PR merged by automation: ${mergeRes.data.sha}`)
-                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: `Auto-merge completed ✅ (SHA: ${mergeRes.data.sha})` })
-              } else {
-                core.info('Merge attempt did not merge the PR: ' + JSON.stringify(mergeRes.data))
-                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: 'Auto-approve succeeded but automatic merge could not complete — please merge manually.' })
-              }
-            } catch (err) {
-              core.error('Merge failed: ' + err.message)
-              await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: `Auto-approve succeeded but automatic merge failed: ${err.message}` })
             }
