@@ -1,27 +1,48 @@
-Copyright (c) 2026 Shellingfordh
+Copyright (c) 2026 Shellingfordh and the Project Contributors
 
 All rights reserved.
 
 This repository is publicly available for viewing and reference purposes.
 
 The source code, documentation, artwork, images, audio, video, game assets,
-design files, and other materials contained in this repository are proprietary
-and are protected by applicable copyright laws.
+design files, and other materials contained in this repository (collectively,
+the "Materials") are proprietary and are protected by applicable copyright
+laws.
+
+Copyright in the Materials is jointly owned by Shellingfordh and the
+contributors who create or contribute original work to the project, subject
+to any separate written agreements between the parties.
 
 No license is granted to any third party to copy, reproduce, modify, adapt,
 distribute, redistribute, publish, sublicense, sell, commercially exploit,
-or create derivative works from the Materials, except with prior written
-permission from the copyright holder.
+or create derivative works from the Materials, except with the prior written
+permission of the copyright holders.
 
 Public availability of this repository does not constitute a license or grant
-of intellectual property rights.
+of any intellectual property rights.
 
-Contributors and authorized collaborators may access, modify, and use the
-Materials solely for the development and maintenance of this project, subject
-to the permissions granted by the project owner and any separate agreements
-between the parties.
+Project contributors and authorized collaborators may access, modify, and use
+the Materials for the purpose of developing, maintaining, testing, and
+operating this project.
+
+A person does not become a copyright holder solely by being granted access to
+the repository or by being designated as a GitHub collaborator. Copyright
+ownership is based on original contributions to the Materials and any
+applicable agreement between the parties.
+
+Unless otherwise agreed in writing, each contributor retains their respective
+copyright interest in their original contributions, while the project as a
+whole remains jointly owned by its recognized copyright holders.
+
+No contributor or collaborator may independently license, sell, distribute,
+commercially exploit, or otherwise grant third-party rights to the project or
+to Materials jointly owned by the project without the consent of the other
+copyright holders.
 
 All rights not expressly granted are reserved.
 
 THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED...
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+LIABILITY ARISING FROM THE USE OF THE MATERIALS.
