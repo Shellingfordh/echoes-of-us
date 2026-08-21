@@ -35,6 +35,31 @@ jobs:
 
             core.info(`Files changed (${files.length}):\n${files.join('\n')}`)
 
+            // --- Trust check: only allow automation for repository collaborators or explicit allowlist ---
+            const prData = (await github.rest.pulls.get({ owner, repo, pull_number: prNumber })).data
+            const author = prData.user.login
+            const ownerLogin = context.repo.owner
+            const allowlist = ['Shellingfordh']
+
+            let trusted = false
+            if (author === ownerLogin || allowlist.includes(author)) {
+              trusted = true
+            } else {
+              try {
+                await github.rest.repos.checkCollaborator({ owner, repo, username: author })
+                trusted = true
+              } catch (e) {
+                trusted = false
+              }
+            }
+
+            if (!trusted) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: '自动化仅限仓库的 collaborator 或白名单用户。此 PR 的作者未被信任，自动批准/合并已跳过。' })
+              core.info('Author not trusted — skipping automation')
+              return
+            }
+            // --- End trust check ---
+
             // Define code file patterns or directories that count as code
             const codePatterns = [
               '.github/workflows',
@@ -83,7 +108,7 @@ jobs:
             const headSha = pr.head.sha
 
             // Poll for status/checks to succeed
-            const maxAttempts = 24 // total wait up to ~2 minutes (24 * 5s)
+            const maxAttempts = 48 // total wait up to ~4 minutes (48 * 5s)
             const delayMs = 5000
             let ready = false
             for (let i = 0; i < maxAttempts; i++) {
@@ -97,9 +122,9 @@ jobs:
 
               core.info(`Attempt ${i+1}: combined state=${state}, check_runs=${runs.length}`)
 
-              // Decide readiness: combined state success OR no check runs and combined state success
+              // Decide readiness: combined state success AND (no runs OR all runs are successful/neutral/skipped)
               const runsAllPassed = runs.length === 0 || runs.every(r => ['success','neutral','skipped'].includes(r.conclusion))
-              if ((state === 'success' && runsAllPassed) || runs.length === 0 && state !== 'failure') {
+              if (state === 'success' && runsAllPassed) {
                 ready = true
                 break
               }
