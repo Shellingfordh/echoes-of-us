@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>余响：牵挂 · 第三章「一起走一段」Prototype v0.4</title>
+<style>
+  html,body{margin:0;padding:0;background:#efe9df;height:100%;display:flex;align-items:center;justify-content:center;font-family:"PingFang SC","Microsoft YaHei",sans-serif;}
+  #wrap{position:relative;}
+  canvas{background:#f6f1e8;border-radius:10px;box-shadow:0 8px 40px rgba(90,70,50,.25);display:block;}
+  #note{position:absolute;bottom:-26px;left:0;right:0;text-align:center;color:#8a7d6a;font-size:12px;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game" width="960" height="540"></canvas>
+  <div id="note">《余响：牵挂》第三章 Prototype v0.4 —— 检查点 · 固定跳高 · 教学踏板 · 动线外双踏板 · 过关转场</div>
+</div>
+<script>
+"use strict";
+/* ============================================================
+   《余响：牵挂》第三章 · 一起走一段 —— Prototype v0.4
+   v0.4 改动：
+   1. 检查点系统：每过一小关记录，坠落回检查点而非从头
+   2. 跳跃高度固定（锚定只加水平借力，不加高度）
+   3. 教学关新增「高台踏板开门」——必须锚定借跳，顺势教锚定
+   4. 终点双踏板移出动线：一个高台、一个凹坑，必须同时踩
+   5. 关卡结束横幅 + 寄语转场
+   6. 修复第三关最后跳不上去的几何错误
+   ============================================================ */
+const cv = document.getElementById("game");
+const ctx = cv.getContext("2d");
+const W = 960, H = 540;
+const GRAV = 1500;
+const REST = 260, MAXL = 380, HARD = 495;
+const BOOST_VX = 200; // 锚定借跳：只加水平速度，跳跃高度恒定
+
+/* ---------- 输入 ---------- */
+const keys = {};
+let jumpQueued = false, switchQueued = false, anchorQueued = false, resetQueued = false, anyKeyQueued = false;
+addEventListener("keydown", e => {
+  if (["Tab","Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)) e.preventDefault();
+  if (!keys[e.code]) {
+    if (e.code === "Space" || e.code === "KeyW" || e.code === "ArrowUp") jumpQueued = true;
+    if (e.code === "Tab") switchQueued = true;
+    if (e.code === "KeyE") anchorQueued = true;
+    if (e.code === "KeyR") resetQueued = true;
+    anyKeyQueued = true;
+  }
+  keys[e.code] = true;
+});
+addEventListener("keyup", e => { keys[e.code] = false; });
+
+/* ---------- 角色 ---------- */
+function makeChar(name, w, h, speed, jumpV, color, dark) {
+  return {name, x:0, y:0, w, h, speed, jumpV, color, dark,
+          vx:0, vy:0, onGround:false, anchored:false, face:1};
+}
+const daughter = makeChar("女儿", 26, 38, 285, 560, "#e2795b", "#a8442c");
+const mother   = makeChar("母亲", 32, 48, 190, 470, "#4e8a96", "#2e5a64");
+const chars = [daughter, mother];
+let active = 0;
+const cx = c => c.x + c.w/2;
+const cy = c => c.y + c.h/2;
+const supported = c => c.onGround || c.anchored;
+
+/* ============================================================
+   关卡定义
+   checkpoints: {x: 两人都超过即记录, dx/dy/mx/my: 重生落点}
+   ============================================================ */
+const LEVELS = [
+/* ---------------- 关卡 1：楼道与出口（教学关） ---------------- */
+{
+  name: "楼道与出口",
+  quote: "线不是限制，而是连接。",
+  worldW: 4300,
+  spawn: {d:[220, 460], m:[130, 460]},
+  checkpoints: [
+    {x:1100, dx:1300, dy:460, mx:1230, my:460},   // 过了楼道口
+    {x:2150, dx:2200, dy:460, mx:2130, my:460},   // 过了教学门（坑后）
+    {x:3180, dx:3250, dy:460, mx:3180, my:460},   // 过了木板坑
+  ],
+  statics: [
+    {x:0,    y:460, w:1500, h:60},   // A：楼道
+    {x:1740, y:400, w:110,  h:14},   // 高台踏板柱（必须锚定借跳才够得着）
+    {x:1850, y:460, w:630,  h:60},   // B（与高台柱相接，在牵挂线可达半径内）
+    {x:2540, y:376, w:84, h:14},     // 女儿小台 1-4
+    {x:2680, y:292, w:84, h:14},
+    {x:2820, y:376, w:84, h:14},
+    {x:2960, y:292, w:84, h:14},
+    {x:3150, y:460, w:550,  h:60},   // C1（凹坑左）
+    {x:3700, y:520, w:160,  h:30},   // 凹坑底（母亲的踏板在这里）
+    {x:3860, y:460, w:440,  h:60},   // C2（凹坑右）
+    {x:3450, y:370, w:90,   h:14},   // 高台（女儿的踏板在这里）
+  ],
+  walls: [],
+  planks: [{x:2500, y:460, w:560, h:16, breakX:2620, breakBy:"mother", armed:false}],
+  boxes: [],
+  plates: [
+    {x:1760, y:400, w:60, on:false}, // P0 高台踏板 → 教学门
+    {x:3465, y:370, w:60, on:false}, // P1 动线外·高台
+    {x:3765, y:520, w:60, on:false}, // P2 动线外·凹坑
+  ],
+  doors: [
+    {x:2100, y:300, w:26, h:160, open:false, plates:[0]},   // 教学门
+    {x:3960, y:300, w:26, h:160, open:false, plates:[1,2]}, // 终点门：同踩才开
+  ],
+  exitX: 4140,
+  objective: "一起向右走——感受线的距离。",
+  onUpdate(L, dt) {
+    const D = daughter, M = mother;
+    L.autofollow = (L.s === 0);
+    if (L.s === 0 && D.x > 1150 && M.x > 1150) {
+      L.s = 1; L.objective = "前面的门锁了：踏板在坑中央的高台上。母亲按 E 锚定在断口边，女儿借线跳上去";
+      toast("线第一次从「绳子」变成「道路」。", 3.5);
+    }
+    if (L.s >= 2) L.planks[0].armed = true; // 幂等武装（检查点重生后仍生效）
+    if (L.s === 1 && L.doors[0].open) {
+      L.s = 2; L.objective = "门开了。把母亲也接过来：女儿在对面锚定，母亲跳下去按住 W 爬线";
+      toast("锚定的人不动，线就成了另一个人的路。", 3.5);
+    }
+    if (L.s === 2 && D.x > 3180 && M.x > 3180 && D.onGround && M.onGround) {
+      L.s = 3; L.objective = "终点大门：两块踏板都不在路上——一个在高台，一个在凹坑。同时踩住才开";
+      toast("楼下出口到了。两个人，一起用力。", 3.5);
+    }
+    if (L.s === 3 && L.doors[1].open) {
+      L.s = 4; L.objective = "门开了——一起走出去 →";
+      toast("不是互相拉扯，而是共同用力。", 4);
+    }
+  }
+},
+/* ---------------- 关卡 2：仓库 ---------------- */
+{
+  name: "仓库",
+  quote: "各尽所能，就是相互支撑。",
+  worldW: 3600,
+  spawn: {d:[200, 460], m:[120, 460]},
+  checkpoints: [
+    {x:1450, dx:1520, dy:460, mx:1450, my:460},   // 过了门1和断口
+    {x:2400, dx:2460, dy:460, mx:2400, my:460},   // 过了窄道机关门
+    {x:2900, dx:2960, dy:460, mx:2900, my:460},   // 过了垫脚坑
+  ],
+  statics: [
+    {x:0,    y:460, w:1100, h:60},
+    {x:1400, y:460, w:1200, h:60},
+    {x:2600, y:560, w:250,  h:30},
+    {x:2850, y:460, w:750,  h:60},
+  ],
+  walls: [
+    {x:1750, y:300, w:330, h:118},
+  ],
+  planks: [],
+  boxes: [
+    {x:640,  y:404, w:56, h:56},
+    {x:2480, y:404, w:56, h:56},
+  ],
+  plates: [
+    {x:420,  y:460, w:70, on:false},
+    {x:2140, y:460, w:70, on:false},
+  ],
+  doors: [
+    {x:1000, y:300, w:26, h:160, open:false, plates:[0]},
+    {x:2350, y:300, w:26, h:160, open:false, plates:[1]},
+  ],
+  exitX: 3450,
+  objective: "把箱子推上金色踏板，压住大门。（母亲能推动重物，女儿不行）",
+  onUpdate(L, dt) {
+    if (!L.f.push && Math.abs(L.boxes[0].x - 640) > 12) {
+      L.f.push = true;
+      toast("女儿：这个我推不动。  母亲：……我来。", 3.5);
+    }
+    if (!L.f.door1 && L.doors[0].open) {
+      L.f.door1 = true; L.objective = "门压住了。前面断口 240——老办法：锚定 + 借跳 + 爬线";
+      toast("箱子压住了踏板，门不会关了。", 3);
+    }
+    if (!L.f.gap && daughter.x > 1400 && mother.x > 1400) {
+      L.f.gap = true; L.objective = "前面的通道太矮，只有女儿能过——去看看通道后面有什么";
+      toast("女儿：这里只有我能过，等我一下。", 3.5);
+    }
+    if (!L.f.door2 && L.doors[1].open) {
+      L.f.door2 = true; L.objective = "第二个坑太宽——把箱子推下去垫脚";
+      toast("机关咔哒一声，远处的门开了。", 3);
+    }
+    if (!L.f.step && L.boxes[1].y > 480) {
+      L.f.step = true; L.objective = "踩着箱子上对岸，一起走向出口 →";
+      toast("箱子正好垫脚。", 3);
+    }
+  }
+},
+/* ---------------- 关卡 3：天台 ---------------- */
+{
+  name: "天台",
+  quote: "牵挂，也可以成为彼此的支点。",
+  worldW: 3400,
+  spawn: {d:[200, 460], m:[120, 460]},
+  checkpoints: [
+    {x:1150, dx:1030, dy:370, mx:1000, my:370},   // 两人都上了台阶1
+    {x:2050, dx:2120, dy:130, mx:2080, my:130},   // 两人都上了天台顶
+  ],
+  statics: [
+    {x:0,    y:460, w:900,  h:60},   // 地面
+    {x:980,  y:370, w:170,  h:14},   // 台阶 1（Δ90）
+    {x:1300, y:280, w:170,  h:14},   // 台阶 2（Δ90）
+    {x:1720, y:220, w:170,  h:14},   // 台阶 3（Δ60，间隔 250——必须锚定借跳）
+    {x:2000, y:130, w:1400, h:40},   // 天台顶（Δ90，间隔 110）
+  ],
+  walls: [],
+  planks: [],
+  boxes: [],
+  plates: [
+    {x:2350, y:130, w:70, on:false},
+    {x:2700, y:130, w:70, on:false},
+  ],
+  doors: [{x:2900, y:-30, w:26, h:160, open:false, plates:[0,1]}],
+  exitX: 3100,
+  objective: "台阶一节比一节高——交替锚定「接龙」：一人锚定，另一人借线上去，再回头拉对方",
+  onUpdate(L, dt) {
+    if (!L.f.start) {
+      L.f.start = true;
+      setTimeout(() => toasts.push({text:"母亲：慢点，一个一个来。", t:3}), 800);
+    }
+    if (!L.f.frog && daughter.onGround && daughter.y + daughter.h <= 375) {
+      L.f.frog = true;
+      toast("女儿上去了。现在换她锚定，把母亲拉上来。", 4);
+    }
+    if (!L.f.top && daughter.y + daughter.h <= 135 && mother.y + mother.h <= 135 && daughter.onGround && mother.onGround) {
+      L.f.top = true; L.objective = "天台顶：两人分别站上两块金色踏板";
+      toast("一起到了。最后一次，共同用力。", 3.5);
+    }
+  }
+},
+];
+
+/* ---------- 运行时关卡状态 ---------- */
+let levelIdx = 0, L = null;
+function loadLevel(i) {
+  levelIdx = i;
+  const def = LEVELS[i];
+  L = {
+    def, s: 0, f: {}, flags: {}, autofollow: false, cpIndex: -1,
+    worldW: def.worldW,
+    statics: def.statics,
+    walls: def.walls,
+    planks: JSON.parse(JSON.stringify(def.planks)).map(p => ({...p, broken:false, creak:0, armed: p.armed !== false})),
+    boxes: JSON.parse(JSON.stringify(def.boxes)).map(b => ({...b, vx:0, vy:0, pushDir:0})),
+    plates: JSON.parse(JSON.stringify(def.plates)),
+    doors: JSON.parse(JSON.stringify(def.doors)),
+    objective: def.objective,
+  };
+  placeAt(def.spawn.d[0], def.spawn.d[1], def.spawn.m[0], def.spawn.m[1]);
+  camX = 0; camY = 0;
+}
+function placeAt(dx, dy, mx, my) {
+  daughter.x = dx; daughter.y = dy - daughter.h;
+  mother.x = mx;   mother.y = my - mother.h;
+  for (const c of chars) { c.vx = 0; c.vy = 0; c.anchored = false; c.onGround = true; }
+  active = 0;
+}
+/* 回最近检查点：保留已开的门/已压的踏板，只重置检查点之后的木板和箱子 */
+function respawnCheckpoint() {
+  const cp = L.cpIndex >= 0 ? L.def.checkpoints[L.cpIndex] : null;
+  const dx0 = cp ? cp.dx : L.def.spawn.d[0], dy0 = cp ? cp.dy : L.def.spawn.d[1];
+  const mx0 = cp ? cp.mx : L.def.spawn.m[0], my0 = cp ? cp.my : L.def.spawn.m[1];
+  placeAt(dx0, dy0, mx0, my0);
+  for (let i = 0; i < L.planks.length; i++) {
+    if (L.planks[i].x > dx0 - 100) { // 检查点之前的断裂保持现状
+      L.planks[i].broken = false; L.planks[i].creak = 0;
+      L.planks[i].armed = L.def.planks[i].armed !== false;
+    }
+  }
+  for (let i = 0; i < L.boxes.length; i++) {
+    if (L.def.boxes[i].x >= dx0 - 100 || L.boxes[i].y > 1100) {
+      L.boxes[i].x = L.def.boxes[i].x; L.boxes[i].y = L.def.boxes[i].y;
+      L.boxes[i].vx = 0; L.boxes[i].vy = 0;
+    }
+  }
+  toast("回到了最近的检查点", 2);
+}
+
+/* ---------- 游戏状态 ---------- */
+let state = "title"; // title | play | leveldone | end
+let camX = 0, camY = 0;
+let toasts = [];
+let endTimer = 0, endIdx = 0, doneTimer = 0;
+
+const END_SCRIPT = [
+  "母亲：到了新地方，别什么都自己扛。",
+  "女儿：……你也是。",
+  "母亲：我？",
+  "女儿：嗯。你也别什么都替我扛。",
+  "—— 牵挂线仍然存在，但距离限制提高了。",
+  "第三章 Prototype 完 · 切换/张力/锚定/爬线/推箱/窄道/接龙/同踩机关",
+];
+
+function toast(text, dur=4) { toasts.push({text, t:dur}); }
+
+/* ---------- 碰撞工具 ---------- */
+function overlap(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+function closedDoors() { return L.doors.filter(d => !d.open); }
+function wallList() { return L.walls.concat(closedDoors()); }
+function onewayList(forBox) {
+  const arr = L.statics.concat(L.planks.filter(p => !p.broken));
+  if (!forBox) return arr.concat(L.boxes);
+  return arr;
+}
+
+/* ---------- 角色移动与碰撞 ---------- */
+function moveCollide(c, dt, dir) {
+  const wl = wallList();
+  c.x += c.vx * dt;
+  c.x = Math.max(0, Math.min(L.worldW - c.w, c.x));
+  for (const p of wl) if (overlap(c, p)) {
+    if (c.vx > 0) c.x = p.x - c.w; else if (c.vx < 0) c.x = p.x + p.w;
+    c.vx = 0;
+  }
+  for (const b of L.boxes) if (overlap(c, b)) {
+    const dirTo = Math.sign(cx(b) - cx(c));
+    if (c === mother && c.onGround && dirTo !== 0 && Math.sign(c.vx || dir) === dirTo) {
+      b.pushDir = dirTo;
+      if (dirTo > 0) b.x = c.x + c.w; else b.x = c.x - b.w;
+    } else {
+      if (c.vx > 0) c.x = b.x - c.w; else if (c.vx < 0) c.x = b.x + b.w;
+      c.vx = 0;
+    }
+  }
+  const prevFeet = c.y + c.h;
+  c.y += c.vy * dt;
+  c.onGround = false;
+  for (const p of wl) if (overlap(c, p)) {
+    if (c.vy > 0) { c.y = p.y - c.h; c.onGround = true; }
+    else if (c.vy < 0) { c.y = p.y + p.h; }
+    c.vy = 0;
+  }
+  if (c.vy >= 0) {
+    for (const p of onewayList(false)) {
+      if (c.x + c.w > p.x && c.x < p.x + p.w &&
+          prevFeet <= p.y + 1 && c.y + c.h >= p.y && c.y + c.h <= p.y + 40) {
+        c.y = p.y - c.h; c.vy = 0; c.onGround = true;
+      }
+    }
+  }
+}
+
+/* ---------- 箱子物理 ---------- */
+function updateBoxes(dt) {
+  for (const b of L.boxes) {
+    if (b.pushDir !== 0) { b.x += b.pushDir * 110 * dt; b.pushDir = 0; }
+    b.x = Math.max(0, Math.min(L.worldW - b.w, b.x));
+    for (const p of wallList()) if (overlap(b, p)) {
+      if (b.x + b.w/2 < p.x + p.w/2) b.x = p.x - b.w; else b.x = p.x + p.w;
+    }
+    const prevFeet = b.y + b.h;
+    b.vy = Math.min(b.vy + GRAV * dt, 1400);
+    b.y += b.vy * dt;
+    if (b.vy >= 0) {
+      for (const p of onewayList(true)) {
+        if (b.x + b.w > p.x && b.x < p.x + p.w &&
+            prevFeet <= p.y + 1 && b.y + b.h >= p.y && b.y + b.h <= p.y + 40) {
+          b.y = p.y - b.h; b.vy = 0;
+        }
+      }
+    }
+    if (b.y > 1100) { // 箱子掉出世界 → 回出生点
+      const i = L.boxes.indexOf(b);
+      b.x = L.def.boxes[i].x; b.y = L.def.boxes[i].y; b.vy = 0;
+    }
+  }
+}
+
+/* ---------- 牵挂线约束 ---------- */
+function tetherConstrain(c, anchor, dt, isActive) {
+  if (c.onGround || c.anchored || !supported(anchor)) return false;
+  let dx = cx(c) - cx(anchor), dy = cy(c) - cy(anchor);
+  let d = Math.hypot(dx, dy) || 0.001;
+  if (isActive && (keys.KeyW || keys.ArrowUp)) {
+    if (d > 90) { // 爬线
+      c.vx -= dx / d * 3000 * dt;
+      c.vy -= dy / d * 3000 * dt;
+      c.vx += (cx(anchor) - cx(c)) * 2.5 * dt;
+    } else if (anchor.onGround) {
+      // 爬到身边：落上对方所站的表面，不再悬空打转
+      c.x = cx(c) < cx(anchor) ? anchor.x - c.w - 2 : anchor.x + anchor.w + 2;
+      c.y = anchor.y + anchor.h - c.h;
+      c.vx = 0; c.vy = 0;
+    }
+  }
+  if (d <= MAXL + 8) return false; // 滞回容差：走下平台边缘的短暂悬空不触发钳制
+  const s = MAXL / d;
+  c.x = cx(anchor) + dx * s - c.w/2;
+  c.y = cy(anchor) + dy * s - c.h/2;
+  const vr = (c.vx * dx + c.vy * dy) / d;
+  if (vr > 0) { c.vx -= dx/d * vr; c.vy -= dy/d * vr; }
+  return true;
+}
+
+/* ---------- 主更新 ---------- */
+function update(dt) {
+  if (state === "title") { if (anyKeyQueued) { state = "play"; anyKeyQueued = false; loadLevel(0); } return; }
+  if (state === "leveldone") {
+    doneTimer += dt;
+    if (doneTimer > 2.6) {
+      loadLevel(levelIdx + 1);
+      state = "play";
+      toast("—— " + L.def.name + " ——", 3);
+    }
+    return;
+  }
+  if (state === "end") {
+    endTimer += dt;
+    if (endTimer > 2.6 && endIdx < END_SCRIPT.length - 1) { endTimer = 0; endIdx++; }
+    return;
+  }
+  if (resetQueued) { resetQueued = false; respawnCheckpoint(); }
+  if (switchQueued) { switchQueued = false; active = 1 - active; }
+  const me = chars[active], other = chars[1 - active];
+  if (anchorQueued) {
+    anchorQueued = false;
+    if (me.anchored) { me.anchored = false; toast(me.name + " 松开了锚点", 1.5); }
+    else if (me.onGround) { me.anchored = true; me.vx = 0; toast(me.name + " 锚定：成为对方的支点（再按 E 松开）", 2.5); }
+  }
+
+  /* --- 输入与移动 --- */
+  const dist0 = Math.hypot(cx(daughter) - cx(mother), cy(daughter) - cy(mother));
+  let mult = 1;
+  if (dist0 > REST) mult = Math.max(0.45, 1 - 0.55 * (dist0 - REST) / (MAXL - REST));
+
+  for (let i = 0; i < 2; i++) {
+    const c = chars[i];
+    if (c.anchored) { c.vx = 0; c.vy = 0; c.onGround = true; continue; }
+    let dir = 0;
+    if (i === active) {
+      dir = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA ? 1 : 0);
+    } else if (L.autofollow && c === mother) {
+      const dxm = cx(daughter) - cx(mother);
+      if (Math.abs(dxm) > 50) dir = Math.sign(dxm);
+    }
+    if (dir !== 0) c.face = dir;
+    const acc = (c.onGround ? 2600 : 1700);
+    const maxSp = c.speed * (i === active ? mult : Math.min(1, mult + 0.2));
+    if (dir !== 0 && (c.onGround || Math.abs(c.vx) < maxSp || Math.sign(c.vx) !== dir)) {
+      c.vx += dir * acc * dt;
+    }
+    if (c.onGround && Math.abs(c.vx) > maxSp) {
+      c.vx = Math.sign(c.vx) * Math.max(maxSp, Math.abs(c.vx) - 3000 * dt);
+    }
+    if (dir === 0 && c.onGround) {
+      const f = 2400 * dt;
+      c.vx = Math.abs(c.vx) <= f ? 0 : c.vx - Math.sign(c.vx) * f;
+    }
+    c.vy = Math.min(c.vy + GRAV * dt, 1400);
+    moveCollide(c, dt, dir);
+  }
+  if (jumpQueued) {
+    jumpQueued = false;
+    if (me.onGround && !me.anchored) {
+      me.vy = -me.jumpV;            // 跳跃高度恒定
+      if (other.anchored) {         // 锚定借跳：只送水平距离
+        me.vx += me.face * BOOST_VX;
+        if (!L.flags.boost) { L.flags.boost = true; toast("借线一跳——对方锚定时，跳得更远（高度不变）。", 3.5); }
+      }
+    }
+  }
+
+  /* --- 牵挂线 --- */
+  let dx = cx(daughter) - cx(mother), dy = cy(daughter) - cy(mother);
+  let d = Math.hypot(dx, dy);
+  if (!L.flags.tension && d > REST) { L.flags.tension = true; toast("线绷紧了——牵挂会影响距离，也会维持连接。", 4); }
+
+  tetherConstrain(daughter, mother, dt, active === 0);
+  tetherConstrain(mother, daughter, dt, active === 1);
+  dx = cx(daughter) - cx(mother); dy = cy(daughter) - cy(mother); d = Math.hypot(dx, dy) || 0.001;
+  if (d > MAXL && daughter.onGround && mother.onGround) {
+    if (!L.flags.over) { L.flags.over = true; toast("极限张力！线开始回拉——让对方靠近一点，或按 E 锚定。", 3.5); }
+    const pull = 2000 * dt; // 回拉要比行走加速度(2600)弱：能拖着走，但不会死锁
+    for (const c of chars) if (!c.anchored) {
+      const dirTo = c === daughter ? -1 : 1;
+      c.vx += dirTo * dx / d * pull;
+      c.vy += dirTo * dy / d * pull * 0.2;
+    }
+    if (d > HARD) {
+      const mid_x = (cx(daughter) + cx(mother)) / 2, mid_y = (cy(daughter) + cy(mother)) / 2;
+      for (const c of chars) if (!c.anchored) {
+        const ex = cx(c) - mid_x, ey = cy(c) - mid_y, ed = Math.hypot(ex, ey) || 0.001;
+        const want = HARD / 2;
+        if (ed > want) { c.x = mid_x + ex / ed * want - c.w/2; c.y = mid_y + ey / ed * want - c.h/2; }
+      }
+    }
+  } else if (d < MAXL * 0.9) L.flags.over = false;
+
+  /* --- 落地捕捉 --- */
+  for (const c of chars) if (!c.anchored && !c.onGround && c.vy >= 0) {
+    for (const p of onewayList(false).concat(wallList())) {
+      const feet = c.y + c.h;
+      if (c.x + c.w > p.x && c.x < p.x + p.w && feet >= p.y && feet <= p.y + 16) {
+        c.y = p.y - c.h; c.vy = 0; c.onGround = true; break;
+      }
+    }
+  }
+
+  updateBoxes(dt);
+
+  /* --- 坠落：回检查点，不回关卡起点 --- */
+  for (const c of chars) {
+    if (c.y > 1100) {
+      if (supported(chars[1 - chars.indexOf(c)])) { c.y = 1000; c.vy = -50; }
+      else { respawnCheckpoint(); break; }
+    }
+  }
+
+  /* --- 木板断裂 --- */
+  for (const p of L.planks) {
+    if (p.broken || !p.armed) continue;
+    const holder = p.breakBy === "mother" ? mother : daughter;
+    const onPlank = holder.onGround && cx(holder) > p.x && cx(holder) < p.x + p.w &&
+                    Math.abs(holder.y + holder.h - p.y) < 4;
+    if (onPlank && cx(holder) > p.breakX) {
+      p.creak += dt;
+      if (p.creak > 0.9) {
+        p.broken = true;
+        toast("木板断了！——快让女儿站稳，把母亲拉上来（Tab 切换，按住 W 爬线）", 5);
+        setTimeout(() => toasts.push({text:"母亲：小心，别拉太用力。", t:3}), 5200);
+        setTimeout(() => toasts.push({text:"女儿：知道。……以前你也是这么说我的吧。", t:3.5}), 8400);
+      }
+    }
+  }
+
+  /* --- 踏板与门（同踩才开，闩锁） --- */
+  for (const p of L.plates) {
+    p.on = chars.some(c => c.onGround && cx(c) > p.x && cx(c) < p.x + p.w && Math.abs(c.y + c.h - p.y) < 6)
+        || L.boxes.some(b => cx(b) > p.x && cx(b) < p.x + p.w && Math.abs(b.y + b.h - p.y) < 10);
+  }
+  for (const dr of L.doors) {
+    if (!dr.open && dr.plates.every(idx => L.plates[idx].on)) dr.open = true;
+  }
+
+  /* --- 检查点 --- */
+  L.def.checkpoints.forEach((cp, i) => {
+    if (i > L.cpIndex && cx(daughter) > cp.x && cx(mother) > cp.x) {
+      L.cpIndex = i;
+      toast("✓ 检查点", 1.8);
+    }
+  });
+
+  /* --- 关卡自定义逻辑 --- */
+  L.def.onUpdate(L, dt);
+
+  /* --- 过关 --- */
+  if (cx(daughter) > L.def.exitX && cx(mother) > L.def.exitX) {
+    if (levelIdx < LEVELS.length - 1) {
+      state = "leveldone"; doneTimer = 0;
+    } else {
+      state = "end"; endIdx = 0; endTimer = -1;
+    }
+  }
+
+  /* --- 相机 --- */
+  const midX = (cx(daughter) + cx(mother)) / 2, midY = (cy(daughter) + cy(mother)) / 2;
+  camX += (Math.min(Math.max(midX - W/2, 0), L.worldW - W) - camX) * Math.min(1, 6 * dt);
+  camY += (Math.min(Math.max(midY - H/2 - 40, -260), 380) - camY) * Math.min(1, 6 * dt);
+
+  for (const t of toasts) t.t -= dt;
+  toasts = toasts.filter(t => t.t > 0);
+}
+
+/* ---------- 渲染 ---------- */
+function drawChar(c, isActive) {
+  const x = c.x - camX, y = c.y - camY;
+  ctx.save();
+  ctx.fillStyle = c.color;
+  roundRect(x, y + c.h * 0.32, c.w, c.h * 0.68, 6); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + c.w/2, y + c.h * 0.2, c.w * 0.42, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.beginPath(); ctx.arc(x + c.w/2 + c.face * c.w * 0.16, y + c.h * 0.18, 2.4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = c.dark; ctx.font = "12px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText(c.name, x + c.w/2, y - (isActive ? 16 : 6));
+  if (isActive) {
+    ctx.fillStyle = "#c0392b";
+    ctx.beginPath();
+    ctx.moveTo(x + c.w/2 - 6, y - 13); ctx.lineTo(x + c.w/2 + 6, y - 13); ctx.lineTo(x + c.w/2, y - 6);
+    ctx.closePath(); ctx.fill();
+  }
+  if (c.anchored) {
+    ctx.fillStyle = "#8a5a2b"; ctx.font = "bold 13px sans-serif";
+    ctx.fillText("⚓ 锚定", x + c.w/2, y + c.h + 16);
+  }
+  ctx.restore();
+}
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function drawTether() {
+  const x1 = cx(daughter) - camX, y1 = cy(daughter) - camY;
+  const x2 = cx(mother) - camX, y2 = cy(mother) - camY;
+  const d = Math.hypot(x2 - x1, y2 - y1);
+  let color, width, glow = 0;
+  if (d < REST)      { color = "rgba(192,57,43,.55)"; width = 2.5; }
+  else if (d < MAXL) { color = "rgba(192,57,43,.9)";  width = 3.5; glow = 6; }
+  else {
+    const j = Math.sin(performance.now() / 30) * 2;
+    color = "rgba(231,76,60,1)"; width = 4.5; glow = 14;
+    ctx.save(); ctx.translate(j, -j);
+  }
+  ctx.strokeStyle = color; ctx.lineWidth = width;
+  ctx.shadowColor = "rgba(231,76,60,.8)"; ctx.shadowBlur = glow;
+  ctx.beginPath();
+  const sag = d < REST ? (1 - d / REST) * 60 : 0;
+  ctx.moveTo(x1, y1);
+  ctx.quadraticCurveTo((x1 + x2)/2, (y1 + y2)/2 + sag, x2, y2);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  if (glow === 14) ctx.restore();
+}
+function render() {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#f8f3ea"); g.addColorStop(1, "#ece2d2");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "rgba(255,255,255,.6)";
+  for (let i = 0; i < 6; i++) {
+    const xx = ((i * 800 - camX * 0.3) % 2400 + 2400) % 2400 - 200;
+    ctx.beginPath(); ctx.ellipse(xx, 70 + i * 24, 90, 22, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  for (const p of L ? L.statics : []) {
+    ctx.fillStyle = "#b8a88f";
+    ctx.fillRect(p.x - camX, p.y - camY, p.w, p.h);
+    ctx.fillStyle = "#d8cbb4";
+    ctx.fillRect(p.x - camX, p.y - camY, p.w, 6);
+  }
+  for (const p of L ? L.walls : []) {
+    ctx.fillStyle = "#9c8b72";
+    ctx.fillRect(p.x - camX, p.y - camY, p.w, p.h);
+    ctx.fillStyle = "rgba(255,255,255,.15)";
+    ctx.fillRect(p.x - camX, p.y - camY, p.w, 5);
+  }
+  if (L) {
+    for (const p of L.planks) if (!p.broken) {
+      const shake = p.creak > 0 ? Math.sin(performance.now() / 40) * p.creak * 3 : 0;
+      ctx.fillStyle = p.creak > 0 ? "#a0522d" : "#b07a45";
+      ctx.fillRect(p.x - camX + shake, p.y - camY, p.w, p.h);
+      if (p.creak > 0) {
+        ctx.fillStyle = "#c0392b"; ctx.font = "13px sans-serif"; ctx.textAlign = "center";
+        ctx.fillText("嘎吱……", p.x - camX + p.w/2, p.y - camY - 10);
+      }
+    }
+    for (const b of L.boxes) {
+      const x = b.x - camX, y = b.y - camY;
+      ctx.fillStyle = "#a9773f";
+      ctx.fillRect(x, y, b.w, b.h);
+      ctx.strokeStyle = "#7d5326"; ctx.lineWidth = 3;
+      ctx.strokeRect(x + 2, y + 2, b.w - 4, b.h - 4);
+      ctx.beginPath();
+      ctx.moveTo(x + 4, y + 4); ctx.lineTo(x + b.w - 4, y + b.h - 4);
+      ctx.moveTo(x + b.w - 4, y + 4); ctx.lineTo(x + 4, y + b.h - 4);
+      ctx.stroke();
+    }
+    for (const p of L.plates) {
+      ctx.fillStyle = p.on ? "#f1c40f" : "#c9b26b";
+      ctx.fillRect(p.x - camX, p.y - 8 - camY, p.w, 12);
+      ctx.fillStyle = "#7a6a3a"; ctx.font = "11px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText(p.on ? "已压住" : "踏板", p.x - camX + p.w/2, p.y - 14 - camY);
+    }
+    for (const dr of L.doors) {
+      if (!dr.open) {
+        ctx.fillStyle = "#7d4b3a";
+        ctx.fillRect(dr.x - camX, dr.y - camY, dr.w, dr.h);
+        ctx.fillStyle = "rgba(255,255,255,.25)";
+        ctx.fillRect(dr.x - camX + 4, dr.y - camY, 4, dr.h);
+      } else {
+        ctx.strokeStyle = "rgba(125,75,58,.4)"; ctx.lineWidth = 3;
+        ctx.strokeRect(dr.x - camX, dr.y - camY, dr.w, dr.h);
+      }
+    }
+  }
+
+  if (state !== "title") {
+    drawTether();
+    drawChar(daughter, active === 0);
+    drawChar(mother, active === 1);
+  }
+
+  /* --- HUD --- */
+  if (state === "play" && L) {
+    ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(60,45,30,.85)"; ctx.font = "bold 14px sans-serif";
+    ctx.fillText(`第 ${levelIdx + 1}/3 关 · ${L.def.name} — ${L.objective}`, 16, 26);
+    const dReal = Math.hypot(cx(daughter) - cx(mother), cy(daughter) - cy(mother));
+    let st = dReal < REST ? "松弛" : dReal < MAXL ? "张力" : "极限张力";
+    ctx.font = "12px sans-serif"; ctx.fillStyle = "#8a7d6a";
+    ctx.fillText(`控制：${chars[active].name}（Tab 切换）  线状态：${st}  距离 ${Math.round(dReal)} / ${MAXL}`, 16, 46);
+    ctx.fillText("←→/AD 移动 · Space 跳 · E 锚定 · W 爬线 · R 回检查点", 16, H - 12);
+  }
+
+  ctx.textAlign = "center";
+  toasts.slice(-3).forEach((t, i) => {
+    ctx.globalAlpha = Math.min(1, t.t);
+    ctx.fillStyle = "rgba(40,30,20,.8)";
+    ctx.font = "15px sans-serif";
+    ctx.fillText(t.text, W/2, H - 90 - (toasts.slice(-3).length - 1 - i) * 26);
+    ctx.globalAlpha = 1;
+  });
+
+  if (state === "leveldone" && L) {
+    const a = Math.min(1, doneTimer / 0.6);
+    ctx.fillStyle = `rgba(30,22,15,${0.75 * a})`; ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = a;
+    ctx.fillStyle = "#f5ead8"; ctx.textAlign = "center";
+    ctx.font = "bold 30px sans-serif";
+    ctx.fillText(`第 ${levelIdx + 1} 关 · ${L.def.name} · 完成`, W/2, 230);
+    ctx.font = "18px sans-serif"; ctx.fillStyle = "#d8c9ae";
+    ctx.fillText(L.def.quote, W/2, 278);
+    ctx.globalAlpha = 1;
+  }
+  if (state === "title") {
+    ctx.fillStyle = "rgba(30,22,15,.78)"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#f5ead8"; ctx.textAlign = "center";
+    ctx.font = "bold 34px sans-serif"; ctx.fillText("余响：牵挂", W/2, 150);
+    ctx.font = "20px sans-serif"; ctx.fillText("第三章 · 一起走一段（Prototype v0.4）", W/2, 190);
+    ctx.font = "15px sans-serif"; ctx.fillStyle = "#d8c9ae";
+    ctx.fillText("第一关「楼道与出口」：张力 · 锚定教学 · 同踩开门", W/2, 240);
+    ctx.fillText("第二关「仓库」：母亲推箱 · 女儿窄道 · 箱子垫脚", W/2, 268);
+    ctx.fillText("第三关「天台」：交替锚定接龙，一起爬到最高处", W/2, 296);
+    ctx.fillText("Tab 切换 · E 锚定 · W 爬线 · 坠落回到检查点", W/2, 340);
+    ctx.fillText("—— 按任意键开始 ——", W/2, 390);
+  }
+  if (state === "end") {
+    ctx.fillStyle = "rgba(30,22,15,.72)"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#f5ead8"; ctx.textAlign = "center";
+    ctx.font = "22px sans-serif";
+    for (let i = 0; i <= endIdx && i < END_SCRIPT.length; i++) {
+      ctx.globalAlpha = i === endIdx ? 1 : 0.45;
+      ctx.fillText(END_SCRIPT[i], W/2, 170 + i * 42);
+    }
+    ctx.globalAlpha = 1;
+  }
+}
+
+/* ---------- 主循环 ---------- */
+loadLevel(0);
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 1/30);
+  last = now;
+  update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
