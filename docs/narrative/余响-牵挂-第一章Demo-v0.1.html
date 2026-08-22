@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>余响：牵挂 · 第一章「离家」Prototype v0.1</title>
+<style>
+  html,body{margin:0;padding:0;background:#e8e6e9;height:100%;display:flex;align-items:center;justify-content:center;font-family:"PingFang SC","Microsoft YaHei",sans-serif;}
+  #wrap{position:relative;}
+  canvas{background:#f2f0f3;border-radius:10px;box-shadow:0 8px 40px rgba(60,60,80,.25);display:block;}
+  #note{position:absolute;bottom:-26px;left:0;right:0;text-align:center;color:#8a8691;font-size:12px;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game" width="960" height="540"></canvas>
+  <div id="note">《余响：牵挂》第一章 Prototype —— 单人探索 + 线的激活 · 无美术资产</div>
+</div>
+<script>
+"use strict";
+/* ============================================================
+   第一章｜离家 —— 女儿单人章
+   阶段一：房间探索（5 物件，含床底钻取 / 柜顶跳跃）
+   阶段二：雨伞冲突（演出）
+   阶段三：线的激活 · 张力 · 回弹 · W 种子教学
+   转场：黄伞 → 第二章
+   ============================================================ */
+const cv = document.getElementById("game");
+const ctx = cv.getContext("2d");
+const W = 960, H = 540;
+const GRAV = 1500;
+const FLOOR = 480;
+
+/* ---------- 输入 ---------- */
+const keys = {};
+let jumpQueued = false, interactQueued = false, anyKeyQueued = false;
+addEventListener("keydown", e => {
+  if (["Tab","Space","ArrowUp","ArrowDown","ArrowLeft","Right","ArrowRight","KeyE"].includes(e.code)) e.preventDefault();
+  if (!keys[e.code]) {
+    if (e.code === "Space" || e.code === "KeyW" || e.code === "ArrowUp") jumpQueued = true;
+    if (e.code === "KeyE") interactQueued = true;
+    anyKeyQueued = true;
+  }
+  keys[e.code] = true;
+});
+addEventListener("keyup", e => { keys[e.code] = false; });
+
+/* ---------- 场景 ---------- */
+const platforms = [
+  {x:0,   y:FLOOR, w:960, h:60},   // 地板
+  {x:60,  y:320, w:140, h:18},     // 衣柜顶
+  {x:230, y:400, w:60,  h:16},     // 椅子
+  {x:740, y:430, w:180, h:14},     // 床面（床底可钻）
+];
+const objects = [
+  {id:"boxes",   x:380, y:FLOOR, name:"打包纸箱",   done:false,
+   text:"胶带封得很死。里面装了几件深色外套、耳机和几本诗集。把过去二十年压缩进三个纸箱，其实比想象中容易得多。"},
+  {id:"case",    x:520, y:FLOOR, name:"敞开的行李箱", done:false,
+   text:"保温杯、水果和胃药压根就不属于我的秩序，但它们总能精准地入侵我的行李。哎……"},
+  {id:"desk",    x:660, y:FLOOR, name:"书桌",       done:false,
+   text:"东西都带齐了。不过桌面上还是留下一块浅色的印记。或许有些痕迹是带不走的吧……可能吧。"},
+  {id:"earpod",  x:850, y:FLOOR, name:"床底的耳机", done:false, crawl:true,
+   text:"找了一星期，原来在这儿。……这种地方也就我能进来。"},
+  {id:"photo",   x:130, y:320,  name:"柜顶的相框", done:false, high:true,
+   text:"小学春游的合影。她站在最后一排，手一直悬在我肩膀上方，没敢搭下来。"},
+];
+
+/* ---------- 女儿 ---------- */
+const girl = {x:480, y:FLOOR-38, w:26, h:38, vx:0, vy:0, speed:260, jumpV:560,
+              onGround:true, face:1, color:"#e2795b", dark:"#a8442c"};
+const motherFig = {x:-60, y:FLOOR-48, w:32, h:48, state:"hide"}; // 阶段二演出用
+const ANCHOR = {x:-60, y:400}; // 画外客厅，母亲的位置
+
+/* ---------- 状态机 ---------- */
+let state = "title"; // title | explore | cutscene | leave1 | drag | mono | leave2 | drag2 | final | transition | end
+let cutIdx = 0, cutTimer = 0, dragT = 0, monoIdx = 0, monoTimer = 0;
+let lockX = 860, climbMax = 905, wHintShown = false, transT = 0; // climbMax 必须小于世界边界 914
+let dialog = null; // {text, t} 底部独白
+const CUTSCENE = [
+  {act:"enter",  dur:1.6, text:""},
+  {act:"kneel",  dur:2.6, text:"母亲：（头也不抬）伞你没拿。天气预报说你搬家那个区，明天有大阵雨。"},
+  {act:"talk",   dur:3.0, text:"女儿：（皱眉）妈，别塞了，真塞不下了。楼下便利店买把伞只要十块钱。"},
+  {act:"talk",   dur:3.2, text:"母亲：（声音拔高）外边买伞多贵啊。……再说了，在家里住多好，非得出去租房住吗？"},
+  {act:"talk",   dur:2.8, text:"女儿：（语气转冷）……现在伞哪儿都有卖的，何况这把伞骨架都松了。"},
+  {act:"pause",  dur:2.0, text:"（沉默。母亲的手停在伞柄上。）"},
+  {act:"leave",  dur:2.2, text:"母亲：……算了，随你吧。反正外面什么都有卖的。"},
+];
+const MONO1 = [
+  "为什么走不出去……？",
+  "这是什么？一根线？",
+  "这根线，像一道无法挣脱的法则，硬生生把我钉在原地。",
+];
+const MONO2 = [
+  "攀住了，也还是走不远。",
+  "……是因为妈妈，不想让我走吗？",
+];
+let monoSet = MONO1;
+
+function overlap(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+function moveGirl(dt, lockRight) {
+  let dir = 0;
+  if (state === "explore" || state === "leave1" || state === "leave2" || state === "final") {
+    dir = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA ? 1 : 0);
+    if (lockRight && dir > 0) dir = 0;
+  }
+  if (dir !== 0) girl.face = dir;
+  // 阶段三：张力减速（非线性，顶风前行的泥泞感）
+  let mult = 1;
+  if (state === "leave1" || state === "leave2") {
+    const ratio = Math.max(0, (girl.x - 500) / (lockX - 500));
+    mult = Math.max(0, 1 - ratio * ratio);
+  }
+  girl.vx += dir * 2600 * dt;
+  const maxSp = girl.speed * mult;
+  if (Math.abs(girl.vx) > maxSp) girl.vx = Math.sign(girl.vx) * Math.max(maxSp, Math.abs(girl.vx) - 3000 * dt);
+  if (dir === 0 && girl.onGround) {
+    const f = 2400 * dt;
+    girl.vx = Math.abs(girl.vx) <= f ? 0 : girl.vx - Math.sign(girl.vx) * f;
+  }
+  girl.x += girl.vx * dt;
+  girl.x = Math.max(10, Math.min(940 - girl.w, girl.x));
+  const prevFeet = girl.y + girl.h;
+  girl.vy = Math.min(girl.vy + GRAV * dt, 1400);
+  girl.y += girl.vy * dt;
+  girl.onGround = false;
+  if (girl.vy >= 0) {
+    for (const p of platforms) {
+      if (girl.x + girl.w > p.x && girl.x < p.x + p.w &&
+          prevFeet <= p.y + 1 && girl.y + girl.h >= p.y && girl.y + girl.h <= p.y + 40) {
+        girl.y = p.y - girl.h; girl.vy = 0; girl.onGround = true;
+      }
+    }
+  }
+  if (jumpQueued) { jumpQueued = false; if (girl.onGround) girl.vy = -girl.jumpV; }
+}
+
+/* ---------- 主更新 ---------- */
+function update(dt) {
+  if (state === "title") { if (anyKeyQueued) { state = "explore"; anyKeyQueued = false; } return; }
+  if (state === "end") return;
+
+  if (state === "cutscene") {
+    cutTimer += dt;
+    const beat = CUTSCENE[cutIdx];
+    if (beat) {
+      if (beat.act === "enter") motherFig.x = Math.min(430, motherFig.x + 260 * dt);
+      if (beat.act === "leave") motherFig.x -= 300 * dt;
+      if (cutTimer > beat.dur) { cutIdx++; cutTimer = 0; }
+    } else {
+      state = "leave1";
+      dialog = {text:"任务：离开房间 →", t:3};
+    }
+    return;
+  }
+  if (state === "drag" || state === "drag2") { // 被线拽回
+    dragT += dt;
+    const k = Math.min(1, dragT / 0.8);
+    girl.x += (110 - girl.x) * Math.min(1, 8 * dt);
+    girl.vx = 0;
+    if (k >= 1) {
+      monoSet = state === "drag" ? MONO1 : MONO2;
+      state = "mono"; monoIdx = 0; monoTimer = 0;
+    }
+    return;
+  }
+  if (state === "mono") {
+    monoTimer += dt;
+    if (monoTimer > 2.2) {
+      monoTimer = 0; monoIdx++;
+      if (monoIdx >= monoSet.length) {
+        if (monoSet === MONO1) { state = "leave2"; wHintShown = false; }
+        else { state = "final"; }
+      }
+    }
+    return;
+  }
+  if (state === "final") {
+    // 房间暗下，黄伞亮起，等待 E
+    if (interactQueued) {
+      interactQueued = false;
+      if (Math.abs(girl.x + girl.w/2 - 60) < 90) { state = "transition"; transT = 0; }
+    }
+    moveGirl(dt, false);
+    return;
+  }
+  if (state === "transition") {
+    transT += dt;
+    if (transT > 3.2) state = "end";
+    return;
+  }
+
+  /* --- explore / leave1 / leave2 --- */
+  moveGirl(dt, false);
+
+  if (state === "explore") {
+    if (interactQueued) {
+      interactQueued = false;
+      for (const o of objects) {
+        if (o.done) continue;
+        const near = Math.abs(girl.x + girl.w/2 - o.x) < 70 &&
+                     (!o.high || girl.y + girl.h <= 322) &&
+                     (!o.crawl || girl.x > 740);
+        if (near) {
+          o.done = true;
+          dialog = {text: o.text, t: 5};
+          break;
+        }
+      }
+    }
+    if (objects.every(o => o.done)) { state = "cutscene"; cutIdx = 0; cutTimer = 0; motherFig.x = -60; }
+    return;
+  }
+
+  // 阶段三：线已激活
+  if (state === "leave1" || state === "leave2") {
+    if (state === "leave2" && !wHintShown && girl.x > lockX - 40) {
+      wHintShown = true;
+      dialog = {text:"线绷住了……但它好像，可以攀。（按住 W）", t:4};
+    }
+    // W 种子教学：多走两步（W 攀爬期间不受 lockX 钳制）
+    const wClimb = state === "leave2" && keys.KeyW && girl.x >= lockX - 8;
+    if (wClimb) {
+      girl.x = Math.min(climbMax, girl.x + 40 * dt);
+      if (girl.x >= climbMax) { state = "drag2"; dragT = 0; girl.vx = 0; return; }
+    } else if (girl.x >= lockX - 6) { // 渐近减速永远到不了 lockX，提前 6px 触发
+      girl.x = Math.min(girl.x, lockX);
+      if (state === "leave1") { state = "drag"; dragT = 0; girl.vx = 0; }
+    }
+  }
+  if (dialog) { dialog.t -= dt; if (dialog.t <= 0) dialog = null; }
+}
+function monoList() { return monoSet; }
+
+/* ---------- 渲染 ---------- */
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function drawGirl() {
+  const x = girl.x, y = girl.y;
+  const crouch = girl.x > 730 && girl.onGround && state === "explore";
+  const h = crouch ? girl.h * 0.6 : girl.h;
+  const yy = crouch ? girl.y + girl.h - h : y;
+  ctx.fillStyle = girl.color;
+  roundRect(x, yy + h * 0.32, girl.w, h * 0.68, 6); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + girl.w/2, yy + h * 0.2, girl.w * 0.42, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.beginPath(); ctx.arc(x + girl.w/2 + girl.face * 4, yy + h * 0.18, 2.4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = girl.dark; ctx.font = "12px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("女儿", x + girl.w/2, yy - 8);
+}
+function drawTether() {
+  if (!(state === "leave1" || state === "leave2" || state === "drag" || state === "drag2" || state === "mono" || state === "final")) return;
+  const x1 = girl.x + girl.w/2, y1 = girl.y + girl.h/2;
+  const d = Math.hypot(x1 - ANCHOR.x, y1 - ANCHOR.y);
+  const ratio = Math.min(1, Math.max(0, (girl.x - 500) / (lockX - 500)));
+  const warm = state === "final";
+  ctx.strokeStyle = warm ? "rgba(230,180,80,.9)" : `rgba(${192 + ratio*40},${57 + ratio*20},43,${0.5 + ratio*0.5})`;
+  ctx.lineWidth = 2.5 + ratio * 2;
+  ctx.shadowColor = "rgba(231,76,60,.8)"; ctx.shadowBlur = ratio * 14;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.quadraticCurveTo((x1 + ANCHOR.x)/2, (y1 + ANCHOR.y)/2 + (1 - ratio) * 40, ANCHOR.x, ANCHOR.y);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+function render() {
+  // 冷色调房间
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#f2f0f3"); g.addColorStop(1, "#dcd9e0");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // 左侧客厅门（画外）
+  ctx.fillStyle = "#b9b4c0"; ctx.fillRect(0, 300, 24, FLOOR - 300);
+  ctx.fillStyle = "#8f8a9a"; ctx.font = "11px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("客厅", 12, 290);
+  // 右侧大门
+  ctx.fillStyle = state === "leave1" || state === "leave2" ? "#7d6a8a" : "#a89fb2";
+  ctx.fillRect(920, 280, 30, FLOOR - 280);
+  ctx.fillStyle = "#6e6880";
+  ctx.fillText("大门", 935, 270);
+  // 家具
+  ctx.fillStyle = "#a89fb2"; ctx.fillRect(60, 320, 140, FLOOR - 320);   // 衣柜
+  ctx.fillStyle = "#b9b0c4"; ctx.fillRect(230, 400, 60, FLOOR - 400);   // 椅子
+  ctx.fillStyle = "#b9b0c4"; ctx.fillRect(350, FLOOR - 56, 90, 56);     // 纸箱
+  ctx.fillStyle = "#9aa5b1"; ctx.fillRect(490, FLOOR - 40, 70, 40);     // 行李箱
+  ctx.fillStyle = "#b9b0c4"; ctx.fillRect(620, FLOOR - 70, 90, 70);     // 书桌
+  ctx.fillStyle = "#c5bccd"; ctx.fillRect(740, 430, 180, 14);           // 床面
+  ctx.fillRect(740, 430, 14, FLOOR - 430); ctx.fillRect(906, 430, 14, FLOOR - 430); // 床腿
+  // 地板
+  ctx.fillStyle = "#cfcad6"; ctx.fillRect(0, FLOOR, W, 60);
+  // 未调查物件的微光
+  if (state === "explore") {
+    ctx.fillStyle = "rgba(255,255,255,.9)";
+    for (const o of objects) if (!o.done) {
+      ctx.beginPath(); ctx.arc(o.x, o.y - 14, 4 + Math.sin(performance.now()/300) * 1.5, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  // 鞋柜与黄伞
+  ctx.fillStyle = "#a89fb2"; ctx.fillRect(34, FLOOR - 46, 52, 46);
+  if (["leave1","leave2","drag","drag2","mono","final","transition","end"].includes(state)) {
+    const glow = state === "final" || state === "transition" ? 10 + Math.sin(performance.now()/200) * 8 : 0;
+    ctx.shadowColor = "rgba(240,200,80,.9)"; ctx.shadowBlur = glow;
+    ctx.fillStyle = "#f0c850";
+    ctx.fillRect(52, FLOOR - 78, 8, 36); // 伞
+    ctx.beginPath(); ctx.arc(56, FLOOR - 78, 12, Math.PI, 0); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+  // 母亲（演出）
+  if (state === "cutscene" && motherFig.x > -50) {
+    ctx.fillStyle = "#4e8a96";
+    roundRect(motherFig.x, motherFig.y + 16, motherFig.w, 32, 6); ctx.fill();
+    ctx.beginPath(); ctx.arc(motherFig.x + 16, motherFig.y + 9, 13, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#2e5a64"; ctx.font = "12px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("母亲", motherFig.x + 16, motherFig.y - 8);
+  }
+  drawTether();
+  drawGirl();
+
+  /* --- HUD --- */
+  ctx.textAlign = "left";
+  if (state === "explore") {
+    const n = objects.filter(o => o.done).length;
+    ctx.fillStyle = "rgba(70,65,80,.85)"; ctx.font = "bold 14px sans-serif";
+    ctx.fillText(`第一章 · 离家 —— 探索房间，确认行李 ${n}/5（走近按 E 调查）`, 16, 26);
+  }
+  if (state === "leave1" || state === "leave2") {
+    ctx.fillStyle = "rgba(70,65,80,.85)"; ctx.font = "bold 14px sans-serif";
+    ctx.fillText("任务：离开房间 →", 16, 26);
+  }
+  ctx.fillStyle = "#8a8691"; ctx.font = "12px sans-serif";
+  ctx.fillText("←→/AD 移动 · Space 跳 · E 调查", 16, H - 12);
+
+  // 独白 / 对白条
+  const cutText = state === "cutscene" && CUTSCENE[cutIdx] ? CUTSCENE[cutIdx].text : null;
+  const monoText = state === "mono" ? monoList()[monoIdx] : null;
+  const showText = cutText || monoText || (dialog ? dialog.text : null);
+  if (showText) {
+    ctx.fillStyle = "rgba(30,26,36,.75)";
+    roundRect(80, H - 110, W - 160, 56, 8); ctx.fill();
+    ctx.fillStyle = "#f0ecf4"; ctx.font = "15px sans-serif"; ctx.textAlign = "center";
+    wrapText(showText, W/2, H - 88, W - 200, 20);
+  }
+  // final 提示
+  if (state === "final") {
+    ctx.fillStyle = "rgba(30,26,36,.5)"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#f0c850"; ctx.font = "15px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("房间里暗下来了。只有鞋柜上的黄伞亮着。（走近按 E）", W/2, 120);
+  }
+  // 转场与结束
+  if (state === "transition" || state === "end") {
+    const a = state === "end" ? 1 : Math.min(1, transT / 2);
+    ctx.fillStyle = `rgba(240,214,150,${a})`; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#5a4a2a"; ctx.textAlign = "center";
+    ctx.globalAlpha = a;
+    ctx.font = "bold 26px sans-serif";
+    ctx.fillText("第二章｜第一次放手", W/2, 220);
+    ctx.font = "17px sans-serif";
+    ctx.fillText("牵挂，不只是拉住，也可以守护。", W/2, 268);
+    ctx.font = "14px sans-serif";
+    ctx.fillText("→ 打开《余响-牵挂-第二章Demo-v0.1.html》继续", W/2, 330);
+    ctx.globalAlpha = 1;
+  }
+  if (state === "title") {
+    ctx.fillStyle = "rgba(35,32,42,.8)"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#efeaf2"; ctx.textAlign = "center";
+    ctx.font = "bold 34px sans-serif"; ctx.fillText("余响：牵挂", W/2, 180);
+    ctx.font = "20px sans-serif"; ctx.fillText("第一章 · 离家（Prototype v0.1）", W/2, 220);
+    ctx.font = "15px sans-serif"; ctx.fillStyle = "#c9c3d4";
+    ctx.fillText("牵挂，连接彼此，也限制距离。", W/2, 264);
+    ctx.fillText("—— 按任意键开始 ——", W/2, 350);
+  }
+}
+function wrapText(text, x, y, maxW, lh) {
+  let line = "", lines = [];
+  for (const ch of text) {
+    if (ctx.measureText(line + ch).width > maxW) { lines.push(line); line = ch; }
+    else line += ch;
+  }
+  lines.push(line);
+  lines.forEach((l, i) => ctx.fillText(l, x, y + i * lh));
+}
+
+/* ---------- 主循环 ---------- */
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 1/30);
+  last = now;
+  update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
