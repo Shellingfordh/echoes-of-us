@@ -1,0 +1,81 @@
+<svg viewBox="0 0 680 480" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','Microsoft YaHei',sans-serif">
+  <defs>
+    <marker id="arr4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#3d405b"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="680" height="480" fill="#f4f1de"/>
+
+  <text x="340" y="30" font-size="20" font-weight="700" fill="#3d405b" text-anchor="middle">Act 3｜外面的世界（P003 三段渐进 + 街道）</text>
+  <text x="340" y="50" font-size="12" fill="#3d405b" opacity="0.7" text-anchor="middle">双人合作机制教学 → 过渡到独立帮助路人的「街道上的牵挂」</text>
+
+  <!-- Zone 1: 楼道与出口 (同踩开门) -->
+  <g>
+    <rect x="40" y="80" width="180" height="150" rx="8" fill="#fff" stroke="#3d405b" stroke-width="2.5"/>
+    <text x="130" y="100" font-size="13" font-weight="700" fill="#3d405b" text-anchor="middle">L03-001 楼道与出口</text>
+    <!-- two floor switches -->
+    <rect x="70" y="190" width="36" height="20" rx="3" fill="#e9c46a" stroke="#e07a5f" stroke-width="1.5"/>
+    <text x="88" y="204" font-size="8" fill="#3d405b" text-anchor="middle">踩</text>
+    <rect x="165" y="190" width="36" height="20" rx="3" fill="#e9c46a" stroke="#e07a5f" stroke-width="1.5"/>
+    <text x="183" y="204" font-size="8" fill="#3d405b" text-anchor="middle">踩</text>
+    <rect x="120" y="120" width="20" height="44" rx="2" fill="#3d405b"/>
+    <text x="130" y="170" font-size="8" fill="#f4f1de" text-anchor="middle">门</text>
+    <text x="130" y="225" font-size="9" fill="#2d7d8a" text-anchor="middle">同踩开门</text>
+  </g>
+
+  <!-- arrow 1->2 -->
+  <line x1="220" y1="155" x2="258" y2="155" stroke="#3d405b" stroke-width="2.5" marker-end="url(#arr4)"/>
+
+  <!-- Zone 2: 仓库 (推箱 + 窄道 + 垫脚) -->
+  <g>
+    <rect x="270" y="80" width="180" height="150" rx="8" fill="#fff" stroke="#3d405b" stroke-width="2.5"/>
+    <text x="360" y="100" font-size="13" font-weight="700" fill="#3d405b" text-anchor="middle">L03-002 仓库</text>
+    <rect x="295" y="160" width="44" height="44" rx="3" fill="#e07a5f" stroke="#3d405b" stroke-width="1.5"/>
+    <text x="317" y="186" font-size="9" fill="#f4f1de" text-anchor="middle">箱</text>
+    <rect x="360" y="165" width="20" height="40" rx="2" fill="#a8dadc" stroke="#2d7d8a" stroke-width="1.5"/>
+    <text x="370" y="158" font-size="8" fill="#2d7d8a" text-anchor="middle">垫脚</text>
+    <!-- narrow path -->
+    <line x1="290" y1="220" x2="410" y2="220" stroke="#3d405b" stroke-width="1" stroke-dasharray="4 3"/>
+    <text x="360" y="225" font-size="9" fill="#2d7d8a" text-anchor="middle">窄道</text>
+  </g>
+
+  <!-- arrow 2->3 -->
+  <line x1="450" y1="155" x2="488" y2="155" stroke="#3d405b" stroke-width="2.5" marker-end="url(#arr4)"/>
+
+  <!-- Zone 3: 天台 (交替锚定接龙) -->
+  <g>
+    <rect x="500" y="80" width="140" height="150" rx="8" fill="#fff" stroke="#3d405b" stroke-width="2.5"/>
+    <text x="570" y="100" font-size="13" font-weight="700" fill="#3d405b" text-anchor="middle">L03-003 天台</text>
+    <!-- anchor points chain -->
+    <circle cx="525" cy="140" r="6" fill="#e9c46a" stroke="#e07a5f" stroke-width="1.5"/>
+    <circle cx="555" cy="170" r="6" fill="#e9c46a" stroke="#e07a5f" stroke-width="1.5"/>
+    <circle cx="585" cy="140" r="6" fill="#e9c46a" stroke="#e07a5f" stroke-width="1.5"/>
+    <circle cx="615" cy="170" r="6" fill="#e9c46a" stroke="#e07a5f" stroke-width="1.5"/>
+    <line x1="525" y1="140" x2="555" y2="170" stroke="#2d7d8a" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <line x1="555" y1="170" x2="585" y2="140" stroke="#2d7d8a" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <line x1="585" y1="140" x2="615" y2="170" stroke="#2d7d8a" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <text x="570" y="210" font-size="9" fill="#2d7d8a" text-anchor="middle">交替锚定接龙</text>
+  </g>
+
+  <!-- transition banner -->
+  <rect x="40" y="255" width="600" height="34" rx="6" fill="#81b29a" opacity="0.85"/>
+  <text x="340" y="277" font-size="12" font-weight="700" fill="#3d405b" text-anchor="middle">过渡：从「共同操作牵挂线」→ 走到街道，遇见需要帮助的路人</text>
+
+  <!-- Zone 4: 街道上的牵挂 (路人寻物) -->
+  <g>
+    <rect x="60" y="310" width="560" height="130" rx="8" fill="#fff" stroke="#3d405b" stroke-width="2.5"/>
+    <text x="340" y="335" font-size="14" font-weight="700" fill="#3d405b" text-anchor="middle">L03-004 街道上的牵挂（路人寻物）</text>
+    <!-- player -->
+    <circle cx="110" cy="390" r="14" fill="#e07a5f" stroke="#3d405b" stroke-width="2"/>
+    <text x="110" y="394" font-size="9" fill="#f4f1de" text-anchor="middle">女儿</text>
+    <!-- passerby -->
+    <circle cx="430" cy="390" r="14" fill="#f2cc8f" stroke="#e07a5f" stroke-width="2"/>
+    <text x="430" y="394" font-size="9" fill="#3d405b" text-anchor="middle">路人</text>
+    <!-- lost item glow -->
+    <rect x="540" y="375" width="30" height="30" rx="3" fill="#e9c46a" stroke="#e07a5f" stroke-width="1.5"/>
+    <text x="555" y="372" font-size="8" fill="#e07a5f" text-anchor="middle">失物</text>
+    <!-- tie line between daughter & passerby -->
+    <line x1="124" y1="390" x2="416" y2="390" stroke="#3d405b" stroke-width="2" stroke-dasharray="5 3"/>
+    <text x="270" y="380" font-size="9" fill="#2d7d8a" text-anchor="middle">为他人建立牵挂连接</text>
+  </g>
+</svg>

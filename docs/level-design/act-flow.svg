@@ -1,0 +1,77 @@
+<svg viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','Microsoft YaHei',sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#3d405b"/>
+    </marker>
+  </defs>
+
+  <!-- background -->
+  <rect x="0" y="0" width="680" height="420" fill="#f4f1de"/>
+
+  <!-- title -->
+  <text x="340" y="34" font-size="22" font-weight="700" fill="#3d405b" text-anchor="middle">四幕情感弧线 — 牵挂之线的四次重新理解</text>
+  <text x="340" y="56" font-size="13" fill="#3d405b" text-anchor="middle" opacity="0.7">束缚 → 可调整的关系 → 属于世界的连接 → 允许彼此远行</text>
+
+  <!-- four act boxes -->
+  <!-- Act 1 -->
+  <rect x="30" y="100" width="140" height="120" rx="10" fill="#3d405b"/>
+  <text x="100" y="135" font-size="15" font-weight="700" fill="#f4f1de" text-anchor="middle">Act 1</text>
+  <text x="100" y="158" font-size="17" font-weight="700" fill="#f2cc8f" text-anchor="middle">离家</text>
+  <text x="100" y="182" font-size="12" fill="#f4f1de" text-anchor="middle">牵挂 = 束缚</text>
+  <text x="100" y="202" font-size="11" fill="#a8dadc" text-anchor="middle">女儿单人 · 房间</text>
+
+  <!-- arrow 1->2 -->
+  <line x1="170" y1="160" x2="208" y2="160" stroke="#3d405b" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Act 2 -->
+  <rect x="210" y="100" width="140" height="120" rx="10" fill="#2d7d8a"/>
+  <text x="280" y="135" font-size="15" font-weight="700" fill="#f4f1de" text-anchor="middle">Act 2</text>
+  <text x="280" y="158" font-size="17" font-weight="700" fill="#f2cc8f" text-anchor="middle">第一次放手</text>
+  <text x="280" y="182" font-size="12" fill="#f4f1de" text-anchor="middle">牵挂可调整</text>
+  <text x="280" y="202" font-size="11" fill="#a8dadc" text-anchor="middle">母亲 + 小女儿</text>
+
+  <!-- arrow 2->3 -->
+  <line x1="350" y1="160" x2="388" y2="160" stroke="#3d405b" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Act 3 -->
+  <rect x="390" y="100" width="140" height="120" rx="10" fill="#81b29a"/>
+  <text x="460" y="135" font-size="15" font-weight="700" fill="#3d405b" text-anchor="middle">Act 3</text>
+  <text x="460" y="158" font-size="17" font-weight="700" fill="#3d405b" text-anchor="middle">外面的世界</text>
+  <text x="460" y="182" font-size="12" fill="#3d405b" text-anchor="middle">牵挂属世界</text>
+  <text x="460" y="202" font-size="11" fill="#3d405b" text-anchor="middle">双人 + 路人</text>
+
+  <!-- arrow 3->4 -->
+  <line x1="530" y1="160" x2="568" y2="160" stroke="#3d405b" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Act 4 -->
+  <rect x="570" y="100" width="80" height="120" rx="10" fill="#e9c46a"/>
+  <text x="610" y="135" font-size="15" font-weight="700" fill="#3d405b" text-anchor="middle">Act 4</text>
+  <text x="610" y="160" font-size="14" font-weight="700" fill="#3d405b" text-anchor="middle">向外跑</text>
+  <text x="610" y="184" font-size="11" fill="#3d405b" text-anchor="middle">允许远行</text>
+  <text x="610" y="202" font-size="10" fill="#3d405b" text-anchor="middle">余响</text>
+
+  <!-- knot-line metaphor row -->
+  <text x="340" y="278" font-size="14" font-weight="700" fill="#3d405b" text-anchor="middle">牵挂之线的形态演变（四态系统对应）</text>
+
+  <!-- line representations -->
+  <g>
+    <circle cx="90" cy="340" r="26" fill="#3d405b"/>
+    <text x="90" y="345" font-size="11" fill="#f4f1de" text-anchor="middle">紧绷</text>
+    <text x="90" y="390" font-size="11" fill="#3d405b" text-anchor="middle">Hidden/Tense</text>
+
+    <line x1="130" y1="340" x2="220" y2="340" stroke="#3d405b" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+    <circle cx="260" cy="340" r="26" fill="#2d7d8a"/>
+    <text x="260" y="345" font-size="11" fill="#f4f1de" text-anchor="middle">可调</text>
+    <text x="260" y="390" font-size="11" fill="#3d405b" text-anchor="middle">Adjustable</text>
+
+    <line x1="300" y1="340" x2="390" y2="340" stroke="#3d405b" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+    <circle cx="430" cy="340" r="26" fill="#81b29a"/>
+    <text x="430" y="345" font-size="11" fill="#3d405b" text-anchor="middle">连接</text>
+    <text x="430" y="390" font-size="11" fill="#3d405b" text-anchor="middle">Extending</text>
+
+    <line x1="470" y1="340" x2="560" y2="340" stroke="#3d405b" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+    <circle cx="610" cy="340" r="26" fill="#e9c46a"/>
+    <text x="610" y="345" font-size="11" fill="#3d405b" text-anchor="middle">无限</text>
+    <text x="610" y="390" font-size="11" fill="#3d405b" text-anchor="middle">Resolved</text>
+  </g>
+</svg>
