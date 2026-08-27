@@ -95,7 +95,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.63, 0.73, 1)
 theme_override_font_sizes/font_size = 12
-text = "WASD 移动 · E 互动 · Tab 切换 · 空格控线 · F1 帮助"
+text = "WASD 移动 · E / 点击互动 · Tab 切换 · 空格控线 · F1 帮助"
 
 [node name="StatusRow" type="HBoxContainer" parent="TopMargin/TopRow/ObjectivePanel/ObjectiveBox"]
 layout_mode = 2
@@ -235,10 +235,17 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.88, 0.85, 0.9, 1)
 theme_override_font_sizes/font_size = 16
-text = "银色的线，安静地延伸。\n记忆碎片 0/5 · 回响 0/3\n\n按 R 重新体验"
+text = "银色的线，安静地延伸。\n记忆碎片 0/5 · 回响 0/3"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
+
+[node name="CompleteRestartButton" type="Button" parent="CompletionPanel/CompleteBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "重新体验   [R]"
 
 [node name="CheckpointLabel" type="Label" parent="."]
 unique_name_in_owner = true
@@ -388,5 +395,5 @@ text = "重新开始   [R]"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.71, 0.69, 0.76, 1)
 theme_override_font_sizes/font_size = 12
-text = "F1 操作帮助 · F3 开发调试"
+text = "方向键选择 · Enter 确认 · Esc 返回"
 horizontal_alignment = 1

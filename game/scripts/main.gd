@@ -207,6 +207,7 @@ func _start_act_one() -> void:
 	world.set_layout(FullDemoWorld.Layout.HOME)
 	audio_director.set_mood("home")
 	player.set_role("成年女儿")
+	player.set_presentation_mode(false)
 	player.set_world_bounds(Rect2(96.0, 258.0, 1350.0, 350.0))
 	player.global_position = Vector2(420.0, 470.0)
 	player.visible = true
@@ -235,15 +236,15 @@ func _update_interaction_prompt() -> void:
 	var prompt := ""
 	match current_interaction:
 		"box", "suitcase", "desk":
-			prompt = "E  调查物件"
+			prompt = "E / 点击  调查物件"
 		"chair":
-			prompt = "E  站上木椅"
+			prompt = "E / 点击  站上木椅"
 		"fragment_frame", "fragment_earphones", "fragment_ticket", "fragment_height", "fragment_boots":
-			prompt = "E  收集记忆碎片"
+			prompt = "E / 点击  收集记忆碎片"
 		"umbrella":
-			prompt = "E  触碰黄色雨伞" if phase == Phase.ACT1_UMBRELLA else "E  把牵挂线挂在雨伞上"
+			prompt = "E / 点击  触碰黄色雨伞" if phase == Phase.ACT1_UMBRELLA else "E / 点击  把牵挂线挂在雨伞上"
 		"memory_lamp", "corridor_anchor_1", "corridor_anchor_2", "rooftop_anchor_1", "rooftop_anchor_2", "rooftop_anchor_3":
-			prompt = "E  将牵挂线绕过锚点"
+			prompt = "E / 点击  将牵挂线绕过锚点"
 	ui.set_interaction_prompt(prompt, not prompt.is_empty())
 
 
@@ -994,6 +995,7 @@ func _enter_epilogue() -> void:
 	_phase_guard = true
 	phase = Phase.ACT4_EPILOGUE
 	player.controls_enabled = false
+	player.set_presentation_mode(true)
 	world.set_stage(3)
 	world.epilogue_line_visible = true
 	companion.visible = false
@@ -1007,7 +1009,7 @@ func _enter_epilogue() -> void:
 	phase = Phase.COMPLETE
 	ui.show_completion(
 		"—— 线还在 ——",
-		"它不再拉扯，只安静地留在那里。\n记忆碎片 %d/5 · 回响 %d/3\n\n按 R 重新体验" % [fragments_found, echoes_found]
+		"它不再拉扯，只安静地留在那里。\n记忆碎片 %d/5 · 回响 %d/3" % [fragments_found, echoes_found]
 	)
 	_phase_guard = false
 

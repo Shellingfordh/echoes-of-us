@@ -24,6 +24,7 @@ const SETTINGS_PATH := "user://echoes_settings.cfg"
 @onready var completion_panel: PanelContainer = %CompletionPanel
 @onready var complete_title: Label = %CompleteTitle
 @onready var complete_subtitle: Label = %CompleteSubtitle
+@onready var complete_restart_button: Button = %CompleteRestartButton
 @onready var chapter_panel: PanelContainer = %ChapterPanel
 @onready var chapter_kicker: Label = %ChapterKicker
 @onready var chapter_title: Label = %ChapterTitle
@@ -55,6 +56,7 @@ func _ready() -> void:
 	sound_button.pressed.connect(toggle_mute)
 	motion_button.pressed.connect(toggle_reduced_motion)
 	restart_button.pressed.connect(_restart_game)
+	complete_restart_button.pressed.connect(_restart_game)
 	_update_settings_labels()
 
 
@@ -252,6 +254,7 @@ func show_completion(title := "—— 第四章 · 完 ——", subtitle := "线
 	complete_title.text = title
 	complete_subtitle.text = subtitle
 	completion_panel.visible = true
+	complete_restart_button.grab_focus()
 
 
 func hide_completion() -> void:

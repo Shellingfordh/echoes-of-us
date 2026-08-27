@@ -3,6 +3,8 @@ extends Node2D
 
 const BICYCLE_TEXTURE := preload("res://assets/props/prop_bicycle.png")
 const MOVING_BOX_TEXTURE := preload("res://assets/props/prop_moving_box.png")
+const PROLOGUE_CHILD_TEXTURE := preload("res://assets/characters/character_daughter_child_neutral.png")
+const PROLOGUE_YOUNG_MOTHER_TEXTURE := preload("res://assets/characters/character_mother_young_neutral.png")
 const SUITCASE_TEXTURE := preload("res://assets/props/prop_suitcase.png")
 const WAREHOUSE_CRATE_TEXTURE := preload("res://assets/props/prop_warehouse_crate.png")
 
@@ -200,23 +202,47 @@ func _draw_prologue() -> void:
 		draw_circle(Vector2(1230.0, 270.0), 10.0, Color("#efc9b5"))
 		draw_colored_polygon(PackedVector2Array([Vector2(1175.0, 278.0), Vector2(1260.0, 278.0), Vector2(1285.0, 318.0), Vector2(1148.0, 318.0)]), Color("#6d5e72"))
 	_label("旧城缝纫铺", Vector2(235.0, 405.0), Color("#b59c91"), 14)
+	if _has_background_texture():
+		# The prologue is observed rather than played, so its actors belong to the world layer.
+		draw_texture_rect(
+			PROLOGUE_YOUNG_MOTHER_TEXTURE,
+			Rect2(576.0, 412.0, 68.0, 102.0),
+			false,
+			Color(0.88, 0.84, 0.82, 0.92)
+		)
+		if stage >= 1:
+			draw_set_transform(Vector2(420.0, 160.0), -PI / 2.0)
+			draw_texture_rect(
+				PROLOGUE_CHILD_TEXTURE,
+				Rect2(-32.0, -51.0, 64.0, 102.0),
+				false,
+				Color(0.82, 0.79, 0.82, 0.9)
+			)
+			draw_set_transform(Vector2.ZERO)
 
 	var thread_points := PackedVector2Array([
 		Vector2(410.0, 421.0),
 		Vector2(520.0, 430.0),
-		Vector2(665.0, 474.0),
-		Vector2(780.0, 520.0),
-		Vector2(920.0, 430.0),
-		Vector2(1035.0, 350.0),
+		Vector2(610.0, 432.0),
 	])
 	if stage >= 1:
+		thread_points.append(Vector2(665.0, 474.0))
+		thread_points.append(Vector2(780.0, 520.0))
+		thread_points.append(Vector2(920.0, 430.0))
+		thread_points.append(Vector2(1035.0, 350.0))
 		thread_points.append(Vector2(1130.0, 302.0))
 		thread_points.append(Vector2(1218.0, 276.0))
+		thread_points.append(Vector2(1320.0, 215.0))
+		thread_points.append(Vector2(1320.0, 170.0))
+		thread_points.append(Vector2(1080.0, 158.0))
+		thread_points.append(Vector2(820.0, 158.0))
+		thread_points.append(Vector2(580.0, 155.0))
+		thread_points.append(Vector2(460.0, 160.0))
 	draw_polyline(thread_points, Color("#b64d4f"), 3.0, true)
 	for point in thread_points:
 		draw_circle(point, 5.0, Color(0.76, 0.25, 0.28, 0.13))
 	if stage >= 1:
-		_glow(Vector2(1218.0, 276.0), 42.0, Color("#d96d68"))
+		_glow(Vector2(440.0, 160.0), 42.0, Color("#d96d68"))
 		_glow(Vector2(610.0, 432.0), 32.0, Color("#c75d58"))
 
 
@@ -292,20 +318,20 @@ func _draw_memory_street() -> void:
 
 	_draw_ellipse(get_point("puddle"), Vector2(95.0, 28.0), Color(0.32, 0.57, 0.68, 0.48))
 	_label("水坑", get_point("puddle") + Vector2(-22.0, 48.0), Color("#a8cfd8"), 12)
-	draw_rect(Rect2(1030.0, 330.0, 120.0, 220.0), Color("#676574"), true)
-	draw_rect(Rect2(1060.0, 512.0, 62.0, 38.0), Color("#252331"), true)
+	_draw_structure(Rect2(1030.0, 330.0, 120.0, 220.0), Color("#676574"))
+	_draw_gap(Rect2(1060.0, 512.0, 62.0, 38.0))
 	_label("快递柜 / 低矮缺口", Vector2(1008.0, 320.0), Color("#d8cfc4"), 12)
 	if not gate_one_open:
-		draw_rect(Rect2(1200.0, 300.0, 24.0, 308.0), Color("#8d6e66"), true)
+		_draw_gate(Rect2(1200.0, 300.0, 24.0, 308.0), Color("#8d6e66"))
 	else:
-		draw_rect(Rect2(1200.0, 300.0, 24.0, 38.0), Color("#be9a72"), true)
+		_draw_gate(Rect2(1200.0, 300.0, 24.0, 38.0), Color("#be9a72"))
 	_draw_plate(get_point("memory_plate"), gate_one_open)
 
 	draw_line(Vector2(1090.0, 510.0), Vector2(1090.0, 350.0), Color("#796c60"), 8.0)
 	draw_circle(Vector2(1090.0, 340.0), 18.0, Color("#efc36f"))
 	if highlight_id == "memory_lamp" or stage >= 4:
 		_glow(Vector2(1090.0, 355.0), 44.0, Color("#ffd47e"))
-	draw_rect(Rect2(1160.0, 540.0, 145.0, 68.0), Color("#171520"), true)
+	_draw_gap(Rect2(1160.0, 540.0, 145.0, 68.0))
 	_label("施工断口", Vector2(1195.0, 530.0), Color("#b99f8b"), 12)
 
 
@@ -320,15 +346,15 @@ func _draw_corridor() -> void:
 			draw_circle(Vector2(light_x, 310.0), 7.0, Color("#e7bf78"))
 			_glow(Vector2(light_x, 318.0), 52.0, Color("#d8aa65"))
 	_label("现实 · 楼道合作", Vector2(95.0, 285.0), Color("#a7c8dd"), 17)
-	draw_rect(Rect2(630.0, 530.0, 140.0, 78.0), Color("#0b0e14"), true)
-	draw_rect(Rect2(1160.0, 530.0, 120.0, 78.0), Color("#0b0e14"), true)
+	_draw_gap(Rect2(630.0, 530.0, 140.0, 78.0))
+	_draw_gap(Rect2(1160.0, 530.0, 120.0, 78.0))
 	_draw_anchor(get_point("corridor_anchor_1"), 1, anchor_index >= 1)
 	_draw_anchor(get_point("corridor_anchor_2"), 2, anchor_index >= 2)
 	_draw_plate(get_point("corridor_plate_1"), gate_one_open)
 	if not gate_one_open:
-		draw_rect(Rect2(900.0, 300.0, 24.0, 308.0), Color("#597083"), true)
+		_draw_gate(Rect2(900.0, 300.0, 24.0, 308.0), Color("#597083"))
 	if not gate_two_open:
-		draw_rect(Rect2(1380.0, 300.0, 24.0, 308.0), Color("#597083"), true)
+		_draw_gate(Rect2(1380.0, 300.0, 24.0, 308.0), Color("#597083"))
 	_label("一人锚定 · 一人借线", Vector2(500.0, 330.0), Color("#8ca7b8"), 13)
 
 
@@ -346,15 +372,15 @@ func _draw_warehouse() -> void:
 	_draw_crate(box_one_position, "重箱 1", highlight_id == "warehouse_box_1")
 	_draw_plate(get_point("warehouse_plate_1"), gate_one_open)
 	if not gate_one_open:
-		draw_rect(Rect2(650.0, 300.0, 24.0, 308.0), Color("#625b54"), true)
-	draw_rect(Rect2(760.0, 350.0, 120.0, 200.0), Color("#575354"), true)
-	draw_rect(Rect2(790.0, 515.0, 58.0, 35.0), Color("#161616"), true)
+		_draw_gate(Rect2(650.0, 300.0, 24.0, 308.0), Color("#625b54"))
+	_draw_structure(Rect2(760.0, 350.0, 120.0, 200.0), Color("#575354"))
+	_draw_gap(Rect2(790.0, 515.0, 58.0, 35.0))
 	_label("窄道", Vector2(792.0, 342.0), Color("#b8ae9f"), 12)
 	_draw_plate(get_point("warehouse_plate_2"), gate_two_open)
 	_draw_crate(box_two_position, "重箱 2", highlight_id == "warehouse_box_2")
-	draw_rect(Rect2(1270.0, 530.0, 150.0, 78.0), Color("#080808"), true)
+	_draw_gap(Rect2(1270.0, 530.0, 150.0, 78.0))
 	if gap_filled:
-		draw_rect(Rect2(1305.0, 520.0, 72.0, 62.0), Color("#77614c"), true)
+		_draw_structure(Rect2(1305.0, 520.0, 72.0, 62.0), Color("#77614c"))
 	_label("断口", Vector2(1318.0, 515.0), Color("#a99a88"), 12)
 
 
@@ -371,10 +397,10 @@ func _draw_rooftop() -> void:
 			draw_circle(Vector2(star_x, star_y), 1.1 + float(star_index % 2), Color(0.78, 0.83, 0.92, 0.24))
 	_draw_ellipse(Vector2(1260.0, 278.0), Vector2(82.0, 27.0), Color(0.72, 0.76, 0.83, 0.08))
 	_label("天台 · 交替锚定", Vector2(95.0, 285.0), Color("#b6cae7"), 17)
-	draw_rect(Rect2(320.0, 535.0, 260.0, 73.0), Color("#3d4657"), true)
-	draw_rect(Rect2(650.0, 455.0, 255.0, 153.0), Color("#465064"), true)
-	draw_rect(Rect2(970.0, 375.0, 250.0, 233.0), Color("#505b70"), true)
-	draw_rect(Rect2(1280.0, 300.0, 210.0, 308.0), Color("#5a667c"), true)
+	_draw_structure(Rect2(320.0, 535.0, 260.0, 73.0), Color("#3d4657"))
+	_draw_structure(Rect2(650.0, 455.0, 255.0, 153.0), Color("#465064"))
+	_draw_structure(Rect2(970.0, 375.0, 250.0, 233.0), Color("#505b70"))
+	_draw_structure(Rect2(1280.0, 300.0, 210.0, 308.0), Color("#5a667c"))
 	_draw_anchor(get_point("rooftop_anchor_1"), 1, anchor_index >= 1)
 	_draw_anchor(get_point("rooftop_anchor_2"), 2, anchor_index >= 2)
 	_draw_anchor(get_point("rooftop_anchor_3"), 3, anchor_index >= 3)
@@ -393,6 +419,9 @@ func _draw_apartment() -> void:
 		background = Color("#292630")
 		floor_color = Color("#51494a")
 	_draw_base(background, floor_color)
+	if stage == 1:
+		# The relationship falls quiet across the whole room, without a visible rectangular seam.
+		draw_rect(Rect2(0.0, 0.0, 1600.0, 720.0), Color(0.035, 0.055, 0.09, 0.42), true)
 
 	if not _has_background_texture():
 		# Procedural fallback for builds where the watercolor background is unavailable.
@@ -423,7 +452,6 @@ func _draw_apartment() -> void:
 		_draw_crate(Vector2(550.0, 535.0), "已经放好的箱子", false)
 		_label("新住处 · 尚未整理完", Vector2(95.0, 255.0), Color("#e0c49c"), 17)
 	elif stage == 1:
-		draw_rect(Rect2(120.0, 282.0, 1320.0, 326.0), Color(0.04, 0.07, 0.1, 0.34), true)
 		_label("新住处 · 线忽然没有回应", Vector2(95.0, 255.0), Color("#8793a2"), 17)
 	elif stage == 2:
 		_label("留一点距离，也留一条回来的路", Vector2(95.0, 255.0), Color("#d9b98f"), 17)
@@ -493,6 +521,51 @@ func _draw_crate(point: Vector2, label_text: String, highlighted: bool) -> void:
 	_label(label_text, point + Vector2(-35.0, 58.0), Color("#cdb99d"), 11)
 
 
+func _draw_structure(rect: Rect2, color: Color) -> void:
+	var shadow := color.darkened(0.72)
+	shadow.a = 0.38
+	draw_rect(Rect2(rect.position + Vector2(7.0, 8.0), rect.size), shadow, true)
+	var body := color
+	body.a = 0.78
+	draw_rect(rect, body, true)
+	var top_color := color.lightened(0.22)
+	top_color.a = 0.88
+	draw_rect(Rect2(rect.position, Vector2(rect.size.x, minf(8.0, rect.size.y))), top_color, true)
+	var edge_color := color.darkened(0.32)
+	edge_color.a = 0.84
+	draw_rect(rect, edge_color, false, 2.0)
+	for wash_index in range(1, 4):
+		var wash_y := rect.position.y + rect.size.y * float(wash_index) / 4.0
+		draw_line(
+			Vector2(rect.position.x + 8.0, wash_y),
+			Vector2(rect.end.x - 8.0, wash_y + 2.0),
+			Color(0.88, 0.9, 0.94, 0.07),
+			1.0
+		)
+
+
+func _draw_gate(rect: Rect2, color: Color) -> void:
+	var gate_color := color
+	gate_color.a = 0.78
+	draw_rect(rect, gate_color, true)
+	draw_line(rect.position, Vector2(rect.position.x, rect.end.y), color.lightened(0.25), 2.0)
+	for cross_y in range(int(rect.position.y + 34.0), int(rect.end.y), 48):
+		draw_line(Vector2(rect.position.x, cross_y), Vector2(rect.end.x, cross_y), color.darkened(0.28), 2.0)
+
+
+func _draw_gap(rect: Rect2) -> void:
+	var gap_points := PackedVector2Array([
+		rect.position + Vector2(0.0, 5.0),
+		rect.position + Vector2(rect.size.x * 0.32, 0.0),
+		rect.position + Vector2(rect.size.x * 0.7, 3.0),
+		rect.position + Vector2(rect.size.x, 0.0),
+		rect.end,
+		Vector2(rect.position.x, rect.end.y),
+	])
+	draw_colored_polygon(gap_points, Color(0.035, 0.04, 0.055, 0.86))
+	draw_polyline(gap_points, Color(0.33, 0.36, 0.43, 0.58), 2.0, true)
+
+
 func _glow(point: Vector2, radius: float, color: Color) -> void:
 	var pulse := 1.0 + sin(_elapsed * 2.7) * 0.08
 	var glow_color := color
@@ -501,6 +574,9 @@ func _glow(point: Vector2, radius: float, color: Color) -> void:
 
 
 func _label(text: String, position: Vector2, color: Color, font_size: int) -> void:
+	var shadow := Color(0.035, 0.03, 0.045, 0.86)
+	for offset in [Vector2(-1.0, 0.0), Vector2(1.0, 0.0), Vector2(0.0, -1.0), Vector2(0.0, 1.0)]:
+		draw_string(ThemeDB.fallback_font, position + offset, text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size, shadow)
 	draw_string(ThemeDB.fallback_font, position, text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size, color)
 
 

@@ -56,9 +56,19 @@ func _draw() -> void:
 			false
 		)
 	draw_circle(Vector2.ZERO, 32.0 * size + breath, Color(0.95, 0.66, 0.51, 0.06))
+	var label_position := Vector2(-52.0, -78.0 * size)
 	draw_string(
 		ThemeDB.fallback_font,
-		Vector2(-52.0, -78.0 * size),
+		label_position + Vector2(1.0, 1.0),
+		role_name,
+		HORIZONTAL_ALIGNMENT_CENTER,
+		104.0,
+		13,
+		Color(0.03, 0.025, 0.04, 0.88)
+	)
+	draw_string(
+		ThemeDB.fallback_font,
+		label_position,
 		role_name,
 		HORIZONTAL_ALIGNMENT_CENTER,
 		104.0,

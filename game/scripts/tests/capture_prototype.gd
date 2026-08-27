@@ -154,6 +154,7 @@ func _capture_ending(prefix: String, world: FullDemoWorld, player: EchoesPlayer,
 	world.set_stage(3)
 	world.epilogue_line_visible = true
 	_configure_scene(player, companion, tie_line, ui, "", "", "成年女儿", "母亲", Vector2(760.0, 500.0), Vector2(250.0, 500.0), TieLine.TieState.HIDDEN)
+	player.set_presentation_mode(true)
 	companion.visible = false
 	umbrella.global_position = world.get_point("epilogue_umbrella")
 	umbrella.visible = true
@@ -161,7 +162,7 @@ func _capture_ending(prefix: String, world: FullDemoWorld, player: EchoesPlayer,
 	await _save_frame("%s-act4-epilogue.png" % prefix)
 	ui.show_completion(
 		"—— 线还在 ——",
-		"它不再拉扯，只安静地留在那里。\n记忆碎片 5/5 · 回响 3/3\n\n按 R 重新体验"
+		"它不再拉扯，只安静地留在那里。\n记忆碎片 5/5 · 回响 3/3"
 	)
 	await _save_frame("%s-ending.png" % prefix)
 
@@ -169,6 +170,7 @@ func _capture_ending(prefix: String, world: FullDemoWorld, player: EchoesPlayer,
 func _configure_scene(player: EchoesPlayer, companion: EchoesMother, tie_line: TieLine, ui: PrototypeUI, phase: String, objective: String, player_role: String, companion_role: String, player_position: Vector2, companion_position: Vector2, state: TieLine.TieState) -> void:
 	player.visible = true
 	player.set_role(player_role)
+	player.set_presentation_mode(false)
 	companion.set_role(companion_role)
 	player.global_position = player_position
 	companion.global_position = companion_position

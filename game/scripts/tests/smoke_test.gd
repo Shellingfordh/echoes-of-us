@@ -41,6 +41,7 @@ func _run() -> void:
 	_check(_world != null, "full demo world exists")
 	_check(_audio != null, "procedural audio director exists")
 	_check(_ui != null, "immersive UI exists")
+	_check(_game.get_node_or_null("PrototypeUI/CompletionPanel/CompleteBox/CompleteRestartButton") != null, "completion offers a mouse and keyboard restart action")
 	var dialogue_catalog = _game.get("dialogue_catalog")
 	_check(dialogue_catalog != null and int(dialogue_catalog.call("size")) >= 61, "dialogue catalog loads all D001-D040 entries and runtime fragments")
 	var has_all_story_ids := true
@@ -287,6 +288,9 @@ func _test_act_four() -> void:
 	_check(_phase() == "complete", "the silent yellow-umbrella epilogue completes the ending")
 	_check(bool(_world.get("epilogue_line_visible")), "a short loose line remains beside the old umbrella")
 	_check(_umbrella.visible, "the old yellow umbrella returns behind the new apartment door")
+	_check(bool(_player.get("presentation_mode")), "the epilogue removes gameplay-only role labels and control rings")
+	var completion_restart := _game.get_node_or_null("PrototypeUI/CompletionPanel/CompleteBox/CompleteRestartButton") as Button
+	_check(completion_restart != null and completion_restart.has_focus(), "completion places keyboard focus on the restart action")
 
 
 func _phase() -> String:

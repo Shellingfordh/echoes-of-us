@@ -16,6 +16,7 @@ const ROLE_TEXTURES := {
 
 var controls_enabled := true
 var movement_multiplier := 1.0
+var presentation_mode := false
 var _facing_direction := Vector2.RIGHT
 var _body_color := Color("#607aa6")
 var _accent_color := Color("#dce8f4")
@@ -90,6 +91,11 @@ func set_world_bounds(next_bounds: Rect2) -> void:
 	camera.limit_bottom = 720
 
 
+func set_presentation_mode(enabled: bool) -> void:
+	presentation_mode = enabled
+	queue_redraw()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if controls_enabled and event.is_action_pressed(&"interact"):
 		interaction_requested.emit()
@@ -104,13 +110,24 @@ func _draw() -> void:
 			Rect2(Vector2(-34.0, -70.0) * size, Vector2(68.0, 102.0) * size),
 			false
 		)
-	draw_arc(Vector2.ZERO, 31.0 * size, 0.0, TAU, 32, Color(0.43, 0.76, 1.0, 0.46), 2.0, true)
-	draw_string(
-		ThemeDB.fallback_font,
-		Vector2(-52.0, -78.0 * size),
-		role_name,
-		HORIZONTAL_ALIGNMENT_CENTER,
-		104.0,
-		13,
-		outline_color
-	)
+	if not presentation_mode:
+		draw_arc(Vector2.ZERO, 31.0 * size, 0.0, TAU, 32, Color(0.43, 0.76, 1.0, 0.46), 2.0, true)
+		var label_position := Vector2(-52.0, -78.0 * size)
+		draw_string(
+			ThemeDB.fallback_font,
+			label_position + Vector2(1.0, 1.0),
+			role_name,
+			HORIZONTAL_ALIGNMENT_CENTER,
+			104.0,
+			13,
+			Color(0.03, 0.025, 0.04, 0.88)
+		)
+		draw_string(
+			ThemeDB.fallback_font,
+			label_position,
+			role_name,
+			HORIZONTAL_ALIGNMENT_CENTER,
+			104.0,
+			13,
+			outline_color
+		)

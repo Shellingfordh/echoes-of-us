@@ -125,6 +125,14 @@ F3               显示/隐藏 Debug
 godot --headless --path game --script res://scripts/tests/smoke_test.gd
 ```
 
+自动审计完成度、素材、输入、UI、完整流程并生成全章节截图：
+
+```bash
+scripts/audit_game.sh /tmp/echoes-of-us-completion-audit
+```
+
+没有图形显示环境时，可设置 `ECHOES_SKIP_CAPTURE=1`，仍会执行 154 项完成度检查和完整流程测试。
+
 ---
 
 # 📁 仓库结构
