@@ -35,7 +35,7 @@ unique_name_in_owner = true
 
 [node name="Player" type="CharacterBody3D" parent="."]
 unique_name_in_owner = true
-position = Vector3(-0.2, 0, 1.05)
+position = Vector3(2.8, 0, 0.8)
 script = ExtResource("2_player")
 
 [node name="Mother" type="Node3D" parent="."]

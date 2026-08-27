@@ -27,6 +27,7 @@ godot --headless --path chapter1-25d --script res://scripts/tests/smoke_test.gd
 
 - 场景、家具、角色和牵挂线均位于真实 `Node3D` 空间；
 - 玩家使用 `CharacterBody3D`，可以在 X/Z 两个地面轴移动；
+- 墙体、床、衣柜、书桌、纸箱、行李箱和木凳使用 `StaticBody3D` 阻挡角色，并保留前后景绕行通道；
 - 使用正交 `Camera3D`，保持绘本式构图，同时保留前景、中景、后景的真实遮挡与视差；
 - 牵挂线由多段 3D Mesh 构成，从余念手部连接到楼下母亲；
 - 镜头只做缓慢跟随、固定观察推进和轻量张力反馈，不使用 FPS 式运动。

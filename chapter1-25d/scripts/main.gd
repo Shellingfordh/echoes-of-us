@@ -14,6 +14,7 @@ enum Phase {
 }
 
 const REQUIRED_IDS := ["boxes", "suitcase", "desk", "earphones", "photo"]
+const INTERACTION_RADIUS := 1.65
 const CORE_DIALOGUE := {
 	"boxes": "D001",
 	"suitcase": "D002",
@@ -145,6 +146,8 @@ func _build_room() -> void:
 	_create_box(room, "Rug", Vector3(0.25, 0.015, 0.45), Vector3(5.3, 0.025, 2.6), Color("#857a77"))
 	_create_box(room, "ForegroundLeft", Vector3(-7.25, 1.3, 2.35), Vector3(0.65, 2.6, 0.28), Color("#4d453f"))
 	_create_box(room, "ForegroundRight", Vector3(7.25, 1.3, 2.35), Vector3(0.65, 2.6, 0.28), Color("#4d453f"))
+	_add_box_collision(room, "BackWallCollision", Vector3(0.0, 2.1, -2.75), Vector3(16.0, 4.2, 0.2))
+	_add_box_collision(room, "LeftWallCollision", Vector3(-8.0, 1.75, 0.0), Vector3(0.22, 3.5, 5.6))
 
 	_build_window()
 	_build_bed()
@@ -181,6 +184,8 @@ func _build_bed() -> void:
 	_create_box(bed, "Mattress", Vector3(0.0, 0.66, -0.05), Vector3(3.0, 0.36, 1.9), Color("#c9b89d"))
 	_create_box(bed, "Blanket", Vector3(-0.45, 0.87, 0.15), Vector3(2.0, 0.08, 1.82), Color("#748086"))
 	_create_box(bed, "Pillow", Vector3(-1.05, 0.9, -0.45), Vector3(0.75, 0.16, 0.65), Color("#d8ccba"))
+	# Keep a slim reachable strip along the front so the bed-bottom earphones remain investigable.
+	_add_box_collision(bed, "CollisionBody", Vector3(0.0, 0.52, -0.05), Vector3(2.9, 1.04, 1.55))
 
 
 func _build_wardrobe_and_photo() -> void:
@@ -191,6 +196,7 @@ func _build_wardrobe_and_photo() -> void:
 	_create_box(wardrobe, "Body", Vector3(0.0, 1.55, 0.0), Vector3(2.2, 3.1, 1.05), Color("#8b684a"))
 	_create_box(wardrobe, "DoorLeft", Vector3(-0.52, 1.55, 0.55), Vector3(1.0, 2.9, 0.06), Color("#9b7654"))
 	_create_box(wardrobe, "DoorRight", Vector3(0.52, 1.55, 0.55), Vector3(1.0, 2.9, 0.06), Color("#9b7654"))
+	_add_box_collision(wardrobe, "CollisionBody", Vector3(0.0, 1.55, 0.0), Vector3(1.8, 3.1, 0.9))
 	_register_object("wardrobe", wardrobe, false, "衣柜")
 
 	var photo := Node3D.new()
@@ -212,6 +218,7 @@ func _build_desk() -> void:
 		for z in [-0.34, 0.34]:
 			_create_box(desk, "Leg", Vector3(x, 0.45, z), Vector3(0.12, 0.9, 0.12), Color("#665044"))
 	_create_box(desk, "Ticket", Vector3(0.18, 1.03, 0.03), Vector3(0.8, 0.025, 0.32), Color("#e5dec8"))
+	_add_box_collision(desk, "CollisionBody", Vector3(0.0, 0.52, 0.0), Vector3(2.1, 1.04, 0.85))
 	_register_object("desk", desk, true, "书桌")
 
 
@@ -225,6 +232,8 @@ func _build_boxes() -> void:
 	_create_box(root, "BoxC", Vector3(-0.25, 1.0, -0.1), Vector3(1.05, 0.48, 0.84), Color("#aa8259"))
 	var tape := _create_box(root, "Tape", Vector3(-0.25, 1.25, -0.1), Vector3(0.16, 0.025, 0.82), Color("#d6c6a1"))
 	_line_visual_materials.append(tape.material_override as StandardMaterial3D)
+	_add_box_collision(root, "CollisionBody", Vector3(-0.45, 0.45, 0.0), Vector3(1.1, 0.9, 0.8))
+	_add_box_collision(root, "CollisionBodyB", Vector3(0.64, 0.38, 0.12), Vector3(0.8, 0.76, 0.65))
 	_register_object("boxes", root, true, "打包纸箱")
 
 
@@ -236,6 +245,7 @@ func _build_suitcase() -> void:
 	_create_box(suitcase, "Body", Vector3(0.0, 0.42, 0.0), Vector3(1.35, 0.78, 0.48), Color("#70818b"))
 	_create_box(suitcase, "Lid", Vector3(0.0, 0.74, -0.34), Vector3(1.35, 0.12, 0.58), Color("#8998a0"))
 	_create_box(suitcase, "Handle", Vector3(0.0, 0.96, 0.0), Vector3(0.46, 0.1, 0.12), Color("#4d585e"))
+	_add_box_collision(suitcase, "CollisionBody", Vector3(0.0, 0.48, -0.08), Vector3(1.15, 0.96, 0.6))
 	_register_object("suitcase", suitcase, true, "行李箱")
 
 
@@ -262,6 +272,7 @@ func _build_stool() -> void:
 	for x in [-0.32, 0.32]:
 		for z in [-0.22, 0.22]:
 			_create_box(stool, "Leg", Vector3(x, 0.25, z), Vector3(0.1, 0.5, 0.1), Color("#5d4c3c"))
+	_add_box_collision(stool, "CollisionBody", Vector3(0.0, 0.3, 0.0), Vector3(0.75, 0.6, 0.6))
 	_register_object("stool", stool, false, "木凳")
 
 
@@ -311,6 +322,8 @@ func _build_exit() -> void:
 	_create_box(doorway, "RightFrame", Vector3(0.82, 1.55, 0.0), Vector3(0.18, 3.1, 0.34), Color("#5d4e43"))
 	_create_box(doorway, "TopFrame", Vector3(0.0, 3.05, 0.0), Vector3(1.82, 0.18, 0.34), Color("#5d4e43"))
 	_create_box(doorway, "DarkLanding", Vector3(0.0, 1.45, -0.25), Vector3(1.45, 2.72, 0.08), Color("#343137"))
+	_add_box_collision(doorway, "LeftFrameCollision", Vector3(-0.82, 1.55, 0.0), Vector3(0.18, 3.1, 0.34))
+	_add_box_collision(doorway, "RightFrameCollision", Vector3(0.82, 1.55, 0.0), Vector3(0.18, 3.1, 0.34))
 	var label := Label3D.new()
 	label.text = "玄关 / 楼梯  →"
 	label.position = Vector3(0.0, 2.15, 0.2)
@@ -422,7 +435,7 @@ func _find_nearest_interaction() -> String:
 			pass
 
 	var nearest := ""
-	var nearest_distance := 1.45
+	var nearest_distance := INTERACTION_RADIUS
 	for candidate in candidates:
 		var base_id := candidate.trim_suffix("_p2").trim_suffix("_final")
 		var node := object_states[base_id].node as Node3D
@@ -804,6 +817,22 @@ func _create_mesh(parent: Node3D, node_name: String, mesh: Mesh, position: Vecto
 	instance.material_override = _make_material(Color(color, alpha), 0.0, false, alpha)
 	parent.add_child(instance)
 	return instance
+
+
+func _add_box_collision(parent: Node3D, node_name: String, position: Vector3, size: Vector3) -> StaticBody3D:
+	var body := StaticBody3D.new()
+	body.name = node_name
+	body.position = position
+	body.collision_layer = 1
+	body.collision_mask = 1
+	var collision := CollisionShape3D.new()
+	collision.name = "CollisionShape3D"
+	var shape := BoxShape3D.new()
+	shape.size = size
+	collision.shape = shape
+	body.add_child(collision)
+	parent.add_child(body)
+	return body
 
 
 func _make_material(color: Color, emission_energy := 0.0, unshaded := false, alpha := 1.0) -> StandardMaterial3D:

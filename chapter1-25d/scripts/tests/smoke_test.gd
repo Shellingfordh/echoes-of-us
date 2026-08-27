@@ -27,7 +27,26 @@ func _run() -> void:
 	_check(_game.get_node_or_null("Room/Floor") is MeshInstance3D, "room is built from depth-aware 3D geometry")
 	_check(float(player.get("z_bounds").y - player.get("z_bounds").x) > 2.0, "player can move through foreground and background depth")
 	_check(tie_line != null, "3D tie line exists")
+	_check(_game.get_node_or_null("Room/Bed/CollisionBody") is StaticBody3D, "bed has a static collision body")
+	_check(_game.get_node_or_null("Props/Wardrobe/CollisionBody") is StaticBody3D, "wardrobe has a static collision body")
+	_check(_game.get_node_or_null("Props/Desk/CollisionBody") is StaticBody3D, "desk has a static collision body")
+	_check(_game.get_node_or_null("Props/MovingBoxes/CollisionBody") is StaticBody3D, "moving boxes have a static collision body")
+	_check(_game.get_node_or_null("Props/Suitcase/CollisionBody") is StaticBody3D, "suitcase has a static collision body")
+	_check(_game.get_node_or_null("Props/Stool/CollisionBody") is StaticBody3D, "stool has a static collision body")
 	_check(int(_game.get("required_done")) == 0, "chapter starts before the five required investigations")
+	player.global_position = Vector3(-3.0, 0.0, 0.35)
+	var bed_hit := player.move_and_collide(Vector3(-2.4, 0.0, 0.0))
+	_check(bed_hit != null and bed_hit.get_collider() is StaticBody3D, "player is blocked by the bed instead of crossing it")
+	player.global_position = Vector3(-3.3, 0.0, -1.2)
+	var bed_route_hit := player.move_and_collide(Vector3(-2.8, 0.0, 0.0))
+	_check(bed_route_hit == null and player.global_position.x < -6.0, "player can route around the bed through the background lane")
+	player.global_position = Vector3(3.2, 0.0, -1.82)
+	var desk_hit := player.move_and_collide(Vector3(-2.5, 0.0, 0.0))
+	_check(desk_hit != null and desk_hit.get_collider() is StaticBody3D, "player is blocked by the desk instead of crossing it")
+	player.global_position = Vector3(2.8, 0.0, 0.8)
+	_check(_move_path_is_clear(player, [Vector3(2.8, 0.0, 1.6), Vector3(-2.3, 0.0, 1.6)]), "foreground route remains open beside the moving boxes")
+	player.global_position = Vector3(2.8, 0.0, 0.8)
+	_check(_move_path_is_clear(player, [Vector3(2.8, 0.0, -0.8), Vector3(-5.0, 0.0, -0.8)]), "background route remains open to the bed-bottom earphones")
 	player.global_position = Vector3(0.0, 0.0, -1.4)
 	await _frames(2)
 	_check(player.global_position.z < -1.0, "background lane movement remains available")
@@ -114,6 +133,14 @@ func _wait_for_phase(expected: String, timeout: float) -> void:
 func _frames(count: int) -> void:
 	for _index in range(count):
 		await process_frame
+
+
+func _move_path_is_clear(player: CharacterBody3D, points: Array[Vector3]) -> bool:
+	for point in points:
+		var collision := player.move_and_collide(point - player.global_position)
+		if collision != null:
+			return false
+	return true
 
 
 func _check(condition: bool, message: String) -> void:
