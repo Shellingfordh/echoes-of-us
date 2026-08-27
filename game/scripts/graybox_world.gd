@@ -1,6 +1,11 @@
 class_name FullDemoWorld
 extends Node2D
 
+const BICYCLE_TEXTURE := preload("res://assets/props/prop_bicycle.png")
+const MOVING_BOX_TEXTURE := preload("res://assets/props/prop_moving_box.png")
+const SUITCASE_TEXTURE := preload("res://assets/props/prop_suitcase.png")
+const WAREHOUSE_CRATE_TEXTURE := preload("res://assets/props/prop_warehouse_crate.png")
+
 enum Layout {
 	PROLOGUE,
 	HOME,
@@ -9,6 +14,16 @@ enum Layout {
 	WAREHOUSE,
 	ROOFTOP,
 	APARTMENT,
+}
+
+var _background_textures: Dictionary = {
+	Layout.PROLOGUE: preload("res://assets/environments/environment_prologue_sewing_shop.png"),
+	Layout.HOME: preload("res://assets/environments/environment_home.png"),
+	Layout.MEMORY_STREET: preload("res://assets/environments/environment_memory_street.png"),
+	Layout.CORRIDOR: preload("res://assets/environments/environment_corridor.png"),
+	Layout.WAREHOUSE: preload("res://assets/environments/environment_warehouse.png"),
+	Layout.ROOFTOP: preload("res://assets/environments/environment_rooftop.png"),
+	Layout.APARTMENT: preload("res://assets/environments/environment_apartment.png"),
 }
 
 var layout := Layout.HOME
@@ -125,12 +140,22 @@ func _draw() -> void:
 
 
 func _draw_base(background: Color, floor_color: Color, width := 1600.0) -> void:
-	draw_rect(Rect2(0.0, 0.0, width, 720.0), background)
-	for band in range(9):
-		var ratio := float(band) / 8.0
-		var band_color := background.lerp(floor_color, 0.18 + ratio * 0.36)
-		draw_rect(Rect2(0.0, 185.0 + band * 28.0, width, 30.0), band_color)
-	draw_rect(Rect2(0.0, 420.0, width, 225.0), floor_color)
+	var background_texture := _background_textures.get(layout) as Texture2D
+	if background_texture != null:
+		draw_texture_rect(background_texture, Rect2(0.0, 0.0, width, 720.0), false)
+		var atmosphere := background
+		atmosphere.a = 0.12
+		draw_rect(Rect2(0.0, 0.0, width, 720.0), atmosphere)
+		var floor_wash := floor_color
+		floor_wash.a = 0.08
+		draw_rect(Rect2(0.0, 420.0, width, 225.0), floor_wash)
+	else:
+		draw_rect(Rect2(0.0, 0.0, width, 720.0), background)
+		for band in range(9):
+			var ratio := float(band) / 8.0
+			var band_color := background.lerp(floor_color, 0.18 + ratio * 0.36)
+			draw_rect(Rect2(0.0, 185.0 + band * 28.0, width, 30.0), band_color)
+		draw_rect(Rect2(0.0, 420.0, width, 225.0), floor_color)
 	for wash_index in range(32):
 		var wash_x := fmod(float(wash_index * 193), width + 180.0) - 90.0
 		var wash_y := 250.0 + fmod(float(wash_index * 71), 330.0)
@@ -139,40 +164,42 @@ func _draw_base(background: Color, floor_color: Color, width := 1600.0) -> void:
 		_draw_ellipse(Vector2(wash_x, wash_y), Vector2(115.0 + float(wash_index % 4) * 23.0, 32.0), wash_color)
 	for y_position in range(456, 609, 58):
 		draw_line(Vector2(0.0, y_position), Vector2(width, y_position + 5.0), Color(0.8, 0.76, 0.72, 0.025), 2.0)
-	draw_rect(Rect2(0.0, 608.0, width, 37.0), floor_color.lightened(0.055))
-	draw_rect(Rect2(0.0, 645.0, width, 75.0), background.darkened(0.22))
+	var edge_color := background.darkened(0.22)
+	edge_color.a = 0.32 if background_texture != null else 1.0
+	draw_rect(Rect2(0.0, 645.0, width, 75.0), edge_color)
 	_draw_paper_grain(width)
+
+
+func _has_background_texture() -> bool:
+	return _background_textures.get(layout) != null
 
 
 func _draw_prologue() -> void:
 	_draw_base(Color("#17151e"), Color("#2d2830"))
-	# A quiet cross-section of the old sewing shop and the room above it.
-	draw_rect(Rect2(125.0, 365.0, 1320.0, 245.0), Color("#312b33"), true)
-	draw_rect(Rect2(125.0, 220.0, 1320.0, 128.0), Color("#26222d"), true)
-	draw_line(Vector2(125.0, 356.0), Vector2(1445.0, 356.0), Color("#786c70"), 8.0)
-	for window_x in [930.0, 1050.0, 1170.0]:
-		draw_rect(Rect2(window_x, 248.0, 74.0, 62.0), Color("#3b4454"), true)
-		draw_rect(Rect2(window_x, 248.0, 74.0, 62.0), Color("#817882"), false, 3.0)
-
-	# Sewing table, cloth and the young mother at work.
-	draw_rect(Rect2(245.0, 438.0, 315.0, 20.0), Color("#6e584d"), true)
-	draw_rect(Rect2(275.0, 458.0, 14.0, 118.0), Color("#57443e"), true)
-	draw_rect(Rect2(518.0, 458.0, 14.0, 118.0), Color("#57443e"), true)
-	draw_rect(Rect2(350.0, 402.0, 92.0, 43.0), Color("#716f74"), true)
-	draw_circle(Vector2(369.0, 397.0), 18.0, Color("#8f8b91"), false, 5.0)
-	draw_rect(Rect2(455.0, 423.0, 82.0, 13.0), Color("#a99887"), true)
-	draw_circle(Vector2(610.0, 432.0), 13.0, Color("#e7bca7"))
-	draw_colored_polygon(PackedVector2Array([Vector2(592.0, 449.0), Vector2(628.0, 449.0), Vector2(637.0, 514.0), Vector2(583.0, 514.0)]), Color("#95675d"))
+	if not _has_background_texture():
+		# Procedural fallback for builds where the watercolor background is unavailable.
+		draw_rect(Rect2(125.0, 365.0, 1320.0, 245.0), Color("#312b33"), true)
+		draw_rect(Rect2(125.0, 220.0, 1320.0, 128.0), Color("#26222d"), true)
+		draw_line(Vector2(125.0, 356.0), Vector2(1445.0, 356.0), Color("#786c70"), 8.0)
+		for window_x in [930.0, 1050.0, 1170.0]:
+			draw_rect(Rect2(window_x, 248.0, 74.0, 62.0), Color("#3b4454"), true)
+			draw_rect(Rect2(window_x, 248.0, 74.0, 62.0), Color("#817882"), false, 3.0)
+		draw_rect(Rect2(245.0, 438.0, 315.0, 20.0), Color("#6e584d"), true)
+		draw_rect(Rect2(275.0, 458.0, 14.0, 118.0), Color("#57443e"), true)
+		draw_rect(Rect2(518.0, 458.0, 14.0, 118.0), Color("#57443e"), true)
+		draw_rect(Rect2(350.0, 402.0, 92.0, 43.0), Color("#716f74"), true)
+		draw_circle(Vector2(369.0, 397.0), 18.0, Color("#8f8b91"), false, 5.0)
+		draw_rect(Rect2(455.0, 423.0, 82.0, 13.0), Color("#a99887"), true)
+		draw_circle(Vector2(610.0, 432.0), 13.0, Color("#e7bca7"))
+		draw_colored_polygon(PackedVector2Array([Vector2(592.0, 449.0), Vector2(628.0, 449.0), Vector2(637.0, 514.0), Vector2(583.0, 514.0)]), Color("#95675d"))
+		for stair_index in range(7):
+			var stair_x := 715.0 + stair_index * 47.0
+			var stair_y := 550.0 - stair_index * 30.0
+			draw_rect(Rect2(stair_x, stair_y, 54.0, 12.0), Color("#685b5e"), true)
+		draw_rect(Rect2(1105.0, 285.0, 215.0, 48.0), Color("#5f5159"), true)
+		draw_circle(Vector2(1230.0, 270.0), 10.0, Color("#efc9b5"))
+		draw_colored_polygon(PackedVector2Array([Vector2(1175.0, 278.0), Vector2(1260.0, 278.0), Vector2(1285.0, 318.0), Vector2(1148.0, 318.0)]), Color("#6d5e72"))
 	_label("旧城缝纫铺", Vector2(235.0, 405.0), Color("#b59c91"), 14)
-
-	# Stairs and the upper room keep the thread's path spatially continuous.
-	for stair_index in range(7):
-		var stair_x := 715.0 + stair_index * 47.0
-		var stair_y := 550.0 - stair_index * 30.0
-		draw_rect(Rect2(stair_x, stair_y, 54.0, 12.0), Color("#685b5e"), true)
-	draw_rect(Rect2(1105.0, 285.0, 215.0, 48.0), Color("#5f5159"), true)
-	draw_circle(Vector2(1230.0, 270.0), 10.0, Color("#efc9b5"))
-	draw_colored_polygon(PackedVector2Array([Vector2(1175.0, 278.0), Vector2(1260.0, 278.0), Vector2(1285.0, 318.0), Vector2(1148.0, 318.0)]), Color("#6d5e72"))
 
 	var thread_points := PackedVector2Array([
 		Vector2(410.0, 421.0),
@@ -195,25 +222,26 @@ func _draw_prologue() -> void:
 
 func _draw_home() -> void:
 	_draw_base(Color("#161325"), Color("#242038"))
-	draw_rect(Rect2(105.0, 270.0, 690.0, 315.0), Color("#29243b"), true)
-	draw_rect(Rect2(474.0, 284.0, 114.0, 92.0), Color("#605c72"), true)
-	draw_rect(Rect2(482.0, 292.0, 98.0, 76.0), Color("#333a50"), true)
-	draw_line(Vector2(531.0, 292.0), Vector2(531.0, 368.0), Color("#8f8998"), 2.0)
-	draw_line(Vector2(482.0, 330.0), Vector2(580.0, 330.0), Color("#8f8998"), 2.0)
-	draw_colored_polygon(PackedVector2Array([Vector2(452.0, 278.0), Vector2(482.0, 278.0), Vector2(470.0, 398.0), Vector2(438.0, 398.0)]), Color("#5f4658"))
-	draw_colored_polygon(PackedVector2Array([Vector2(580.0, 278.0), Vector2(610.0, 278.0), Vector2(622.0, 398.0), Vector2(590.0, 398.0)]), Color("#5f4658"))
-	_draw_ellipse(Vector2(510.0, 512.0), Vector2(230.0, 70.0), Color(0.38, 0.3, 0.4, 0.32))
-	draw_rect(Rect2(140.0, 324.0, 116.0, 8.0), Color("#68564f"), true)
-	for frame_x in [150.0, 194.0, 226.0]:
-		draw_rect(Rect2(frame_x, 287.0, 24.0, 30.0), Color("#786b70"), true)
-	draw_line(Vector2(755.0, 285.0), Vector2(755.0, 376.0), Color("#82715e"), 5.0)
-	draw_circle(Vector2(755.0, 380.0), 10.0, Color("#65765c"))
-	draw_circle(Vector2(742.0, 370.0), 13.0, Color("#536b55"))
-	draw_circle(Vector2(768.0, 366.0), 12.0, Color("#536b55"))
-	_glow(Vector2(531.0, 330.0), 90.0, Color("#c4b0d7"))
-	draw_rect(Rect2(1000.0, 263.0, 112.0, 345.0), Color("#302c42"), true)
-	draw_rect(Rect2(1023.0, 288.0, 70.0, 320.0), Color("#4b4050"), true)
-	draw_circle(Vector2(1078.0, 452.0), 5.0, Color("#f6d79a"))
+	if not _has_background_texture():
+		draw_rect(Rect2(105.0, 270.0, 690.0, 315.0), Color("#29243b"), true)
+		draw_rect(Rect2(474.0, 284.0, 114.0, 92.0), Color("#605c72"), true)
+		draw_rect(Rect2(482.0, 292.0, 98.0, 76.0), Color("#333a50"), true)
+		draw_line(Vector2(531.0, 292.0), Vector2(531.0, 368.0), Color("#8f8998"), 2.0)
+		draw_line(Vector2(482.0, 330.0), Vector2(580.0, 330.0), Color("#8f8998"), 2.0)
+		draw_colored_polygon(PackedVector2Array([Vector2(452.0, 278.0), Vector2(482.0, 278.0), Vector2(470.0, 398.0), Vector2(438.0, 398.0)]), Color("#5f4658"))
+		draw_colored_polygon(PackedVector2Array([Vector2(580.0, 278.0), Vector2(610.0, 278.0), Vector2(622.0, 398.0), Vector2(590.0, 398.0)]), Color("#5f4658"))
+		_draw_ellipse(Vector2(510.0, 512.0), Vector2(230.0, 70.0), Color(0.38, 0.3, 0.4, 0.32))
+		draw_rect(Rect2(140.0, 324.0, 116.0, 8.0), Color("#68564f"), true)
+		for frame_x in [150.0, 194.0, 226.0]:
+			draw_rect(Rect2(frame_x, 287.0, 24.0, 30.0), Color("#786b70"), true)
+		draw_line(Vector2(755.0, 285.0), Vector2(755.0, 376.0), Color("#82715e"), 5.0)
+		draw_circle(Vector2(755.0, 380.0), 10.0, Color("#65765c"))
+		draw_circle(Vector2(742.0, 370.0), 13.0, Color("#536b55"))
+		draw_circle(Vector2(768.0, 366.0), 12.0, Color("#536b55"))
+		_glow(Vector2(531.0, 330.0), 90.0, Color("#c4b0d7"))
+		draw_rect(Rect2(1000.0, 263.0, 112.0, 345.0), Color("#302c42"), true)
+		draw_rect(Rect2(1023.0, 288.0, 70.0, 320.0), Color("#4b4050"), true)
+		draw_circle(Vector2(1078.0, 452.0), 5.0, Color("#f6d79a"))
 	_label("女儿房间", Vector2(125.0, 305.0), Color("#8d849f"), 16)
 	_label("玄关 / 门口 →", Vector2(930.0, 290.0), Color("#d6ae75"), 15)
 
@@ -239,23 +267,25 @@ func _draw_home() -> void:
 
 func _draw_memory_street() -> void:
 	_draw_base(Color("#352d32"), Color("#514743"))
-	for building_index in range(8):
-		var building_x := float(building_index * 215 - 30)
-		var building_height := 110.0 + float((building_index * 47) % 95)
-		draw_rect(Rect2(building_x, 420.0 - building_height, 175.0, building_height), Color(0.29, 0.27, 0.29, 0.64), true)
-		for window_index in range(3):
-			var window_color := Color(0.94, 0.72, 0.4, 0.18 + float((building_index + window_index) % 2) * 0.12)
-			draw_rect(Rect2(building_x + 26.0 + window_index * 45.0, 338.0, 22.0, 28.0), window_color, true)
+	if not _has_background_texture():
+		for building_index in range(8):
+			var building_x := float(building_index * 215 - 30)
+			var building_height := 110.0 + float((building_index * 47) % 95)
+			draw_rect(Rect2(building_x, 420.0 - building_height, 175.0, building_height), Color(0.29, 0.27, 0.29, 0.64), true)
+			for window_index in range(3):
+				var window_color := Color(0.94, 0.72, 0.4, 0.18 + float((building_index + window_index) % 2) * 0.12)
+				draw_rect(Rect2(building_x + 26.0 + window_index * 45.0, 338.0, 22.0, 28.0), window_color, true)
 	_draw_ellipse(Vector2(800.0, 566.0), Vector2(610.0, 29.0), Color(0.43, 0.56, 0.62, 0.1))
 	for rain_x in range(40, 1580, 70):
 		var offset := fmod(_elapsed * 170.0 + rain_x * 0.31, 280.0)
 		draw_line(Vector2(rain_x, 235.0 + offset), Vector2(rain_x - 8.0, 255.0 + offset), Color(0.76, 0.83, 0.85, 0.22), 1.2)
 	_label("童年记忆 · 雨中街道", Vector2(90.0, 285.0), Color("#f0c98f"), 17)
 
-	draw_circle(bicycle_position + Vector2(-20.0, 14.0), 19.0, Color("#a4acb3"), false, 3.0)
-	draw_circle(bicycle_position + Vector2(24.0, 14.0), 19.0, Color("#a4acb3"), false, 3.0)
-	draw_line(bicycle_position + Vector2(-20.0, 14.0), bicycle_position + Vector2(3.0, -8.0), Color("#c6a76c"), 4.0)
-	draw_line(bicycle_position + Vector2(3.0, -8.0), bicycle_position + Vector2(24.0, 14.0), Color("#c6a76c"), 4.0)
+	draw_texture_rect(
+		BICYCLE_TEXTURE,
+		Rect2(bicycle_position - Vector2(58.0, 50.0), Vector2(116.0, 86.0)),
+		false
+	)
 	if highlight_id == "bicycle":
 		_glow(bicycle_position, 48.0, Color("#fff2be"))
 	_label("倒下的自行车", bicycle_position + Vector2(-62.0, 55.0), Color("#d8cfc4"), 12)
@@ -281,13 +311,14 @@ func _draw_memory_street() -> void:
 
 func _draw_corridor() -> void:
 	_draw_base(Color("#121722"), Color("#252b37"))
-	for door_x in [170.0, 340.0, 1030.0, 1320.0]:
-		draw_rect(Rect2(door_x, 315.0, 92.0, 224.0), Color("#202631"), true)
-		draw_rect(Rect2(door_x + 8.0, 325.0, 76.0, 214.0), Color("#323a47"), false, 3.0)
-		draw_circle(Vector2(door_x + 72.0, 430.0), 4.0, Color("#d4b372"))
-	for light_x in [295.0, 875.0, 1260.0]:
-		draw_circle(Vector2(light_x, 310.0), 7.0, Color("#e7bf78"))
-		_glow(Vector2(light_x, 318.0), 52.0, Color("#d8aa65"))
+	if not _has_background_texture():
+		for door_x in [170.0, 340.0, 1030.0, 1320.0]:
+			draw_rect(Rect2(door_x, 315.0, 92.0, 224.0), Color("#202631"), true)
+			draw_rect(Rect2(door_x + 8.0, 325.0, 76.0, 214.0), Color("#323a47"), false, 3.0)
+			draw_circle(Vector2(door_x + 72.0, 430.0), 4.0, Color("#d4b372"))
+		for light_x in [295.0, 875.0, 1260.0]:
+			draw_circle(Vector2(light_x, 310.0), 7.0, Color("#e7bf78"))
+			_glow(Vector2(light_x, 318.0), 52.0, Color("#d8aa65"))
 	_label("现实 · 楼道合作", Vector2(95.0, 285.0), Color("#a7c8dd"), 17)
 	draw_rect(Rect2(630.0, 530.0, 140.0, 78.0), Color("#0b0e14"), true)
 	draw_rect(Rect2(1160.0, 530.0, 120.0, 78.0), Color("#0b0e14"), true)
@@ -303,9 +334,10 @@ func _draw_corridor() -> void:
 
 func _draw_warehouse() -> void:
 	_draw_base(Color("#171717"), Color("#303033"))
-	for beam_x in range(120, 1540, 250):
-		draw_rect(Rect2(float(beam_x), 245.0, 18.0, 363.0), Color("#242426"), true)
-		draw_line(Vector2(beam_x + 18.0, 270.0), Vector2(beam_x + 225.0, 340.0), Color("#3d3936"), 8.0)
+	if not _has_background_texture():
+		for beam_x in range(120, 1540, 250):
+			draw_rect(Rect2(float(beam_x), 245.0, 18.0, 363.0), Color("#242426"), true)
+			draw_line(Vector2(beam_x + 18.0, 270.0), Vector2(beam_x + 225.0, 340.0), Color("#3d3936"), 8.0)
 	for dust_index in range(24):
 		var dust_x := float((dust_index * 127) % 1480 + 55)
 		var dust_y := 295.0 + fmod(float(dust_index * 83) + _elapsed * (5.0 + dust_index % 3), 250.0)
@@ -328,14 +360,15 @@ func _draw_warehouse() -> void:
 
 func _draw_rooftop() -> void:
 	_draw_base(Color("#151b2c"), Color("#252d3d"))
-	for skyline_index in range(11):
-		var skyline_x := float(skyline_index * 155 - 20)
-		var skyline_height := 55.0 + float((skyline_index * 37) % 105)
-		draw_rect(Rect2(skyline_x, 420.0 - skyline_height, 125.0, skyline_height), Color(0.16, 0.2, 0.29, 0.72), true)
-	for star_index in range(30):
-		var star_x := float((star_index * 193) % 1540 + 20)
-		var star_y := 245.0 + float((star_index * 61) % 145)
-		draw_circle(Vector2(star_x, star_y), 1.1 + float(star_index % 2), Color(0.78, 0.83, 0.92, 0.24))
+	if not _has_background_texture():
+		for skyline_index in range(11):
+			var skyline_x := float(skyline_index * 155 - 20)
+			var skyline_height := 55.0 + float((skyline_index * 37) % 105)
+			draw_rect(Rect2(skyline_x, 420.0 - skyline_height, 125.0, skyline_height), Color(0.16, 0.2, 0.29, 0.72), true)
+		for star_index in range(30):
+			var star_x := float((star_index * 193) % 1540 + 20)
+			var star_y := 245.0 + float((star_index * 61) % 145)
+			draw_circle(Vector2(star_x, star_y), 1.1 + float(star_index % 2), Color(0.78, 0.83, 0.92, 0.24))
 	_draw_ellipse(Vector2(1260.0, 278.0), Vector2(82.0, 27.0), Color(0.72, 0.76, 0.83, 0.08))
 	_label("天台 · 交替锚定", Vector2(95.0, 285.0), Color("#b6cae7"), 17)
 	draw_rect(Rect2(320.0, 535.0, 260.0, 73.0), Color("#3d4657"), true)
@@ -361,30 +394,29 @@ func _draw_apartment() -> void:
 		floor_color = Color("#51494a")
 	_draw_base(background, floor_color)
 
-	# A newer, sparer room than the childhood home: it is hers, but not settled yet.
-	draw_rect(Rect2(120.0, 282.0, 1320.0, 326.0), background.lightened(0.095), true)
-	draw_rect(Rect2(835.0, 292.0, 250.0, 142.0), Color("#77727b"), true)
-	draw_rect(Rect2(848.0, 305.0, 224.0, 116.0), Color("#425064") if stage != 1 else Color("#303943"), true)
-	draw_line(Vector2(960.0, 305.0), Vector2(960.0, 421.0), Color("#a39ca4"), 3.0)
-	draw_line(Vector2(848.0, 363.0), Vector2(1072.0, 363.0), Color("#a39ca4"), 3.0)
-	if stage != 1:
-		_glow(Vector2(960.0, 363.0), 125.0, Color("#d7b678"))
-
-	draw_rect(Rect2(1180.0, 315.0, 140.0, 293.0), Color("#38313d"), true)
-	draw_rect(Rect2(1202.0, 337.0, 94.0, 271.0), Color("#5b4d54"), true)
-	draw_circle(Vector2(1218.0, 466.0), 5.0, Color("#e1bd7d"))
-	_label("门口", Vector2(1226.0, 308.0), Color("#b9a6a3"), 12)
-
-	draw_rect(Rect2(285.0, 392.0, 165.0, 14.0), Color("#715d52"), true)
-	draw_rect(Rect2(300.0, 406.0, 10.0, 94.0), Color("#5f4e48"), true)
-	draw_rect(Rect2(425.0, 406.0, 10.0, 94.0), Color("#5f4e48"), true)
-	_label("她自己的书桌", Vector2(300.0, 378.0), Color("#bca9a0"), 12)
-	draw_rect(Rect2(490.0, 326.0, 112.0, 178.0), Color("#5b5058"), true)
-	for shelf_y in [370.0, 414.0, 458.0]:
-		draw_line(Vector2(500.0, shelf_y), Vector2(592.0, shelf_y), Color("#83737a"), 4.0)
-	draw_circle(Vector2(690.0, 403.0), 24.0, Color("#53695a"))
-	draw_rect(Rect2(674.0, 426.0, 32.0, 45.0), Color("#8a7662"), true)
-	_draw_ellipse(Vector2(750.0, 547.0), Vector2(260.0, 48.0), Color(0.58, 0.39, 0.37, 0.26 if stage != 1 else 0.08))
+	if not _has_background_texture():
+		# Procedural fallback for builds where the watercolor background is unavailable.
+		draw_rect(Rect2(120.0, 282.0, 1320.0, 326.0), background.lightened(0.095), true)
+		draw_rect(Rect2(835.0, 292.0, 250.0, 142.0), Color("#77727b"), true)
+		draw_rect(Rect2(848.0, 305.0, 224.0, 116.0), Color("#425064") if stage != 1 else Color("#303943"), true)
+		draw_line(Vector2(960.0, 305.0), Vector2(960.0, 421.0), Color("#a39ca4"), 3.0)
+		draw_line(Vector2(848.0, 363.0), Vector2(1072.0, 363.0), Color("#a39ca4"), 3.0)
+		if stage != 1:
+			_glow(Vector2(960.0, 363.0), 125.0, Color("#d7b678"))
+		draw_rect(Rect2(1180.0, 315.0, 140.0, 293.0), Color("#38313d"), true)
+		draw_rect(Rect2(1202.0, 337.0, 94.0, 271.0), Color("#5b4d54"), true)
+		draw_circle(Vector2(1218.0, 466.0), 5.0, Color("#e1bd7d"))
+		_label("门口", Vector2(1226.0, 308.0), Color("#b9a6a3"), 12)
+		draw_rect(Rect2(285.0, 392.0, 165.0, 14.0), Color("#715d52"), true)
+		draw_rect(Rect2(300.0, 406.0, 10.0, 94.0), Color("#5f4e48"), true)
+		draw_rect(Rect2(425.0, 406.0, 10.0, 94.0), Color("#5f4e48"), true)
+		_label("她自己的书桌", Vector2(300.0, 378.0), Color("#bca9a0"), 12)
+		draw_rect(Rect2(490.0, 326.0, 112.0, 178.0), Color("#5b5058"), true)
+		for shelf_y in [370.0, 414.0, 458.0]:
+			draw_line(Vector2(500.0, shelf_y), Vector2(592.0, shelf_y), Color("#83737a"), 4.0)
+		draw_circle(Vector2(690.0, 403.0), 24.0, Color("#53695a"))
+		draw_rect(Rect2(674.0, 426.0, 32.0, 45.0), Color("#8a7662"), true)
+		_draw_ellipse(Vector2(750.0, 547.0), Vector2(260.0, 48.0), Color(0.58, 0.39, 0.37, 0.26 if stage != 1 else 0.08))
 
 	if stage == 0:
 		_draw_crate(apartment_box_position, "最后一个纸箱", highlight_id == "apartment_box")
@@ -413,7 +445,16 @@ func _draw_apartment() -> void:
 
 
 func _draw_object(item_id: String, rect: Rect2, color: Color, label_text: String) -> void:
-	draw_rect(rect, color, true)
+	var prop_texture: Texture2D
+	match item_id:
+		"box": prop_texture = MOVING_BOX_TEXTURE
+		"suitcase": prop_texture = SUITCASE_TEXTURE
+	if prop_texture != null:
+		draw_texture_rect(prop_texture, rect, false)
+	else:
+		var fill_color := color
+		fill_color.a = 0.48
+		draw_rect(rect, fill_color, true)
 	if not is_collected(item_id):
 		var alpha := 0.13 if highlight_id != item_id else 0.3
 		draw_rect(rect.grow(8.0), Color(0.95, 0.93, 1.0, alpha), false, 3.0)
@@ -445,9 +486,8 @@ func _draw_anchor(point: Vector2, number: int, active: bool) -> void:
 
 
 func _draw_crate(point: Vector2, label_text: String, highlighted: bool) -> void:
-	draw_rect(Rect2(point - Vector2(38.0, 36.0), Vector2(76.0, 72.0)), Color("#725f4b"), true)
-	draw_line(point - Vector2(35.0, 33.0), point + Vector2(35.0, 33.0), Color("#a78a68"), 3.0)
-	draw_line(point + Vector2(35.0, -33.0), point - Vector2(35.0, 33.0), Color("#a78a68"), 3.0)
+	var crate_texture := MOVING_BOX_TEXTURE if layout == Layout.APARTMENT else WAREHOUSE_CRATE_TEXTURE
+	draw_texture_rect(crate_texture, Rect2(point - Vector2(43.0, 40.0), Vector2(86.0, 76.0)), false)
 	if highlighted:
 		_glow(point, 52.0, Color("#f7d699"))
 	_label(label_text, point + Vector2(-35.0, 58.0), Color("#cdb99d"), 11)

@@ -3,6 +3,13 @@ extends CharacterBody2D
 
 signal interaction_requested
 
+const ROLE_TEXTURES := {
+	"成年女儿": preload("res://assets/characters/character_daughter_adult_neutral.png"),
+	"母亲": preload("res://assets/characters/character_mother_adult_neutral.png"),
+	"年轻母亲": preload("res://assets/characters/character_mother_young_neutral.png"),
+	"小女儿": preload("res://assets/characters/character_daughter_child_neutral.png"),
+}
+
 @export var move_speed: float = 250.0
 @export var world_bounds := Rect2(96.0, 258.0, 1350.0, 350.0)
 @export var role_name := "成年女儿"
@@ -13,6 +20,7 @@ var _facing_direction := Vector2.RIGHT
 var _body_color := Color("#607aa6")
 var _accent_color := Color("#dce8f4")
 var _actor_scale := 1.0
+var _role_texture: Texture2D
 
 
 func _ready() -> void:
@@ -51,6 +59,7 @@ func _physics_process(_delta: float) -> void:
 
 func set_role(next_role: String) -> void:
 	role_name = next_role
+	_role_texture = ROLE_TEXTURES.get(role_name, ROLE_TEXTURES["成年女儿"]) as Texture2D
 	match role_name:
 		"母亲", "年轻母亲":
 			_body_color = Color("#9b695d")
@@ -87,32 +96,18 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	# Asset-free silhouettes keep every role readable in the graybox prototype.
-	var body_color := _body_color
 	var outline_color := _accent_color
-	var skin_color := Color("#efc9b5")
-	var facing_offset := _facing_direction.x * 2.0
 	var size := _actor_scale
-
-	draw_circle(Vector2(facing_offset, -24.0 * size), 10.0 * size, skin_color)
-	draw_circle(Vector2(facing_offset, -24.0 * size), 10.0 * size, outline_color, false, 2.0, true)
-	draw_colored_polygon(
-		PackedVector2Array([
-			Vector2(-10.0, -12.0) * size,
-			Vector2(10.0, -12.0) * size,
-			Vector2(13.0, 16.0) * size,
-			Vector2(-13.0, 16.0) * size,
-		]),
-		body_color
-	)
-	draw_line(Vector2(-7.0, 16.0) * size, Vector2(-9.0, 31.0) * size, outline_color, 4.0 * size, true)
-	draw_line(Vector2(7.0, 16.0) * size, Vector2(9.0, 31.0) * size, outline_color, 4.0 * size, true)
-	draw_line(Vector2(-10.0, -6.0) * size, Vector2(-17.0, 9.0) * size, outline_color, 3.0 * size, true)
-	draw_line(Vector2(10.0, -6.0) * size, Vector2(17.0, 9.0) * size, outline_color, 3.0 * size, true)
-	draw_arc(Vector2.ZERO, 28.0 * size, 0.0, TAU, 32, Color(0.43, 0.76, 1.0, 0.52), 2.0, true)
+	if _role_texture != null:
+		draw_texture_rect(
+			_role_texture,
+			Rect2(Vector2(-34.0, -70.0) * size, Vector2(68.0, 102.0) * size),
+			false
+		)
+	draw_arc(Vector2.ZERO, 31.0 * size, 0.0, TAU, 32, Color(0.43, 0.76, 1.0, 0.46), 2.0, true)
 	draw_string(
 		ThemeDB.fallback_font,
-		Vector2(-52.0, -46.0 * size),
+		Vector2(-52.0, -78.0 * size),
 		role_name,
 		HORIZONTAL_ALIGNMENT_CENTER,
 		104.0,

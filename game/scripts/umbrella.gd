@@ -3,6 +3,8 @@ extends Area2D
 
 signal inspected
 
+const UMBRELLA_TEXTURE := preload("res://assets/props/prop_yellow_umbrella.png")
+
 @export_node_path("Node2D") var player_path: NodePath
 @export var interaction_distance := 92.0
 
@@ -50,10 +52,7 @@ func _draw() -> void:
 		glow_alpha += 0.18
 
 	draw_circle(Vector2(0.0, -5.0), 42.0 + pulse * 5.0, Color(1.0, 0.73, 0.24, glow_alpha))
-	draw_arc(Vector2.ZERO, 27.0, PI, TAU, 32, Color("#f5c84c"), 8.0, true)
-	draw_line(Vector2(0.0, 0.0), Vector2(0.0, 43.0), Color("#8d6943"), 4.0, true)
-	draw_arc(Vector2(8.0, 43.0), 8.0, 0.0, PI, 16, Color("#8d6943"), 4.0, true)
-	draw_line(Vector2(-24.0, -2.0), Vector2(24.0, -2.0), Color("#fff0a6"), 1.5, true)
+	draw_texture_rect(UMBRELLA_TEXTURE, Rect2(-39.0, -49.0, 78.0, 81.0), false)
 
 	if _is_near:
 		draw_arc(Vector2(0.0, 8.0), 48.0, 0.0, TAU, 48, Color("#ffe49a"), 2.0, true)

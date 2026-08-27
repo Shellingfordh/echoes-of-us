@@ -1,12 +1,20 @@
 class_name EchoesMother
 extends Node2D
 
+const ROLE_TEXTURES := {
+	"成年女儿": preload("res://assets/characters/character_daughter_adult_neutral.png"),
+	"母亲": preload("res://assets/characters/character_mother_adult_neutral.png"),
+	"年轻母亲": preload("res://assets/characters/character_mother_young_neutral.png"),
+	"小女儿": preload("res://assets/characters/character_daughter_child_neutral.png"),
+}
+
 @export var role_name := "母亲"
 
 var _time := 0.0
 var _body_color := Color("#9b695d")
 var _outline_color := Color("#f1ddd1")
 var _actor_scale := 1.0
+var _role_texture: Texture2D
 
 
 func _process(delta: float) -> void:
@@ -20,6 +28,7 @@ func _ready() -> void:
 
 func set_role(next_role: String) -> void:
 	role_name = next_role
+	_role_texture = ROLE_TEXTURES.get(role_name, ROLE_TEXTURES["母亲"]) as Texture2D
 	match role_name:
 		"小女儿":
 			_body_color = Color("#d5a24c")
@@ -38,28 +47,18 @@ func set_role(next_role: String) -> void:
 
 func _draw() -> void:
 	var breath := sin(_time * 1.6) * 1.2
-	var body_color := _body_color
 	var outline_color := _outline_color
-	var skin_color := Color("#e7bca7")
 	var size := _actor_scale
-
-	draw_circle(Vector2(0.0, -24.0 * size + breath * 0.15), 11.0 * size, skin_color)
-	draw_circle(Vector2(0.0, -24.0 * size + breath * 0.15), 11.0 * size, outline_color, false, 2.0, true)
-	draw_colored_polygon(
-		PackedVector2Array([
-			Vector2(-11.0, -12.0) * size,
-			Vector2(11.0, -12.0) * size,
-			Vector2(15.0 + breath, 17.0) * size,
-			Vector2(-15.0 - breath, 17.0) * size,
-		]),
-		body_color
-	)
-	draw_line(Vector2(-8.0, 17.0) * size, Vector2(-8.0, 31.0) * size, outline_color, 4.0 * size, true)
-	draw_line(Vector2(8.0, 17.0) * size, Vector2(8.0, 31.0) * size, outline_color, 4.0 * size, true)
+	if _role_texture != null:
+		draw_texture_rect(
+			_role_texture,
+			Rect2(Vector2(-34.0, -70.0 + breath * 0.15) * size, Vector2(68.0, 102.0) * size),
+			false
+		)
 	draw_circle(Vector2.ZERO, 32.0 * size + breath, Color(0.95, 0.66, 0.51, 0.06))
 	draw_string(
 		ThemeDB.fallback_font,
-		Vector2(-52.0, -46.0 * size),
+		Vector2(-52.0, -78.0 * size),
 		role_name,
 		HORIZONTAL_ALIGNMENT_CENTER,
 		104.0,
