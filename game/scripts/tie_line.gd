@@ -9,7 +9,8 @@ enum TieState {
 	HIDDEN,
 	TENSE,
 	ADJUSTABLE,
-	EXTENDING,
+	SILENT,
+	STABLE,
 }
 
 @export_node_path("Node2D") var source_path: NodePath
@@ -23,7 +24,7 @@ enum TieState {
 var state := TieState.HIDDEN
 var distance := 0.0
 var tension_value := 0.0
-var ending_warmth := 0.0
+var reduced_motion := false
 
 var _source: Node2D
 var _target: Node2D
@@ -49,7 +50,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	_elapsed += delta
+	if not reduced_motion:
+		_elapsed += delta
 	if _source == null or _target == null:
 		return
 
@@ -82,7 +84,6 @@ func _process(delta: float) -> void:
 func reset_line(next_state := TieState.HIDDEN) -> void:
 	_anchor_points.clear()
 	_visual_tension_override = -1.0
-	ending_warmth = 0.0
 	_maximum_emitted = false
 	_reveal_progress = 0.0 if next_state == TieState.HIDDEN else 1.0
 	state = next_state
@@ -105,10 +106,6 @@ func set_visual_tension(value: float) -> void:
 	_visual_tension_override = value
 
 
-func set_ending_warmth(value: float) -> void:
-	ending_warmth = clampf(value, 0.0, 1.0)
-
-
 func set_story_state(next_state: TieState) -> void:
 	if state == next_state:
 		return
@@ -126,8 +123,10 @@ func get_state_name() -> String:
 			return "Tense"
 		TieState.ADJUSTABLE:
 			return "Adjustable"
-		TieState.EXTENDING:
-			return "Extending"
+		TieState.SILENT:
+			return "Silent"
+		TieState.STABLE:
+			return "Stable"
 	return "Unknown"
 
 
@@ -158,9 +157,15 @@ func _update_points(source_position: Vector2, target_position: Vector2) -> void:
 					wave_strength += visual_tension * sin(_elapsed * 22.0 + index * 2.1) * 1.4
 				TieState.ADJUSTABLE:
 					wave_strength = 7.0
-				TieState.EXTENDING:
-					wave_strength = 2.5
+				TieState.SILENT:
+					wave_strength = 0.0
+				TieState.STABLE:
+					wave_strength = 0.65
+			if reduced_motion:
+				wave_strength = minf(wave_strength, 0.45)
 			point += perpendicular * sin(_elapsed * 2.8 + ratio * TAU * 2.0) * wave_strength * envelope
+			if state == TieState.STABLE:
+				point.y += envelope * 18.0
 			next_points.append(point)
 
 	points = next_points
@@ -180,9 +185,12 @@ func _update_visuals() -> void:
 		TieState.ADJUSTABLE:
 			color = Color("#f2c88f")
 			width = 4.0
-		TieState.EXTENDING:
-			color = Color("#e6edf2").lerp(Color("#f5d77f"), ending_warmth)
-			width = 2.0
+		TieState.SILENT:
+			color = Color(0.48, 0.53, 0.59, 0.13)
+			width = 1.0
+		TieState.STABLE:
+			color = Color("#e8a579")
+			width = 2.8
 
-	color.a = _reveal_progress
+	color.a = _reveal_progress * (0.13 if state == TieState.SILENT else 1.0)
 	default_color = color

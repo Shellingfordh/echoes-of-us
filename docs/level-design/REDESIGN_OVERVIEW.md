@@ -1,5 +1,7 @@
 # 关卡文档重设计总览（基于剧情总纲 + 三章 Demo）
 
+> **历史方案：不再执行。** 当前制作请使用 [`CURRENT_IMPLEMENTATION.md`](CURRENT_IMPLEMENTATION.md)。
+
 > 本总览对应 `level-redesign` 分支的最后一次提交。所有关卡文档已按「六要素流程总章」重写，并落地了 4 张位置示意图。
 
 ## 文档清单

@@ -8,6 +8,7 @@ var _tie_line: Line2D
 var _umbrella: Area2D
 var _world: Node2D
 var _audio: Node
+var _ui: CanvasLayer
 
 
 func _initialize() -> void:
@@ -32,12 +33,14 @@ func _run() -> void:
 	_umbrella = _game.get_node_or_null("Umbrella") as Area2D
 	_world = _game.get_node_or_null("GrayboxWorld") as Node2D
 	_audio = _game.get_node_or_null("AudioDirector")
+	_ui = _game.get_node_or_null("PrototypeUI") as CanvasLayer
 	_check(_player != null, "player exists")
 	_check(_companion != null, "companion exists")
 	_check(_tie_line != null, "tie line exists")
 	_check(_umbrella != null, "umbrella exists")
 	_check(_world != null, "full demo world exists")
 	_check(_audio != null, "procedural audio director exists")
+	_check(_ui != null, "immersive UI exists")
 	var dialogue_catalog = _game.get("dialogue_catalog")
 	_check(dialogue_catalog != null and int(dialogue_catalog.call("size")) >= 61, "dialogue catalog loads all D001-D040 entries and runtime fragments")
 	var has_all_story_ids := true
@@ -48,10 +51,24 @@ func _run() -> void:
 	_check(str(opening_entry.get("text", "")).contains("二十多年"), "stable dialogue IDs resolve authored text")
 	var main_source := FileAccess.get_file_as_string("res://scripts/main.gd")
 	_check(main_source.count("show_dialogue(") == 1, "gameplay code routes authored lines through dialogue IDs")
+	var all_spoken_story_ids_are_routed := true
+	for dialogue_number in range(1, 41):
+		var dialogue_id := "D%03d" % dialogue_number
+		var entry: Dictionary = _game.call("get_dialogue_entry", dialogue_id)
+		if not str(entry.get("text", "")).is_empty():
+			all_spoken_story_ids_are_routed = all_spoken_story_ids_are_routed and main_source.contains('"%s"' % dialogue_id)
+	_check(all_spoken_story_ids_are_routed, "every non-silent D001-D040 story line is routed by the playable flow")
+	_check(bool(_ui.call("toggle_pause")) and paused, "pause menu suspends the game tree")
+	_check(not bool(_ui.call("toggle_pause")) and not paused, "pause menu resumes the game tree")
+	_check(bool(_ui.call("toggle_mute")) and bool(_audio.get("muted")), "sound accessibility toggle reaches the audio director")
+	_ui.call("toggle_mute")
+	_check(bool(_ui.call("toggle_reduced_motion")) and bool(_world.get("reduced_motion")) and bool(_tie_line.get("reduced_motion")), "reduced-motion setting reaches animated systems")
+	_ui.call("toggle_reduced_motion")
 	if _failures > 0:
 		quit(1)
 		return
 
+	await _test_prologue()
 	await _test_act_one()
 	await _test_act_two()
 	await _test_act_three()
@@ -63,8 +80,9 @@ func _run() -> void:
 	_check(snapshot.core_items == 3, "all required room objects were inspected")
 	_check(snapshot.fragments == 5, "all five optional memory fragments persist to the ending")
 	_check(snapshot.echoes == 3, "all three hidden echo points persist to the ending")
-	_check(snapshot.key_connected, "the stranger was reconnected to the key")
-	_check(snapshot.tie_state == "Extending", "the ending keeps the tie line extending")
+	_check(snapshot.relationship_state == "Stable", "the ending preserves a stable, non-pulling relationship")
+	_check(snapshot.epilogue, "the silent umbrella epilogue is present")
+	_check(snapshot.tie_state == "Hidden", "the full tie line yields to the short umbrella thread in the epilogue")
 
 	if _failures == 0:
 		print("[SmokeTest] PASS - all four acts load and complete")
@@ -73,6 +91,15 @@ func _run() -> void:
 	_game.queue_free()
 	await _frames(3)
 	quit(exit_code)
+
+
+func _test_prologue() -> void:
+	_check(_phase() == "prologue", "the demo opens on the silent sewing-shop prologue")
+	_check(int(_world.get("layout")) == FullDemoWorld.Layout.PROLOGUE, "the prologue keeps the red thread in the mother's everyday sewing space")
+	_check(not _player.visible and not _companion.visible, "the prologue uses its own fixed observation scene rather than playable actors")
+	_check(_audio.get("current_mood") == "prologue", "the prologue has a restrained ambient bed")
+	await _wait_for_phase("act1_explore", 0.5)
+	_check(_phase() == "act1_explore", "the red-thread prologue transitions cleanly into the present-day room")
 
 
 func _test_act_one() -> void:
@@ -123,14 +150,18 @@ func _test_act_one() -> void:
 	await _wait_for_phase("act1_walk", 0.8)
 	_check(_phase() == "act1_walk", "three inspections trigger the umbrella conflict and release movement")
 
-	_player.global_position = Vector2(650.0, 470.0)
+	_player.global_position = Vector2(700.0, 470.0)
 	await _frames(3)
 	_check(_phase() == "act1_tie", "distance reveals the tie line")
 	_check(_tie_line.call("get_state_name") == "Tense", "Act 1 line becomes Tense")
 
-	_player.global_position = Vector2(1070.0, 470.0)
+	_player.global_position = Vector2(850.0, 470.0)
 	await create_timer(0.12).timeout
-	_check(_phase() == "act1_umbrella", "maximum tension pulls the player back to the umbrella")
+	_check(_phase() == "act1_suspended", "maximum tension briefly lifts and supports the player")
+	_check(_player.global_position.y <= 410.0, "the first-act support is visually distinct from standing on the floor")
+	await _hold(&"move_right", 1.25)
+	await _wait_for_phase("act1_umbrella", 0.35)
+	_check(_phase() == "act1_umbrella", "horizontal input produces a short supported swing before settling by the umbrella")
 	_player.global_position = _umbrella.global_position + Vector2(30.0, 0.0)
 	_sync_interaction()
 	_player.emit_signal("interaction_requested")
@@ -169,8 +200,13 @@ func _test_act_two() -> void:
 	_check(int(_world.get("anchor_index")) == 1, "the memory lamp bends the tie line")
 	await _tap(&"switch_character")
 	await _hold(&"move_up", 0.08)
-	await create_timer(0.22).timeout
-	_check(_phase() == "act3_attach", "anchor crossing and farewell complete Act 2")
+	await _wait_for_phase("act2_climb", 0.4)
+	_check(_phase() == "act2_climb", "the child's solo route causes a real fall after the anchor lesson")
+	_check(_tie_line.call("get_state_name") == "Tense", "the same tense line now bears the child's weight")
+	_check(_player.global_position.y >= 560.0, "the child remains visibly suspended instead of being auto-returned")
+	await _hold(&"move_up", 0.62)
+	await _wait_for_phase("act3_attach", 0.5)
+	_check(_phase() == "act3_attach", "the child climbs back under player control before the farewell completes Act 2")
 
 
 func _test_act_three() -> void:
@@ -225,32 +261,32 @@ func _test_act_three() -> void:
 		await _hold(&"move_up", 0.08)
 		await create_timer(0.08).timeout
 	await create_timer(0.14).timeout
-	_check(_phase() == "act3_street", "three alternating anchors complete the rooftop")
-
-	_player.global_position = _world.call("get_point", "stranger")
-	await _frames(3)
-	_check(_phase() == "act3_street_key", "approaching the stranger reveals another person's line")
-	_player.global_position = _world.call("get_point", "flowerbed")
-	_sync_interaction()
-	_player.emit_signal("interaction_requested")
-	await _frames(3)
-	_check(bool(_world.get("key_connected")), "the flowerbed key reconnects to the stranger")
-	_player.global_position = Vector2(1360.0, 500.0)
-	await create_timer(0.16).timeout
-	_check(_phase() == "act4_run", "leaving the street enters Act 4")
+	await _wait_for_phase("act4_move_in", 0.4)
+	_check(_phase() == "act4_move_in", "three alternating anchors lead directly into the current Act 4")
 
 
 func _test_act_four() -> void:
-	_check(_tie_line.call("get_state_name") == "Extending", "Act 4 removes resistance and extends the line")
-	_check(_audio.get("current_mood") == "run", "Act 4 switches to the running ambience")
-	_player.global_position = Vector2(760.0, 500.0)
-	await _frames(3)
-	_player.global_position = Vector2(1540.0, 500.0)
-	await create_timer(0.12).timeout
-	_check(_phase() == "act4_run", "mother cutaway returns control to the daughter")
-	_player.global_position = Vector2(2700.0, 500.0)
-	await create_timer(0.18).timeout
-	_check(_phase() == "complete", "running into the light completes the ending")
+	_check(int(_world.get("layout")) == FullDemoWorld.Layout.APARTMENT, "Act 4 takes place in the daughter's new apartment")
+	_check(_tie_line.call("get_state_name") == "Adjustable", "the move-in begins with the familiar adjustable tie")
+	_check(_audio.get("current_mood") == "apartment", "Act 4 starts with the apartment ambience")
+	_player.global_position = _world.get("apartment_box_position") - Vector2(48.0, 0.0)
+	_world.set("apartment_box_position", Vector2(1000.0, 485.0))
+	await _wait_for_phase("act4_silence", 0.5)
+	_check(_phase() == "act4_silence", "the boundary conflict changes the room instead of starting the legacy long run")
+	_check(_tie_line.call("get_state_name") == "Silent", "the tie becomes frozen and nearly invisible after the conflict")
+	_check(_audio.get("current_mood") == "silence", "the conflict drops into a near-silent ambience")
+
+	_game.set("_act4_elapsed", 9.1)
+	await _wait_for_phase("act4_relaxed", 0.5)
+	_check(_phase() == "act4_relaxed", "time alone lets the daughter recognize the distance she actually wants")
+	_check(_tie_line.call("get_state_name") == "Stable", "the returning tie is warm, slack, and stable")
+	_check(_game.get("relationship_state") == "Stable", "the relationship state records stability without pullback")
+
+	_player.global_position = Vector2(1300.0, 500.0)
+	await _wait_for_phase("complete", 0.5)
+	_check(_phase() == "complete", "the silent yellow-umbrella epilogue completes the ending")
+	_check(bool(_world.get("epilogue_line_visible")), "a short loose line remains beside the old umbrella")
+	_check(_umbrella.visible, "the old yellow umbrella returns behind the new apartment door")
 
 
 func _phase() -> String:

@@ -2,13 +2,13 @@ class_name FullDemoWorld
 extends Node2D
 
 enum Layout {
+	PROLOGUE,
 	HOME,
 	MEMORY_STREET,
 	CORRIDOR,
 	WAREHOUSE,
 	ROOFTOP,
-	STREET,
-	RUN,
+	APARTMENT,
 }
 
 var layout := Layout.HOME
@@ -19,20 +19,20 @@ var collected_ids: Dictionary = {}
 var bicycle_position := Vector2(540.0, 470.0)
 var box_one_position := Vector2(480.0, 470.0)
 var box_two_position := Vector2(1160.0, 470.0)
+var apartment_box_position := Vector2(650.0, 485.0)
 var gate_one_open := false
 var gate_two_open := false
 var gap_filled := false
 var anchor_index := 0
-var stranger_line_visible := false
-var key_connected := false
-var cutaway_home := false
-var ending_warmth := 0.0
+var epilogue_line_visible := false
+var reduced_motion := false
 
 var _elapsed := 0.0
 
 
 func _process(delta: float) -> void:
-	_elapsed += delta
+	if not reduced_motion:
+		_elapsed += delta
 	queue_redraw()
 
 
@@ -43,13 +43,12 @@ func set_layout(next_layout: Layout) -> void:
 	bicycle_position = Vector2(540.0, 470.0)
 	box_one_position = Vector2(480.0, 470.0)
 	box_two_position = Vector2(1160.0, 470.0)
+	apartment_box_position = Vector2(650.0, 485.0)
 	gate_one_open = false
 	gate_two_open = false
 	gap_filled = false
 	anchor_index = 0
-	stranger_line_visible = false
-	key_connected = false
-	cutaway_home = false
+	epilogue_line_visible = false
 	queue_redraw()
 
 
@@ -100,14 +99,17 @@ func get_point(point_id: String) -> Vector2:
 		"rooftop_anchor_1": return Vector2(410.0, 500.0)
 		"rooftop_anchor_2": return Vector2(760.0, 420.0)
 		"rooftop_anchor_3": return Vector2(1080.0, 340.0)
-		"stranger": return Vector2(640.0, 480.0)
-		"flowerbed": return Vector2(1030.0, 500.0)
-		"street_exit": return Vector2(1390.0, 480.0)
+		"apartment_box": return apartment_box_position
+		"apartment_door": return Vector2(250.0, 480.0)
+		"apartment_exit": return Vector2(1320.0, 500.0)
+		"epilogue_umbrella": return Vector2(1090.0, 475.0)
 	return Vector2.ZERO
 
 
 func _draw() -> void:
 	match layout:
+		Layout.PROLOGUE:
+			_draw_prologue()
 		Layout.HOME:
 			_draw_home()
 		Layout.MEMORY_STREET:
@@ -118,10 +120,8 @@ func _draw() -> void:
 			_draw_warehouse()
 		Layout.ROOFTOP:
 			_draw_rooftop()
-		Layout.STREET:
-			_draw_street()
-		Layout.RUN:
-			_draw_run()
+		Layout.APARTMENT:
+			_draw_apartment()
 
 
 func _draw_base(background: Color, floor_color: Color, width := 1600.0) -> void:
@@ -142,6 +142,55 @@ func _draw_base(background: Color, floor_color: Color, width := 1600.0) -> void:
 	draw_rect(Rect2(0.0, 608.0, width, 37.0), floor_color.lightened(0.055))
 	draw_rect(Rect2(0.0, 645.0, width, 75.0), background.darkened(0.22))
 	_draw_paper_grain(width)
+
+
+func _draw_prologue() -> void:
+	_draw_base(Color("#17151e"), Color("#2d2830"))
+	# A quiet cross-section of the old sewing shop and the room above it.
+	draw_rect(Rect2(125.0, 365.0, 1320.0, 245.0), Color("#312b33"), true)
+	draw_rect(Rect2(125.0, 220.0, 1320.0, 128.0), Color("#26222d"), true)
+	draw_line(Vector2(125.0, 356.0), Vector2(1445.0, 356.0), Color("#786c70"), 8.0)
+	for window_x in [930.0, 1050.0, 1170.0]:
+		draw_rect(Rect2(window_x, 248.0, 74.0, 62.0), Color("#3b4454"), true)
+		draw_rect(Rect2(window_x, 248.0, 74.0, 62.0), Color("#817882"), false, 3.0)
+
+	# Sewing table, cloth and the young mother at work.
+	draw_rect(Rect2(245.0, 438.0, 315.0, 20.0), Color("#6e584d"), true)
+	draw_rect(Rect2(275.0, 458.0, 14.0, 118.0), Color("#57443e"), true)
+	draw_rect(Rect2(518.0, 458.0, 14.0, 118.0), Color("#57443e"), true)
+	draw_rect(Rect2(350.0, 402.0, 92.0, 43.0), Color("#716f74"), true)
+	draw_circle(Vector2(369.0, 397.0), 18.0, Color("#8f8b91"), false, 5.0)
+	draw_rect(Rect2(455.0, 423.0, 82.0, 13.0), Color("#a99887"), true)
+	draw_circle(Vector2(610.0, 432.0), 13.0, Color("#e7bca7"))
+	draw_colored_polygon(PackedVector2Array([Vector2(592.0, 449.0), Vector2(628.0, 449.0), Vector2(637.0, 514.0), Vector2(583.0, 514.0)]), Color("#95675d"))
+	_label("旧城缝纫铺", Vector2(235.0, 405.0), Color("#b59c91"), 14)
+
+	# Stairs and the upper room keep the thread's path spatially continuous.
+	for stair_index in range(7):
+		var stair_x := 715.0 + stair_index * 47.0
+		var stair_y := 550.0 - stair_index * 30.0
+		draw_rect(Rect2(stair_x, stair_y, 54.0, 12.0), Color("#685b5e"), true)
+	draw_rect(Rect2(1105.0, 285.0, 215.0, 48.0), Color("#5f5159"), true)
+	draw_circle(Vector2(1230.0, 270.0), 10.0, Color("#efc9b5"))
+	draw_colored_polygon(PackedVector2Array([Vector2(1175.0, 278.0), Vector2(1260.0, 278.0), Vector2(1285.0, 318.0), Vector2(1148.0, 318.0)]), Color("#6d5e72"))
+
+	var thread_points := PackedVector2Array([
+		Vector2(410.0, 421.0),
+		Vector2(520.0, 430.0),
+		Vector2(665.0, 474.0),
+		Vector2(780.0, 520.0),
+		Vector2(920.0, 430.0),
+		Vector2(1035.0, 350.0),
+	])
+	if stage >= 1:
+		thread_points.append(Vector2(1130.0, 302.0))
+		thread_points.append(Vector2(1218.0, 276.0))
+	draw_polyline(thread_points, Color("#b64d4f"), 3.0, true)
+	for point in thread_points:
+		draw_circle(point, 5.0, Color(0.76, 0.25, 0.28, 0.13))
+	if stage >= 1:
+		_glow(Vector2(1218.0, 276.0), 42.0, Color("#d96d68"))
+		_glow(Vector2(610.0, 432.0), 32.0, Color("#c75d58"))
 
 
 func _draw_home() -> void:
@@ -301,48 +350,66 @@ func _draw_rooftop() -> void:
 	_label("交替成为彼此的支点", Vector2(780.0, 315.0), Color("#91a8c6"), 13)
 
 
-func _draw_street() -> void:
-	_draw_base(Color("#17202a"), Color("#2f3a42"))
-	for tree_x in [170.0, 360.0, 1230.0, 1430.0]:
-		draw_line(Vector2(tree_x, 530.0), Vector2(tree_x, 390.0), Color("#39423d"), 13.0)
-		for crown_offset in [-30.0, 0.0, 28.0]:
-			draw_circle(Vector2(tree_x + crown_offset, 390.0 - absf(crown_offset) * 0.35), 36.0, Color(0.25, 0.36, 0.32, 0.72))
-	for lamp_x in [530.0, 850.0, 1170.0]:
-		draw_line(Vector2(lamp_x, 510.0), Vector2(lamp_x, 355.0), Color("#566064"), 6.0)
-		draw_circle(Vector2(lamp_x, 350.0), 8.0, Color("#e8cd8a"))
-		_glow(Vector2(lamp_x, 360.0), 48.0, Color("#dfbf75"))
-	_label("外面的世界", Vector2(95.0, 285.0), Color("#aed4d3"), 17)
-	draw_rect(Rect2(960.0, 455.0, 150.0, 100.0), Color("#395a46"), true)
-	for plant_x in range(980, 1100, 24):
-		draw_circle(Vector2(plant_x, 450.0 + sin(float(plant_x)) * 5.0), 15.0, Color("#628568"))
-	_label("花坛", Vector2(1010.0, 575.0), Color("#9fc3a2"), 12)
+func _draw_apartment() -> void:
+	var background := Color("#24212d")
+	var floor_color := Color("#494047")
+	if stage == 1:
+		background = Color("#151922")
+		floor_color = Color("#2c323a")
+	elif stage >= 2:
+		background = Color("#292630")
+		floor_color = Color("#51494a")
+	_draw_base(background, floor_color)
 
-	if not key_connected:
-		draw_circle(Vector2(640.0, 440.0), 10.0, Color("#d9c7bd"))
-		draw_rect(Rect2(628.0, 451.0, 24.0, 42.0), Color("#6e7788"), true)
-		_label("寻找钥匙的路人", Vector2(585.0, 525.0), Color("#aab5c6"), 12)
-		if stranger_line_visible:
-			draw_dashed_line(get_point("stranger"), get_point("flowerbed"), Color(0.78, 0.9, 0.86, 0.45), 2.0, 10.0)
-			_glow(get_point("flowerbed"), 42.0, Color("#bfe6a6"))
-		draw_circle(get_point("flowerbed"), 7.0, Color("#f5d67c"))
+	# A newer, sparer room than the childhood home: it is hers, but not settled yet.
+	draw_rect(Rect2(120.0, 282.0, 1320.0, 326.0), background.lightened(0.095), true)
+	draw_rect(Rect2(835.0, 292.0, 250.0, 142.0), Color("#77727b"), true)
+	draw_rect(Rect2(848.0, 305.0, 224.0, 116.0), Color("#425064") if stage != 1 else Color("#303943"), true)
+	draw_line(Vector2(960.0, 305.0), Vector2(960.0, 421.0), Color("#a39ca4"), 3.0)
+	draw_line(Vector2(848.0, 363.0), Vector2(1072.0, 363.0), Color("#a39ca4"), 3.0)
+	if stage != 1:
+		_glow(Vector2(960.0, 363.0), 125.0, Color("#d7b678"))
+
+	draw_rect(Rect2(1180.0, 315.0, 140.0, 293.0), Color("#38313d"), true)
+	draw_rect(Rect2(1202.0, 337.0, 94.0, 271.0), Color("#5b4d54"), true)
+	draw_circle(Vector2(1218.0, 466.0), 5.0, Color("#e1bd7d"))
+	_label("门口", Vector2(1226.0, 308.0), Color("#b9a6a3"), 12)
+
+	draw_rect(Rect2(285.0, 392.0, 165.0, 14.0), Color("#715d52"), true)
+	draw_rect(Rect2(300.0, 406.0, 10.0, 94.0), Color("#5f4e48"), true)
+	draw_rect(Rect2(425.0, 406.0, 10.0, 94.0), Color("#5f4e48"), true)
+	_label("她自己的书桌", Vector2(300.0, 378.0), Color("#bca9a0"), 12)
+	draw_rect(Rect2(490.0, 326.0, 112.0, 178.0), Color("#5b5058"), true)
+	for shelf_y in [370.0, 414.0, 458.0]:
+		draw_line(Vector2(500.0, shelf_y), Vector2(592.0, shelf_y), Color("#83737a"), 4.0)
+	draw_circle(Vector2(690.0, 403.0), 24.0, Color("#53695a"))
+	draw_rect(Rect2(674.0, 426.0, 32.0, 45.0), Color("#8a7662"), true)
+	_draw_ellipse(Vector2(750.0, 547.0), Vector2(260.0, 48.0), Color(0.58, 0.39, 0.37, 0.26 if stage != 1 else 0.08))
+
+	if stage == 0:
+		_draw_crate(apartment_box_position, "最后一个纸箱", highlight_id == "apartment_box")
+		_draw_crate(Vector2(550.0, 535.0), "已经放好的箱子", false)
+		_label("新住处 · 尚未整理完", Vector2(95.0, 255.0), Color("#e0c49c"), 17)
+	elif stage == 1:
+		draw_rect(Rect2(120.0, 282.0, 1320.0, 326.0), Color(0.04, 0.07, 0.1, 0.34), true)
+		_label("新住处 · 线忽然没有回应", Vector2(95.0, 255.0), Color("#8793a2"), 17)
+	elif stage == 2:
+		_label("留一点距离，也留一条回来的路", Vector2(95.0, 255.0), Color("#d9b98f"), 17)
 	else:
-		_label("钥匙已经回到主人手中", Vector2(560.0, 515.0), Color("#d4e6d3"), 12)
+		_label("新家", Vector2(95.0, 255.0), Color("#dec8a5"), 17)
 
-
-func _draw_run() -> void:
-	_draw_base(Color("#111a26"), Color("#293746"), 3200.0)
-	for building_x in range(100, 3150, 180):
-		var height := 95.0 + float((building_x * 13) % 140)
-		draw_rect(Rect2(building_x, 225.0 - height, 110.0, height), Color(0.24, 0.3, 0.39, 0.54), true)
-	for light_x in range(420, 3150, 260):
-		draw_circle(Vector2(light_x, 350.0), 5.0, Color("#f4d38b"))
-		draw_circle(Vector2(light_x, 350.0), 32.0, Color(0.96, 0.77, 0.46, 0.06))
-	var horizon_color := Color("#e8edf3").lerp(Color("#f5d77f"), ending_warmth)
-	draw_circle(Vector2(3020.0, 380.0), 170.0, Color(horizon_color, 0.18))
-	_label("向外跑", Vector2(120.0, 285.0), horizon_color, 18)
-	if cutaway_home:
-		draw_rect(Rect2(1100.0, 270.0, 900.0, 300.0), Color(0.09, 0.07, 0.12, 0.95), true)
-		_label("家中 · 母亲慢慢松开握线的手", Vector2(1190.0, 420.0), Color("#f0d6be"), 24)
+	if stage >= 3:
+		var umbrella_point := get_point("epilogue_umbrella")
+		# The prop node supplies the umbrella itself; the world owns only the final loose thread.
+		if epilogue_line_visible:
+			var line_points := PackedVector2Array([
+				umbrella_point + Vector2(12.0, -5.0),
+				umbrella_point + Vector2(42.0, 6.0),
+				umbrella_point + Vector2(76.0, 13.0),
+				umbrella_point + Vector2(112.0, 6.0),
+			])
+			draw_polyline(line_points, Color(0.86, 0.48, 0.4, 0.78), 2.5, true)
+			_glow(umbrella_point + Vector2(46.0, 4.0), 38.0, Color("#e2a073"))
 
 
 func _draw_object(item_id: String, rect: Rect2, color: Color, label_text: String) -> void:

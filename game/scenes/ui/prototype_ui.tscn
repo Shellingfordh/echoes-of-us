@@ -52,6 +52,7 @@ content_margin_bottom = 24.0
 
 [node name="PrototypeUI" type="CanvasLayer"]
 unique_name_in_owner = true
+process_mode = 3
 script = ExtResource("1_ui")
 
 [node name="TopMargin" type="MarginContainer" parent="."]
@@ -306,4 +307,86 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.94, 0.82, 1)
 theme_override_font_sizes/font_size = 32
 text = "第一次放手"
+horizontal_alignment = 1
+
+[node name="PauseShade" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 69
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0.025, 0.02, 0.035, 0.7)
+
+[node name="PausePanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 70
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -220.0
+offset_right = 250.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_complete")
+
+[node name="PauseBox" type="VBoxContainer" parent="PausePanel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="PauseKicker" type="Label" parent="PausePanel/PauseBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.69, 0.44, 1)
+theme_override_font_sizes/font_size = 14
+text = "《不断线》"
+horizontal_alignment = 1
+
+[node name="PauseTitle" type="Label" parent="PausePanel/PauseBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.84, 1)
+theme_override_font_sizes/font_size = 28
+text = "暂停"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="PausePanel/PauseBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "继续   [Esc]"
+
+[node name="SoundButton" type="Button" parent="PausePanel/PauseBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "声音：开启   [M]"
+
+[node name="MotionButton" type="Button" parent="PausePanel/PauseBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "动态效果：完整   [V]"
+
+[node name="RestartButton" type="Button" parent="PausePanel/PauseBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "重新开始   [R]"
+
+[node name="PauseHint" type="Label" parent="PausePanel/PauseBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.71, 0.69, 0.76, 1)
+theme_override_font_sizes/font_size = 12
+text = "F1 操作帮助 · F3 开发调试"
 horizontal_alignment = 1

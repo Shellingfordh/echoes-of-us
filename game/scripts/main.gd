@@ -1,11 +1,13 @@
 extends Node2D
 
 enum Phase {
+	PROLOGUE,
 	ACT1_EXPLORE,
 	ACT1_CONFLICT,
 	ACT1_WALK,
 	ACT1_TIE,
 	ACT1_PULLBACK,
+	ACT1_SUSPENDED,
 	ACT1_UMBRELLA,
 	TRANSITION,
 	ACT2_BICYCLE,
@@ -13,6 +15,8 @@ enum Phase {
 	ACT2_CABINET_CHILD,
 	ACT2_CABINET_MOTHER,
 	ACT2_ANCHOR,
+	ACT2_FALL,
+	ACT2_CLIMB,
 	ACT2_FAREWELL,
 	ACT3_ATTACH,
 	ACT3_CORRIDOR_1,
@@ -21,11 +25,11 @@ enum Phase {
 	ACT3_WAREHOUSE_CRAWL,
 	ACT3_WAREHOUSE_BOX_2,
 	ACT3_ROOFTOP,
-	ACT3_STREET,
-	ACT3_STREET_KEY,
-	ACT4_RUN,
-	ACT4_CUTAWAY,
-	ACT4_END,
+	ACT4_MOVE_IN,
+	ACT4_CONFLICT,
+	ACT4_SILENCE,
+	ACT4_RELAXED,
+	ACT4_EPILOGUE,
 	COMPLETE,
 }
 
@@ -66,22 +70,26 @@ const ECHO_DIALOGUE_IDS := {
 @onready var ui: PrototypeUI = %PrototypeUI
 @onready var audio_director: AudioDirector = %AudioDirector
 
-var phase := Phase.ACT1_EXPLORE
+var phase := Phase.PROLOGUE
 var current_interaction := ""
 var core_items_found := 0
 var fragments_found := 0
 var echoes_found := 0
 var chair_climbed := false
-var stranger_key_connected := false
+var relationship_state := "Hidden"
 var dialogue_catalog: DialogueCatalog
 
 var _phase_guard := false
 var _act1_elapsed := 0.0
-var _street_elapsed := 0.0
+var _suspension_elapsed := 0.0
+var _suspension_origin_x := 0.0
+var _suspension_input_seen := false
+var _act2_climb_elapsed := 0.0
+var _act4_elapsed := 0.0
+var _silence_start_position := Vector2.ZERO
 var _echo_hold_id := ""
 var _echo_hold_time := 0.0
 var _coop_step := 0
-var _act4_step := 0
 
 
 func _enter_tree() -> void:
@@ -97,7 +105,11 @@ func _ready() -> void:
 	umbrella.inspected.connect(_on_umbrella_inspected)
 	ui.checkpoint_shown.connect(_on_checkpoint_shown)
 	ui.chapter_shown.connect(_on_chapter_shown)
-	_start_act_one()
+	ui.mute_changed.connect(_on_mute_changed)
+	ui.reduced_motion_changed.connect(_on_reduced_motion_changed)
+	audio_director.set_muted(ui.sound_muted)
+	_on_reduced_motion_changed(ui.reduced_motion)
+	_start_prologue()
 
 
 func _physics_process(delta: float) -> void:
@@ -117,6 +129,8 @@ func _physics_process(delta: float) -> void:
 		Phase.ACT1_TIE:
 			_update_echo_points(delta)
 			player.movement_multiplier = maxf(0.12, 1.0 - pow(tie_line.tension_value, 2.0))
+		Phase.ACT1_SUSPENDED:
+			_update_act_one_suspension(delta)
 		Phase.ACT2_BICYCLE:
 			_update_bicycle_push(delta)
 		Phase.ACT2_PUDDLE:
@@ -128,6 +142,8 @@ func _physics_process(delta: float) -> void:
 				_setup_memory_anchor()
 		Phase.ACT2_ANCHOR:
 			_update_memory_anchor_crossing()
+		Phase.ACT2_CLIMB:
+			_update_memory_climb(delta)
 		Phase.ACT3_CORRIDOR_1, Phase.ACT3_CORRIDOR_2:
 			_update_corridor_crossing()
 		Phase.ACT3_WAREHOUSE_BOX_1:
@@ -138,14 +154,17 @@ func _physics_process(delta: float) -> void:
 			_update_warehouse_box_two(delta)
 		Phase.ACT3_ROOFTOP:
 			_update_rooftop_crossing()
-		Phase.ACT3_STREET, Phase.ACT3_STREET_KEY:
-			_update_street(delta)
-		Phase.ACT4_RUN:
-			_update_final_run()
+		Phase.ACT4_MOVE_IN:
+			_update_apartment_box(delta)
+		Phase.ACT4_SILENCE:
+			_update_silent_apartment(delta)
+		Phase.ACT4_RELAXED:
+			if player.global_position.x >= 1280.0:
+				_enter_epilogue()
 		_:
 			pass
 
-	if phase != Phase.ACT1_TIE and phase not in [Phase.ACT4_RUN, Phase.ACT4_CUTAWAY]:
+	if phase not in [Phase.ACT1_TIE, Phase.ACT1_SUSPENDED]:
 		player.movement_multiplier = 1.0
 
 	_update_memory_tie_control()
@@ -162,6 +181,27 @@ func _unhandled_input(event: InputEvent) -> void:
 		_try_switch_character()
 
 
+func _start_prologue() -> void:
+	phase = Phase.PROLOGUE
+	world.set_layout(FullDemoWorld.Layout.PROLOGUE)
+	world.set_stage(0)
+	audio_director.set_mood("prologue")
+	player.controls_enabled = false
+	player.visible = false
+	companion.visible = false
+	umbrella.visible = false
+	umbrella.set_process(false)
+	tie_line.auto_reveal_enabled = false
+	tie_line.reset_line(TieLine.TieState.HIDDEN)
+	ui.hide_completion()
+	ui.set_hud_visible(false)
+	await get_tree().create_timer(_scaled(2.2)).timeout
+	world.set_stage(1)
+	await get_tree().create_timer(_scaled(2.6)).timeout
+	await ui.show_chapter("第一幕", "离家")
+	_start_act_one()
+
+
 func _start_act_one() -> void:
 	phase = Phase.ACT1_EXPLORE
 	world.set_layout(FullDemoWorld.Layout.HOME)
@@ -169,6 +209,7 @@ func _start_act_one() -> void:
 	player.set_role("成年女儿")
 	player.set_world_bounds(Rect2(96.0, 258.0, 1350.0, 350.0))
 	player.global_position = Vector2(420.0, 470.0)
+	player.visible = true
 	player.controls_enabled = true
 	companion.set_role("母亲")
 	companion.global_position = Vector2(110.0, 470.0)
@@ -178,12 +219,14 @@ func _start_act_one() -> void:
 	tie_line.auto_reveal_enabled = false
 	tie_line.reset_line(TieLine.TieState.HIDDEN)
 	ui.hide_completion()
+	ui.set_hud_visible(true)
 	ui.set_phase("第一幕 · 离家")
 	ui.set_objective("调查纸箱、行李箱和书桌（0/3）")
 	ui.set_role(player.role_name)
 	ui.set_collection(0, 0)
 	ui.set_debug_visible(false)
 	ui.show_controls_hint()
+	_say("D004")
 
 
 func _update_interaction_prompt() -> void:
@@ -201,8 +244,6 @@ func _update_interaction_prompt() -> void:
 			prompt = "E  触碰黄色雨伞" if phase == Phase.ACT1_UMBRELLA else "E  把牵挂线挂在雨伞上"
 		"memory_lamp", "corridor_anchor_1", "corridor_anchor_2", "rooftop_anchor_1", "rooftop_anchor_2", "rooftop_anchor_3":
 			prompt = "E  将牵挂线绕过锚点"
-		"flowerbed":
-			prompt = "E  让牵挂线连接到钥匙"
 	ui.set_interaction_prompt(prompt, not prompt.is_empty())
 
 
@@ -237,8 +278,6 @@ func _find_nearby_interaction() -> String:
 		var anchor_id := "rooftop_anchor_%d" % (_coop_step + 1)
 		if _coop_step < 3 and world.anchor_index == _coop_step and _near_point(anchor_id, 105.0):
 			return anchor_id
-	if phase == Phase.ACT3_STREET_KEY and not world.key_connected and _near_point("flowerbed", 95.0):
-		return "flowerbed"
 	return ""
 
 
@@ -260,8 +299,6 @@ func _on_interaction_requested() -> void:
 			_anchor_corridor_two()
 		"rooftop_anchor_1", "rooftop_anchor_2", "rooftop_anchor_3":
 			_anchor_rooftop(current_interaction)
-		"flowerbed":
-			_connect_stranger_key(false)
 
 
 func _inspect_core_item(item_id: String) -> void:
@@ -340,12 +377,14 @@ func _begin_umbrella_conflict() -> void:
 	await _say("D007")
 	await _say("D008")
 	await _say("D009")
+	await _say("D010")
 	await _say("D011")
 	await _say("D012")
 	await _say("D013")
 	await _say("D014")
-	companion.global_position = Vector2(240.0, 470.0)
+	companion.global_position = Vector2(320.0, 470.0)
 	player.global_position = Vector2(520.0, 470.0)
+	tie_line.max_distance = 520.0
 	tie_line.auto_reveal_enabled = true
 	tie_line.reset_line(TieLine.TieState.HIDDEN)
 	phase = Phase.ACT1_WALK
@@ -374,10 +413,46 @@ func _on_maximum_tension_reached() -> void:
 	ui.set_phase("第一次分离")
 	ui.set_objective("牵挂线已经绷紧")
 	await _say("D015")
-	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tween.tween_property(player, "global_position", umbrella.global_position + Vector2(66.0, 10.0), _scaled(0.7))
-	await tween.finished
+	tie_line.set_visual_tension(1.0)
+	var lift := create_tween()
+	lift.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	lift.tween_property(player, "global_position", player.global_position + Vector2(-70.0, -92.0), _scaled(0.42))
+	await lift.finished
+	phase = Phase.ACT1_SUSPENDED
+	_suspension_elapsed = 0.0
+	_suspension_origin_x = player.global_position.x
+	_suspension_input_seen = false
+	player.controls_enabled = true
+	ui.set_phase("牵挂线承住了她")
+	ui.set_objective("按 A / D 或 ← / →，感受线承重时的摆动")
+	_say("D017")
+	_phase_guard = false
+
+
+func _update_act_one_suspension(delta: float) -> void:
+	_suspension_elapsed += delta
+	player.movement_multiplier = 0.42
+	var horizontal_input := Input.get_axis(&"move_left", &"move_right")
+	if absf(horizontal_input) > 0.1:
+		_suspension_input_seen = true
+	var horizontal_offset := clampf(player.global_position.x - _suspension_origin_x, -110.0, 110.0)
+	player.global_position.x = _suspension_origin_x + horizontal_offset
+	player.global_position.y = 378.0 + absf(horizontal_offset) * 0.16
+	if (_suspension_input_seen and _suspension_elapsed >= 1.2) or _suspension_elapsed >= 7.0:
+		_complete_act_one_suspension()
+
+
+func _complete_act_one_suspension() -> void:
+	if phase != Phase.ACT1_SUSPENDED or _phase_guard:
+		return
+	_phase_guard = true
+	phase = Phase.ACT1_PULLBACK
+	player.controls_enabled = false
+	var settle := create_tween()
+	settle.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	settle.tween_property(player, "global_position", umbrella.global_position + Vector2(66.0, 10.0), _scaled(0.7))
+	await settle.finished
+	tie_line.set_visual_tension(-1.0)
 	phase = Phase.ACT1_UMBRELLA
 	umbrella.set_interaction_enabled(true)
 	player.controls_enabled = true
@@ -413,6 +488,7 @@ func _enter_act_two() -> void:
 	companion.visible = true
 	companion.set_role("小女儿")
 	companion.global_position = Vector2(690.0, 500.0)
+	tie_line.max_distance = 820.0
 	tie_line.auto_reveal_enabled = false
 	tie_line.reset_line(TieLine.TieState.ADJUSTABLE)
 	ui.set_role(player.role_name)
@@ -469,6 +545,7 @@ func _complete_puddle_lesson() -> void:
 		return
 	phase = Phase.TRANSITION
 	player.controls_enabled = false
+	await _say("D022")
 	var tween := create_tween()
 	tween.tween_property(companion, "global_position", Vector2(980.0, 500.0), _scaled(0.8))
 	await tween.finished
@@ -528,13 +605,60 @@ func _update_memory_anchor_crossing() -> void:
 	if world.anchor_index != 1 or player.role_name != "小女儿":
 		return
 	if Input.is_action_pressed(&"move_up"):
-		phase = Phase.ACT2_FAREWELL
-		player.controls_enabled = false
-		var tween := create_tween()
-		tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		tween.tween_property(player, "global_position", Vector2(1380.0, 450.0), _scaled(0.85))
-		await tween.finished
-		_finish_act_two()
+		_begin_memory_fall()
+
+
+func _begin_memory_fall() -> void:
+	if phase != Phase.ACT2_ANCHOR or _phase_guard:
+		return
+	_phase_guard = true
+	phase = Phase.ACT2_FALL
+	player.controls_enabled = false
+	world.set_stage(5)
+	ui.set_phase("只有孩子能走的路")
+	ui.set_objective("脚下的木板突然松动")
+	await _say("D021")
+	var approach := create_tween()
+	approach.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	approach.tween_property(player, "global_position", Vector2(1255.0, 460.0), _scaled(0.35))
+	await approach.finished
+	tie_line.set_story_state(TieLine.TieState.TENSE)
+	tie_line.set_visual_tension(1.0)
+	audio_director.play_cue("tension")
+	var fall := create_tween()
+	fall.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	fall.tween_property(player, "global_position", Vector2(1255.0, 578.0), _scaled(0.42))
+	await fall.finished
+	await _say("D024")
+	phase = Phase.ACT2_CLIMB
+	_act2_climb_elapsed = 0.0
+	player.controls_enabled = true
+	ui.set_phase("牵挂线承住了她")
+	ui.set_objective("按住 W / ↑，让小女儿沿线自己爬回去")
+	_phase_guard = false
+
+
+func _update_memory_climb(delta: float) -> void:
+	_act2_climb_elapsed += delta
+	if player.global_position.y <= 465.0 or _act2_climb_elapsed >= 18.0:
+		_complete_memory_climb()
+
+
+func _complete_memory_climb() -> void:
+	if phase != Phase.ACT2_CLIMB or _phase_guard:
+		return
+	_phase_guard = true
+	phase = Phase.ACT2_FAREWELL
+	player.controls_enabled = false
+	tie_line.set_visual_tension(-1.0)
+	tie_line.set_story_state(TieLine.TieState.ADJUSTABLE)
+	var return_to_safety := create_tween()
+	return_to_safety.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	return_to_safety.tween_property(player, "global_position", Vector2(1380.0, 450.0), _scaled(0.75))
+	await return_to_safety.finished
+	ui.show_checkpoint("✓ 线提供支撑，小女儿自己回到了安全处")
+	await _finish_act_two()
+	_phase_guard = false
 
 
 func _finish_act_two() -> void:
@@ -561,8 +685,9 @@ func _enter_act_three_attach() -> void:
 	tie_line.clear_anchor_points()
 	tie_line.reset_line(TieLine.TieState.ADJUSTABLE)
 	ui.set_role(player.role_name)
-	await ui.show_chapter("第三幕", "外面的世界")
+	await ui.show_chapter("第三幕", "一起走一段")
 	await _say("D026")
+	await _say("D027")
 	phase = Phase.ACT3_ATTACH
 	player.controls_enabled = true
 	ui.set_phase("回到现实 · 安放牵挂")
@@ -763,58 +888,12 @@ func _update_rooftop_crossing() -> void:
 		world.gate_two_open = true
 		ui.show_checkpoint("✓ 两人同时到达天台顶")
 		await _say("D033")
-		_setup_street()
+		_enter_act_four()
 		return
 	phase = Phase.ACT3_ROOFTOP
 	player.controls_enabled = true
 	var next_required_role := "成年女儿" if _coop_step == 1 else "母亲"
 	ui.set_objective("%s靠近第 %d 个支点按 E 锚定" % [next_required_role, _coop_step + 1])
-
-
-func _setup_street() -> void:
-	world.set_layout(FullDemoWorld.Layout.STREET)
-	audio_director.set_mood("street")
-	player.set_role("成年女儿")
-	player.global_position = Vector2(300.0, 500.0)
-	player.set_world_bounds(Rect2(96.0, 258.0, 1400.0, 350.0))
-	companion.set_role("母亲")
-	companion.global_position = Vector2(100.0, 500.0)
-	companion.visible = false
-	tie_line.set_anchor_points([Vector2(150.0, 500.0)])
-	tie_line.set_story_state(TieLine.TieState.ADJUSTABLE)
-	phase = Phase.ACT3_STREET
-	_street_elapsed = 0.0
-	ui.set_role(player.role_name)
-	ui.set_phase("街道上的牵挂")
-	ui.set_objective("走向开阔的街道  →")
-	player.controls_enabled = true
-
-
-func _update_street(delta: float) -> void:
-	_street_elapsed += delta
-	if not world.stranger_line_visible and player.global_position.distance_to(world.get_point("stranger")) <= 240.0:
-		world.stranger_line_visible = true
-		phase = Phase.ACT3_STREET_KEY
-		_say("W001")
-		ui.set_objective("顺着那根微弱的线看看")
-	if not world.key_connected and _street_elapsed >= 30.0:
-		_connect_stranger_key(true)
-	if world.key_connected and player.global_position.x >= 1340.0:
-		_enter_act_four()
-
-
-func _connect_stranger_key(auto_solved: bool) -> void:
-	if world.key_connected:
-		return
-	world.key_connected = true
-	stranger_key_connected = true
-	phase = Phase.ACT3_STREET
-	ui.show_checkpoint("✓ 钥匙与主人重新建立连接")
-	if auto_solved:
-		_say("W002")
-	else:
-		_say("W003")
-	ui.set_objective("继续向前走  →")
 
 
 func _enter_act_four() -> void:
@@ -823,79 +902,112 @@ func _enter_act_four() -> void:
 	_phase_guard = true
 	phase = Phase.TRANSITION
 	player.controls_enabled = false
-	world.set_layout(FullDemoWorld.Layout.RUN)
-	audio_director.set_mood("run")
-	player.set_world_bounds(Rect2(96.0, 258.0, 3000.0, 350.0))
-	player.global_position = Vector2(300.0, 500.0)
-	companion.global_position = Vector2(80.0, 500.0)
-	tie_line.set_anchor_points([Vector2(140.0, 500.0)])
-	tie_line.set_story_state(TieLine.TieState.EXTENDING)
-	var warmth := float(fragments_found) / 5.0
-	tie_line.set_ending_warmth(warmth)
-	world.ending_warmth = warmth
+	world.set_layout(FullDemoWorld.Layout.APARTMENT)
+	audio_director.set_mood("apartment")
+	player.set_world_bounds(Rect2(96.0, 258.0, 1340.0, 350.0))
+	player.set_role("成年女儿")
+	player.global_position = Vector2(520.0, 500.0)
+	companion.set_role("母亲")
+	companion.global_position = Vector2(330.0, 500.0)
+	companion.visible = true
+	umbrella.visible = false
+	tie_line.clear_anchor_points()
+	tie_line.reset_line(TieLine.TieState.ADJUSTABLE)
+	relationship_state = "Adjustable"
 	ui.set_role(player.role_name)
-	await ui.show_chapter("第四幕", "向外跑")
-	phase = Phase.ACT4_RUN
-	_act4_step = 0
+	ui.set_hud_visible(true)
+	await ui.show_chapter("第四幕", "线的尽头")
+	phase = Phase.ACT4_MOVE_IN
+	_act4_elapsed = 0.0
 	player.controls_enabled = true
-	ui.set_phase("重新奔跑")
-	ui.set_objective("向右奔跑——这次，线不会把你拉回")
+	ui.set_phase("新住处 · 最后一个箱子")
+	ui.set_objective("把最后一个纸箱推到窗边  →")
 	_phase_guard = false
 
 
-func _update_final_run() -> void:
-	var run_bonus := 0.35 if Input.is_action_pressed(&"run") else 0.0
-	player.movement_multiplier = 1.2 + clampf(player.global_position.x / 3000.0, 0.0, 0.65) + run_bonus
-	if _act4_step == 0 and player.global_position.x >= 720.0:
-		_act4_step = 1
-		_say("A401")
-	if _act4_step == 1 and player.global_position.x >= 1500.0:
-		_act4_step = 2
-		_run_mother_cutaway()
-	if _act4_step >= 2 and player.global_position.x >= 2650.0:
-		_finish_demo()
+func _update_apartment_box(delta: float) -> void:
+	_act4_elapsed += delta
+	var near_box := player.global_position.distance_to(world.apartment_box_position) < 112.0
+	world.set_highlight("apartment_box" if near_box else "")
+	if near_box and Input.get_axis(&"move_left", &"move_right") > 0.1:
+		world.apartment_box_position.x = maxf(world.apartment_box_position.x, player.global_position.x + 46.0)
+	if world.apartment_box_position.x >= 990.0 or _act4_elapsed >= 25.0:
+		_begin_apartment_conflict()
 
 
-func _run_mother_cutaway() -> void:
-	if phase != Phase.ACT4_RUN:
-		return
-	phase = Phase.ACT4_CUTAWAY
-	player.controls_enabled = false
-	world.cutaway_home = true
-	ui.set_phase("线的另一端")
-	await _say("A402")
-	await get_tree().create_timer(_scaled(1.0)).timeout
-	world.cutaway_home = false
-	phase = Phase.ACT4_RUN
-	player.controls_enabled = true
-	ui.set_phase("线不断延长")
-	ui.set_objective("继续跑向远方  →")
-
-
-func _finish_demo() -> void:
-	if phase not in [Phase.ACT4_RUN, Phase.ACT4_CUTAWAY] or _phase_guard:
+func _begin_apartment_conflict() -> void:
+	if phase != Phase.ACT4_MOVE_IN or _phase_guard:
 		return
 	_phase_guard = true
-	phase = Phase.ACT4_END
+	phase = Phase.ACT4_CONFLICT
 	player.controls_enabled = false
-	ui.set_phase("余响")
-	ui.set_objective("关系没有断，远行也没有停止")
-	var tween := create_tween()
-	tween.tween_property(player, "global_position", Vector2(2920.0, 500.0), _scaled(1.15))
-	await tween.finished
-	await _say("A403")
-	var ending_tier := "银色的线，安静地延伸。"
-	if fragments_found >= 4:
-		ending_tier = "金色的线带着所有记忆，仍在延伸。"
-	elif fragments_found >= 2:
-		ending_tier = "线染上一点暖色，仍在延伸。"
-	var echo_note := ""
-	if echoes_found >= 3:
-		echo_note = "\n你听见了全部回响：雨声里仍有熟悉的哼唱。"
+	ui.set_phase("熟悉的边界")
+	ui.set_objective("母亲又开始替她安排这个家")
+	await _say("D034")
+	await _say("D035")
+	await _say("D036")
+	world.set_stage(1)
+	companion.visible = false
+	tie_line.set_story_state(TieLine.TieState.SILENT)
+	relationship_state = "Silent"
+	audio_director.set_mood("silence")
+	phase = Phase.ACT4_SILENCE
+	_act4_elapsed = 0.0
+	_silence_start_position = player.global_position
+	player.controls_enabled = true
+	ui.set_phase("几乎没有线的房间")
+	ui.set_objective("一个人走一走，听听房间里的安静")
+	_phase_guard = false
+
+
+func _update_silent_apartment(delta: float) -> void:
+	_act4_elapsed += delta
+	var walked_distance := player.global_position.distance_to(_silence_start_position)
+	if walked_distance >= 360.0 or _act4_elapsed >= 9.0:
+		_begin_relaxed_connection()
+
+
+func _begin_relaxed_connection() -> void:
+	if phase != Phase.ACT4_SILENCE or _phase_guard:
+		return
+	_phase_guard = true
+	phase = Phase.TRANSITION
+	player.controls_enabled = false
+	await _say("D038")
+	world.set_stage(2)
+	companion.global_position = world.get_point("apartment_door")
+	companion.visible = true
+	tie_line.set_story_state(TieLine.TieState.STABLE)
+	relationship_state = "Stable"
+	audio_director.set_mood("apartment")
+	await _say("D039")
+	phase = Phase.ACT4_RELAXED
+	player.controls_enabled = true
+	ui.set_phase("松开的牵挂")
+	ui.set_objective("送母亲到门边，然后回到自己的生活  →")
+	_phase_guard = false
+
+
+func _enter_epilogue() -> void:
+	if phase != Phase.ACT4_RELAXED or _phase_guard:
+		return
+	_phase_guard = true
+	phase = Phase.ACT4_EPILOGUE
+	player.controls_enabled = false
+	world.set_stage(3)
+	world.epilogue_line_visible = true
+	companion.visible = false
+	tie_line.set_story_state(TieLine.TieState.HIDDEN)
+	umbrella.global_position = world.get_point("epilogue_umbrella")
+	umbrella.visible = true
+	umbrella.set_process(false)
+	audio_director.set_mood("epilogue")
+	ui.set_hud_visible(false)
+	await get_tree().create_timer(_scaled(3.2)).timeout
 	phase = Phase.COMPLETE
 	ui.show_completion(
-		"—— 第四章 · 完 ——",
-		"%s\n记忆碎片 %d/5 · 回响 %d/3%s\n\n按 R 重新体验" % [ending_tier, fragments_found, echoes_found, echo_note]
+		"—— 线还在 ——",
+		"它不再拉扯，只安静地留在那里。\n记忆碎片 %d/5 · 回响 %d/3\n\n按 R 重新体验" % [fragments_found, echoes_found]
 	)
 	_phase_guard = false
 
@@ -942,6 +1054,9 @@ func _update_memory_tie_control() -> void:
 func _apply_stage_constraints() -> void:
 	if phase == Phase.ACT2_CABINET_CHILD and player.role_name in ["母亲", "年轻母亲"]:
 		player.global_position.x = minf(player.global_position.x, 1010.0)
+	elif phase == Phase.ACT2_CLIMB:
+		player.global_position.x = 1255.0
+		player.global_position.y = clampf(player.global_position.y, 445.0, 590.0)
 	elif phase == Phase.ACT3_WAREHOUSE_CRAWL and player.role_name == "母亲":
 		player.global_position.x = minf(player.global_position.x, 735.0)
 
@@ -966,7 +1081,7 @@ func get_act_number() -> int:
 		return 1
 	if phase <= Phase.ACT2_FAREWELL:
 		return 2
-	if phase <= Phase.ACT3_STREET_KEY:
+	if phase <= Phase.ACT3_ROOFTOP:
 		return 3
 	return 4
 
@@ -991,7 +1106,8 @@ func get_completion_snapshot() -> Dictionary:
 		"core_items": core_items_found,
 		"fragments": fragments_found,
 		"echoes": echoes_found,
-		"key_connected": stranger_key_connected,
+		"relationship_state": relationship_state,
+		"epilogue": world.stage == 3 and world.epilogue_line_visible,
 		"tie_state": tie_line.get_state_name(),
 	}
 
@@ -1016,6 +1132,9 @@ func _ensure_input_actions() -> void:
 	_register_key_action(&"restart", [KEY_R])
 	_register_key_action(&"toggle_debug", [KEY_F3])
 	_register_key_action(&"toggle_help", [KEY_F1])
+	_register_key_action(&"pause_menu", [KEY_ESCAPE])
+	_register_key_action(&"toggle_mute", [KEY_M])
+	_register_key_action(&"toggle_reduced_motion", [KEY_V])
 	_register_mouse_action(&"interact", MOUSE_BUTTON_LEFT)
 	_register_mouse_action(&"tie_control", MOUSE_BUTTON_LEFT)
 
@@ -1026,6 +1145,15 @@ func _on_checkpoint_shown() -> void:
 
 func _on_chapter_shown() -> void:
 	audio_director.play_cue("transition")
+
+
+func _on_mute_changed(muted: bool) -> void:
+	audio_director.set_muted(muted)
+
+
+func _on_reduced_motion_changed(enabled: bool) -> void:
+	world.reduced_motion = enabled
+	tie_line.reduced_motion = enabled
 
 
 func _register_key_action(action: StringName, keys: Array) -> void:

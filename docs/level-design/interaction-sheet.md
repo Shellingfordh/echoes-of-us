@@ -1,5 +1,7 @@
 # 交互规格｜Interaction Sheet（基于 Demo v0.1-v0.4 + 剧情总纲重设计）
 
+> **历史方案：不再执行。** 当前制作请使用 [`CURRENT_IMPLEMENTATION.md`](CURRENT_IMPLEMENTATION.md)。路人钥匙与 Extending 长跑状态不属于当前流程。
+
 > 本文档基于 `level-redesign-proposal.md` 的重设计总纲更新。
 >
 > 核心变化：新增 Chair Climb（站上椅子）、Character Switch 四重标识、分阶段教学交互，以及每个交互的"六要素"说明。

@@ -5,6 +5,7 @@ const SAMPLE_RATE := 22050
 
 var current_mood := "silent"
 var last_cue := ""
+var muted := false
 
 var _ambient_player: AudioStreamPlayer
 var _cue_player: AudioStreamPlayer
@@ -27,7 +28,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _ambient_player == null:
 		return
-	var target_volume := lerpf(-31.0, -24.0, _tension)
+	var target_volume := -80.0 if muted else lerpf(-31.0, -24.0, _tension)
 	_ambient_player.volume_db = move_toward(_ambient_player.volume_db, target_volume, delta * 7.0)
 	_ambient_player.pitch_scale = lerpf(1.0, 1.045, _tension)
 
@@ -53,7 +54,7 @@ func set_tension(value: float) -> void:
 
 func play_cue(cue_name: String) -> void:
 	last_cue = cue_name
-	if not _playback_enabled:
+	if muted or not _playback_enabled:
 		return
 	var duration := 0.52
 	if cue_name == "transition":
@@ -66,6 +67,14 @@ func play_cue(cue_name: String) -> void:
 	_cue_player.volume_db = -13.0
 	_cue_player.pitch_scale = 1.0
 	_cue_player.play()
+
+
+func set_muted(value: bool) -> void:
+	muted = value
+	if muted and _cue_player != null:
+		_cue_player.stop()
+	if _ambient_player != null:
+		_ambient_player.volume_db = -80.0 if muted else lerpf(-31.0, -24.0, _tension)
 
 
 func shutdown() -> void:
@@ -124,6 +133,8 @@ func _build_stream(stream_id: String, duration: float, should_loop: bool) -> Aud
 func _sample_stream(stream_id: String, time: float, duration: float, noise: float) -> float:
 	var ratio := time / maxf(duration, 0.001)
 	match stream_id:
+		"mood_prologue":
+			return sin(TAU * 48.0 * time) * 0.035 + sin(TAU * 72.0 * time) * 0.018 + noise * 0.012
 		"mood_home":
 			return sin(TAU * 55.0 * time) * 0.07 + sin(TAU * 82.5 * time) * 0.035 + noise * 0.018
 		"mood_memory":
@@ -134,11 +145,12 @@ func _sample_stream(stream_id: String, time: float, duration: float, noise: floa
 			return sin(TAU * 39.0 * time) * 0.075 + sin(TAU * 78.0 * time) * 0.025 + noise * 0.03
 		"mood_rooftop":
 			return noise * 0.105 + sin(TAU * 66.0 * time) * 0.026
-		"mood_street":
-			return noise * 0.055 + sin(TAU * 73.0 * time) * 0.035 + sin(TAU * 110.0 * time) * 0.018
-		"mood_run":
-			var pulse := maxf(sin(TAU * 1.7 * time), 0.0)
-			return sin(TAU * 52.0 * time) * (0.04 + pulse * 0.045) + noise * 0.035
+		"mood_apartment":
+			return sin(TAU * 62.0 * time) * 0.045 + sin(TAU * 93.0 * time) * 0.022 + noise * 0.025
+		"mood_silence":
+			return sin(TAU * 38.0 * time) * 0.012 + noise * 0.008
+		"mood_epilogue":
+			return sin(TAU * 58.0 * time) * 0.032 + sin(TAU * 87.0 * time) * 0.019 + noise * 0.014
 		"cue_checkpoint":
 			return sin(TAU * 660.0 * time) * 0.2 + sin(TAU * 880.0 * time) * 0.12
 		"cue_fragment":
