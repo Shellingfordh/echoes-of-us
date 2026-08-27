@@ -77,6 +77,44 @@ Relationship Physics / 关系物理
 
 ---
 
+# 🕹️ 当前可玩原型
+
+仓库已经包含第一幕 Godot 灰盒原型，当前实现：
+
+- 序章母女对白；
+- WASD / 方向键移动；
+- 母女距离驱动的牵挂线显现、颜色、线宽与抖动；
+- 最大张力下的减速和拉回；
+- 黄色雨伞交互与第一幕完成态；
+- 可切换的实时 Debug 面板。
+
+开发验证版本：
+
+> Godot 4.7.2（工程保持 Godot 4.x Compatibility Renderer 配置）
+
+运行：
+
+```bash
+godot --path .
+```
+
+操作：
+
+```text
+WASD / 方向键    移动
+E                互动
+R                重新开始
+F3               显示/隐藏 Debug
+```
+
+无界面流程测试：
+
+```bash
+godot --headless --path . --script res://scripts/tests/smoke_test.gd
+```
+
+---
+
 # 📁 仓库结构
 
 ```text
@@ -622,4 +660,3 @@ PR 正文模板：
 
 - [ ] 已在本地运行且通过基本测试
 - [ ] 没有直接改动 `main` 场景引用
-
