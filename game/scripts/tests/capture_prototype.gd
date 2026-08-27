@@ -25,6 +25,7 @@ func _capture() -> void:
 	var tie_line := prototype.get_node("TieLine") as TieLine
 	var world := prototype.get_node("GrayboxWorld") as FullDemoWorld
 	var ui := prototype.get_node("PrototypeUI") as PrototypeUI
+	var audio_director := prototype.get_node("AudioDirector") as AudioDirector
 	player.controls_enabled = false
 	ui.set_debug_visible(false)
 
@@ -40,6 +41,10 @@ func _capture() -> void:
 	await _capture_rooftop(output_prefix, world, player, companion, tie_line, ui)
 	await _capture_street(output_prefix, world, player, companion, tie_line, ui)
 	await _capture_ending(output_prefix, world, player, companion, tie_line, ui)
+	audio_director.shutdown()
+	prototype.queue_free()
+	await process_frame
+	await process_frame
 	quit(0)
 
 
@@ -48,6 +53,10 @@ func _capture_act_one(prefix: String, world: FullDemoWorld, player: EchoesPlayer
 	_configure_scene(player, companion, tie_line, ui, "第一幕 · 离家", "收拾行李，寻找家里的记忆", "成年女儿", "母亲", Vector2(420.0, 470.0), Vector2(760.0, 470.0), TieLine.TieState.TENSE)
 	world.set_highlight("fragment_frame")
 	await _save_frame("%s-act1.png" % prefix)
+	ui.duration_scale = 1.0
+	ui.show_dialogue("余念 · 心声", "胃药、水果、保温杯……它们总能精准地出现在我的行李里。东西当然没错，只是从来没人问我需不需要。", 4.0)
+	await _save_frame("%s-dialogue.png" % prefix)
+	ui.dialogue_panel.visible = false
 
 
 func _capture_act_two(prefix: String, world: FullDemoWorld, player: EchoesPlayer, companion: EchoesMother, tie_line: TieLine, ui: PrototypeUI) -> void:

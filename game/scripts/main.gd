@@ -38,23 +38,22 @@ const FRAGMENT_IDS := [
 	"fragment_earphones",
 ]
 const ECHO_IDS := ["echo_kitchen", "echo_door", "echo_hall"]
-
-const ITEM_TEXT := {
-	"box": "深色外套、耳机和诗集。把过去二十年压缩进三个纸箱，其实比想象中容易。",
-	"suitcase": "保温杯、水果和胃药不属于我的秩序，却总能精准地进入我的行李。",
-	"desk": "桌面还留着一块浅色的印记。有些痕迹是带不走的。",
+const CORE_DIALOGUE_IDS := {
+	"box": "D001",
+	"suitcase": "D002",
+	"desk": "D003",
 }
-const FRAGMENT_TEXT := {
-	"fragment_ticket": "这是妈妈送我去学校的路。",
-	"fragment_height": "又长高了。",
-	"fragment_boots": "小时候我最讨厌穿雨靴。",
-	"fragment_frame": "小学春游的合影。她的手悬在我肩膀上方，没敢搭下来。",
-	"fragment_earphones": "找了一星期，原来在这儿。……这种地方也就我能进来。",
+const FRAGMENT_DIALOGUE_IDS := {
+	"fragment_ticket": "M001",
+	"fragment_height": "M002",
+	"fragment_boots": "M003",
+	"fragment_frame": "M004",
+	"fragment_earphones": "M005",
 }
-const ECHO_TEXT := {
-	"echo_kitchen": "吃饭了——",
-	"echo_door": "我回来啦！",
-	"echo_hall": "♪ 一段很轻的哼唱……",
+const ECHO_DIALOGUE_IDS := {
+	"echo_kitchen": "E001",
+	"echo_door": "E002",
+	"echo_hall": "E003",
 }
 
 @export var test_mode := false
@@ -74,6 +73,7 @@ var fragments_found := 0
 var echoes_found := 0
 var chair_climbed := false
 var stranger_key_connected := false
+var dialogue_catalog: DialogueCatalog
 
 var _phase_guard := false
 var _act1_elapsed := 0.0
@@ -85,6 +85,7 @@ var _act4_step := 0
 
 
 func _enter_tree() -> void:
+	dialogue_catalog = DialogueCatalog.new()
 	_ensure_input_actions()
 
 
@@ -269,7 +270,7 @@ func _inspect_core_item(item_id: String) -> void:
 	world.mark_collected(item_id)
 	core_items_found += 1
 	ui.set_objective("调查纸箱、行李箱和书桌（%d/3）" % core_items_found)
-	ui.show_dialogue("女儿 · 心声", ITEM_TEXT[item_id], 2.8)
+	_say(CORE_DIALOGUE_IDS[item_id])
 	if core_items_found >= 3 and not _phase_guard:
 		_begin_umbrella_conflict()
 
@@ -277,7 +278,7 @@ func _inspect_core_item(item_id: String) -> void:
 func _climb_chair() -> void:
 	chair_climbed = true
 	ui.show_checkpoint("✓ 站上木椅：现在能够到柜顶了")
-	ui.show_dialogue("女儿 · 心声", "椅子还在原来的位置。", 1.8)
+	_say("C001")
 
 
 func _collect_fragment(fragment_id: String) -> void:
@@ -288,7 +289,7 @@ func _collect_fragment(fragment_id: String) -> void:
 	ui.set_collection(fragments_found, echoes_found)
 	ui.show_checkpoint("记忆碎片 %d/5" % fragments_found)
 	audio_director.play_cue("fragment")
-	ui.show_dialogue("记忆碎片", FRAGMENT_TEXT[fragment_id], 2.4)
+	_say(FRAGMENT_DIALOGUE_IDS[fragment_id])
 
 
 func _update_echo_points(delta: float) -> void:
@@ -315,7 +316,7 @@ func _update_echo_points(delta: float) -> void:
 		world.mark_collected(nearby_echo)
 		echoes_found += 1
 		ui.set_collection(fragments_found, echoes_found)
-		ui.show_dialogue("远处的回响", ECHO_TEXT[nearby_echo], 2.6)
+		_say(ECHO_DIALOGUE_IDS[nearby_echo])
 		audio_director.play_cue("echo")
 		_echo_hold_id = ""
 		_echo_hold_time = 0.0
@@ -334,11 +335,15 @@ func _begin_umbrella_conflict() -> void:
 	umbrella.global_position = Vector2(790.0, 488.0)
 	ui.set_phase("雨伞冲突")
 	ui.set_objective("听妈妈把话说完")
-	await ui.show_dialogue("妈妈", "伞你没拿。明天有大阵雨。", 2.0)
-	await ui.show_dialogue("女儿", "妈，别塞了，真的塞不下了。", 1.8)
-	await ui.show_dialogue("妈妈", "外边买伞多贵啊……在家里住多好。", 2.2)
-	await ui.show_dialogue("女儿", "这把伞的骨架都松了。", 1.7)
-	await ui.show_dialogue("妈妈", "……算了，随你吧。反正外面什么都有卖的。", 2.3)
+	await _say("D005")
+	await _say("D006")
+	await _say("D007")
+	await _say("D008")
+	await _say("D009")
+	await _say("D011")
+	await _say("D012")
+	await _say("D013")
+	await _say("D014")
 	companion.global_position = Vector2(240.0, 470.0)
 	player.global_position = Vector2(520.0, 470.0)
 	tie_line.auto_reveal_enabled = true
@@ -356,7 +361,7 @@ func _on_tie_revealed() -> void:
 	phase = Phase.ACT1_TIE
 	ui.set_objective("继续走，感受牵挂线的变化  →")
 	audio_director.play_cue("reveal")
-	ui.show_dialogue("女儿 · 心声", "……这是什么？", 2.0)
+	_say("D016")
 
 
 func _on_maximum_tension_reached() -> void:
@@ -368,6 +373,7 @@ func _on_maximum_tension_reached() -> void:
 	audio_director.play_cue("tension")
 	ui.set_phase("第一次分离")
 	ui.set_objective("牵挂线已经绷紧")
+	await _say("D015")
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tween.tween_property(player, "global_position", umbrella.global_position + Vector2(66.0, 10.0), _scaled(0.7))
@@ -377,7 +383,7 @@ func _on_maximum_tension_reached() -> void:
 	player.controls_enabled = true
 	ui.set_phase("记忆的入口")
 	ui.set_objective("看看那把发光的黄色雨伞")
-	ui.show_dialogue("女儿 · 心声", "这根线……是妈妈不愿让我离开的证明。", 2.8)
+	_say("D018")
 	_phase_guard = false
 
 
@@ -396,7 +402,7 @@ func _enter_act_two() -> void:
 	player.controls_enabled = false
 	audio_director.play_cue("transition")
 	umbrella.set_interaction_enabled(false)
-	await ui.show_dialogue("女儿 · 心声", "小时候下雨，她总把伞往我这边倾。", 2.5)
+	await _say("A101")
 	world.set_layout(FullDemoWorld.Layout.MEMORY_STREET)
 	audio_director.set_mood("memory")
 	umbrella.visible = false
@@ -411,12 +417,13 @@ func _enter_act_two() -> void:
 	tie_line.reset_line(TieLine.TieState.ADJUSTABLE)
 	ui.set_role(player.role_name)
 	await ui.show_chapter("第二幕", "第一次放手")
+	await _say("D019")
 	phase = Phase.ACT2_BICYCLE
 	world.set_stage(1)
 	player.controls_enabled = true
 	ui.set_phase("自行车 · 推重物教学")
 	ui.set_objective("母亲靠近自行车，向上推到路边")
-	ui.show_dialogue("母亲 · 心声", "这把伞……你小时候总喜欢走在雨里。", 2.4)
+	_say("D020")
 	_phase_guard = false
 
 
@@ -440,7 +447,7 @@ func _complete_bicycle() -> void:
 	companion.global_position = Vector2(850.0, 500.0)
 	tie_line.set_story_state(TieLine.TieState.TENSE)
 	ui.show_checkpoint("✓ 自行车移到路边")
-	ui.show_dialogue("小女儿", "妈妈好厉害！", 1.8)
+	_say("A201")
 	ui.set_phase("水坑 · 张力教学")
 	ui.set_objective("走近小女儿，让绷紧的线重新松弛")
 
@@ -466,7 +473,7 @@ func _complete_puddle_lesson() -> void:
 	tween.tween_property(companion, "global_position", Vector2(980.0, 500.0), _scaled(0.8))
 	await tween.finished
 	ui.show_checkpoint("✓ 松开不代表失去连接")
-	await ui.show_dialogue("年轻母亲", "松开不代表失去连接。", 2.2)
+	await _say("A202")
 	_setup_memory_cabinet()
 
 
@@ -490,7 +497,7 @@ func _update_memory_cabinet() -> void:
 		world.gate_one_open = true
 		phase = Phase.ACT2_CABINET_MOTHER
 		ui.show_checkpoint("✓ 小女儿踩下踏板，闸门打开")
-		ui.show_dialogue("小女儿", "这种地方，只有我过得去。", 2.1)
+		_say("D023")
 		ui.set_objective("按 Tab 切回母亲，通过已经打开的闸门")
 
 
@@ -532,8 +539,9 @@ func _update_memory_anchor_crossing() -> void:
 
 func _finish_act_two() -> void:
 	ui.show_checkpoint("✓ 小女儿到达街道终点")
-	await ui.show_dialogue("小女儿", "妈妈——我到啦！", 2.0)
-	await ui.show_dialogue("年轻母亲 · 心声", "牵挂，不只是拉住，也可以守护。", 2.8)
+	await _say("A203")
+	await _say("D025")
+	await _say("A204")
 	_enter_act_three_attach()
 
 
@@ -554,6 +562,7 @@ func _enter_act_three_attach() -> void:
 	tie_line.reset_line(TieLine.TieState.ADJUSTABLE)
 	ui.set_role(player.role_name)
 	await ui.show_chapter("第三幕", "外面的世界")
+	await _say("D026")
 	phase = Phase.ACT3_ATTACH
 	player.controls_enabled = true
 	ui.set_phase("回到现实 · 安放牵挂")
@@ -568,7 +577,7 @@ func _attach_line_to_umbrella() -> void:
 	umbrella.set_interaction_enabled(false)
 	tie_line.add_anchor_point(umbrella.global_position)
 	ui.show_checkpoint("✓ 线固定在伞上，不再阻碍远行")
-	await ui.show_dialogue("女儿 · 心声", "不是切断它，而是换一种连接方式。", 2.5)
+	await _say("A301")
 	_setup_corridor()
 
 
@@ -597,6 +606,7 @@ func _anchor_corridor_one() -> void:
 	world.anchor_index = 1
 	tie_line.add_anchor_point(world.get_point("corridor_anchor_1"))
 	ui.show_checkpoint("✓ 母亲成为支点")
+	_say("D028")
 	ui.set_objective("Tab 切换成年女儿，按 W / ↑ 借线越过断口")
 
 
@@ -624,7 +634,7 @@ func _update_corridor_crossing() -> void:
 			await tween.finished
 			world.gate_two_open = true
 			ui.show_checkpoint("✓ 两人共同打开楼道出口")
-			await ui.show_dialogue("女儿 · 心声", "不是互相拉扯，而是共同用力。", 2.4)
+			await _say("D029")
 			_setup_warehouse()
 
 
@@ -660,6 +670,7 @@ func _setup_warehouse() -> void:
 	ui.set_role(player.role_name)
 	ui.set_phase("仓库 · 推箱与窄道")
 	ui.set_objective("母亲把重箱 1 向上推到踏板")
+	_say("D030")
 	player.controls_enabled = true
 
 
@@ -675,6 +686,7 @@ func _update_warehouse_box_one(_delta: float) -> void:
 			world.gate_one_open = true
 			phase = Phase.ACT3_WAREHOUSE_CRAWL
 			ui.show_checkpoint("✓ 重箱压住踏板，第一扇门打开")
+			_say("D031")
 			ui.set_objective("Tab 切换女儿，穿过前方窄道")
 
 
@@ -700,7 +712,6 @@ func _update_warehouse_box_two(_delta: float) -> void:
 			phase = Phase.TRANSITION
 			player.controls_enabled = false
 			ui.show_checkpoint("✓ 箱子正好垫住断口")
-			await ui.show_dialogue("成年女儿", "各自能做的事不一样。", 2.0)
 			_setup_rooftop()
 
 
@@ -717,6 +728,7 @@ func _setup_rooftop() -> void:
 	ui.set_role(player.role_name)
 	ui.set_phase("天台 · 交替锚定接龙")
 	ui.set_objective("母亲在第一个发光支点按 E 锚定")
+	_say("D032")
 	player.controls_enabled = true
 
 
@@ -750,7 +762,7 @@ func _update_rooftop_crossing() -> void:
 	if _coop_step >= 3:
 		world.gate_two_open = true
 		ui.show_checkpoint("✓ 两人同时到达天台顶")
-		await ui.show_dialogue("成年女儿", "一起到了。最后一次，共同用力。", 2.4)
+		await _say("D033")
 		_setup_street()
 		return
 	phase = Phase.ACT3_ROOFTOP
@@ -783,7 +795,7 @@ func _update_street(delta: float) -> void:
 	if not world.stranger_line_visible and player.global_position.distance_to(world.get_point("stranger")) <= 240.0:
 		world.stranger_line_visible = true
 		phase = Phase.ACT3_STREET_KEY
-		ui.show_dialogue("路人", "我的钥匙……好像掉在附近了。", 2.3)
+		_say("W001")
 		ui.set_objective("顺着那根微弱的线看看")
 	if not world.key_connected and _street_elapsed >= 30.0:
 		_connect_stranger_key(true)
@@ -799,9 +811,9 @@ func _connect_stranger_key(auto_solved: bool) -> void:
 	phase = Phase.ACT3_STREET
 	ui.show_checkpoint("✓ 钥匙与主人重新建立连接")
 	if auto_solved:
-		ui.show_dialogue("路人", "啊，原来掉在花坛边了。", 2.0)
+		_say("W002")
 	else:
-		ui.show_dialogue("女儿 · 心声", "原来不只有我和妈妈之间有这种线。", 2.8)
+		_say("W003")
 	ui.set_objective("继续向前走  →")
 
 
@@ -836,7 +848,7 @@ func _update_final_run() -> void:
 	player.movement_multiplier = 1.2 + clampf(player.global_position.x / 3000.0, 0.0, 0.65) + run_bonus
 	if _act4_step == 0 and player.global_position.x >= 720.0:
 		_act4_step = 1
-		ui.show_dialogue("女儿 · 心声", "线……在延伸？", 2.1)
+		_say("A401")
 	if _act4_step == 1 and player.global_position.x >= 1500.0:
 		_act4_step = 2
 		_run_mother_cutaway()
@@ -851,7 +863,7 @@ func _run_mother_cutaway() -> void:
 	player.controls_enabled = false
 	world.cutaway_home = true
 	ui.set_phase("线的另一端")
-	await ui.show_dialogue("母亲 · 心声", "去吧。", 2.2)
+	await _say("A402")
 	await get_tree().create_timer(_scaled(1.0)).timeout
 	world.cutaway_home = false
 	phase = Phase.ACT4_RUN
@@ -871,7 +883,7 @@ func _finish_demo() -> void:
 	var tween := create_tween()
 	tween.tween_property(player, "global_position", Vector2(2920.0, 500.0), _scaled(1.15))
 	await tween.finished
-	await ui.show_dialogue("女儿 · 心声", "人可以离开彼此，关系不一定因此断裂。", 3.0)
+	await _say("A403")
 	var ending_tier := "银色的线，安静地延伸。"
 	if fragments_found >= 4:
 		ending_tier = "金色的线带着所有记忆，仍在延伸。"
@@ -957,6 +969,19 @@ func get_act_number() -> int:
 	if phase <= Phase.ACT3_STREET_KEY:
 		return 3
 	return 4
+
+
+func _say(dialogue_id: String) -> void:
+	var entry := dialogue_catalog.get_entry(dialogue_id)
+	await ui.show_dialogue(
+		str(entry.get("speaker", "")),
+		str(entry.get("text", "")),
+		float(entry.get("duration", 2.2))
+	)
+
+
+func get_dialogue_entry(dialogue_id: String) -> Dictionary:
+	return dialogue_catalog.get_entry(dialogue_id)
 
 
 func get_completion_snapshot() -> Dictionary:

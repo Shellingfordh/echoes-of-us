@@ -38,6 +38,16 @@ func _run() -> void:
 	_check(_umbrella != null, "umbrella exists")
 	_check(_world != null, "full demo world exists")
 	_check(_audio != null, "procedural audio director exists")
+	var dialogue_catalog = _game.get("dialogue_catalog")
+	_check(dialogue_catalog != null and int(dialogue_catalog.call("size")) >= 61, "dialogue catalog loads all D001-D040 entries and runtime fragments")
+	var has_all_story_ids := true
+	for dialogue_number in range(1, 41):
+		has_all_story_ids = has_all_story_ids and bool(dialogue_catalog.call("has_entry", "D%03d" % dialogue_number))
+	_check(has_all_story_ids, "the stable D001-D040 story ID range is complete")
+	var opening_entry: Dictionary = _game.call("get_dialogue_entry", "D001")
+	_check(str(opening_entry.get("text", "")).contains("二十多年"), "stable dialogue IDs resolve authored text")
+	var main_source := FileAccess.get_file_as_string("res://scripts/main.gd")
+	_check(main_source.count("show_dialogue(") == 1, "gameplay code routes authored lines through dialogue IDs")
 	if _failures > 0:
 		quit(1)
 		return

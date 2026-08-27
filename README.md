@@ -86,6 +86,7 @@ Relationship Physics / 关系物理
 - 第三幕：双向锚定、仓库推箱/钻洞、屋顶交替协作、陌生人牵挂线与钥匙回声；
 - 第四幕：长距离奔跑、牵挂线延展、母亲切镜与根据收集结果变化的结尾；
 - Hidden / Tense / Adjustable / Extending 四种牵挂线状态；
+- `D001–D040` 稳定对白 ID、数据驱动的正式台词目录，以及独立的碎片/回响文本；
 - 分章节的程序化环境音，以及碎片、回响、显线、张力和检查点反馈音；
 - 水彩纸张颗粒、分层景深、生活化环境细节和默认收起的轻量 HUD；
 - 零失败流程、章节转场、检查点反馈和可切换的实时 Debug 面板。
@@ -137,6 +138,8 @@ echoes-of-us/
 
 ├── game/
 │   ├── project.godot
+│   ├── data/
+│   │   └── dialogue.json
 │   ├── scenes/
 │   ├── scripts/
 │   ├── assets/
@@ -153,6 +156,8 @@ echoes-of-us/
 ## game
 
 完整的 Godot 工程目录。用 Godot 导入 `game/project.godot`，或者在仓库根目录运行 `godot --path game`。
+
+`game/data/dialogue.json` 是运行时对白目录；玩法代码只引用稳定对白 ID。
 
 ## game/scenes
 
@@ -204,7 +209,8 @@ docs/narrative/
 ```text
 story.md
 characters.md
-dialogue.md
+03_剧情对白表.md
+dialogue.md（对白入口与同步规则）
 ```
 
 剧情文档直接使用 Markdown。
