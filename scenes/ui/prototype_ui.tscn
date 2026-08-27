@@ -95,7 +95,25 @@ text = "向门口走，试着离开家"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.63, 0.73, 1)
 theme_override_font_sizes/font_size = 12
-text = "WASD / 方向键移动     E 互动     R 重新开始     F3 调试信息"
+text = "WASD / 方向键移动   E 互动   Tab 切换角色   空格/鼠标拉紧线   R 重开   F3 调试"
+
+[node name="StatusRow" type="HBoxContainer" parent="TopMargin/TopRow/ObjectivePanel/ObjectiveBox"]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="RoleLabel" type="Label" parent="TopMargin/TopRow/ObjectivePanel/ObjectiveBox/StatusRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.82, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "当前控制：成年女儿"
+
+[node name="CollectionLabel" type="Label" parent="TopMargin/TopRow/ObjectivePanel/ObjectiveBox/StatusRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.79, 0.47, 1)
+theme_override_font_sizes/font_size = 12
+text = "记忆碎片 0/5   回响 0/3"
 
 [node name="DebugPanel" type="PanelContainer" parent="TopMargin/TopRow"]
 unique_name_in_owner = true
@@ -186,15 +204,16 @@ horizontal_alignment = 1
 [node name="CompletionPanel" type="PanelContainer" parent="."]
 unique_name_in_owner = true
 visible = false
+z_index = 40
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -245.0
-offset_top = -84.0
-offset_right = 245.0
-offset_bottom = 84.0
+offset_left = -340.0
+offset_top = -130.0
+offset_right = 340.0
+offset_bottom = 130.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_complete")
@@ -203,16 +222,89 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_complete")
 layout_mode = 2
 theme_override_constants/separation = 9
 
-[node name="Title" type="Label" parent="CompletionPanel/CompleteBox"]
+[node name="CompleteTitle" type="Label" parent="CompletionPanel/CompleteBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.84, 0.55, 1)
 theme_override_font_sizes/font_size = 27
-text = "第一幕灰盒完成"
+text = "—— 第四章 · 完 ——"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="CompletionPanel/CompleteBox"]
+[node name="CompleteSubtitle" type="Label" parent="CompletionPanel/CompleteBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.88, 0.85, 0.9, 1)
 theme_override_font_sizes/font_size = 16
-text = "你发现了牵挂线，也找到了记忆的入口。\n按 R 可以重新体验。"
+text = "银色的线，安静地延伸。\n记忆碎片 0/5 · 回响 0/3\n\n按 R 重新体验"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="CheckpointLabel" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 25
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -180.0
+offset_top = 164.0
+offset_right = 180.0
+offset_bottom = 206.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.84, 0.5, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 18
+text = "✓ 检查点"
+horizontal_alignment = 1
+
+[node name="FadeRect" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 50
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.055, 0.047, 0.082, 1)
+
+[node name="ChapterPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 51
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -92.0
+offset_right = 260.0
+offset_bottom = 92.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_complete")
+
+[node name="ChapterBox" type="VBoxContainer" parent="ChapterPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ChapterKicker" type="Label" parent="ChapterPanel/ChapterBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.69, 0.43, 1)
+theme_override_font_sizes/font_size = 15
+text = "第二幕"
+horizontal_alignment = 1
+
+[node name="ChapterTitle" type="Label" parent="ChapterPanel/ChapterBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.82, 1)
+theme_override_font_sizes/font_size = 32
+text = "第一次放手"
 horizontal_alignment = 1
