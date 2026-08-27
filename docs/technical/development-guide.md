@@ -9,7 +9,7 @@
 启动方式：
 
 1. 打开项目；
-2. 确认 `project.godot`；
+2. 确认并导入 `game/project.godot`；
 3. 运行 Main Scene；
 4. 确认 Level 01 可以进入。
 

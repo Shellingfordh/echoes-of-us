@@ -1,5 +1,7 @@
 # 谜题设计｜Puzzle Design（基于 Demo v0.1-v0.4 + 剧情总纲重设计）
 
+> **历史方案：不再执行。** 当前制作请使用 [`CURRENT_IMPLEMENTATION.md`](CURRENT_IMPLEMENTATION.md)。P003 路人钥匙已经从当前剧情中移除。
+
 > 本文档基于 `level-redesign-proposal.md` 的重设计总纲更新。
 >
 > 核心变化：

@@ -201,7 +201,7 @@ jobs:
               '运营/',
               '运营文档/',
               'content/',
-              'assets/',
+              'game/assets/',
               'images/',
               'image/',
               'art/',
@@ -239,7 +239,7 @@ jobs:
               //
               // docs/运营文档（1）.md
               // docs/运营 文档 2.xlsx
-              // assets/角色立绘（最终版）.png
+              // game/assets/角色立绘（最终版）.png
               //
               // Chinese characters, spaces and brackets are fine.
               // ----------------------------------------------------------

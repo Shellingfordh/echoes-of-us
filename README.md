@@ -14,7 +14,7 @@
 
 你只需要记住：
 
-> **文档放 `docs/`，正式游戏素材放 `assets/`，技术代码放 `scripts/`，Godot 场景放 `scenes/`。**
+> **文档放 `docs/`，完整 Godot 工程放 `game/`；工程内的素材、代码和场景分别放 `game/assets/`、`game/scripts/`、`game/scenes/`。**
 
 不要自己新建：
 
@@ -71,9 +71,59 @@ Relationship Physics / 关系物理
 →
 理解关系
 →
-女儿离开
+女儿建立边界
 →
-线不断
+牵挂从拉扯变成稳定的连接
+
+---
+
+# 🕹️ 当前可玩原型
+
+仓库已经包含一个可从头到尾完成的四幕 Godot 可玩 Demo，当前仍采用程序化绘制的原型角色与场景，已实现：
+
+- 序章：从旧城缝纫铺的普通红线，连续揭示到楼上熟睡女儿掌心的无对白演出；
+- 第一幕：离家探索、5 个可选记忆碎片、3 个环境回响、牵挂线显现、回弹承重/短摆与雨伞记忆；
+- 第二幕：母女视角切换、自行车协作、水洼、柜子机关、路灯锚点、坠落承重与玩家主动攀回；
+- 第三幕：双向锚定、仓库推箱/钻洞与屋顶交替协作；
+- 第四幕：新住处搬箱、边界冲突、牵挂线沉默与松弛，以及门后黄伞的无对白尾声；
+- Hidden / Tense / Adjustable / Silent / Stable 五种牵挂线状态；
+- `D001–D040` 稳定对白 ID、数据驱动的正式台词目录，以及独立的碎片/回响文本；
+- 分章节的程序化环境音，以及碎片、回响、显线、张力和检查点反馈音；
+- 水彩纸张颗粒、分层景深、生活化环境细节和默认收起的轻量 HUD；
+- 可持久化的声音与减少动态效果设置，以及支持鼠标/键盘的暂停菜单；
+- 零失败流程、章节转场、检查点反馈和可切换的实时 Debug 面板。
+
+开发验证版本：
+
+> Godot 4.7.2（工程保持 Godot 4.x Compatibility Renderer 配置）
+
+运行：
+
+```bash
+godot --path game
+```
+
+操作：
+
+```text
+WASD / 方向键    移动
+E / 鼠标左键      互动
+Tab              切换控制角色
+空格 / 鼠标左键   主动控制牵挂线
+Shift            奔跑
+R                重新开始
+Esc              暂停/继续
+M（暂停菜单）     开启/关闭声音
+V（暂停菜单）     完整/减少动态效果
+F1               显示/隐藏操作帮助
+F3               显示/隐藏 Debug
+```
+
+无界面流程测试：
+
+```bash
+godot --headless --path game --script res://scripts/tests/smoke_test.gd
+```
 
 ---
 
@@ -83,7 +133,6 @@ Relationship Physics / 关系物理
 echoes-of-us/
 
 ├── README.md
-├── project.godot
 ├── .gitignore
 
 ├── docs/
@@ -92,11 +141,15 @@ echoes-of-us/
 │   ├── art-bible/
 │   └── technical/
 
-├── scenes/
-├── scripts/
-├── assets/
-├── audio/
-├── ui/
+├── game/
+│   ├── project.godot
+│   ├── data/
+│   │   └── dialogue.json
+│   ├── scenes/
+│   ├── scripts/
+│   ├── assets/
+│   ├── audio/
+│   └── ui/
 
 └── _artwork/
 ```
@@ -105,23 +158,31 @@ echoes-of-us/
 
 所有策划和技术文档。
 
-## scenes
+当前关卡制作入口：`docs/level-design/CURRENT_IMPLEMENTATION.md`。同目录中标记为“历史方案”的路人钥匙与无限长跑文档仅供追溯。
+
+## game
+
+完整的 Godot 工程目录。用 Godot 导入 `game/project.godot`，或者在仓库根目录运行 `godot --path game`。
+
+`game/data/dialogue.json` 是运行时对白目录；玩法代码只引用稳定对白 ID。
+
+## game/scenes
 
 Godot 场景。
 
-## scripts
+## game/scripts
 
 GDScript 代码。
 
-## assets
+## game/assets
 
 已经确定进入游戏的正式图片、角色、场景、道具等素材。
 
-## audio
+## game/audio
 
 BGM、音效、配音。
 
-## ui
+## game/ui
 
 游戏 UI。
 
@@ -137,8 +198,8 @@ AI 原图、参考图、废稿、PSD 等工作过程文件。
 | -- | --------------------------- | ---------- |
 | 剧情 | `docs/narrative/`           | 故事、角色、对白   |
 | 关卡 | `docs/level-design/`        | 关卡流程、交互、谜题 |
-| 美术 | `assets/`、`docs/art-bible/` | 游戏素材、视觉规范  |
-| 技术 | `scenes/`、`scripts/`、`ui/`  | Godot 实现   |
+| 美术 | `game/assets/`、`docs/art-bible/` | 游戏素材、视觉规范  |
+| 技术 | `game/scenes/`、`game/scripts/`、`game/ui/`  | Godot 实现   |
 
 ---
 
@@ -155,7 +216,8 @@ docs/narrative/
 ```text
 story.md
 characters.md
-dialogue.md
+03_剧情对白表.md
+dialogue.md（对白入口与同步规则）
 ```
 
 剧情文档直接使用 Markdown。
@@ -236,16 +298,16 @@ puzzle-design.md
 正式进入游戏的素材：
 
 ```text
-assets/
+game/assets/
 ```
 
 例如：
 
 ```text
-assets/characters/mother_adult.png
-assets/characters/daughter_adult.png
-assets/props/yellow_umbrella.png
-assets/environments/home_background.png
+game/assets/characters/mother_adult.png
+game/assets/characters/daughter_adult.png
+game/assets/props/yellow_umbrella.png
+game/assets/environments/home_background.png
 ```
 
 AI 原图、PSD、参考图、废稿：
@@ -254,7 +316,7 @@ AI 原图、PSD、参考图、废稿：
 _artwork/
 ```
 
-不要把大量废稿放进 `assets/`。
+不要把大量废稿放进 `game/assets/`。
 
 正式素材命名必须清楚。
 
@@ -284,9 +346,9 @@ IMG_001.png
 技术同学负责：
 
 ```text
-scenes/
-scripts/
-ui/
+game/scenes/
+game/scripts/
+game/ui/
 ```
 
 ## 第一步：创建自己的 Branch
@@ -616,10 +678,9 @@ PR 正文模板：
 
 ### 注意事项
 - 参数为 Prototype 数值，后续需要调参
-- 影响文件：`scripts/tie_line.gd`, `scenes/level01.tscn`
+- 影响文件：`game/scripts/tie_line.gd`, `game/scenes/level01.tscn`
 
 复审者请检查：性能（连接数上限）、资源路径是否破坏场景引用
 
 - [ ] 已在本地运行且通过基本测试
 - [ ] 没有直接改动 `main` 场景引用
-

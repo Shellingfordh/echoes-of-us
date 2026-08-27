@@ -1,4 +1,5 @@
 .import/
 .godot/
+docs/**/*.import
 export_presets.cfg
 .DS_Store
