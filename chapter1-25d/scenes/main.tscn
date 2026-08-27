@@ -1,0 +1,83 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="2_player"]
+[ext_resource type="Script" path="res://scripts/tie_line_3d.gd" id="3_tie"]
+[ext_resource type="Script" path="res://scripts/chapter_ui.gd" id="4_ui"]
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 1
+background_color = Color(0.105, 0.094, 0.09, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.86, 0.78, 0.68, 1)
+ambient_light_energy = 0.42
+reflected_light_source = 2
+tonemap_mode = 2
+
+[node name="ChapterOne25D" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-48, -28, 0)
+light_color = Color(1, 0.89, 0.74, 1)
+light_energy = 0.62
+shadow_enabled = true
+directional_shadow_max_distance = 30.0
+
+[node name="Room" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="Props" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="Player" type="CharacterBody3D" parent="."]
+unique_name_in_owner = true
+position = Vector3(-0.2, 0, 1.05)
+script = ExtResource("2_player")
+
+[node name="Mother" type="Node3D" parent="."]
+unique_name_in_owner = true
+position = Vector3(5.4, 0, -0.55)
+
+[node name="HandAnchor" type="Marker3D" parent="Mother"]
+position = Vector3(-0.3, 1.16, 0)
+
+[node name="TieLine3D" type="Node3D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("3_tie")
+source_path = NodePath("../Player")
+target_path = NodePath("../Mother")
+
+[node name="CameraRig" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+unique_name_in_owner = true
+position = Vector3(0, 6.4, 12.2)
+projection = 1
+size = 8.2
+near = 0.1
+far = 40.0
+current = true
+
+[node name="WarmWindowLight" type="OmniLight3D" parent="."]
+unique_name_in_owner = true
+position = Vector3(-4.8, 2.2, -1.3)
+light_color = Color(0.83, 0.9, 1, 1)
+light_energy = 0.9
+omni_range = 6.0
+shadow_enabled = true
+
+[node name="DoorLight" type="OmniLight3D" parent="."]
+unique_name_in_owner = true
+position = Vector3(6.15, 1.6, -0.9)
+light_color = Color(1, 0.74, 0.46, 1)
+light_energy = 1.15
+omni_range = 4.8
+
+[node name="ChapterUI" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+script = ExtResource("4_ui")

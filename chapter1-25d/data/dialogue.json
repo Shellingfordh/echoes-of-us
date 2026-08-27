@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "source": "docs/narrative/03_剧情对白表.md",
+  "entries": {
+    "D001": {"speaker": "余念 · 独白", "text": "终于封上了……累死了。\n\n三箱。衣服一箱，书一箱，剩下乱七八糟的塞一箱。\n\n二十三年，收拾到最后也就这么点。", "blocking": false, "duration": 4.5},
+    "D002": {"speaker": "余念 · 独白", "text": "保温杯、苹果、胃药……\n\n我什么时候装的？\n\n……行。知道是谁了。", "blocking": false, "duration": 4.0},
+    "D003": {"speaker": "余念 · 独白", "text": "票，通知……都在。\n\n两点零五。明早六点四十到。还挺久。\n\n……这印子怎么擦不掉。\n\n算了。", "blocking": false, "duration": 4.8},
+    "D004": {"speaker": "余念 · 独白", "text": "还行。看着挺像那么回事。", "blocking": false, "duration": 2.4},
+    "D005": {"speaker": "余秀兰", "text": "伞没拿。你这拉链怎么又卡了？", "blocking": true, "duration": 2.2},
+    "D006": {"speaker": "余秀兰", "text": "那边这两天有雨。塞着吧，省得到地方现买。", "blocking": true, "duration": 2.6},
+    "D007": {"speaker": "余念", "text": "妈，真塞不下了，你别硬塞啊。", "blocking": true, "duration": 2.2},
+    "D008": {"speaker": "余念", "text": "到那儿再买就行，便利店多的是。", "blocking": true, "duration": 2.2},
+    "D009": {"speaker": "余秀兰", "text": "十几二十块不是钱啊？家里有，还买。", "blocking": true, "duration": 2.3},
+    "D010": {"speaker": "余秀兰", "text": "还有这两盒药你别给我拿出来，啊，你一忙起来，饭都不按点吃。", "blocking": true, "duration": 3.2},
+    "D011": {"speaker": "余秀兰", "text": "你说你……非得跑那么远干什么。省城不是也有工作吗？", "blocking": true, "duration": 3.0},
+    "D012": {"speaker": "余念", "text": "妈，你说，这伞都多少年了，骨架都松了，我带它干什么。", "blocking": true, "duration": 3.0},
+    "D013": {"speaker": "余秀兰", "text": "行。你不要就不要。", "blocking": true, "duration": 1.9},
+    "D014": {"speaker": "余秀兰", "text": "放这儿了。爱拿不拿。", "blocking": true, "duration": 2.0},
+    "D015": {"speaker": "余念", "text": "怎么又回来了？", "blocking": false, "duration": 2.0},
+    "D016": {"speaker": "余念", "text": "……线？", "blocking": false, "duration": 2.1},
+    "D017": {"speaker": "余念", "text": "等等……它托得住我？", "blocking": false, "duration": 2.4},
+    "D018": {"speaker": "余念", "text": "……妈妈不想让我走？", "blocking": true, "duration": 2.8},
+    "D041": {"speaker": "余念 · 独白", "text": "真是的，我的耳机，找了一星期，原来在这儿。\n\n……这种地方也就我进得来。", "blocking": false, "duration": 4.0},
+    "D042": {"speaker": "余念 · 独白", "text": "小学春游……我站哪儿呢。\n\n哦，这儿。\n\n妈还站最后一排。她那时候头发这么长啊。\n\n这张怎么搁这么高。", "blocking": false, "duration": 4.8},
+    "D043": {"speaker": "余念 · 独白", "text": "这件还在啊。领口都硬了。\n\n我都说多少次了，留着也没人穿。\n\n……算了。她爱留就留着吧。", "blocking": false, "duration": 4.5},
+    "D044": {"speaker": "余念 · 独白", "text": "这线都起毛了。\n\n……回头换一根。", "blocking": false, "duration": 3.0},
+    "D045": {"speaker": "余念 · 独白", "text": "……又多两盒。\n她什么时候塞的。", "blocking": false, "duration": 2.8},
+    "D046": {"speaker": "余念 · 独白", "text": "这伞还在啊。\n\n猫脸都要掉没了，伞骨也松了。\n\n……她怎么什么都留。", "blocking": false, "duration": 4.2},
+    "D047": {"speaker": "余念 · 独白", "text": "它们一直都在这儿。", "blocking": false, "duration": 2.5}
+  }
+}
