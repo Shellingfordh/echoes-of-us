@@ -7,6 +7,7 @@ var _companion: Node2D
 var _tie_line: Line2D
 var _umbrella: Area2D
 var _world: Node2D
+var _audio: Node
 
 
 func _initialize() -> void:
@@ -30,11 +31,13 @@ func _run() -> void:
 	_tie_line = _game.get_node_or_null("TieLine") as Line2D
 	_umbrella = _game.get_node_or_null("Umbrella") as Area2D
 	_world = _game.get_node_or_null("GrayboxWorld") as Node2D
+	_audio = _game.get_node_or_null("AudioDirector")
 	_check(_player != null, "player exists")
 	_check(_companion != null, "companion exists")
 	_check(_tie_line != null, "tie line exists")
 	_check(_umbrella != null, "umbrella exists")
 	_check(_world != null, "full demo world exists")
+	_check(_audio != null, "procedural audio director exists")
 	if _failures > 0:
 		quit(1)
 		return
@@ -55,12 +58,17 @@ func _run() -> void:
 
 	if _failures == 0:
 		print("[SmokeTest] PASS - all four acts load and complete")
-	quit(1 if _failures > 0 else 0)
+	var exit_code := 1 if _failures > 0 else 0
+	_audio.call("shutdown")
+	_game.queue_free()
+	await _frames(3)
+	quit(exit_code)
 
 
 func _test_act_one() -> void:
 	_check(_phase() == "act1_explore", "Act 1 starts with room exploration")
 	_check(_tie_line.call("get_state_name") == "Hidden", "Act 1 tie line starts hidden")
+	_check(_audio.get("current_mood") == "home", "Act 1 starts with the home ambience")
 
 	# The desk owns interaction priority; a second interaction reveals its ticket fragment.
 	_player.global_position = _world.call("get_point", "desk")
@@ -95,6 +103,7 @@ func _test_act_one() -> void:
 
 	_check(int(_game.get("fragments_found")) == 5, "all five memory fragments can be collected")
 	_check(int(_game.get("echoes_found")) == 3, "all three echo points can be heard by waiting")
+	_check(_audio.get("last_cue") == "echo", "hidden echoes produce an audio cue")
 
 	for item_id in ["box", "suitcase"]:
 		_player.global_position = _world.call("get_point", item_id)
@@ -122,6 +131,7 @@ func _test_act_one() -> void:
 func _test_act_two() -> void:
 	_check(_player.get("role_name") == "年轻母亲", "Act 2 begins from the young mother's perspective")
 	_check(_tie_line.call("get_state_name") == "Adjustable", "memory starts with an Adjustable line")
+	_check(_audio.get("current_mood") == "memory", "Act 2 switches to rain ambience")
 
 	_player.global_position = _world.get("bicycle_position") + Vector2(0.0, 55.0)
 	await _hold(&"move_up", 0.75)
@@ -222,6 +232,7 @@ func _test_act_three() -> void:
 
 func _test_act_four() -> void:
 	_check(_tie_line.call("get_state_name") == "Extending", "Act 4 removes resistance and extends the line")
+	_check(_audio.get("current_mood") == "run", "Act 4 switches to the running ambience")
 	_player.global_position = Vector2(760.0, 500.0)
 	await _frames(3)
 	_player.global_position = Vector2(1540.0, 500.0)

@@ -65,6 +65,7 @@ const ECHO_TEXT := {
 @onready var tie_line: TieLine = %TieLine
 @onready var umbrella: MemoryUmbrella = %Umbrella
 @onready var ui: PrototypeUI = %PrototypeUI
+@onready var audio_director: AudioDirector = %AudioDirector
 
 var phase := Phase.ACT1_EXPLORE
 var current_interaction := ""
@@ -93,10 +94,13 @@ func _ready() -> void:
 	tie_line.revealed.connect(_on_tie_revealed)
 	tie_line.maximum_tension_reached.connect(_on_maximum_tension_reached)
 	umbrella.inspected.connect(_on_umbrella_inspected)
+	ui.checkpoint_shown.connect(_on_checkpoint_shown)
+	ui.chapter_shown.connect(_on_chapter_shown)
 	_start_act_one()
 
 
 func _physics_process(delta: float) -> void:
+	audio_director.set_tension(tie_line.tension_value if tie_line.state == TieLine.TieState.TENSE else 0.0)
 	_update_debug_ui()
 	_update_interaction_prompt()
 	_apply_stage_constraints()
@@ -151,6 +155,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_tree().reload_current_scene()
 	elif event.is_action_pressed(&"toggle_debug"):
 		ui.toggle_debug()
+	elif event.is_action_pressed(&"toggle_help"):
+		ui.toggle_controls_hint()
 	elif event.is_action_pressed(&"switch_character"):
 		_try_switch_character()
 
@@ -158,6 +164,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _start_act_one() -> void:
 	phase = Phase.ACT1_EXPLORE
 	world.set_layout(FullDemoWorld.Layout.HOME)
+	audio_director.set_mood("home")
 	player.set_role("成年女儿")
 	player.set_world_bounds(Rect2(96.0, 258.0, 1350.0, 350.0))
 	player.global_position = Vector2(420.0, 470.0)
@@ -174,7 +181,8 @@ func _start_act_one() -> void:
 	ui.set_objective("调查纸箱、行李箱和书桌（0/3）")
 	ui.set_role(player.role_name)
 	ui.set_collection(0, 0)
-	ui.set_debug_visible(true)
+	ui.set_debug_visible(false)
+	ui.show_controls_hint()
 
 
 func _update_interaction_prompt() -> void:
@@ -279,6 +287,7 @@ func _collect_fragment(fragment_id: String) -> void:
 	fragments_found += 1
 	ui.set_collection(fragments_found, echoes_found)
 	ui.show_checkpoint("记忆碎片 %d/5" % fragments_found)
+	audio_director.play_cue("fragment")
 	ui.show_dialogue("记忆碎片", FRAGMENT_TEXT[fragment_id], 2.4)
 
 
@@ -307,6 +316,7 @@ func _update_echo_points(delta: float) -> void:
 		echoes_found += 1
 		ui.set_collection(fragments_found, echoes_found)
 		ui.show_dialogue("远处的回响", ECHO_TEXT[nearby_echo], 2.6)
+		audio_director.play_cue("echo")
 		_echo_hold_id = ""
 		_echo_hold_time = 0.0
 
@@ -345,6 +355,7 @@ func _on_tie_revealed() -> void:
 		return
 	phase = Phase.ACT1_TIE
 	ui.set_objective("继续走，感受牵挂线的变化  →")
+	audio_director.play_cue("reveal")
 	ui.show_dialogue("女儿 · 心声", "……这是什么？", 2.0)
 
 
@@ -354,6 +365,7 @@ func _on_maximum_tension_reached() -> void:
 	_phase_guard = true
 	phase = Phase.ACT1_PULLBACK
 	player.controls_enabled = false
+	audio_director.play_cue("tension")
 	ui.set_phase("第一次分离")
 	ui.set_objective("牵挂线已经绷紧")
 	var tween := create_tween()
@@ -382,9 +394,11 @@ func _enter_act_two() -> void:
 	_phase_guard = true
 	phase = Phase.TRANSITION
 	player.controls_enabled = false
+	audio_director.play_cue("transition")
 	umbrella.set_interaction_enabled(false)
 	await ui.show_dialogue("女儿 · 心声", "小时候下雨，她总把伞往我这边倾。", 2.5)
 	world.set_layout(FullDemoWorld.Layout.MEMORY_STREET)
+	audio_director.set_mood("memory")
 	umbrella.visible = false
 	umbrella.set_process(false)
 	player.set_role("年轻母亲")
@@ -526,6 +540,7 @@ func _finish_act_two() -> void:
 func _enter_act_three_attach() -> void:
 	phase = Phase.TRANSITION
 	world.set_layout(FullDemoWorld.Layout.HOME)
+	audio_director.set_mood("home")
 	player.set_role("成年女儿")
 	player.global_position = Vector2(850.0, 490.0)
 	companion.set_role("母亲")
@@ -559,6 +574,7 @@ func _attach_line_to_umbrella() -> void:
 
 func _setup_corridor() -> void:
 	world.set_layout(FullDemoWorld.Layout.CORRIDOR)
+	audio_director.set_mood("corridor")
 	umbrella.visible = false
 	umbrella.set_process(false)
 	player.set_role("母亲")
@@ -634,6 +650,7 @@ func _anchor_corridor_two() -> void:
 
 func _setup_warehouse() -> void:
 	world.set_layout(FullDemoWorld.Layout.WAREHOUSE)
+	audio_director.set_mood("warehouse")
 	player.set_role("母亲")
 	player.global_position = Vector2(390.0, 500.0)
 	companion.set_role("成年女儿")
@@ -689,6 +706,7 @@ func _update_warehouse_box_two(_delta: float) -> void:
 
 func _setup_rooftop() -> void:
 	world.set_layout(FullDemoWorld.Layout.ROOFTOP)
+	audio_director.set_mood("rooftop")
 	player.set_role("母亲")
 	player.global_position = Vector2(380.0, 500.0)
 	companion.set_role("成年女儿")
@@ -743,6 +761,7 @@ func _update_rooftop_crossing() -> void:
 
 func _setup_street() -> void:
 	world.set_layout(FullDemoWorld.Layout.STREET)
+	audio_director.set_mood("street")
 	player.set_role("成年女儿")
 	player.global_position = Vector2(300.0, 500.0)
 	player.set_world_bounds(Rect2(96.0, 258.0, 1400.0, 350.0))
@@ -793,6 +812,7 @@ func _enter_act_four() -> void:
 	phase = Phase.TRANSITION
 	player.controls_enabled = false
 	world.set_layout(FullDemoWorld.Layout.RUN)
+	audio_director.set_mood("run")
 	player.set_world_bounds(Rect2(96.0, 258.0, 3000.0, 350.0))
 	player.global_position = Vector2(300.0, 500.0)
 	companion.global_position = Vector2(80.0, 500.0)
@@ -970,8 +990,17 @@ func _ensure_input_actions() -> void:
 	_register_key_action(&"run", [KEY_SHIFT])
 	_register_key_action(&"restart", [KEY_R])
 	_register_key_action(&"toggle_debug", [KEY_F3])
+	_register_key_action(&"toggle_help", [KEY_F1])
 	_register_mouse_action(&"interact", MOUSE_BUTTON_LEFT)
 	_register_mouse_action(&"tie_control", MOUSE_BUTTON_LEFT)
+
+
+func _on_checkpoint_shown() -> void:
+	audio_director.play_cue("checkpoint")
+
+
+func _on_chapter_shown() -> void:
+	audio_director.play_cue("transition")
 
 
 func _register_key_action(action: StringName, keys: Array) -> void:

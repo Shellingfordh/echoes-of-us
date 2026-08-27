@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/prototype_ui.gd" id="1_ui"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_top"]
-bg_color = Color(0.055, 0.047, 0.082, 0.9)
+bg_color = Color(0.055, 0.047, 0.082, 0.76)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -55,13 +55,11 @@ unique_name_in_owner = true
 script = ExtResource("1_ui")
 
 [node name="TopMargin" type="MarginContainer" parent="."]
-anchors_preset = 10
-anchor_right = 1.0
+anchors_preset = 0
 offset_left = 24.0
 offset_top = 22.0
-offset_right = -24.0
-offset_bottom = 142.0
-grow_horizontal = 2
+offset_right = 710.0
+offset_bottom = 134.0
 mouse_filter = 2
 
 [node name="TopRow" type="HBoxContainer" parent="TopMargin"]
@@ -92,10 +90,11 @@ theme_override_font_sizes/font_size = 21
 text = "向门口走，试着离开家"
 
 [node name="ControlsLabel" type="Label" parent="TopMargin/TopRow/ObjectivePanel/ObjectiveBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.63, 0.73, 1)
 theme_override_font_sizes/font_size = 12
-text = "WASD / 方向键移动   E 互动   Tab 切换角色   空格/鼠标拉紧线   R 重开   F3 调试"
+text = "WASD 移动 · E 互动 · Tab 切换 · 空格控线 · F1 帮助"
 
 [node name="StatusRow" type="HBoxContainer" parent="TopMargin/TopRow/ObjectivePanel/ObjectiveBox"]
 layout_mode = 2

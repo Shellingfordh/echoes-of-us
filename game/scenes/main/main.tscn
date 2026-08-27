@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/graybox_world.gd" id="2_world"]
@@ -7,9 +7,14 @@
 [ext_resource type="PackedScene" path="res://scenes/characters/mother.tscn" id="5_mother"]
 [ext_resource type="PackedScene" path="res://scenes/props/yellow_umbrella.tscn" id="6_umbrella"]
 [ext_resource type="PackedScene" path="res://scenes/ui/prototype_ui.tscn" id="7_ui"]
+[ext_resource type="Script" path="res://scripts/audio_director.gd" id="8_audio"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
+
+[node name="AudioDirector" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("8_audio")
 
 [node name="GrayboxWorld" type="Node2D" parent="."]
 unique_name_in_owner = true

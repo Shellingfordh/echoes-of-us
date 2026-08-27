@@ -126,17 +126,42 @@ func _draw() -> void:
 
 func _draw_base(background: Color, floor_color: Color, width := 1600.0) -> void:
 	draw_rect(Rect2(0.0, 0.0, width, 720.0), background)
-	draw_rect(Rect2(0.0, 225.0, width, 420.0), floor_color)
-	draw_rect(Rect2(0.0, 608.0, width, 37.0), floor_color.lightened(0.08))
-	for x_position in range(0, int(width) + 1, 80):
-		draw_line(Vector2(x_position, 258.0), Vector2(x_position, 608.0), Color(0.55, 0.52, 0.66, 0.07), 1.0)
-	for y_position in range(288, 609, 64):
-		draw_line(Vector2(0.0, y_position), Vector2(width, y_position), Color(0.55, 0.52, 0.66, 0.07), 1.0)
+	for band in range(9):
+		var ratio := float(band) / 8.0
+		var band_color := background.lerp(floor_color, 0.18 + ratio * 0.36)
+		draw_rect(Rect2(0.0, 185.0 + band * 28.0, width, 30.0), band_color)
+	draw_rect(Rect2(0.0, 420.0, width, 225.0), floor_color)
+	for wash_index in range(32):
+		var wash_x := fmod(float(wash_index * 193), width + 180.0) - 90.0
+		var wash_y := 250.0 + fmod(float(wash_index * 71), 330.0)
+		var wash_color := floor_color.lightened(0.12 if wash_index % 2 == 0 else -0.08)
+		wash_color.a = 0.035
+		_draw_ellipse(Vector2(wash_x, wash_y), Vector2(115.0 + float(wash_index % 4) * 23.0, 32.0), wash_color)
+	for y_position in range(456, 609, 58):
+		draw_line(Vector2(0.0, y_position), Vector2(width, y_position + 5.0), Color(0.8, 0.76, 0.72, 0.025), 2.0)
+	draw_rect(Rect2(0.0, 608.0, width, 37.0), floor_color.lightened(0.055))
+	draw_rect(Rect2(0.0, 645.0, width, 75.0), background.darkened(0.22))
+	_draw_paper_grain(width)
 
 
 func _draw_home() -> void:
 	_draw_base(Color("#161325"), Color("#242038"))
 	draw_rect(Rect2(105.0, 270.0, 690.0, 315.0), Color("#29243b"), true)
+	draw_rect(Rect2(474.0, 284.0, 114.0, 92.0), Color("#605c72"), true)
+	draw_rect(Rect2(482.0, 292.0, 98.0, 76.0), Color("#333a50"), true)
+	draw_line(Vector2(531.0, 292.0), Vector2(531.0, 368.0), Color("#8f8998"), 2.0)
+	draw_line(Vector2(482.0, 330.0), Vector2(580.0, 330.0), Color("#8f8998"), 2.0)
+	draw_colored_polygon(PackedVector2Array([Vector2(452.0, 278.0), Vector2(482.0, 278.0), Vector2(470.0, 398.0), Vector2(438.0, 398.0)]), Color("#5f4658"))
+	draw_colored_polygon(PackedVector2Array([Vector2(580.0, 278.0), Vector2(610.0, 278.0), Vector2(622.0, 398.0), Vector2(590.0, 398.0)]), Color("#5f4658"))
+	_draw_ellipse(Vector2(510.0, 512.0), Vector2(230.0, 70.0), Color(0.38, 0.3, 0.4, 0.32))
+	draw_rect(Rect2(140.0, 324.0, 116.0, 8.0), Color("#68564f"), true)
+	for frame_x in [150.0, 194.0, 226.0]:
+		draw_rect(Rect2(frame_x, 287.0, 24.0, 30.0), Color("#786b70"), true)
+	draw_line(Vector2(755.0, 285.0), Vector2(755.0, 376.0), Color("#82715e"), 5.0)
+	draw_circle(Vector2(755.0, 380.0), 10.0, Color("#65765c"))
+	draw_circle(Vector2(742.0, 370.0), 13.0, Color("#536b55"))
+	draw_circle(Vector2(768.0, 366.0), 12.0, Color("#536b55"))
+	_glow(Vector2(531.0, 330.0), 90.0, Color("#c4b0d7"))
 	draw_rect(Rect2(1000.0, 263.0, 112.0, 345.0), Color("#302c42"), true)
 	draw_rect(Rect2(1023.0, 288.0, 70.0, 320.0), Color("#4b4050"), true)
 	draw_circle(Vector2(1078.0, 452.0), 5.0, Color("#f6d79a"))
@@ -165,6 +190,14 @@ func _draw_home() -> void:
 
 func _draw_memory_street() -> void:
 	_draw_base(Color("#352d32"), Color("#514743"))
+	for building_index in range(8):
+		var building_x := float(building_index * 215 - 30)
+		var building_height := 110.0 + float((building_index * 47) % 95)
+		draw_rect(Rect2(building_x, 420.0 - building_height, 175.0, building_height), Color(0.29, 0.27, 0.29, 0.64), true)
+		for window_index in range(3):
+			var window_color := Color(0.94, 0.72, 0.4, 0.18 + float((building_index + window_index) % 2) * 0.12)
+			draw_rect(Rect2(building_x + 26.0 + window_index * 45.0, 338.0, 22.0, 28.0), window_color, true)
+	_draw_ellipse(Vector2(800.0, 566.0), Vector2(610.0, 29.0), Color(0.43, 0.56, 0.62, 0.1))
 	for rain_x in range(40, 1580, 70):
 		var offset := fmod(_elapsed * 170.0 + rain_x * 0.31, 280.0)
 		draw_line(Vector2(rain_x, 235.0 + offset), Vector2(rain_x - 8.0, 255.0 + offset), Color(0.76, 0.83, 0.85, 0.22), 1.2)
@@ -199,6 +232,13 @@ func _draw_memory_street() -> void:
 
 func _draw_corridor() -> void:
 	_draw_base(Color("#121722"), Color("#252b37"))
+	for door_x in [170.0, 340.0, 1030.0, 1320.0]:
+		draw_rect(Rect2(door_x, 315.0, 92.0, 224.0), Color("#202631"), true)
+		draw_rect(Rect2(door_x + 8.0, 325.0, 76.0, 214.0), Color("#323a47"), false, 3.0)
+		draw_circle(Vector2(door_x + 72.0, 430.0), 4.0, Color("#d4b372"))
+	for light_x in [295.0, 875.0, 1260.0]:
+		draw_circle(Vector2(light_x, 310.0), 7.0, Color("#e7bf78"))
+		_glow(Vector2(light_x, 318.0), 52.0, Color("#d8aa65"))
 	_label("现实 · 楼道合作", Vector2(95.0, 285.0), Color("#a7c8dd"), 17)
 	draw_rect(Rect2(630.0, 530.0, 140.0, 78.0), Color("#0b0e14"), true)
 	draw_rect(Rect2(1160.0, 530.0, 120.0, 78.0), Color("#0b0e14"), true)
@@ -214,6 +254,13 @@ func _draw_corridor() -> void:
 
 func _draw_warehouse() -> void:
 	_draw_base(Color("#171717"), Color("#303033"))
+	for beam_x in range(120, 1540, 250):
+		draw_rect(Rect2(float(beam_x), 245.0, 18.0, 363.0), Color("#242426"), true)
+		draw_line(Vector2(beam_x + 18.0, 270.0), Vector2(beam_x + 225.0, 340.0), Color("#3d3936"), 8.0)
+	for dust_index in range(24):
+		var dust_x := float((dust_index * 127) % 1480 + 55)
+		var dust_y := 295.0 + fmod(float(dust_index * 83) + _elapsed * (5.0 + dust_index % 3), 250.0)
+		draw_circle(Vector2(dust_x, dust_y), 1.5, Color(0.86, 0.77, 0.61, 0.16))
 	_label("仓库 · 各尽所能", Vector2(95.0, 285.0), Color("#d3bc8d"), 17)
 	_draw_crate(box_one_position, "重箱 1", highlight_id == "warehouse_box_1")
 	_draw_plate(get_point("warehouse_plate_1"), gate_one_open)
@@ -232,6 +279,15 @@ func _draw_warehouse() -> void:
 
 func _draw_rooftop() -> void:
 	_draw_base(Color("#151b2c"), Color("#252d3d"))
+	for skyline_index in range(11):
+		var skyline_x := float(skyline_index * 155 - 20)
+		var skyline_height := 55.0 + float((skyline_index * 37) % 105)
+		draw_rect(Rect2(skyline_x, 420.0 - skyline_height, 125.0, skyline_height), Color(0.16, 0.2, 0.29, 0.72), true)
+	for star_index in range(30):
+		var star_x := float((star_index * 193) % 1540 + 20)
+		var star_y := 245.0 + float((star_index * 61) % 145)
+		draw_circle(Vector2(star_x, star_y), 1.1 + float(star_index % 2), Color(0.78, 0.83, 0.92, 0.24))
+	_draw_ellipse(Vector2(1260.0, 278.0), Vector2(82.0, 27.0), Color(0.72, 0.76, 0.83, 0.08))
 	_label("天台 · 交替锚定", Vector2(95.0, 285.0), Color("#b6cae7"), 17)
 	draw_rect(Rect2(320.0, 535.0, 260.0, 73.0), Color("#3d4657"), true)
 	draw_rect(Rect2(650.0, 455.0, 255.0, 153.0), Color("#465064"), true)
@@ -247,6 +303,14 @@ func _draw_rooftop() -> void:
 
 func _draw_street() -> void:
 	_draw_base(Color("#17202a"), Color("#2f3a42"))
+	for tree_x in [170.0, 360.0, 1230.0, 1430.0]:
+		draw_line(Vector2(tree_x, 530.0), Vector2(tree_x, 390.0), Color("#39423d"), 13.0)
+		for crown_offset in [-30.0, 0.0, 28.0]:
+			draw_circle(Vector2(tree_x + crown_offset, 390.0 - absf(crown_offset) * 0.35), 36.0, Color(0.25, 0.36, 0.32, 0.72))
+	for lamp_x in [530.0, 850.0, 1170.0]:
+		draw_line(Vector2(lamp_x, 510.0), Vector2(lamp_x, 355.0), Color("#566064"), 6.0)
+		draw_circle(Vector2(lamp_x, 350.0), 8.0, Color("#e8cd8a"))
+		_glow(Vector2(lamp_x, 360.0), 48.0, Color("#dfbf75"))
 	_label("外面的世界", Vector2(95.0, 285.0), Color("#aed4d3"), 17)
 	draw_rect(Rect2(960.0, 455.0, 150.0, 100.0), Color("#395a46"), true)
 	for plant_x in range(980, 1100, 24):
@@ -339,3 +403,16 @@ func _draw_ellipse(center: Vector2, radii: Vector2, color: Color) -> void:
 		var angle := TAU * float(index) / 32.0
 		polygon.append(center + Vector2(cos(angle) * radii.x, sin(angle) * radii.y))
 	draw_colored_polygon(polygon, color)
+
+
+func _draw_paper_grain(width: float) -> void:
+	for grain_index in range(74):
+		var grain_x := fmod(float(grain_index * 149), width)
+		var grain_y := fmod(float(grain_index * 97), 645.0)
+		var grain_alpha := 0.018 + float(grain_index % 4) * 0.006
+		draw_line(
+			Vector2(grain_x, grain_y),
+			Vector2(grain_x + 16.0 + float(grain_index % 7) * 3.0, grain_y + float(grain_index % 3) - 1.0),
+			Color(0.92, 0.88, 0.82, grain_alpha),
+			1.0
+		)

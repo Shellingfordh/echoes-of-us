@@ -1,8 +1,12 @@
 class_name PrototypeUI
 extends CanvasLayer
 
+signal checkpoint_shown
+signal chapter_shown
+
 @onready var objective_label: Label = %ObjectiveLabel
 @onready var phase_label: Label = %PhaseLabel
+@onready var controls_label: Label = %ControlsLabel
 @onready var role_label: Label = %RoleLabel
 @onready var collection_label: Label = %CollectionLabel
 @onready var dialogue_panel: PanelContainer = %DialoguePanel
@@ -23,6 +27,7 @@ extends CanvasLayer
 
 var _dialogue_revision := 0
 var _checkpoint_revision := 0
+var _controls_revision := 0
 var duration_scale := 1.0
 
 
@@ -54,6 +59,21 @@ func set_debug_visible(visible_now: bool) -> void:
 func toggle_debug() -> bool:
 	debug_panel.visible = not debug_panel.visible
 	return debug_panel.visible
+
+
+func show_controls_hint(duration := 7.0) -> void:
+	_controls_revision += 1
+	var revision := _controls_revision
+	controls_label.visible = true
+	await get_tree().create_timer(maxf(duration * duration_scale, 0.05)).timeout
+	if revision == _controls_revision:
+		controls_label.visible = false
+
+
+func toggle_controls_hint() -> bool:
+	_controls_revision += 1
+	controls_label.visible = not controls_label.visible
+	return controls_label.visible
 
 
 func update_debug(
@@ -96,6 +116,7 @@ func show_dialogue(speaker: String, text: String, duration := 2.2) -> void:
 
 
 func show_checkpoint(text := "✓ 检查点") -> void:
+	checkpoint_shown.emit()
 	_checkpoint_revision += 1
 	var revision := _checkpoint_revision
 	checkpoint_label.text = text
@@ -106,6 +127,7 @@ func show_checkpoint(text := "✓ 检查点") -> void:
 
 
 func show_chapter(kicker: String, title: String) -> void:
+	chapter_shown.emit()
 	fade_rect.visible = true
 	fade_rect.modulate.a = 0.0
 	var fade_in := create_tween()
