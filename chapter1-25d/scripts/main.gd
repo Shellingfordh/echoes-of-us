@@ -15,6 +15,7 @@ enum Phase {
 
 const REQUIRED_IDS := ["boxes", "suitcase", "desk", "earphones", "photo"]
 const INTERACTION_RADIUS := 1.65
+const LABEL_REVEAL_RADIUS := 2.35
 const CORE_DIALOGUE := {
 	"boxes": "D001",
 	"suitcase": "D002",
@@ -139,7 +140,7 @@ func _load_dialogue() -> void:
 
 
 func _build_room() -> void:
-	_create_box(room, "Floor", Vector3(0.0, -0.1, 0.0), Vector3(16.0, 0.2, 5.6), Color("#796957"))
+	_create_box(room, "Floor", Vector3(0.0, -0.1, 1.7), Vector3(16.0, 0.2, 9.0), Color("#796957"))
 	_create_box(room, "BackWall", Vector3(0.0, 2.1, -2.75), Vector3(16.0, 4.2, 0.2), Color("#b8aa91"))
 	_create_box(room, "LeftWall", Vector3(-8.0, 1.75, 0.0), Vector3(0.22, 3.5, 5.6), Color("#887967"))
 	_create_box(room, "CeilingBeam", Vector3(0.0, 3.95, -2.15), Vector3(16.0, 0.18, 1.0), Color("#67594e"))
@@ -218,7 +219,7 @@ func _build_desk() -> void:
 		for z in [-0.34, 0.34]:
 			_create_box(desk, "Leg", Vector3(x, 0.45, z), Vector3(0.12, 0.9, 0.12), Color("#665044"))
 	_create_box(desk, "Ticket", Vector3(0.18, 1.03, 0.03), Vector3(0.8, 0.025, 0.32), Color("#e5dec8"))
-	_add_box_collision(desk, "CollisionBody", Vector3(0.0, 0.52, 0.0), Vector3(2.1, 1.04, 0.85))
+	_add_box_collision(desk, "CollisionBody", Vector3(0.0, 0.52, 0.0), Vector3(2.3, 1.04, 0.95))
 	_register_object("desk", desk, true, "书桌")
 
 
@@ -783,8 +784,11 @@ func _update_glows() -> void:
 			elif object_id == "umbrella" and phase == Phase.P3_AFTER_SUPPORT:
 				visible = true
 
-		glow.visible = visible and (state.node as Node3D).visible
-		label.visible = glow.visible
+		var object_node := state.node as Node3D
+		glow.visible = visible and object_node.visible
+		var near_enough := _flat_distance(player.global_position, object_node.global_position) <= LABEL_REVEAL_RADIUS
+		var interaction_base := current_interaction.trim_suffix("_p2").trim_suffix("_final")
+		label.visible = glow.visible and (near_enough or interaction_base == object_id)
 		if glow.visible:
 			glow.scale = Vector3.ONE * (pulse * (1.35 if object_id == current_interaction else 1.0))
 			var material := glow.material_override as StandardMaterial3D

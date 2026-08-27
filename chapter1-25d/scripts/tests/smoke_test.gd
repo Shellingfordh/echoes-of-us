@@ -34,6 +34,13 @@ func _run() -> void:
 	_check(_game.get_node_or_null("Props/Suitcase/CollisionBody") is StaticBody3D, "suitcase has a static collision body")
 	_check(_game.get_node_or_null("Props/Stool/CollisionBody") is StaticBody3D, "stool has a static collision body")
 	_check(int(_game.get("required_done")) == 0, "chapter starts before the five required investigations")
+	player.global_position = Vector3(4.0, 0.0, 1.0)
+	_game.call("_update_glows")
+	var boxes_label := _game.get_node("Props/MovingBoxes/ObjectLabel") as Label3D
+	_check(not boxes_label.visible, "distant object labels stay hidden to preserve exploration")
+	player.global_position = Vector3(-2.3, 0.0, 1.6)
+	_game.call("_update_glows")
+	_check(boxes_label.visible, "object labels appear after the player approaches")
 	player.global_position = Vector3(-3.0, 0.0, 0.35)
 	var bed_hit := player.move_and_collide(Vector3(-2.4, 0.0, 0.0))
 	_check(bed_hit != null and bed_hit.get_collider() is StaticBody3D, "player is blocked by the bed instead of crossing it")
