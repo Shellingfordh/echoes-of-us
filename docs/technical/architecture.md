@@ -279,7 +279,7 @@ Dialogue / Puzzle / Camera
 # 14. 场景结构建议
 
 ```text
-scenes/
+game/scenes/
 ├── main/
 │   └── main.tscn
 ├── levels/

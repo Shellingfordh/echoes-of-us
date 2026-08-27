@@ -14,7 +14,7 @@
 
 你只需要记住：
 
-> **文档放 `docs/`，正式游戏素材放 `assets/`，技术代码放 `scripts/`，Godot 场景放 `scenes/`。**
+> **文档放 `docs/`，完整 Godot 工程放 `game/`；工程内的素材、代码和场景分别放 `game/assets/`、`game/scripts/`、`game/scenes/`。**
 
 不要自己新建：
 
@@ -95,7 +95,7 @@ Relationship Physics / 关系物理
 运行：
 
 ```bash
-godot --path .
+godot --path game
 ```
 
 操作：
@@ -113,7 +113,7 @@ F3               显示/隐藏 Debug
 无界面流程测试：
 
 ```bash
-godot --headless --path . --script res://scripts/tests/smoke_test.gd
+godot --headless --path game --script res://scripts/tests/smoke_test.gd
 ```
 
 ---
@@ -124,7 +124,6 @@ godot --headless --path . --script res://scripts/tests/smoke_test.gd
 echoes-of-us/
 
 ├── README.md
-├── project.godot
 ├── .gitignore
 
 ├── docs/
@@ -133,11 +132,13 @@ echoes-of-us/
 │   ├── art-bible/
 │   └── technical/
 
-├── scenes/
-├── scripts/
-├── assets/
-├── audio/
-├── ui/
+├── game/
+│   ├── project.godot
+│   ├── scenes/
+│   ├── scripts/
+│   ├── assets/
+│   ├── audio/
+│   └── ui/
 
 └── _artwork/
 ```
@@ -146,23 +147,27 @@ echoes-of-us/
 
 所有策划和技术文档。
 
-## scenes
+## game
+
+完整的 Godot 工程目录。用 Godot 导入 `game/project.godot`，或者在仓库根目录运行 `godot --path game`。
+
+## game/scenes
 
 Godot 场景。
 
-## scripts
+## game/scripts
 
 GDScript 代码。
 
-## assets
+## game/assets
 
 已经确定进入游戏的正式图片、角色、场景、道具等素材。
 
-## audio
+## game/audio
 
 BGM、音效、配音。
 
-## ui
+## game/ui
 
 游戏 UI。
 
@@ -178,8 +183,8 @@ AI 原图、参考图、废稿、PSD 等工作过程文件。
 | -- | --------------------------- | ---------- |
 | 剧情 | `docs/narrative/`           | 故事、角色、对白   |
 | 关卡 | `docs/level-design/`        | 关卡流程、交互、谜题 |
-| 美术 | `assets/`、`docs/art-bible/` | 游戏素材、视觉规范  |
-| 技术 | `scenes/`、`scripts/`、`ui/`  | Godot 实现   |
+| 美术 | `game/assets/`、`docs/art-bible/` | 游戏素材、视觉规范  |
+| 技术 | `game/scenes/`、`game/scripts/`、`game/ui/`  | Godot 实现   |
 
 ---
 
@@ -277,16 +282,16 @@ puzzle-design.md
 正式进入游戏的素材：
 
 ```text
-assets/
+game/assets/
 ```
 
 例如：
 
 ```text
-assets/characters/mother_adult.png
-assets/characters/daughter_adult.png
-assets/props/yellow_umbrella.png
-assets/environments/home_background.png
+game/assets/characters/mother_adult.png
+game/assets/characters/daughter_adult.png
+game/assets/props/yellow_umbrella.png
+game/assets/environments/home_background.png
 ```
 
 AI 原图、PSD、参考图、废稿：
@@ -295,7 +300,7 @@ AI 原图、PSD、参考图、废稿：
 _artwork/
 ```
 
-不要把大量废稿放进 `assets/`。
+不要把大量废稿放进 `game/assets/`。
 
 正式素材命名必须清楚。
 
@@ -325,9 +330,9 @@ IMG_001.png
 技术同学负责：
 
 ```text
-scenes/
-scripts/
-ui/
+game/scenes/
+game/scripts/
+game/ui/
 ```
 
 ## 第一步：创建自己的 Branch
@@ -657,7 +662,7 @@ PR 正文模板：
 
 ### 注意事项
 - 参数为 Prototype 数值，后续需要调参
-- 影响文件：`scripts/tie_line.gd`, `scenes/level01.tscn`
+- 影响文件：`game/scripts/tie_line.gd`, `game/scenes/level01.tscn`
 
 复审者请检查：性能（连接数上限）、资源路径是否破坏场景引用
 
