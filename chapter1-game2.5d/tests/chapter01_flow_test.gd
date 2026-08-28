@@ -96,12 +96,15 @@ func _run() -> void:
 	assert(act.current_beat == Act01Sequence.Beat.SECOND_ATTEMPT)
 	assert(tie_line.distance <= tie_line.tension_distance + 0.15)
 
+	# 回归：第二次尝试必须能靠真实持续输入越过临界距离，不能依赖传送坐标。
 	# SR-006：第二次极限张力不是对白占位，而是抬高逻辑 Y 并保留有限横摆输入。
-	player.set_logical_position(Vector3(16.8, 0.0, 1.0))
-	for _index in range(60):
+	assert(tie_line.get_critical_distance() < tie_line.get_effective_max_distance())
+	Input.action_press(&"move_right")
+	for _index in range(240):
 		await physics_frame
 		if act.current_beat == Act01Sequence.Beat.SUSPENDED:
 			break
+	Input.action_release(&"move_right")
 	assert(act.current_beat == Act01Sequence.Beat.SUSPENDED)
 	assert(player.is_suspended())
 	assert(player.get_logical_position().y >= player.suspension_height)

@@ -66,6 +66,10 @@ func _process(_delta: float) -> void:
 			_tie_line.tension_distance,
 			_tie_line.max_distance,
 		])
+		lines.append("critical     distance %.2f | tension %.3f" % [
+			_tie_line.get_critical_distance(),
+			_tie_line.critical_tension,
+		])
 	else:
 		lines.append("line_state  <no TieLine>")
 

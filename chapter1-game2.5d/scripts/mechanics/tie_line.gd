@@ -22,6 +22,8 @@ enum State { HIDDEN, NORMAL, TENSION, PULL_BACK }
 @export_range(0.0, 1.0, 0.01) var distance_weight := 0.64
 @export_range(0.0, 1.0, 0.01) var exit_progress_weight := 0.20
 @export_range(0.8, 1.0, 0.005) var critical_tension := 0.985
+@export_range(0.9, 1.0, 0.005) var critical_distance_ratio := 0.985
+@export_range(0.0, 0.5, 0.01) var minimum_away_speed_multiplier := 0.12
 
 var current_state := State.HIDDEN
 var tension := 0.0
@@ -70,7 +72,7 @@ func _process(_delta: float) -> void:
 		0.0,
 		1.0
 	)
-	if _force_critical or distance >= get_effective_max_distance() or tension >= critical_tension:
+	if _force_critical or distance >= get_critical_distance() or tension >= critical_tension:
 		_pullback_active = true
 	elif _pullback_active and distance <= _get_pullback_release_distance() + 0.02 and tension < critical_tension:
 		_pullback_active = false
@@ -116,6 +118,10 @@ func get_effective_max_distance() -> float:
 	return maxf(max_distance * (extend_multiplier if extended else 1.0), 0.01)
 
 
+func get_critical_distance() -> float:
+	return get_effective_max_distance() * critical_distance_ratio
+
+
 func set_extended(value: bool) -> void:
 	extended = value
 
@@ -145,12 +151,14 @@ func set_force_critical(value: bool) -> void:
 func get_speed_multiplier() -> float:
 	if current_state == State.HIDDEN:
 		return 1.0
+	if current_state == State.PULL_BACK:
+		return 0.0
 	var span := get_effective_max_distance() - reveal_distance
 	if span <= 0.0:
 		return 1.0
 	var distance_ratio := clampf((distance - reveal_distance) / span, 0.0, 1.0)
 	var ratio := maxf(distance_ratio, tension)
-	return maxf(0.0, 1.0 - ratio * ratio)
+	return maxf(minimum_away_speed_multiplier, 1.0 - ratio * ratio)
 
 
 func is_moving_away(from_position: Vector3, direction: Vector3) -> bool:
@@ -169,8 +177,7 @@ func get_logical_correction() -> Vector3:
 	target.y = 0.0
 	source.y = 0.0
 	var offset := source - target
-	var limit := get_effective_max_distance()
-	if _force_critical or offset.length() >= limit or tension >= critical_tension:
+	if _force_critical or offset.length() >= get_critical_distance() or tension >= critical_tension:
 		_pullback_active = true
 	elif _pullback_active and offset.length() <= _get_pullback_release_distance() + 0.02 and tension < critical_tension:
 		_pullback_active = false
