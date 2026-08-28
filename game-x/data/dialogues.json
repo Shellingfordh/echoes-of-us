@@ -1,0 +1,163 @@
+{
+  "_comment": "第一章屋内对白 Source of Truth。依据 docs/narrative/03_剧情对白表.md；剧情同学只改 speaker、lines、next。presentation_group 只控制连续同角色台词是否同屏呈现，不改变对白 ID、正文或顺序。",
+  "_schema": "mode = monologue/dialogue；speaker = 说话人；lines = 当前节点的句子；next = 下一节点 ID 或 END；presentation_group = 可选，仅将连续同角色节点合并为同一表现屏。",
+
+  "D001": {
+    "mode": "monologue",
+    "speaker": "余念·独白",
+    "lines": ["终于收完了！我还以为真要收出十箱八箱呢。", "……也好，东西少，走起来省事。"],
+    "next": "END"
+  },
+  "D002": {
+    "mode": "monologue",
+    "speaker": "余念·独白",
+    "lines": ["我就知道，她到底什么时候进来的……每次都这样，也不先问我一声。", "算了，药先放着吧。"],
+    "next": "END"
+  },
+  "D003": {
+    "mode": "monologue",
+    "speaker": "余念·独白",
+    "lines": ["总算等到这一天了。", "……怎么还真有点紧张……没事，到了再说！"],
+    "next": "END"
+  },
+  "D004": {
+    "mode": "monologue",
+    "speaker": "余念·独白",
+    "lines": ["看着还行嘛。至少不像第一次出远门的人。"],
+    "next": "D044"
+  },
+  "D005": {
+    "mode": "dialogue",
+    "speaker": "余秀兰",
+    "presentation_group": "umbrella_opening",
+    "lines": ["雨伞没拿，来，给你装上。你这拉链怎么又卡了？"],
+    "next": "D006"
+  },
+  "D006": {
+    "mode": "dialogue",
+    "speaker": "余秀兰",
+    "presentation_group": "umbrella_opening",
+    "lines": ["那边这两天有雨。塞着吧，省得到地方现买。"],
+    "next": "D007"
+  },
+  "D007": {
+    "mode": "dialogue",
+    "speaker": "余念",
+    "presentation_group": "umbrella_boundary",
+    "lines": ["妈，真塞不下了，你别硬塞啊。"],
+    "next": "D008"
+  },
+  "D008": {
+    "mode": "dialogue",
+    "speaker": "余念",
+    "presentation_group": "umbrella_boundary",
+    "lines": ["到那儿再买就行，便利店多的是。"],
+    "next": "D009"
+  },
+  "D009": {
+    "mode": "dialogue",
+    "speaker": "余秀兰",
+    "presentation_group": "umbrella_pressure",
+    "lines": ["十几二十块不是钱啊？家里有，还买。"],
+    "next": "D010"
+  },
+  "D010": {
+    "mode": "dialogue",
+    "speaker": "余秀兰",
+    "presentation_group": "umbrella_pressure",
+    "lines": ["还有这两盒药你别给我拿出来，啊，你一忙起来，饭都不按点吃。"],
+    "next": "D011"
+  },
+  "D011": {
+    "mode": "dialogue",
+    "speaker": "余秀兰",
+    "lines": ["你说你……非得跑那么远干什么。省城不是也有工作吗？"],
+    "next": "D012"
+  },
+  "D012": {
+    "mode": "dialogue",
+    "speaker": "余念",
+    "lines": ["妈，你说，这伞都多少年了，骨架都松了，我带它干什么。"],
+    "next": "D013"
+  },
+  "D013": {
+    "mode": "dialogue",
+    "speaker": "余秀兰",
+    "presentation_group": "umbrella_withdrawal",
+    "lines": ["行。你不要就不要。"],
+    "next": "D014"
+  },
+  "D014": {
+    "mode": "dialogue",
+    "speaker": "余秀兰",
+    "presentation_group": "umbrella_withdrawal",
+    "lines": ["放这儿了。爱拿不拿。"],
+    "next": "END"
+  },
+  "D015": {
+    "mode": "monologue",
+    "speaker": "余念",
+    "lines": ["怎么又回来了？"],
+    "next": "D016"
+  },
+  "D016": {
+    "mode": "monologue",
+    "speaker": "余念",
+    "lines": ["……线？"],
+    "next": "END"
+  },
+  "D017": {
+    "mode": "monologue",
+    "speaker": "余念",
+    "lines": ["不是幻觉？这是怎么回事？"],
+    "next": "END"
+  },
+  "D018": {
+    "mode": "dialogue",
+    "speaker": "余念",
+    "lines": ["……妈妈不想让我走？"],
+    "next": "END"
+  },
+  "D041": {
+    "mode": "monologue",
+    "speaker": "余念·独白",
+    "lines": ["我就说没丢嘛。妈前两天还让我别找了，再买一副。幸好没听她的。", "……这种地方也就我进得来，要换成她，腰肯定不行。"],
+    "next": "END"
+  },
+  "D042": {
+    "mode": "monologue",
+    "speaker": "余念·独白",
+    "lines": ["妈以前头发这么长啊。", "……她现在拍照还老说自己不上镜，明明这张倒笑得挺开心的。"],
+    "next": "END"
+  },
+  "D043": {
+    "mode": "monologue",
+    "speaker": "余念·独白",
+    "lines": ["爸爸的衣服……还留着。每次收拾都说‘下回再弄’，下回又原样挂回去。", "……算了，她想留就留吧。"],
+    "next": "END"
+  },
+  "D044": {
+    "mode": "monologue",
+    "speaker": "余念·独白",
+    "lines": ["这东西居然还没散架。不过，换根线，应该也还能戴。"],
+    "next": "END"
+  },
+  "D045": {
+    "mode": "monologue",
+    "speaker": "余念·独白",
+    "lines": ["又塞。她是不是觉得我一出这个门就能立刻病倒啊。", "……算了，也不沉。"],
+    "next": "END"
+  },
+  "D046": {
+    "mode": "monologue",
+    "speaker": "余念·独白",
+    "lines": ["她还真把它留下了。", "……刚才跟一把伞较什么劲。先放这儿吧。"],
+    "next": "END"
+  },
+  "D047": {
+    "mode": "monologue",
+    "speaker": "余念·独白",
+    "lines": ["……怎么现在看什么都像那根东西。烦死了。"],
+    "next": "END"
+  }
+}
