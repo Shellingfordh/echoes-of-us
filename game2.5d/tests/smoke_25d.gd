@@ -14,6 +14,7 @@ func _run() -> void:
 	var player := main.get_node("Player") as PlayerController
 	var tie_line := main.get_node("TieLine") as TieLine
 	var dialogue_db := main.get_node("DialogueDatabase") as DialogueDatabase
+	var observation_db := main.get_node("ObservationDatabase") as ObservationDatabase
 	var start := player.get_logical_position()
 	assert(start.is_equal_approx(Vector3(5.0, 0.0, 10.2)))
 	assert(player.global_position.is_equal_approx(Projection25D.project(start)))
@@ -59,6 +60,7 @@ func _run() -> void:
 	var room := main.get_node("World/Chapter01Room01")
 	var required_objects := get_nodes_in_group(&"key_object")
 	assert(required_objects.size() == 5)
+	assert(observation_db.get_all_ids().size() == 11)
 	for dialogue_id in [
 		"D001", "D002", "D003", "D004", "D005", "D014", "D015", "D016",
 		"D017", "D018", "D041", "D042", "D043", "D044", "D045", "D046", "D047",
@@ -68,12 +70,18 @@ func _run() -> void:
 	assert((room.get_node("Interactables/Headphones") as Interactable).is_key_object)
 	assert(not (room.get_node("Interactables/WardrobeInspect") as Interactable).is_key_object)
 	assert(not (room.get_node("Interactables/WindowInspect") as Interactable).is_key_object)
+	assert((room.get_node("Interactables/BeadBracelet") as Interactable).observation_id == "O044")
 	assert(not (room.get_node("Interactables/ThreadClue") as Interactable).interaction_enabled)
 	var wardrobe := room.get_node("Midground/Wardrobe") as SpatialProp25D
 	var photo := room.get_node("Interactables/PhotoFrame") as Interactable
+	var stool := room.get_node("Interactables/Stool") as Interactable
 	var window := room.get_node("Midground/Window") as SpatialProp25D
-	# 相框画面仍在柜顶，但交互锚点位于衣柜正前方，玩家不必绕到柜侧。
+	# 相框画面仍在柜顶；先移动有真实碰撞的木凳，才开放交互锚点。
 	assert(photo.get_logical_position().is_equal_approx(Vector3(3.0, 0.0, 2.9)))
+	assert(not photo.interaction_enabled)
+	assert(stool.get_node("MathBody") is StaticBody3D)
+	stool.interact(player)
+	assert(photo.interaction_enabled)
 	player.set_logical_position(Vector3(3.0, 0.0, 3.0))
 	await physics_frame
 	await physics_frame

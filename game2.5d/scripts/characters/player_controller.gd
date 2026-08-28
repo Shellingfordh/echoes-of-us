@@ -9,14 +9,24 @@ extends Node2D
 @export var anchor_height := 1.05
 @export var pull_back_stiffness := 6.0
 @export var max_pull_speed := 5.5
+@export var suspension_height := 1.35
+@export var swing_acceleration := 4.8
+@export var swing_damping := 3.2
+@export var swing_max_offset := 1.25
 
 @onready var math_body: CharacterBody3D = $MathBody
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var interaction_area: Area2D = $InteractionArea
+@onready var ground_shadow: Polygon2D = $GroundShadow
 
 var _game_flow: GameFlow
 var _current_interactable: Area2D
 var _tie_line: TieLine
+var _suspended := false
+var _suspension_origin := Vector3.ZERO
+var _swing_offset := 0.0
+var _swing_velocity := 0.0
+var _suspension_input_seen := false
 
 var logical_position: Vector3:
 	get:
@@ -30,8 +40,12 @@ func _ready() -> void:
 	_sync_projection()
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	_game_flow = _get_game_flow()
+	if _suspended:
+		_update_suspension(delta)
+		_update_interaction_target()
+		return
 	if _game_flow != null and not _game_flow.is_player_control_enabled():
 		math_body.velocity = Vector3.ZERO
 		_play_idle_animation()
@@ -68,8 +82,68 @@ func _physics_process(_delta: float) -> void:
 
 
 func set_logical_position(value: Vector3) -> void:
-	math_body.position = Vector3(value.x, 0.0, value.z)
+	math_body.position = value
 	_sync_projection()
+
+
+func begin_suspension() -> void:
+	_suspended = true
+	_suspension_origin = get_logical_position()
+	_suspension_origin.y = 0.0
+	_swing_offset = 0.0
+	_swing_velocity = 0.0
+	_suspension_input_seen = false
+	math_body.velocity = Vector3.ZERO
+	_update_suspension_projection()
+
+
+func end_suspension(landing_position: Vector3) -> void:
+	_suspended = false
+	_swing_velocity = 0.0
+	_swing_offset = 0.0
+	math_body.position = Vector3(landing_position.x, 0.0, landing_position.z)
+	math_body.velocity = Vector3.ZERO
+	_sync_projection()
+
+
+func is_suspended() -> bool:
+	return _suspended
+
+
+func has_suspension_input() -> bool:
+	return _suspension_input_seen
+
+
+func debug_mark_suspension_input() -> void:
+	_suspension_input_seen = true
+
+
+func _update_suspension(delta: float) -> void:
+	var horizontal_input := Input.get_axis(&"move_left", &"move_right")
+	if not is_zero_approx(horizontal_input):
+		_suspension_input_seen = true
+	_swing_velocity += horizontal_input * swing_acceleration * delta
+	_swing_velocity = move_toward(_swing_velocity, 0.0, swing_damping * delta)
+	_swing_offset = clampf(
+		_swing_offset + _swing_velocity * delta,
+		-swing_max_offset,
+		swing_max_offset
+	)
+	if absf(_swing_offset) >= swing_max_offset - 0.001:
+		_swing_velocity *= -0.28
+	_update_suspension_projection()
+
+
+func _update_suspension_projection() -> void:
+	# 逻辑 X/Z 同时反向变化，在等距投影中形成画面水平方向的有限摆动。
+	var screen_horizontal_axis := Vector3(1.0, 0.0, -1.0).normalized()
+	var logical := _suspension_origin + screen_horizontal_axis * _swing_offset
+	logical.y = suspension_height + absf(_swing_offset) * 0.17
+	math_body.position = logical
+	_sync_projection()
+	if is_instance_valid(ground_shadow):
+		var ground_position := Vector3(logical.x, 0.0, logical.z)
+		ground_shadow.position = Projection25D.project(ground_position) - global_position
 
 
 ## WASD 按画面方向解释：单键是上/下/左/右，同时按两键才是斜向。
@@ -97,6 +171,8 @@ func _sync_projection() -> void:
 		return
 	global_position = Projection25D.project(math_body.position)
 	z_index = Projection25D.depth_index(math_body.position) + 4
+	if is_instance_valid(ground_shadow) and not _suspended:
+		ground_shadow.position = Vector2.ZERO
 
 
 func _get_speed_scale(direction: Vector3) -> float:

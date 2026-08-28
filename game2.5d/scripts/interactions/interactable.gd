@@ -5,10 +5,13 @@ signal interacted(player: PlayerController)
 
 @export var display_name := "调查对象"
 @export var dialogue_id := ""
+@export var observation_id := ""
 @export var is_key_object := false
 @export var once_only := true
 @export var interaction_enabled := true
 @export var logical_position := Vector3.ZERO
+@export var interaction_prompt_override := ""
+@export var auto_play_dialogue := true
 
 ## 同格物件的先后微调（正数更靠前），墙面物件用 Projection25D.BAND_WALL。
 @export var depth_offset := 0
@@ -36,6 +39,8 @@ func get_logical_position() -> Vector3:
 
 
 func get_interaction_prompt() -> String:
+	if not interaction_prompt_override.is_empty():
+		return interaction_prompt_override
 	return "按 Enter / 空格调查：%s" % display_name
 
 
@@ -49,6 +54,8 @@ func interact(player: PlayerController) -> void:
 	investigated = true
 	_hide_glow()
 	interacted.emit(player)
+	if not auto_play_dialogue:
+		return
 
 	var dialogue_ui := get_tree().get_first_node_in_group(&"dialogue_ui") as DialogueUI
 	if dialogue_ui == null:
@@ -64,6 +71,19 @@ func configure_dialogue(next_dialogue_id: String, reset_investigation := true) -
 	if reset_investigation:
 		investigated = false
 	_set_glow_visible(true)
+
+
+func configure_observation(next_observation_id: String, reset_investigation := true) -> void:
+	observation_id = next_observation_id
+	if reset_investigation:
+		investigated = false
+	_set_glow_visible(true)
+
+
+func reset_interaction() -> void:
+	investigated = false
+	if interaction_enabled:
+		_set_glow_visible(true)
 
 
 func set_interaction_enabled(value: bool) -> void:

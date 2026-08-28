@@ -6,6 +6,7 @@ extends Node2D
 @onready var tie_line: TieLine = $TieLine
 @onready var act_01: Act01Sequence = $Act01Sequence
 @onready var objective_label: ObjectiveLabel = $UI/ObjectiveLabel
+@onready var transition_overlay: ColorRect = $UI/TransitionOverlay
 
 
 func _ready() -> void:
@@ -28,8 +29,23 @@ func _ready() -> void:
 
 
 func _on_act_01_finished() -> void:
-	# Demo 到此为止。正式版这里进入记忆转场（第二章"第一次放手"）。
-	print("[Main] Act 1 完成，记忆转场占位。")
+	transition_overlay.visible = true
+	transition_overlay.color = Color(0.22, 0.075, 0.06, 1.0)
+	transition_overlay.modulate.a = 0.0
+	var title := transition_overlay.get_node_or_null("EchoTitle") as Label
+	if title == null:
+		title = Label.new()
+		title.name = "EchoTitle"
+		title.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		title.text = "余响\n2009 年秋"
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		title.add_theme_font_size_override("font_size", 34)
+		title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.64, 1.0))
+		transition_overlay.add_child(title)
+	var tween := create_tween()
+	tween.tween_property(transition_overlay, "modulate:a", 1.0, 1.15)
+	print("[Main] Act 1 完成，黄伞余响阈值已触发。")
 
 
 func show_room_view() -> void:

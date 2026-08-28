@@ -13,6 +13,10 @@ var _follow_vertical := false
 var _active_tween: Tween
 
 
+func _ready() -> void:
+	add_to_group(&"camera_rig")
+
+
 func _process(_delta: float) -> void:
 	if is_instance_valid(_follow_target):
 		var next_position := _follow_target.global_position
@@ -34,12 +38,20 @@ func move_to(
 	target_zoom: Vector2 = default_zoom,
 	duration: float = default_transition_duration
 ) -> void:
+	move_to_position(target.global_position, target_zoom, duration)
+
+
+func move_to_position(
+	target_position: Vector2,
+	target_zoom: Vector2 = default_zoom,
+	duration: float = default_transition_duration
+) -> void:
 	_cancel_transition()
 	_follow_target = null
 
 	_active_tween = create_tween().set_parallel()
 	_active_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_active_tween.tween_property(self, "global_position", target.global_position, duration)
+	_active_tween.tween_property(self, "global_position", target_position, duration)
 	_active_tween.tween_property(camera, "zoom", target_zoom, duration)
 
 
