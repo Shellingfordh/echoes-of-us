@@ -13,6 +13,9 @@ func _run() -> void:
 
 	var player := main.get_node("Player") as PlayerController
 	var tie_line := main.get_node("TieLine") as TieLine
+	var act := main.get_node("Act01Sequence") as Act01Sequence
+	var hint := main.get_node("UI/InteractionHint") as InteractionHint
+	var objective := main.get_node("UI/ObjectiveLabel") as Label
 	var dialogue_db := main.get_node("DialogueDatabase") as DialogueDatabase
 	var object_info_db := main.get_node("ObjectInfoDatabase") as ObjectInfoDatabase
 	var start := player.get_logical_position()
@@ -91,8 +94,24 @@ func _run() -> void:
 	assert(not photo.interaction_enabled)
 	assert(stool.get_node("MathBody") is StaticBody3D)
 	assert("相框" not in stool.get_interaction_prompt())
+	player.set_logical_position(Vector3(3.0, 0.0, 3.0))
+	await physics_frame
+	await physics_frame
+	assert(player._current_interactable == null)
+	assert(player._current_hint_only_interactable == photo)
+	assert(hint.visible and hint.text == "柜顶相框太高了，站在这里看不清。")
+	var stool_start := stool.get_logical_position()
 	stool.interact(player)
+	for _index in range(60):
+		await physics_frame
+		if photo.interaction_enabled:
+			break
 	assert(photo.interaction_enabled)
+	assert(not stool.get_logical_position().is_equal_approx(stool_start))
+	assert(stool.get_logical_position().is_equal_approx(act.stool_placed_position))
+	assert((stool.get_node("MathBody") as StaticBody3D).position.is_equal_approx(act.stool_placed_position))
+	assert(stool.global_position.is_equal_approx(Projection25D.project(act.stool_placed_position)))
+	assert("靠近相框" in objective.text)
 	player.set_logical_position(Vector3(3.0, 0.0, 3.0))
 	await physics_frame
 	await physics_frame

@@ -11,6 +11,7 @@ signal interacted(player: PlayerController)
 @export var interaction_enabled := true
 @export var logical_position := Vector3.ZERO
 @export var interaction_prompt_override := ""
+@export var disabled_interaction_prompt := ""
 @export var auto_play_dialogue := true
 
 ## 同格物件的先后微调（正数更靠前），墙面物件用 Projection25D.BAND_WALL。
@@ -44,8 +45,20 @@ func get_interaction_prompt() -> String:
 	return "按 Enter / 空格调查：%s" % display_name
 
 
+func get_disabled_interaction_prompt() -> String:
+	return disabled_interaction_prompt
+
+
 func can_interact() -> bool:
 	return interaction_enabled and (not once_only or not investigated)
+
+
+func can_show_disabled_hint() -> bool:
+	return (
+		not interaction_enabled
+		and not disabled_interaction_prompt.is_empty()
+		and (not once_only or not investigated)
+	)
 
 
 func interact(player: PlayerController) -> void:

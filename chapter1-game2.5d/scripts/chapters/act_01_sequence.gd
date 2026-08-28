@@ -44,6 +44,8 @@ const OBSERVATION_COPY := {
 @export var mother_after_dialogue_position := Vector3(6.4, 0.0, 9.2)
 @export var minimum_probe_input_seconds := 0.65
 @export var probe_timeout_seconds := 4.0
+@export var stool_placed_position := Vector3(3.1, 0.0, 3.15)
+@export var stool_move_duration := 0.32
 
 var current_beat := Beat.P1_EXPLORE
 var _investigated_keys := 0
@@ -67,6 +69,7 @@ var _suitcase: Interactable
 var _thread_clue: Interactable
 var _photo: Interactable
 var _stool: Interactable
+var _stool_move_tween: Tween
 
 
 func setup(room: RoomBase, player: PlayerController, tie_line: TieLine) -> void:
@@ -165,12 +168,31 @@ func _on_key_object_investigated(_player_ref: PlayerController) -> void:
 
 
 func _on_stool_used(_player_ref: PlayerController) -> void:
-	if current_beat != Beat.P1_EXPLORE or _photo == null:
+	if current_beat != Beat.P1_EXPLORE or _photo == null or _stool == null:
 		return
+	objective_changed.emit("余念把木凳往衣柜边挪。")
+	var start_position := _stool.get_logical_position()
+	if stool_move_duration <= 0.0 or start_position.is_equal_approx(stool_placed_position):
+		_stool.set_logical_position(stool_placed_position)
+		_finish_stool_move()
+		return
+	_stool_move_tween = create_tween()
+	_stool_move_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_stool_move_tween.tween_method(
+		Callable(_stool, "set_logical_position"),
+		start_position,
+		stool_placed_position,
+		stool_move_duration
+	)
+	_stool_move_tween.finished.connect(_finish_stool_move)
+
+
+func _finish_stool_move() -> void:
+	_stool_move_tween = null
 	_photo.set_interaction_enabled(true)
 	_photo.set_highlight(Color(1.0, 0.92, 0.72, 0.25), true)
 	_set_story_flag(&"chapter1_photo_unlocked")
-	objective_changed.emit("木凳放稳了。现在能看清柜顶相框。")
+	objective_changed.emit("木凳挪到衣柜边了。靠近相框看看。")
 	_emit_debug("[Act01] stool placed / photo unlocked")
 
 
@@ -210,7 +232,7 @@ func _on_observation_closed(_object_id: String) -> void:
 func _update_explore_objective() -> void:
 	var remaining := _key_total - _investigated_keys
 	if _investigated_keys == 0:
-		objective_changed.emit("离开前，再确认一下房间里的东西。柜顶那张相框还够不到。")
+		objective_changed.emit("离开前，再确认一下房间里的东西。柜顶有张相框，在这里看不清。")
 	elif remaining > 1:
 		objective_changed.emit("房间还没完全收好。再四处看看。")
 	else:

@@ -23,6 +23,7 @@ signal empty_interact_pressed
 
 var _game_flow: GameFlow
 var _current_interactable: Area2D
+var _current_hint_only_interactable: Area2D
 var _tie_line: TieLine
 var _suspended := false
 var _suspension_origin := Vector3.ZERO
@@ -207,7 +208,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _game_flow != null and not _game_flow.is_player_control_enabled():
 		return
 	if _current_interactable == null:
-		empty_interact_pressed.emit()
+		if _current_hint_only_interactable == null:
+			empty_interact_pressed.emit()
 		get_viewport().set_input_as_handled()
 		return
 	if _current_interactable.has_method(&"interact"):
@@ -217,31 +219,50 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _update_interaction_target() -> void:
 	_current_interactable = null
-	var nearest_distance := INF
+	_current_hint_only_interactable = null
+	var nearest_interaction_distance := INF
+	var nearest_hint_distance := INF
 	var player_ground := get_logical_position()
 	for area in interaction_area.get_overlapping_areas():
 		if not area.has_method(&"interact"):
-			continue
-		if area.has_method(&"can_interact") and not area.can_interact():
 			continue
 		var distance := global_position.distance_squared_to(area.global_position)
 		if area.has_method(&"get_logical_position"):
 			var target: Vector3 = area.get_logical_position()
 			distance = Vector2(player_ground.x, player_ground.z).distance_squared_to(Vector2(target.x, target.z))
-		if distance < nearest_distance:
-			nearest_distance = distance
+		var is_actionable: bool = not area.has_method(&"can_interact") or area.can_interact()
+		if is_actionable and distance < nearest_interaction_distance:
+			nearest_interaction_distance = distance
 			_current_interactable = area
+		elif (
+			area.has_method(&"can_show_disabled_hint")
+			and area.can_show_disabled_hint()
+			and distance < nearest_hint_distance
+		):
+			nearest_hint_distance = distance
+			_current_hint_only_interactable = area
+
+	# 同一范围里若玩家明显更靠近“暂时够不到”的物件，先解释障碍；
+	# 走向解决它的可交互物件后，再切换为动作提示。
+	if (
+		_current_hint_only_interactable != null
+		and nearest_hint_distance < nearest_interaction_distance
+	):
+		_current_interactable = null
+	else:
+		_current_hint_only_interactable = null
 
 	var hint := get_tree().get_first_node_in_group(&"interaction_hint")
 	if hint == null:
 		return
-	if _current_interactable == null:
-		if _context_action_prompt.is_empty():
-			hint.hide_hint()
-		else:
-			hint.show_hint(_context_action_prompt)
-	else:
+	if _current_interactable != null:
 		hint.show_hint(_current_interactable.get_interaction_prompt())
+	elif not _context_action_prompt.is_empty():
+		hint.show_hint(_context_action_prompt)
+	elif _current_hint_only_interactable != null:
+		hint.show_hint(_current_hint_only_interactable.get_disabled_interaction_prompt())
+	else:
+		hint.hide_hint()
 
 
 func set_context_action_prompt(prompt: String) -> void:

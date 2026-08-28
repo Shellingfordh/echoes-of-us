@@ -335,6 +335,7 @@ display_name = "柜顶相框"
 dialogue_id = "D042"
 is_key_object = true
 logical_position = Vector3(3, 0, 2.9)
+disabled_interaction_prompt = "柜顶相框太高了，站在这里看不清。"
 depth_offset = 2
 
 [node name="Shape" type="CollisionShape2D" parent="Interactables/PhotoFrame" unique_id=1279859034]

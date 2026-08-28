@@ -20,6 +20,8 @@ func _run() -> void:
 	var object_info := main.get_node("UI/ObjectInfoUI") as ObjectInfoUI
 	var object_info_db := main.get_node("ObjectInfoDatabase") as ObjectInfoDatabase
 	var observation := main.get_node("UI/FixedObservationUI") as FixedObservationUI
+	var hint := main.get_node("UI/InteractionHint") as InteractionHint
+	var objective := main.get_node("UI/ObjectiveLabel") as Label
 	var transition := main.get_node("UI/TransitionOverlay") as ColorRect
 	var room := main.get_node("World/Chapter01Room01")
 	var mother := room.get_node("Characters/Mother") as Mother
@@ -47,8 +49,25 @@ func _run() -> void:
 	assert(object_info_db.get_text("O004") in observation._body_label.text)
 	assert(object_info_db.get_text("O044") in observation._body_label.text)
 	observation.close_observation()
+	player.set_logical_position(Vector3(3.0, 0.0, 3.0))
+	for _index in range(20):
+		await physics_frame
+		await process_frame
+		if player._current_hint_only_interactable == photo:
+			break
+	assert(player._current_interactable == null)
+	assert(player._current_hint_only_interactable == photo)
+	assert(hint.visible and "太高" in hint.text)
+	var stool_start := stool.get_logical_position()
 	stool.interact(player)
+	for _index in range(20):
+		await physics_frame
+		if photo.interaction_enabled:
+			break
 	assert(photo.interaction_enabled)
+	assert(not stool.get_logical_position().is_equal_approx(stool_start))
+	assert(stool.get_logical_position().is_equal_approx(act.stool_placed_position))
+	assert("靠近相框" in objective.text)
 
 	# P1 五件主调查：普通物件必须先显示 O-ID 客观事实，再播放 D-ID 主观反应。
 	for node_name in ["PackingBox", "Suitcase"]:

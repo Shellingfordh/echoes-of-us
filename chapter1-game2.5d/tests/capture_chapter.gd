@@ -1,6 +1,6 @@
 extends SceneTree
 
-const PREFIX := "/tmp/echoes-chapter1-audit-round2-after"
+const PREFIX := "/tmp/echoes-chapter1-audit-round3-after"
 
 
 func _initialize() -> void:
@@ -12,46 +12,51 @@ func _run() -> void:
 	var main := packed.instantiate()
 	root.add_child(main)
 	await _frames(8)
-	await _save("%s-room.png" % PREFIX)
+	await _save("%s-01-room-entry.png" % PREFIX)
 
 	var room := main.get_node("World/Chapter01Room01")
 	var player := main.get_node("Player") as PlayerController
-	var dialogue := main.get_node("UI/DialogueUI") as DialogueUI
-	var object_info := main.get_node("UI/ObjectInfoUI") as ObjectInfoUI
-	(room.get_node("Interactables/PackingBox") as Interactable).interact(player)
-	await _frames(8)
-	await _save("%s-packing-box-facts.png" % PREFIX)
-	object_info.advance()
-	await _frames(50)
-	await _save("%s-packing-box-reaction.png" % PREFIX)
-	dialogue._finish_immediately(true)
-	await _frames(2)
+	var photo := room.get_node("Interactables/PhotoFrame") as Interactable
+	var stool := room.get_node("Interactables/Stool") as Interactable
+	var hint := main.get_node("UI/InteractionHint") as InteractionHint
+	var camera_rig := main.get_node("CameraRig") as CameraRig
 
-	var observation := main.get_node("UI/FixedObservationUI") as FixedObservationUI
-	(room.get_node("Interactables/WindowInspect") as Interactable).interact(player)
-	await _frames(4)
-	await _save("%s-observation.png" % PREFIX)
-	observation.close_observation()
+	player.set_logical_position(Vector3(3.0, 0.0, 3.0))
+	_snap_camera(camera_rig, player)
+	await _physics_frames(5)
+	await _save("%s-02-photo-unreachable.png" % PREFIX)
+	print(
+		"[CAPTURE] before stool target=", player._current_interactable,
+		" hint_visible=", hint.visible,
+		" hint=", hint.text
+	)
 
-	var act := main.get_node("Act01Sequence") as Act01Sequence
-	var tie_line := main.get_node("TieLine") as TieLine
-	var mother := room.get_node("Characters/Mother") as Mother
-	mother.visible = true
-	mother.set_logical_position(act.mother_after_dialogue_position)
-	player.set_logical_position(Vector3(15.4, 0.0, 2.0))
-	act.current_beat = Act01Sequence.Beat.LINE_PROBE
-	tie_line.set_enabled(true)
-	act._enter_p3_line_reveal()
-	act._begin_line_probe()
-	Input.action_press(&"interact")
-	Input.action_press(&"move_right")
-	await _physics_frames(8)
-	Input.action_release(&"move_right")
-	Input.action_release(&"interact")
-	await _frames(3)
-	await _save("%s-grounded-probe.png" % PREFIX)
+	player.set_logical_position(Vector3(4.35, 0.0, 3.85))
+	_snap_camera(camera_rig, player)
+	await _physics_frames(5)
+	await _save("%s-03-stool-prompt.png" % PREFIX)
+	print(
+		"[CAPTURE] by stool target=", player._current_interactable,
+		" hint_visible=", hint.visible,
+		" hint=", hint.text
+	)
 
-	print("[CAPTURE] %s-{room,packing-box-facts,packing-box-reaction,observation,grounded-probe}.png" % PREFIX)
+	var stool_before := stool.get_logical_position()
+	stool.interact(player)
+	for _index in range(60):
+		await physics_frame
+		if photo.interaction_enabled:
+			break
+	await _physics_frames(3)
+	await _save("%s-04-after-stool.png" % PREFIX)
+	print(
+		"[CAPTURE] after stool position_before=", stool_before,
+		" position_after=", stool.get_logical_position(),
+		" photo_enabled=", photo.interaction_enabled,
+		" hint=", hint.text
+	)
+
+	print("[CAPTURE] %s-{01-room-entry,02-photo-unreachable,03-stool-prompt,04-after-stool}.png" % PREFIX)
 	quit(0)
 
 
@@ -70,3 +75,8 @@ func _frames(count: int) -> void:
 func _physics_frames(count: int) -> void:
 	for _index in range(count):
 		await physics_frame
+
+
+func _snap_camera(camera_rig: CameraRig, player: PlayerController) -> void:
+	camera_rig.global_position = player.global_position
+	camera_rig.camera.reset_smoothing()
