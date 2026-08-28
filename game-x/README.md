@@ -7,7 +7,7 @@
 - 等距 2D 画面与隐藏 3D `CharacterBody3D` / `StaticBody3D` 碰撞；
 - 五件主调查、P1/P2/P3 阶段切换，以及 O001-O047 客观信息 → D001-D047 人物反应的双层内容；
 - 不显示数字清单；探索进入最后两件后，目标文字才用生活化位置线索逐步收紧范围；
-- 靠近柜顶相框先确认高度障碍，移动带真实碰撞的木凳到衣柜边后再解锁观察；
+- 靠近柜顶相框先确认高度障碍；木凳带真实碰撞地移到衣柜边后，余念会走到凳前、踩上木凳观察相框，查看完再下凳恢复探索；
 - 窗玻璃、床底耳机、柜顶相框的固定观察；
 - 黄伞冲突保留 D005-D014 原文与顺序，并按开场、边界、压力、真正问题、转移和退让组织为六个手动推进的情绪段落；
 - 中文 UI 使用跨平台系统字体回退，避免关键对白出现缺字方框；
@@ -34,6 +34,7 @@ godot --path game-x
 ```bash
 godot --headless --path game-x --script res://tests/smoke_25d.gd
 godot --headless --path game-x --script res://tests/chapter01_flow_test.gd
+godot --headless --path game-x --script res://tests/p2_control_recovery_test.gd
 ```
 
 ## 内容维护

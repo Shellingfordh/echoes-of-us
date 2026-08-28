@@ -39,6 +39,7 @@ var _sprite_rest_rotation := 0.0
 var _shadow_rest_scale := Vector2.ONE
 var _resistance_visual_strength := 0.0
 var _resistance_screen_direction := Vector2.RIGHT
+var _scripted_motion_active := false
 
 var logical_position: Vector3:
 	get:
@@ -65,8 +66,9 @@ func _physics_process(delta: float) -> void:
 	if _game_flow != null and not _game_flow.is_player_control_enabled():
 		math_body.velocity = Vector3.ZERO
 		_update_resistance_feedback(0.0, Vector2.ZERO, delta)
-		_play_idle_animation()
-		_update_interaction_target()
+		if not _scripted_motion_active:
+			_play_idle_animation()
+		_clear_interaction_target()
 		return
 
 	var input := Input.get_vector(&"move_left", &"move_right", &"move_up", &"move_down")
@@ -102,6 +104,25 @@ func _physics_process(delta: float) -> void:
 func set_logical_position(value: Vector3) -> void:
 	math_body.position = value
 	_sync_projection()
+
+
+func begin_scripted_motion(target_position: Vector3) -> void:
+	_scripted_motion_active = true
+	var direction := target_position - get_logical_position()
+	var screen_direction := Projection25D.project_direction(direction)
+	if not is_zero_approx(screen_direction.x):
+		animated_sprite.flip_h = screen_direction.x < 0.0
+	animated_sprite.play(&"walk")
+
+
+func end_scripted_motion() -> void:
+	_scripted_motion_active = false
+	math_body.velocity = Vector3.ZERO
+	_play_idle_animation()
+
+
+func is_scripted_motion_active() -> bool:
+	return _scripted_motion_active
 
 
 func begin_suspension() -> void:
@@ -333,6 +354,14 @@ func _update_interaction_target() -> void:
 	elif _current_hint_only_interactable != null:
 		hint.show_hint(_current_hint_only_interactable.get_disabled_interaction_prompt())
 	else:
+		hint.hide_hint()
+
+
+func _clear_interaction_target() -> void:
+	_current_interactable = null
+	_current_hint_only_interactable = null
+	var hint := get_tree().get_first_node_in_group(&"interaction_hint")
+	if hint != null:
 		hint.hide_hint()
 
 

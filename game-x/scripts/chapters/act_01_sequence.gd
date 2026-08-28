@@ -6,6 +6,7 @@ extends Node
 
 signal objective_changed(text: String)
 signal act_finished
+signal photo_stool_sequence_finished
 
 enum Beat {
 	P1_EXPLORE,
@@ -66,6 +67,12 @@ const KEY_OBJECT_HINTS := {
 @export var probe_timeout_seconds := 4.0
 @export var stool_placed_position := Vector3(3.1, 0.0, 3.15)
 @export var stool_move_duration := 0.32
+@export var photo_stool_step_offset := Vector3(0.95, 0.0, 0.95)
+@export var photo_stool_height := 0.82
+@export var photo_stool_approach_duration := 0.24
+@export var photo_stool_climb_duration := 0.34
+@export var photo_stool_settle_seconds := 0.12
+@export var photo_stool_descend_duration := 0.34
 @export var echo_transition_seconds := 0.8
 
 var current_beat := Beat.P1_EXPLORE
@@ -95,6 +102,7 @@ var _thread_clue: Interactable
 var _photo: Interactable
 var _stool: Interactable
 var _stool_move_tween: Tween
+var _photo_stool_sequence_active := false
 
 
 func setup(room: RoomBase, player: PlayerController, tie_line: TieLine) -> void:
@@ -191,6 +199,8 @@ func _on_key_object_investigated(_player_ref: PlayerController) -> void:
 
 	# interacted 在对白或固定观察真正结束之前发出，必须等玩家回到房间后再进冲突。
 	await get_tree().process_frame
+	if _photo_stool_sequence_active:
+		await photo_stool_sequence_finished
 	if _object_info != null and _object_info.is_open():
 		await _object_info.info_closed
 	if _observation != null and _observation.is_open():
@@ -235,6 +245,9 @@ func _on_observation_interacted(_player_ref: PlayerController, target: Interacta
 	var copy: Dictionary = OBSERVATION_COPY.get(target.name, {})
 	if copy.is_empty():
 		return
+	if target == _photo:
+		_start_photo_stool_observation(target, copy)
+		return
 	if _camera_rig != null:
 		_camera_rig.move_to(target, Vector2(1.55, 1.55), 0.32)
 	_observation.observation_closed.connect(_on_observation_closed, CONNECT_ONE_SHOT)
@@ -255,6 +268,79 @@ func _compose_object_info(info_ids: Array) -> String:
 		if _object_info_database.has_info(info_id):
 			paragraphs.append(_object_info_database.get_text(info_id))
 	return "\n\n".join(paragraphs)
+
+
+func _start_photo_stool_observation(target: Interactable, copy: Dictionary) -> void:
+	if _photo_stool_sequence_active:
+		return
+	_photo_stool_sequence_active = true
+	if _game_flow != null:
+		_game_flow.set_mode(GameFlow.Mode.CUTSCENE)
+	objective_changed.emit("余念走到木凳前，踩上去看相框。")
+	if _camera_rig != null:
+		_camera_rig.move_to(target, Vector2(1.35, 1.35), 0.32)
+
+	await _move_player_scripted(get_photo_stool_step_position(), photo_stool_approach_duration)
+	await _move_player_scripted(get_photo_stool_stand_position(), photo_stool_climb_duration)
+	if photo_stool_settle_seconds > 0.0:
+		await get_tree().create_timer(photo_stool_settle_seconds).timeout
+	objective_changed.emit("站稳了。仔细看看柜顶的相框。")
+	if _camera_rig != null:
+		_camera_rig.move_to(target, Vector2(1.55, 1.55), 0.22)
+	_observation.observation_closed.connect(_on_photo_observation_closed, CONNECT_ONE_SHOT)
+	_observation.open_observation(
+		target.name,
+		str(copy.get("title", target.display_name)),
+		_compose_object_info(copy.get("info_ids", []) as Array),
+		target.dialogue_id
+	)
+	_emit_debug("[Act01] player standing on stool / photo observation")
+
+
+func _on_photo_observation_closed(_object_id: String) -> void:
+	objective_changed.emit("看完了，先从木凳上下来。")
+	await _move_player_scripted(get_photo_stool_step_position(), photo_stool_descend_duration)
+	if _camera_rig != null:
+		_camera_rig.follow(_player, Vector2.ONE, true)
+	if current_beat == Beat.P1_EXPLORE and _investigated_keys < _key_total:
+		_update_explore_objective()
+	if _game_flow != null:
+		_game_flow.set_mode(GameFlow.Mode.EXPLORE)
+	_photo_stool_sequence_active = false
+	_emit_debug("[Act01] player stepped down from stool")
+	photo_stool_sequence_finished.emit()
+
+
+func _move_player_scripted(target_position: Vector3, duration: float) -> void:
+	var start_position := _player.get_logical_position()
+	_player.begin_scripted_motion(target_position)
+	if duration <= 0.0 or start_position.is_equal_approx(target_position):
+		_player.set_logical_position(target_position)
+		_player.end_scripted_motion()
+		return
+	var motion_tween := create_tween()
+	motion_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	motion_tween.tween_method(
+		Callable(_player, "set_logical_position"),
+		start_position,
+		target_position,
+		duration
+	)
+	await motion_tween.finished
+	_player.set_logical_position(target_position)
+	_player.end_scripted_motion()
+
+
+func get_photo_stool_step_position() -> Vector3:
+	return stool_placed_position + photo_stool_step_offset
+
+
+func get_photo_stool_stand_position() -> Vector3:
+	return stool_placed_position + Vector3.UP * photo_stool_height
+
+
+func is_photo_stool_sequence_active() -> bool:
+	return _photo_stool_sequence_active
 
 
 func _on_observation_closed(_object_id: String) -> void:

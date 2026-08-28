@@ -88,11 +88,31 @@ func _run() -> void:
 	assert("/" not in objective.text)
 
 	photo.interact(player)
+	assert(act.is_photo_stool_sequence_active())
+	assert(game_flow.current_mode == GameFlow.Mode.CUTSCENE)
+	assert(not observation.is_open())
+	for _index in range(60):
+		await process_frame
+		if observation.is_open():
+			break
 	assert(observation.is_open() and observation.current_object_id == "PhotoFrame")
+	assert(player.get_logical_position().is_equal_approx(act.get_photo_stool_stand_position()))
+	assert(is_equal_approx(player.get_logical_position().y, act.photo_stool_height))
+	assert(not player.is_scripted_motion_active())
 	assert("小学春游合影" in observation._body_label.text)
-	assert(objective.text == "最后再看看书桌上的台历。")
+	assert(objective.text == "站稳了。仔细看看柜顶的相框。")
 	observation.close_observation()
-	await process_frame
+	for _index in range(60):
+		await process_frame
+		if not act.is_photo_stool_sequence_active():
+			break
+	assert(not act.is_photo_stool_sequence_active())
+	assert(player.get_logical_position().is_equal_approx(act.get_photo_stool_step_position()))
+	assert(is_zero_approx(player.get_logical_position().y))
+	assert(game_flow.current_mode == GameFlow.Mode.EXPLORE)
+	assert(objective.text == "最后再看看书桌上的台历。")
+	await physics_frame
+	assert(player.get_logical_position().is_equal_approx(act.get_photo_stool_step_position()))
 
 	# 将普通物件放在最后，验证 O-ID 与 D-ID 都结束前不会提前触发黄伞冲突。
 	var desk := room.get_node("Interactables/Desk") as Interactable
