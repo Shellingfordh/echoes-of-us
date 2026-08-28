@@ -34,6 +34,7 @@ var _pullback_active := false
 var emotional_pressure := 0.0
 var intention_conflict := 0.0
 var exit_progress := 0.0
+var appearance_progress := 1.0
 var _force_critical := false
 
 var _source: Node2D
@@ -41,6 +42,7 @@ var _target: Node2D
 var _glow_line: Line2D
 var _fiber_light: Line2D
 var _fiber_shadow: Line2D
+var _appearance_tween: Tween
 
 
 func _ready() -> void:
@@ -130,6 +132,23 @@ func set_enabled(value: bool) -> void:
 	enabled = value
 	if not value:
 		_pullback_active = false
+		appearance_progress = 1.0
+		if _appearance_tween != null:
+			_appearance_tween.kill()
+		_appearance_tween = null
+
+
+func reveal_from_source(duration: float = 0.9) -> void:
+	if _appearance_tween != null:
+		_appearance_tween.kill()
+	appearance_progress = 0.0
+	if duration <= 0.0:
+		appearance_progress = 1.0
+		_appearance_tween = null
+		return
+	_appearance_tween = create_tween()
+	_appearance_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_appearance_tween.tween_property(self, "appearance_progress", 1.0, duration)
 
 
 func set_context(next_emotional_pressure: float, next_intention_conflict: float, next_exit_progress: float) -> void:
@@ -231,7 +250,8 @@ func _update_visual() -> void:
 	for index in range(33):
 		var t := float(index) / 32.0
 		curve.append((1.0 - t) * (1.0 - t) * start + 2.0 * (1.0 - t) * t * control + t * t * finish)
-	points = curve
+	var visible_curve := _get_visible_curve(curve)
+	points = visible_curve
 
 	var yarn_color := normal_color
 	var width_scale := 1.0
@@ -245,7 +265,23 @@ func _update_visual() -> void:
 
 	default_color = yarn_color
 	width = visual_width * width_scale
-	_update_yarn_layers(curve, yarn_color, width_scale)
+	_update_yarn_layers(visible_curve, yarn_color, width_scale)
+
+
+func _get_visible_curve(curve: PackedVector2Array) -> PackedVector2Array:
+	if curve.is_empty() or appearance_progress >= 1.0:
+		return curve
+	var visible := PackedVector2Array()
+	var scaled_progress := clampf(appearance_progress, 0.0, 1.0) * float(curve.size() - 1)
+	var complete_index := floori(scaled_progress)
+	for index in range(complete_index + 1):
+		visible.append(curve[index])
+	if complete_index < curve.size() - 1:
+		var fraction := scaled_progress - float(complete_index)
+		visible.append(curve[complete_index].lerp(curve[complete_index + 1], fraction))
+	if visible.size() == 1:
+		visible.append(visible[0])
+	return visible
 
 
 func _setup_yarn_layers() -> void:
@@ -284,12 +320,13 @@ func _update_yarn_layers(curve: PackedVector2Array, yarn_color: Color, width_sca
 
 	var light_points := PackedVector2Array()
 	var shadow_points := PackedVector2Array()
+	var final_index := maxi(curve.size() - 1, 1)
 	for index in range(curve.size()):
 		var previous := curve[maxi(index - 1, 0)]
 		var following := curve[mini(index + 1, curve.size() - 1)]
 		var tangent := (following - previous).normalized()
 		var normal := Vector2(-tangent.y, tangent.x)
-		var t := float(index) / float(curve.size() - 1)
+		var t := float(index) / float(final_index)
 		var braid := sin(t * TAU * yarn_twists) * visual_width * width_scale * 0.28
 		light_points.append(curve[index] + normal * braid)
 		shadow_points.append(curve[index] - normal * braid)

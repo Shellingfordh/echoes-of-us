@@ -65,6 +65,7 @@ func _run() -> void:
 	# 遮挡排序：排序键只能来自地面深度 x + z，高度不参与。
 	# 柜顶相框和衣柜站在同一格地面上，相框必须靠 depth_offset 排到衣柜前面。
 	var room := main.get_node("World/Chapter01Room01")
+	assert(room.get_camera_point(&"LineRevealView") != null)
 	var required_objects := get_nodes_in_group(&"key_object")
 	assert(required_objects.size() == 5)
 	assert(act._get_remaining_key_hints() == [

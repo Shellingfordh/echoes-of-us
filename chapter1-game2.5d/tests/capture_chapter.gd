@@ -1,6 +1,6 @@
 extends SceneTree
 
-const PREFIX := "/tmp/echoes-chapter1-audit-round5-after"
+const PREFIX := "/tmp/echoes-chapter1-audit-round6-after"
 
 
 func _initialize() -> void:
@@ -13,48 +13,61 @@ func _run() -> void:
 	root.add_child(main)
 	await _frames(8)
 
-	var room := main.get_node("World/Chapter01Room01")
+	var player := main.get_node("Player") as PlayerController
 	var act := main.get_node("Act01Sequence") as Act01Sequence
 	var dialogue := main.get_node("UI/DialogueUI") as DialogueUI
-	var camera_rig := main.get_node("CameraRig") as CameraRig
+	var hint := main.get_node("UI/InteractionHint") as InteractionHint
 
 	dialogue.characters_per_second = 0.0
+	dialogue.monologue_hold_seconds = 30.0
 	dialogue.fade_duration = 0.0
-	_snap_room(camera_rig, room)
-	act._start_umbrella_scene()
-	await _frames(5)
-	assert(dialogue._current_id == "D005")
-	assert(dialogue.get_current_presentation_ids() == ["D005", "D006"])
-	await _save("%s-01-opening.png" % PREFIX)
+	act._finish_umbrella_scene()
+	player.set_logical_position(Vector3(14.95, 0.0, 2.4))
+	await _physics_frames(3)
 
-	var confirmations := 0
-	while dialogue._current_id != "D011":
-		dialogue.advance()
-		confirmations += 1
-		await _frames(2)
-	assert(confirmations == 3)
-	assert(dialogue.get_current_presentation_ids() == ["D011"])
-	await _save("%s-02-real-question.png" % PREFIX)
+	Input.action_press(&"move_right")
+	while act.current_beat == Act01Sequence.Beat.P2_LEAVE:
+		await physics_frame
+	Input.action_release(&"move_right")
+	assert(act.current_beat == Act01Sequence.Beat.LINE_REVEAL)
+	await create_timer(1.0).timeout
+	assert(act.current_beat == Act01Sequence.Beat.LINE_REVEAL)
+	await _save("%s-01-clear-endpoints.png" % PREFIX)
 
-	while dialogue._current_id != "D013":
-		dialogue.advance()
-		confirmations += 1
-		await _frames(2)
-	assert(confirmations == 5)
-	assert(dialogue.get_current_presentation_ids() == ["D013", "D014"])
-	await _save("%s-03-withdrawal.png" % PREFIX)
+	while act.current_beat != Act01Sequence.Beat.FIRST_PULL:
+		await physics_frame
+	Input.action_press(&"move_right")
+	while act.current_beat != Act01Sequence.Beat.WAIT_PROBE_REARM:
+		await physics_frame
+	Input.action_release(&"move_right")
+	for _index in range(30):
+		await physics_frame
+	assert(act.current_beat == Act01Sequence.Beat.WAIT_PROBE_REARM)
+	assert(dialogue.is_playing() and dialogue._current_id == "D015")
+	assert(not hint.visible)
+	await _save("%s-02-reaction-before-prompt.png" % PREFIX)
 
-	print("[CAPTURE] grouped dialogue screens=6 confirmations_to_withdrawal=", confirmations)
-	print("[CAPTURE] %s-{01-opening,02-real-question,03-withdrawal}.png" % PREFIX)
+	dialogue.advance()
+	assert(dialogue._current_id == "D016")
+	assert(act.current_beat == Act01Sequence.Beat.WAIT_PROBE_REARM)
+	await _save("%s-03-recognize-line.png" % PREFIX)
+
+	dialogue.advance()
+	while act.current_beat != Act01Sequence.Beat.LINE_PROBE:
+		await physics_frame
+	await _physics_frames(2)
+	assert(hint.visible and "抓住牵挂线" in hint.text)
+	await _save("%s-04-probe-ready.png" % PREFIX)
+
+	print("[CAPTURE] gated reaction IDs=D015,D016 prompt_after_dialogue=true")
+	print("[CAPTURE] %s-{01-clear-endpoints,02-reaction-before-prompt,03-recognize-line,04-probe-ready}.png" % PREFIX)
 	quit(0)
 
 
 func _save(path: String) -> void:
-	# Metal 在相机模式刚切换后的首帧可能仍带上一帧的 Canvas 变换；
-	# 连续等待两次绘制，只接收稳定后的实际游戏画面。
 	await RenderingServer.frame_post_draw
 	await RenderingServer.frame_post_draw
-	var image := root.get_viewport().get_texture().get_image()
+	var image := root.get_texture().get_image()
 	var error := image.save_png(path)
 	assert(error == OK)
 
@@ -64,10 +77,6 @@ func _frames(count: int) -> void:
 		await process_frame
 
 
-func _snap_room(camera_rig: CameraRig, room: RoomBase) -> void:
-	var room_view := room.get_camera_point(&"RoomView")
-	assert(room_view != null)
-	camera_rig.set_process(false)
-	camera_rig.camera.position_smoothing_enabled = false
-	camera_rig.snap_to(room_view, Vector2.ONE)
-	camera_rig.camera.force_update_scroll()
+func _physics_frames(count: int) -> void:
+	for _index in range(count):
+		await physics_frame

@@ -550,6 +550,9 @@ position = Vector2(1338, 570)
 [node name="DoorView" type="Marker2D" parent="CameraPoints" unique_id=769551377]
 position = Vector2(2010, 660)
 
+[node name="LineRevealView" type="Marker2D" parent="CameraPoints"]
+position = Vector2(1364, 690)
+
 [node name="Lighting" type="Node2D" parent="." unique_id=584839010]
 
 [node name="CanvasModulate" type="CanvasModulate" parent="Lighting" unique_id=1943717040]

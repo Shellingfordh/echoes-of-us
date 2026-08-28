@@ -16,6 +16,7 @@ func _run() -> void:
 	var player := main.get_node("Player") as PlayerController
 	var tie_line := main.get_node("TieLine") as TieLine
 	var game_state := main.get_node("GameState") as GameState
+	var game_flow := main.get_node("GameFlow") as GameFlow
 	var dialogue := main.get_node("UI/DialogueUI") as DialogueUI
 	var object_info := main.get_node("UI/ObjectInfoUI") as ObjectInfoUI
 	var object_info_db := main.get_node("ObjectInfoDatabase") as ObjectInfoDatabase
@@ -147,19 +148,44 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	assert(tie_line.enabled)
-	assert(act.current_beat == Act01Sequence.Beat.FIRST_PULL)
+	assert(act.current_beat == Act01Sequence.Beat.LINE_REVEAL)
+	assert(game_flow.current_mode == GameFlow.Mode.CUTSCENE)
+	assert(tie_line.appearance_progress < 1.0)
 	assert(not thread_clue.interaction_enabled)
 	assert(tie_line.emotional_pressure > 0.0)
 	assert(tie_line.intention_conflict > 0.0)
 	assert(tie_line.exit_progress > 0.0)
+	for _index in range(60):
+		await physics_frame
+		if act.current_beat == Act01Sequence.Beat.FIRST_PULL:
+			break
+	assert(act.current_beat == Act01Sequence.Beat.FIRST_PULL)
+	assert(game_flow.current_mode == GameFlow.Mode.EXPLORE)
 
 	# 第一次越界经 CharacterBody3D 连续回弹；回到安全距离后要求玩家主动抓线。
+	dialogue.monologue_hold_seconds = 30.0
 	player.set_logical_position(Vector3(16.8, 0.0, 1.0))
 	for _index in range(180):
+		await physics_frame
+		if act.current_beat == Act01Sequence.Beat.WAIT_PROBE_REARM:
+			break
+	assert(act.current_beat == Act01Sequence.Beat.WAIT_PROBE_REARM)
+	assert(dialogue.is_playing() and dialogue._current_id == "D015")
+	for _index in range(30):
+		await physics_frame
+	assert(act.current_beat == Act01Sequence.Beat.WAIT_PROBE_REARM)
+	assert(not hint.visible)
+	dialogue.advance()
+	assert(dialogue._current_id == "D016")
+	assert(act.current_beat == Act01Sequence.Beat.WAIT_PROBE_REARM)
+	dialogue.advance()
+	await process_frame
+	for _index in range(30):
 		await physics_frame
 		if act.current_beat == Act01Sequence.Beat.LINE_PROBE:
 			break
 	assert(act.current_beat == Act01Sequence.Beat.LINE_PROBE)
+	dialogue.monologue_hold_seconds = 0.0
 	assert(tie_line.distance <= tie_line.tension_distance + 0.15)
 	assert(not player.is_suspended())
 	assert(is_zero_approx(player.get_logical_position().y))
@@ -217,7 +243,7 @@ func _run() -> void:
 	assert(transition.get_node_or_null("EchoTitle") is Label)
 
 	print("[CHAPTER01_FLOW] PASS fixed_observation=true stool_unlock=true umbrella_presentations=6")
-	print("[CHAPTER01_FLOW] PASS first_pull=true grounded_probe=true no_chapter1_support=true umbrella_echo=true")
+	print("[CHAPTER01_FLOW] PASS endpoint_reveal=true reaction_gated=true grounded_probe=true umbrella_echo=true")
 	quit(0)
 
 

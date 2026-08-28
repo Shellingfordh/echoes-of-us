@@ -11,6 +11,7 @@ enum Beat {
 	P1_EXPLORE,
 	UMBRELLA_DIALOGUE,
 	P2_LEAVE,
+	LINE_REVEAL,
 	FIRST_PULL,
 	WAIT_PROBE_REARM,
 	LINE_PROBE,
@@ -54,6 +55,8 @@ const KEY_OBJECT_HINTS := {
 
 @export var reveal_trigger_x := 15.0
 @export var reveal_trigger_z_max := 2.8
+@export var line_reveal_hold_seconds := 1.35
+@export var line_reveal_camera_zoom := Vector2(0.9, 0.9)
 @export_range(0.8, 1.0, 0.01) var pullback_trigger_tension := 0.99
 @export_range(0.1, 0.95, 0.01) var rearm_tension := 0.92
 @export var mother_dialogue_position := Vector3(7.0, 0.0, 7.5)
@@ -68,6 +71,8 @@ var _investigated_keys := 0
 var _key_total := 0
 var _probe_elapsed := 0.0
 var _probe_input_elapsed := 0.0
+var _line_reveal_elapsed := 0.0
+var _pullback_reaction_finished := false
 var _key_objects: Dictionary = {}
 
 var _player: PlayerController
@@ -147,11 +152,13 @@ func _process(delta: float) -> void:
 	match current_beat:
 		Beat.P2_LEAVE:
 			_check_reveal()
+		Beat.LINE_REVEAL:
+			_update_line_reveal(delta)
 		Beat.FIRST_PULL:
 			if _has_reached_pullback():
 				_on_first_pullback()
 		Beat.WAIT_PROBE_REARM:
-			if _is_rearmed():
+			if _pullback_reaction_finished and _is_rearmed():
 				current_beat = Beat.LINE_PROBE
 				_player.set_context_action_prompt("Enter / 空格  抓住牵挂线")
 				objective_changed.emit("抓住牵挂线，亲手确认它是不是真的。")
@@ -326,20 +333,48 @@ func _check_reveal() -> void:
 		or player_position.z >= reveal_trigger_z_max
 	):
 		return
-	_tie_line.set_enabled(true)
 	_enter_p3_line_reveal()
-	current_beat = Beat.FIRST_PULL
+	current_beat = Beat.LINE_REVEAL
+	_line_reveal_elapsed = 0.0
+	if _game_flow != null:
+		_game_flow.set_mode(GameFlow.Mode.CUTSCENE)
+	var reveal_view := _room.get_camera_point(&"LineRevealView")
+	if _camera_rig != null and reveal_view != null:
+		_camera_rig.move_to(reveal_view, line_reveal_camera_zoom, 0.45)
+	_tie_line.set_enabled(true)
+	_tie_line.reveal_from_source(0.9)
 	_set_story_flag(&"chapter1_tie_revealed")
-	objective_changed.emit("继续向门口走。")
+	objective_changed.emit("一根线从掌心延向楼下的妈妈。")
 	_emit_debug("[Act01] tie line revealed")
+
+
+func _update_line_reveal(delta: float) -> void:
+	_line_reveal_elapsed += delta
+	if _line_reveal_elapsed < line_reveal_hold_seconds:
+		return
+	if _game_flow != null:
+		_game_flow.set_mode(GameFlow.Mode.EXPLORE)
+	if _camera_rig != null:
+		_camera_rig.follow(_player, Vector2.ONE, true)
+	current_beat = Beat.FIRST_PULL
+	objective_changed.emit("再向门口走，看看它会怎样。")
 
 
 func _on_first_pullback() -> void:
 	current_beat = Beat.WAIT_PROBE_REARM
 	_set_story_flag(&"chapter1_first_pullback")
-	_play_dialogue("D015")
+	_pullback_reaction_finished = false
+	if _dialogue != null:
+		_dialogue.dialogue_finished.connect(_on_pullback_reaction_finished, CONNECT_ONE_SHOT)
+		_dialogue.play("D015")
+	else:
+		_pullback_reaction_finished = true
 	objective_changed.emit("线把你拽了回来。")
 	_emit_debug("[Act01] first pullback")
+
+
+func _on_pullback_reaction_finished(_root_id: String) -> void:
+	_pullback_reaction_finished = true
 
 
 func _on_empty_interact_pressed() -> void:
