@@ -81,10 +81,14 @@ func _run() -> void:
 	assert(observation.is_open() and observation.current_object_id == "Headphones")
 	observation.close_observation()
 	await process_frame
+	assert("书桌上的台历" in objective.text)
+	assert("柜顶那张相框" in objective.text)
+	assert("/" not in objective.text)
 
 	photo.interact(player)
 	assert(observation.is_open() and observation.current_object_id == "PhotoFrame")
 	assert("小学春游合影" in observation._body_label.text)
+	assert(objective.text == "最后再看看书桌上的台历。")
 	observation.close_observation()
 	await process_frame
 
@@ -93,6 +97,7 @@ func _run() -> void:
 	desk.interact(player)
 	assert(object_info.is_open() and object_info.current_info_id == "O003")
 	assert(act.current_beat == Act01Sequence.Beat.P1_EXPLORE)
+	assert(objective.text == "把眼前这件东西看完。")
 	object_info.advance()
 	assert(dialogue.is_playing())
 	assert(act.current_beat == Act01Sequence.Beat.P1_EXPLORE)

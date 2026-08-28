@@ -36,6 +36,22 @@ const OBSERVATION_COPY := {
 	},
 }
 
+const KEY_OBJECT_HINT_ORDER := [
+	&"PackingBox",
+	&"Suitcase",
+	&"Desk",
+	&"Headphones",
+	&"PhotoFrame",
+]
+
+const KEY_OBJECT_HINTS := {
+	&"PackingBox": "封到一半的纸箱",
+	&"Suitcase": "敞开的行李箱",
+	&"Desk": "书桌上的台历",
+	&"Headphones": "床底露出的耳机线",
+	&"PhotoFrame": "柜顶那张相框",
+}
+
 @export var reveal_trigger_x := 15.0
 @export var reveal_trigger_z_max := 2.8
 @export_range(0.8, 1.0, 0.01) var pullback_trigger_tension := 0.99
@@ -52,6 +68,7 @@ var _investigated_keys := 0
 var _key_total := 0
 var _probe_elapsed := 0.0
 var _probe_input_elapsed := 0.0
+var _key_objects: Dictionary = {}
 
 var _player: PlayerController
 var _mother: Mother
@@ -90,11 +107,15 @@ func setup(room: RoomBase, player: PlayerController, tie_line: TieLine) -> void:
 	_photo = room.get_node_or_null("Interactables/PhotoFrame") as Interactable
 	_stool = room.get_node_or_null("Interactables/Stool") as Interactable
 
+	_key_total = 0
+	_investigated_keys = 0
+	_key_objects.clear()
 	for node in get_tree().get_nodes_in_group(&"key_object"):
 		var key := node as Interactable
 		if key == null:
 			continue
 		_key_total += 1
+		_key_objects[key.name] = key
 		key.interacted.connect(_on_key_object_investigated)
 
 	for node_name in OBSERVATION_COPY.keys():
@@ -230,13 +251,33 @@ func _on_observation_closed(_object_id: String) -> void:
 
 
 func _update_explore_objective() -> void:
-	var remaining := _key_total - _investigated_keys
+	var remaining_hints := _get_remaining_key_hints()
+	var remaining := remaining_hints.size()
 	if _investigated_keys == 0:
 		objective_changed.emit("离开前，再确认一下房间里的东西。柜顶有张相框，在这里看不清。")
 	elif remaining > 1:
-		objective_changed.emit("房间还没完全收好。再四处看看。")
+		if remaining == 2:
+			objective_changed.emit("再确认一下%s，还有%s。" % [remaining_hints[0], remaining_hints[1]])
+		else:
+			objective_changed.emit("房间还没完全收好。再四处看看。")
+	elif remaining == 1:
+		objective_changed.emit("最后再看看%s。" % remaining_hints[0])
 	else:
-		objective_changed.emit("还有一处没确认。")
+		objective_changed.emit("把眼前这件东西看完。")
+
+
+func _get_remaining_key_hints() -> Array[String]:
+	var hints: Array[String] = []
+	for node_name: StringName in KEY_OBJECT_HINT_ORDER:
+		var key := _key_objects.get(node_name) as Interactable
+		if key != null and not key.investigated:
+			hints.append(str(KEY_OBJECT_HINTS.get(node_name, key.display_name)))
+	for value: Variant in _key_objects.values():
+		var key := value as Interactable
+		if key == null or key.investigated or KEY_OBJECT_HINT_ORDER.has(key.name):
+			continue
+		hints.append(key.display_name)
+	return hints
 
 
 func _start_umbrella_scene() -> void:

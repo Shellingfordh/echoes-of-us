@@ -63,6 +63,13 @@ func _run() -> void:
 	var room := main.get_node("World/Chapter01Room01")
 	var required_objects := get_nodes_in_group(&"key_object")
 	assert(required_objects.size() == 5)
+	assert(act._get_remaining_key_hints() == [
+		"封到一半的纸箱",
+		"敞开的行李箱",
+		"书桌上的台历",
+		"床底露出的耳机线",
+		"柜顶那张相框",
+	])
 	for dialogue_id in [
 		"D001", "D002", "D003", "D004", "D005", "D014", "D015", "D016",
 		"D017", "D018", "D041", "D042", "D043", "D044", "D045", "D046", "D047",
