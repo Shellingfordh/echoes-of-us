@@ -24,7 +24,7 @@
 ## 运行
 
 ```bash
-godot --path chapter1-game2.5d
+godot --path game-x
 ```
 
 移动使用 WASD / 方向键，Enter 或空格调查，Esc 退出固定观察，F3 显示调试信息。
@@ -32,8 +32,8 @@ godot --path chapter1-game2.5d
 ## 验证
 
 ```bash
-godot --headless --path chapter1-game2.5d --script res://tests/smoke_25d.gd
-godot --headless --path chapter1-game2.5d --script res://tests/chapter01_flow_test.gd
+godot --headless --path game-x --script res://tests/smoke_25d.gd
+godot --headless --path game-x --script res://tests/chapter01_flow_test.gd
 ```
 
 ## 内容维护

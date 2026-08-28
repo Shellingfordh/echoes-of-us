@@ -1,7 +1,7 @@
 # 第一章产品审查与持续优化记录
 
 审查日期：2026-08-28  
-审查实现基线：`origin/main@f32d43a` + `codex/chapter1-product-pass` 连续产品优化，工程目录 `chapter1-game2.5d`
+审查实现基线：`origin/main@f32d43a` + `codex/chapter1-product-pass` 连续产品优化，工程目录 `game-x`
 
 最新主线复核：`origin/main@4dcccbd`；本轮新增内容未改变第一章“黄伞与红线共同触发余响”的约束
 策划基线：最新剧情总纲、剧情流程、剧情对白表、剧情需求与第一章物件信息表
