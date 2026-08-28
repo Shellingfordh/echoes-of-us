@@ -89,55 +89,58 @@ func _build_interface() -> void:
 
 	var dimmer := ColorRect.new()
 	dimmer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	dimmer.color = Color(0.01, 0.025, 0.024, 0.72)
+	# 观察仍发生在真实房间里，只轻压背景，不把场景切成独立图鉴页。
+	dimmer.color = Color(0.01, 0.025, 0.024, 0.16)
 	dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(dimmer)
 
 	var card := PanelContainer.new()
-	card.set_anchors_preset(Control.PRESET_CENTER)
-	card.position = Vector2(-330.0, -235.0)
-	card.size = Vector2(660.0, 470.0)
+	card.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	card.position = Vector2(-548.0, -286.0)
+	card.size = Vector2(520.0, 572.0)
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.84, 0.82, 0.70, 0.98)
-	style.border_color = Color(0.68, 0.32, 0.26, 1.0)
-	style.set_border_width_all(3)
-	style.set_corner_radius_all(12)
+	style.bg_color = Color(0.035, 0.075, 0.07, 0.96)
+	style.border_color = Color(0.63, 0.76, 0.66, 0.58)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(16)
+	style.shadow_color = Color(0.0, 0.0, 0.0, 0.48)
+	style.shadow_size = 12
 	card.add_theme_stylebox_override("panel", style)
 	add_child(card)
 
 	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 36)
-	margin.add_theme_constant_override("margin_top", 28)
-	margin.add_theme_constant_override("margin_right", 36)
-	margin.add_theme_constant_override("margin_bottom", 24)
+	margin.add_theme_constant_override("margin_left", 28)
+	margin.add_theme_constant_override("margin_top", 26)
+	margin.add_theme_constant_override("margin_right", 28)
+	margin.add_theme_constant_override("margin_bottom", 22)
 	card.add_child(margin)
 
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 16)
+	column.add_theme_constant_override("separation", 12)
 	margin.add_child(column)
 
 	var kicker := Label.new()
-	kicker.text = "固定观察 · 同一个房间，换一个位置看"
-	kicker.add_theme_font_size_override("font_size", 16)
-	kicker.add_theme_color_override("font_color", Color(0.48, 0.22, 0.19, 1.0))
+	kicker.text = "观察中 · 同一个房间，换一个位置"
+	kicker.add_theme_font_size_override("font_size", 15)
+	kicker.add_theme_color_override("font_color", Color(0.71, 0.82, 0.75, 1.0))
 	column.add_child(kicker)
 
 	_title_label = Label.new()
-	_title_label.add_theme_font_size_override("font_size", 34)
-	_title_label.add_theme_color_override("font_color", Color(0.14, 0.16, 0.14, 1.0))
+	_title_label.add_theme_font_size_override("font_size", 30)
+	_title_label.add_theme_color_override("font_color", Color(0.96, 0.87, 0.61, 1.0))
 	column.add_child(_title_label)
 
 	_body_label = RichTextLabel.new()
-	_body_label.custom_minimum_size = Vector2(0.0, 300.0)
+	_body_label.custom_minimum_size = Vector2(0.0, 414.0)
 	_body_label.fit_content = false
 	_body_label.scroll_active = true
-	_body_label.add_theme_font_size_override("normal_font_size", 20)
-	_body_label.add_theme_color_override("default_color", Color(0.20, 0.22, 0.19, 1.0))
+	_body_label.add_theme_font_size_override("normal_font_size", 18)
+	_body_label.add_theme_color_override("default_color", Color(0.91, 0.93, 0.89, 1.0))
 	column.add_child(_body_label)
 
 	var hint := Label.new()
 	hint.text = "Enter / 空格 / Esc  返回房间"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	hint.add_theme_font_size_override("font_size", 15)
-	hint.add_theme_color_override("font_color", Color(0.35, 0.34, 0.28, 1.0))
+	hint.add_theme_font_size_override("font_size", 14)
+	hint.add_theme_color_override("font_color", Color(0.66, 0.75, 0.70, 1.0))
 	column.add_child(hint)

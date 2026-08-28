@@ -2,7 +2,7 @@ class_name Act01Sequence
 extends Node
 
 ## 第一章完整闭环：P1 五件必调与固定观察 → 黄伞冲突 → P2 离开尝试
-## → P3 显线与第一次回弹 → 第二次承重/有限摆动 → 黄伞触发余响。
+## → P3 显线与第一次回弹 → 主动抓线确认物理阻力 → 再次失败 → 黄伞触发余响。
 
 signal objective_changed(text: String)
 signal act_finished
@@ -12,25 +12,27 @@ enum Beat {
 	UMBRELLA_DIALOGUE,
 	P2_LEAVE,
 	FIRST_PULL,
-	WAIT_SECOND_REARM,
-	SECOND_ATTEMPT,
-	SUSPENDED,
-	AFTER_SUPPORT,
+	WAIT_PROBE_REARM,
+	LINE_PROBE,
+	PROBING_RESISTANCE,
+	WAIT_FINAL_REARM,
+	FINAL_ATTEMPT,
+	AFTER_PROBE,
 	DONE,
 }
 
 const OBSERVATION_COPY := {
 	"WindowInspect": {
 		"title": "窗玻璃与旧串珠",
-		"body": "玻璃上留着擦过又蒙灰的痕迹。窗边串珠的线已经起毛，外面仍是她准备离开的老街。",
+		"body": "玻璃没擦干净，边角留着水印和灰。楼下早点摊正在收摊，蒸汽还没散，对面有人把纸箱搬上三轮车。玻璃里能照出余念半张脸，和屋里的东西叠在一起。\n\n木珠颜色已经磨浅，常碰到皮肤的那一面发亮。穿珠子的旧线起了毛，打结处也有点松，但还没有断。",
 	},
 	"Headphones": {
 		"title": "床底的耳机",
-		"body": "视线贴近地面后，床脚、灰尘和缠住的耳机线变得清楚。平常的站姿看不到这里。",
+		"body": "一副有线耳机卡在床底最里面，耳机线绕了好几圈，还粘着一点灰。床沿到地面的缝很窄，手伸进去够不到，只能整个人钻进去。",
 	},
 	"PhotoFrame": {
 		"title": "柜顶相框",
-		"body": "相框积了一层薄灰。照片里是一次普通的小学春游，七八岁的余念和母亲都在笑。父亲没有入画。",
+		"body": "一张小学春游合影。学生挤在前面，七八岁的余念站在中间偏左，余秀兰在最后一排。相框顶边积灰最厚，右下角还有一道擦过又没擦净的指痕。",
 	},
 }
 
@@ -40,15 +42,14 @@ const OBSERVATION_COPY := {
 @export_range(0.1, 0.95, 0.01) var rearm_tension := 0.92
 @export var mother_dialogue_position := Vector3(7.0, 0.0, 7.5)
 @export var mother_after_dialogue_position := Vector3(6.4, 0.0, 9.2)
-@export var suspension_landing_position := Vector3(14.1, 0.0, 6.9)
-@export var minimum_swing_seconds := 1.8
-@export var maximum_suspension_seconds := 6.5
+@export var minimum_probe_input_seconds := 0.65
+@export var probe_timeout_seconds := 4.0
 
 var current_beat := Beat.P1_EXPLORE
 var _investigated_keys := 0
 var _key_total := 0
-var _suspension_elapsed := 0.0
-var _support_dialogue_done := false
+var _probe_elapsed := 0.0
+var _probe_input_elapsed := 0.0
 
 var _player: PlayerController
 var _mother: Mother
@@ -107,6 +108,7 @@ func setup(room: RoomBase, player: PlayerController, tie_line: TieLine) -> void:
 	if _tie_line != null:
 		_tie_line.set_enabled(false)
 		_tie_line.clear_context()
+	_player.empty_interact_pressed.connect(_on_empty_interact_pressed)
 	if _thread_clue != null:
 		_thread_clue.set_interaction_enabled(false)
 	_update_explore_objective()
@@ -120,16 +122,21 @@ func _process(delta: float) -> void:
 		Beat.FIRST_PULL:
 			if _has_reached_pullback():
 				_on_first_pullback()
-		Beat.WAIT_SECOND_REARM:
+		Beat.WAIT_PROBE_REARM:
 			if _is_rearmed():
-				current_beat = Beat.SECOND_ATTEMPT
-				objective_changed.emit("再向门口走一次，看看这根线。")
-		Beat.SECOND_ATTEMPT:
+				current_beat = Beat.LINE_PROBE
+				_player.set_context_action_prompt("Enter / 空格  抓住牵挂线")
+				objective_changed.emit("抓住牵挂线，亲手确认它是不是真的。")
+		Beat.PROBING_RESISTANCE:
+			_update_line_probe(delta)
+		Beat.WAIT_FINAL_REARM:
+			if _is_rearmed():
+				current_beat = Beat.FINAL_ATTEMPT
+				_enable_ordinary_line_clue()
+				objective_changed.emit("再向门口试一次；也可以看看房间里的普通线。")
+		Beat.FINAL_ATTEMPT:
 			if _has_reached_pullback():
-				_begin_suspension()
-		Beat.SUSPENDED:
-			_suspension_elapsed += delta
-			_try_finish_suspension()
+				_prepare_echo_threshold()
 		_:
 			pass
 
@@ -157,7 +164,7 @@ func _on_stool_used(_player_ref: PlayerController) -> void:
 	_photo.set_interaction_enabled(true)
 	_photo.set_highlight(Color(1.0, 0.92, 0.72, 0.25), true)
 	_set_story_flag(&"chapter1_photo_unlocked")
-	objective_changed.emit("木凳放稳了，现在能看清柜顶相框。（%d/%d）" % [_investigated_keys, _key_total])
+	objective_changed.emit("木凳放稳了。现在能看清柜顶相框。")
 	_emit_debug("[Act01] stool placed / photo unlocked")
 
 
@@ -184,7 +191,13 @@ func _on_observation_closed(_object_id: String) -> void:
 
 
 func _update_explore_objective() -> void:
-	objective_changed.emit("整理离家前的东西（%d/%d）；柜顶相框需要先移动木凳。" % [_investigated_keys, _key_total])
+	var remaining := _key_total - _investigated_keys
+	if _investigated_keys == 0:
+		objective_changed.emit("离开前，再确认一下房间里的东西。柜顶那张相框还够不到。")
+	elif remaining > 1:
+		objective_changed.emit("房间还没完全收好。再四处看看。")
+	else:
+		objective_changed.emit("还有一处没确认。")
 
 
 func _start_umbrella_scene() -> void:
@@ -242,105 +255,101 @@ func _check_reveal() -> void:
 
 
 func _on_first_pullback() -> void:
-	current_beat = Beat.WAIT_SECOND_REARM
+	current_beat = Beat.WAIT_PROBE_REARM
 	_set_story_flag(&"chapter1_first_pullback")
 	_play_dialogue("D015")
 	objective_changed.emit("线把你拽了回来。")
 	_emit_debug("[Act01] first pullback")
 
 
-func _begin_suspension() -> void:
-	current_beat = Beat.SUSPENDED
-	_suspension_elapsed = 0.0
-	_support_dialogue_done = _dialogue == null
+func _on_empty_interact_pressed() -> void:
+	if current_beat != Beat.LINE_PROBE:
+		return
+	_begin_line_probe()
+
+
+func _begin_line_probe() -> void:
+	current_beat = Beat.PROBING_RESISTANCE
+	_probe_elapsed = 0.0
+	_probe_input_elapsed = 0.0
+	_player.set_context_action_prompt("按住 Enter / 空格，同时按 D / → 向门口用力")
 	if _tie_line != null:
 		_tie_line.set_force_critical(true)
 	if _game_flow != null:
 		_game_flow.set_mode(GameFlow.Mode.CHALLENGE)
-	_player.begin_suspension()
-	if _camera_rig != null and _mother != null:
-		var midpoint := (_player.global_position + _mother.global_position) * 0.5
-		_camera_rig.move_to_position(midpoint, Vector2(0.72, 0.72), 0.45)
-	objective_changed.emit("牵挂线承住了她；按 A / D 或 ← / → 感受有限摆动。")
-	if _dialogue != null:
-		_dialogue.play("D017")
-		# play() 会先结束仍在显示的旧独白，必须在调用之后连接。
-		_dialogue.dialogue_finished.connect(_on_support_dialogue_finished, CONNECT_ONE_SHOT)
-	_emit_debug("[Act01] second attempt / support / limited swing")
+	objective_changed.emit("按住牵挂线，向门口用力。它在把你往回拉。")
+	_emit_debug("[Act01] active line probe started")
 
 
-func _on_support_dialogue_finished(_root_id: String) -> void:
-	_support_dialogue_done = true
-	_try_finish_suspension()
+func _update_line_probe(delta: float) -> void:
+	_probe_elapsed += delta
+	var pulling_toward_exit := Input.is_action_pressed(&"move_right")
+	var holding_line := Input.is_action_pressed(&"interact")
+	if pulling_toward_exit and holding_line:
+		_probe_input_elapsed += delta
+	if _probe_input_elapsed >= minimum_probe_input_seconds:
+		_finish_line_probe()
+	elif _probe_elapsed >= probe_timeout_seconds:
+		_player.set_context_action_prompt("按住 Enter / 空格，同时按 D / → 向门口用力")
+		objective_changed.emit("同时按住 Enter / 空格和 D / →，拉住这根线。")
 
 
-func _try_finish_suspension() -> void:
-	if current_beat != Beat.SUSPENDED or not _support_dialogue_done:
-		return
-	var completed_by_input := (
-		_player.has_suspension_input()
-		and _suspension_elapsed >= minimum_swing_seconds
-	)
-	if not completed_by_input and _suspension_elapsed < maximum_suspension_seconds:
-		return
-	_finish_suspension()
-
-
-func _finish_suspension() -> void:
-	_player.end_suspension(suspension_landing_position)
+func _finish_line_probe() -> void:
 	if _tie_line != null:
 		_tie_line.set_force_critical(false)
-		_tie_line.set_extended(true)
-		_tie_line.clear_context()
 	if _game_flow != null:
 		_game_flow.set_mode(GameFlow.Mode.EXPLORE)
-	if _camera_rig != null:
-		_camera_rig.follow(_player, Vector2.ONE, true)
+	_player.clear_context_action_prompt()
+	current_beat = Beat.WAIT_FINAL_REARM
+	_set_story_flag(&"chapter1_physical_resistance_confirmed")
+	_play_dialogue("D017")
+	objective_changed.emit("它不是幻觉。它会真实阻止你离开。")
+	_emit_debug("[Act01] physical resistance confirmed / player stayed grounded")
+
+
+func _enable_ordinary_line_clue() -> void:
 	if _thread_clue != null:
 		_thread_clue.set_interaction_enabled(true)
 		_thread_clue.reset_interaction()
-		_thread_clue.set_highlight(Color(1.0, 0.18, 0.22, 0.92), true)
+		_thread_clue.set_highlight(Color(0.72, 0.76, 0.72, 0.34), true)
+
+
+func _prepare_echo_threshold() -> void:
+	if _tie_line != null:
+		_tie_line.set_extended(true)
+		_tie_line.clear_context()
 	if _umbrella != null:
 		_umbrella.auto_play_dialogue = false
 		_umbrella.interaction_prompt_override = "Enter / 空格  触碰黄色旧雨伞，进入余响"
 		_umbrella.set_interaction_enabled(true)
 		_umbrella.reset_interaction()
 		_umbrella.set_highlight(Color(1.0, 0.68, 0.24, 0.72), true)
-	current_beat = Beat.AFTER_SUPPORT
-	_set_story_flag(&"chapter1_support_discovered")
-	objective_changed.emit("观察变红的普通线，或触碰黄伞进入余响。")
-	_emit_debug("[Act01] support understood incorrectly / echo threshold ready")
+	current_beat = Beat.AFTER_PROBE
+	_play_dialogue("D018")
+	objective_changed.emit("看一眼房间里的普通线，或触碰黄伞进入余响。")
+	_emit_debug("[Act01] resistance understood incorrectly / echo threshold ready")
 
 
 func _on_umbrella_interacted(_player_ref: PlayerController) -> void:
-	if current_beat == Beat.AFTER_SUPPORT:
+	if current_beat == Beat.AFTER_PROBE:
 		_finish_act()
 
 
 func _enter_p3_line_reveal() -> void:
-	var red := Color(1.0, 0.18, 0.22, 0.92)
-	for node in get_tree().get_nodes_in_group(&"ordinary_line"):
-		var line := node as Line2D
-		if line != null:
-			line.default_color = red
-
 	for child in _room.get_node("Interactables").get_children():
 		var interactable := child as Interactable
 		if interactable != null:
 			interactable.set_interaction_enabled(false)
-	if _thread_clue != null:
-		_thread_clue.set_interaction_enabled(true)
-		_thread_clue.set_highlight(red, true)
 
 
 func _update_tension_context() -> void:
-	if _tie_line == null or current_beat < Beat.P2_LEAVE or current_beat >= Beat.AFTER_SUPPORT:
+	if _tie_line == null or current_beat < Beat.P2_LEAVE or current_beat >= Beat.AFTER_PROBE:
 		return
 	var player_position := _player.get_logical_position()
 	var exit_span := maxf(_player.movement_max.x - reveal_trigger_x, 0.01)
 	var exit_progress := clampf((player_position.x - reveal_trigger_x) / exit_span, 0.0, 1.0)
 	var intention_conflict := 0.08 if player_position.x > reveal_trigger_x - 0.8 else 0.0
-	var emotional_pressure := 0.14 if current_beat >= Beat.SECOND_ATTEMPT else 0.10
+	var emotional_pressure := 0.14 if current_beat >= Beat.LINE_PROBE else 0.10
 	_tie_line.set_context(emotional_pressure, intention_conflict, exit_progress)
 
 
@@ -378,13 +387,11 @@ func _finish_act() -> void:
 	act_finished.emit()
 
 
-func debug_finish_suspension() -> void:
-	if current_beat != Beat.SUSPENDED:
+func debug_finish_line_probe() -> void:
+	if current_beat != Beat.PROBING_RESISTANCE:
 		return
-	_support_dialogue_done = true
-	_suspension_elapsed = minimum_swing_seconds
-	_player.debug_mark_suspension_input()
-	_try_finish_suspension()
+	_probe_input_elapsed = minimum_probe_input_seconds
+	_finish_line_probe()
 
 
 func get_investigated_key_count() -> int:

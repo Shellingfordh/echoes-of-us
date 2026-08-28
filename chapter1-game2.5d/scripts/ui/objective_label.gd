@@ -5,6 +5,8 @@ extends Label
 
 @export var fade_time := 0.35
 
+var _objective_tween: Tween
+
 
 func _ready() -> void:
 	add_to_group(&"objective_label")
@@ -14,7 +16,10 @@ func _ready() -> void:
 func set_objective(objective_text: String) -> void:
 	if objective_text == text and modulate.a > 0.9:
 		return
-	var tween := create_tween()
-	tween.tween_property(self, "modulate:a", 0.0, fade_time)
-	tween.tween_callback(func() -> void: text = objective_text)
-	tween.tween_property(self, "modulate:a", 1.0, fade_time)
+	if _objective_tween != null:
+		_objective_tween.kill()
+	# 目标承担即时操作引导，先更新文字再做轻微淡入，不能先黑屏半秒。
+	text = objective_text
+	modulate.a = 0.62
+	_objective_tween = create_tween()
+	_objective_tween.tween_property(self, "modulate:a", 1.0, minf(fade_time, 0.22))

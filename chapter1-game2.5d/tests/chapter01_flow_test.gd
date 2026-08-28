@@ -59,7 +59,7 @@ func _run() -> void:
 
 	photo.interact(player)
 	assert(observation.is_open() and observation.current_object_id == "PhotoFrame")
-	assert("普通的小学春游" in observation._body_label.text)
+	assert("小学春游合影" in observation._body_label.text)
 	observation.close_observation()
 	await process_frame
 	await process_frame
@@ -82,49 +82,61 @@ func _run() -> void:
 	await process_frame
 	assert(tie_line.enabled)
 	assert(act.current_beat == Act01Sequence.Beat.FIRST_PULL)
-	assert(thread_clue.interaction_enabled)
+	assert(not thread_clue.interaction_enabled)
 	assert(tie_line.emotional_pressure > 0.0)
 	assert(tie_line.intention_conflict > 0.0)
 	assert(tie_line.exit_progress > 0.0)
 
-	# 第一次越界经 CharacterBody3D 连续回弹，松开后允许第二次尝试。
+	# 第一次越界经 CharacterBody3D 连续回弹；回到安全距离后要求玩家主动抓线。
 	player.set_logical_position(Vector3(16.8, 0.0, 1.0))
 	for _index in range(180):
 		await physics_frame
-		if act.current_beat == Act01Sequence.Beat.SECOND_ATTEMPT:
+		if act.current_beat == Act01Sequence.Beat.LINE_PROBE:
 			break
-	assert(act.current_beat == Act01Sequence.Beat.SECOND_ATTEMPT)
+	assert(act.current_beat == Act01Sequence.Beat.LINE_PROBE)
 	assert(tie_line.distance <= tie_line.tension_distance + 0.15)
+	assert(not player.is_suspended())
+	assert(is_zero_approx(player.get_logical_position().y))
 
-	# 回归：第二次尝试必须能靠真实持续输入越过临界距离，不能依赖传送坐标。
-	# SR-006：第二次极限张力不是对白占位，而是抬高逻辑 Y 并保留有限横摆输入。
-	assert(tie_line.get_critical_distance() < tie_line.get_effective_max_distance())
+	# SR-006：主动抓线并向门口用力时，线以速度限制和回拉提供地面物理反馈。
+	# 第一章全程不得进入悬空、承重或摆荡。
+	act._on_empty_interact_pressed()
+	assert(act.current_beat == Act01Sequence.Beat.PROBING_RESISTANCE)
+	var probe_start := player.get_logical_position()
+	Input.action_press(&"interact")
+	Input.action_press(&"move_right")
+	for _index in range(80):
+		await physics_frame
+		if act.current_beat == Act01Sequence.Beat.WAIT_FINAL_REARM:
+			break
+	Input.action_release(&"move_right")
+	Input.action_release(&"interact")
+	assert(act.current_beat == Act01Sequence.Beat.WAIT_FINAL_REARM)
+	assert(not player.is_suspended())
+	assert(is_zero_approx(player.get_logical_position().y))
+	assert(player.get_logical_position().distance_to(probe_start) < 1.2)
+	_finish_dialogue(dialogue)
+	for _index in range(120):
+		await physics_frame
+		if act.current_beat == Act01Sequence.Beat.FINAL_ATTEMPT:
+			break
+	assert(act.current_beat == Act01Sequence.Beat.FINAL_ATTEMPT)
+	assert(thread_clue.interaction_enabled)
+
+	# 玩家再次向门口用力，失败后才形成 D018 错误理解并开放黄伞余响入口。
 	Input.action_press(&"move_right")
 	for _index in range(240):
 		await physics_frame
-		if act.current_beat == Act01Sequence.Beat.SUSPENDED:
+		if act.current_beat == Act01Sequence.Beat.AFTER_PROBE:
 			break
 	Input.action_release(&"move_right")
-	assert(act.current_beat == Act01Sequence.Beat.SUSPENDED)
-	assert(player.is_suspended())
-	assert(player.get_logical_position().y >= player.suspension_height)
-	var swing_start := player.global_position.x
-	Input.action_press(&"move_right")
-	for _index in range(50):
-		await physics_frame
-	Input.action_release(&"move_right")
-	assert(player.has_suspension_input())
-	assert(absf(player.global_position.x - swing_start) > 1.0)
-
-	_finish_dialogue(dialogue)
-	act.debug_finish_suspension()
-	await process_frame
-	assert(act.current_beat == Act01Sequence.Beat.AFTER_SUPPORT)
+	assert(act.current_beat == Act01Sequence.Beat.AFTER_PROBE)
 	assert(not player.is_suspended())
+	assert(is_zero_approx(player.get_logical_position().y))
 	assert(umbrella.interaction_enabled)
-	assert(thread_clue.interaction_enabled)
 
 	# 第一章只在玩家主动触碰黄伞、越过余响阈值后结束。
+	_finish_dialogue(dialogue)
 	thread_clue.interact(player)
 	_finish_dialogue(dialogue)
 	umbrella.interact(player)
@@ -132,13 +144,13 @@ func _run() -> void:
 	assert(act.current_beat == Act01Sequence.Beat.DONE)
 	assert(game_state.has_flag(&"chapter1_photo_unlocked"))
 	assert(game_state.has_flag(&"chapter1_first_pullback"))
-	assert(game_state.has_flag(&"chapter1_support_discovered"))
+	assert(game_state.has_flag(&"chapter1_physical_resistance_confirmed"))
 	assert(game_state.has_flag(&"chapter1_complete"))
 	assert(transition.visible)
 	assert(transition.get_node_or_null("EchoTitle") is Label)
 
 	print("[CHAPTER01_FLOW] PASS fixed_observation=true stool_unlock=true composite_tension=true")
-	print("[CHAPTER01_FLOW] PASS first_pull=true suspension_swing=true umbrella_echo=true")
+	print("[CHAPTER01_FLOW] PASS first_pull=true grounded_probe=true no_chapter1_support=true umbrella_echo=true")
 	quit(0)
 
 

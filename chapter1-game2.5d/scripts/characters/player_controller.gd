@@ -3,6 +3,8 @@ extends Node2D
 
 ## 可见角色仍是 2D，隐藏的 CharacterBody3D 在 X/Z 平面上负责真实移动与碰撞。
 
+signal empty_interact_pressed
+
 @export var move_speed := 3.8
 @export var movement_min := Vector2(1.0, 1.0)
 @export var movement_max := Vector2(17.0, 11.0)
@@ -27,6 +29,7 @@ var _suspension_origin := Vector3.ZERO
 var _swing_offset := 0.0
 var _swing_velocity := 0.0
 var _suspension_input_seen := false
+var _context_action_prompt := ""
 
 var logical_position: Vector3:
 	get:
@@ -204,6 +207,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _game_flow != null and not _game_flow.is_player_control_enabled():
 		return
 	if _current_interactable == null:
+		empty_interact_pressed.emit()
+		get_viewport().set_input_as_handled()
 		return
 	if _current_interactable.has_method(&"interact"):
 		_current_interactable.interact(self)
@@ -231,9 +236,20 @@ func _update_interaction_target() -> void:
 	if hint == null:
 		return
 	if _current_interactable == null:
-		hint.hide_hint()
+		if _context_action_prompt.is_empty():
+			hint.hide_hint()
+		else:
+			hint.show_hint(_context_action_prompt)
 	else:
 		hint.show_hint(_current_interactable.get_interaction_prompt())
+
+
+func set_context_action_prompt(prompt: String) -> void:
+	_context_action_prompt = prompt
+
+
+func clear_context_action_prompt() -> void:
+	_context_action_prompt = ""
 
 
 func _play_idle_animation() -> void:

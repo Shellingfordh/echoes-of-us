@@ -1,6 +1,6 @@
 extends SceneTree
 
-const PREFIX := "/tmp/echoes-chapter1-game25d"
+const PREFIX := "/tmp/echoes-chapter1-audit-after"
 
 
 func _initialize() -> void:
@@ -27,18 +27,20 @@ func _run() -> void:
 	var mother := room.get_node("Characters/Mother") as Mother
 	mother.visible = true
 	mother.set_logical_position(act.mother_after_dialogue_position)
-	player.set_logical_position(Vector3(16.2, 0.0, 1.35))
-	act.current_beat = Act01Sequence.Beat.SECOND_ATTEMPT
+	player.set_logical_position(Vector3(15.4, 0.0, 2.0))
+	act.current_beat = Act01Sequence.Beat.LINE_PROBE
 	tie_line.set_enabled(true)
 	act._enter_p3_line_reveal()
-	act._begin_suspension()
+	act._begin_line_probe()
+	Input.action_press(&"interact")
 	Input.action_press(&"move_right")
-	await _physics_frames(35)
+	await _physics_frames(8)
 	Input.action_release(&"move_right")
+	Input.action_release(&"interact")
 	await _frames(3)
-	await _save("%s-suspension.png" % PREFIX)
+	await _save("%s-grounded-probe.png" % PREFIX)
 
-	print("[CAPTURE] %s-{room,observation,suspension}.png" % PREFIX)
+	print("[CAPTURE] %s-{room,observation,grounded-probe}.png" % PREFIX)
 	quit(0)
 
 
