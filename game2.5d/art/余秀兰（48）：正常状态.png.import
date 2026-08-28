@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dnugrp3bmlk1b"
-path="res://.godot/imported/enemyWalking_2.png-67c480ed60c35e95f5acb0436246b935.ctex"
+uid="uid://bots46ug5a15d"
+path="res://.godot/imported/余秀兰（48）：正常状态.png-d85f3d12a237876868f751c82427bfab.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/enemyWalking_2.png"
-dest_files=["res://.godot/imported/enemyWalking_2.png-67c480ed60c35e95f5acb0436246b935.ctex"]
+source_file="res://art/余秀兰（48）：正常状态.png"
+dest_files=["res://.godot/imported/余秀兰（48）：正常状态.png-d85f3d12a237876868f751c82427bfab.ctex"]
 
 [params]
 

@@ -45,6 +45,11 @@ func _on_act_01_finished() -> void:
 		transition_overlay.add_child(title)
 	var tween := create_tween()
 	tween.tween_property(transition_overlay, "modulate:a", 1.0, 1.15)
+	tween.tween_interval(0.9)
+	tween.tween_callback(
+		func() -> void:
+			get_tree().change_scene_to_file("res://scenes/chapter2/chapter2.tscn")
+	)
 	print("[Main] Act 1 完成，黄伞余响阈值已触发。")
 
 

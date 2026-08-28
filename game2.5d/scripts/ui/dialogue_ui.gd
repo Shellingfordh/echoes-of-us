@@ -14,11 +14,16 @@ const END_DIALOGUE_ID := "END"
 @export_range(0.0, 10.0, 0.1) var monologue_hold_seconds := MONOLOGUE_DURATION
 @export_range(0.0, 1.0, 0.01) var fade_duration := 0.18
 
+## speaker 名 → 立绘。dialogue 模式才会用到；monologue 走 MonologueFrame，没有立绘位。
+## 在 dialogue_ui.tscn 里配好即可，运行时也可以用 register_portrait() 覆盖。
+@export var speaker_portraits: Dictionary = {}
+
 @onready var dimmer: ColorRect = $Dimmer
 @onready var dialogue_frame: MarginContainer = $DialogueFrame
 @onready var dialogue_header: HBoxContainer = $DialogueFrame/Panel/Margin/VBox/Header
 @onready var speaker_name: Label = $DialogueFrame/Panel/Margin/VBox/Header/SpeakerName
 @onready var portrait_panel: PanelContainer = $DialogueFrame/Panel/Margin/VBox/Body/PortraitPanel
+@onready var portrait_texture: TextureRect = $DialogueFrame/Panel/Margin/VBox/Body/PortraitPanel/PortraitMargin/PortraitTexture
 @onready var portrait_initial: Label = $DialogueFrame/Panel/Margin/VBox/Body/PortraitPanel/PortraitMargin/PortraitInitial
 @onready var dialogue_text: RichTextLabel = $DialogueFrame/Panel/Margin/VBox/Body/TextColumn/DialogueText
 @onready var line_status: Label = $DialogueFrame/Panel/Margin/VBox/Body/TextColumn/Footer/LineStatus
@@ -48,12 +53,24 @@ var _typing_tween: Tween
 var _fade_tween: Tween
 var _session_generation := 0
 var _line_generation := 0
+var _portraits_by_speaker: Dictionary = {}
 
 
 func _ready() -> void:
 	add_to_group(&"dialogue_ui")
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_load_configured_portraits()
 	hide()
+
+
+## 把 speaker_portraits 里配好的立绘灌进运行时表。
+func _load_configured_portraits() -> void:
+	for raw_speaker: Variant in speaker_portraits.keys():
+		var speaker := str(raw_speaker)
+		var texture := speaker_portraits[raw_speaker] as Texture2D
+		if speaker.is_empty() or texture == null:
+			continue
+		_portraits_by_speaker[speaker] = texture
 
 
 ## 唯一播放入口：外部只传 data/dialogues.json 中的对白 ID。
@@ -116,6 +133,17 @@ func is_playing() -> bool:
 	return visible and not _root_id.is_empty()
 
 
+## 后续立绘到位后，从主场景或角色资源加载器调用即可；不需要改对白排版。
+func register_portrait(speaker: String, texture: Texture2D) -> void:
+	if speaker.is_empty():
+		return
+	_portraits_by_speaker[speaker] = texture
+
+
+func clear_portrait(speaker: String) -> void:
+	_portraits_by_speaker.erase(speaker)
+
+
 func _begin_entry(dialogue_id: String) -> bool:
 	var entry := _database.get_entry(dialogue_id)
 	if entry.is_empty():
@@ -149,6 +177,10 @@ func _show_current_line() -> void:
 		dialogue_header.visible = has_speaker
 		portrait_panel.visible = has_speaker
 		speaker_name.text = _speaker
+		var speaker_portrait := _portraits_by_speaker.get(_speaker) as Texture2D
+		portrait_texture.texture = speaker_portrait
+		portrait_texture.visible = speaker_portrait != null
+		portrait_initial.visible = speaker_portrait == null
 		portrait_initial.text = _speaker.left(1) if has_speaker else ""
 		line_status.text = "%d / %d" % [_line_index + 1, _lines.size()]
 		line_status.visible = _lines.size() > 1

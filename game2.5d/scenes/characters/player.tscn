@@ -51,8 +51,9 @@ animation = &"idle"
 
 [node name="GroundShadow" type="Polygon2D" parent="." unique_id=2092590286]
 z_index = -1
-color = Color(0, 0, 0, 0.28)
-polygon = PackedVector2Array(-25, -5, 0, -12, 25, -5, 0, 3)
+position = Vector2(17, 8)
+color = Color(0.005, 0.012, 0.011, 0.34)
+polygon = PackedVector2Array(-20, -5, 0, -11, 33, 4, 11, 13)
 
 [node name="InteractionArea" type="Area2D" parent="." unique_id=2139619122]
 collision_layer = 0

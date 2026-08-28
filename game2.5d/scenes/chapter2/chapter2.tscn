@@ -1,0 +1,152 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/chapter2/chapter2.gd" id="1_chapter2"]
+[ext_resource type="PackedScene" path="res://scenes/characters/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://scripts/characters/chapter2_child.gd" id="3_child"]
+[ext_resource type="Texture2D" path="res://art/playerGrey_walk1.png" id="4_child_idle"]
+[ext_resource type="Texture2D" path="res://art/playerGrey_walk2.png" id="5_child_walk"]
+[ext_resource type="Script" path="res://scripts/mechanics/tie_line.gd" id="6_tie"]
+[ext_resource type="Script" path="res://scripts/camera/camera_rig.gd" id="7_camera"]
+[ext_resource type="Script" path="res://scripts/core/game_flow.gd" id="8_flow"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_child"]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("4_child_idle")}],
+"loop": true,
+"name": &"idle",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("4_child_idle")}, {"duration": 1.0, "texture": ExtResource("5_child_walk")}],
+"loop": true,
+"name": &"walk",
+"speed": 7.0
+}]
+
+[node name="Chapter2" type="Node2D"]
+script = ExtResource("1_chapter2")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="GeneratedMap" type="Node2D" parent="World"]
+
+[node name="SpatialPhysics" type="Node3D" parent="World"]
+
+[node name="Characters" type="Node2D" parent="."]
+
+[node name="YoungMother" parent="Characters" instance=ExtResource("2_player")]
+move_speed = 5.2
+movement_min = Vector2(-4, -55)
+movement_max = Vector2(70, 20)
+
+[node name="AnimatedSprite2D" parent="Characters/YoungMother"]
+scale = Vector2(0.78, 0.78)
+self_modulate = Color(0.82, 0.64, 0.48, 1)
+
+[node name="Child" type="Node2D" parent="Characters"]
+script = ExtResource("3_child")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Characters/Child"]
+position = Vector2(0, -43)
+scale = Vector2(0.52, 0.52)
+self_modulate = Color(1, 0.82, 0.34, 1)
+sprite_frames = SubResource("SpriteFrames_child")
+animation = &"idle"
+
+[node name="GroundShadow" type="Polygon2D" parent="Characters/Child"]
+z_index = -1
+position = Vector2(13, 7)
+color = Color(0.005, 0.012, 0.011, 0.32)
+polygon = PackedVector2Array(-15, -4, 0, -8, 25, 3, 8, 10)
+
+[node name="TieLine" type="Line2D" parent="."]
+z_index = 2500
+width = 5.0
+texture_mode = 1
+script = ExtResource("6_tie")
+reveal_distance = 0.0
+tension_distance = 5.5
+max_distance = 18.0
+visual_width = 5.0
+normal_color = Color(0.66, 0.16, 0.13, 0.78)
+tension_color = Color(0.88, 0.22, 0.16, 0.96)
+pull_back_color = Color(1, 0.28, 0.20, 1)
+distance_weight = 0.2
+critical_tension = 1.0
+critical_distance_ratio = 1.0
+
+[node name="GameFlow" type="Node" parent="."]
+script = ExtResource("8_flow")
+initial_mode = 4
+
+[node name="CameraRig" type="Node2D" parent="."]
+script = ExtResource("7_camera")
+
+[node name="Camera2D" type="Camera2D" parent="CameraRig"]
+limit_left = -400
+limit_top = -300
+limit_right = 8650
+limit_bottom = 1550
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0
+
+[node name="Lighting" type="Node2D" parent="."]
+
+[node name="CanvasModulate" type="CanvasModulate" parent="Lighting"]
+color = Color(1, 0.78, 0.52, 1)
+
+[node name="UI" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="ChapterTitle" type="Label" parent="UI"]
+offset_left = 24.0
+offset_top = 18.0
+offset_right = 460.0
+offset_bottom = 58.0
+theme_override_colors/font_color = Color(0.98, 0.86, 0.64, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 24
+text = "第二章 · 第一次放手 〔大型 Blockout〕"
+
+[node name="ObjectiveLabel" type="Label" parent="UI"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 220.0
+offset_top = 24.0
+offset_right = -80.0
+offset_bottom = 68.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.94, 0.94, 0.88, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 2
+
+[node name="HintLabel" type="Label" parent="UI"]
+anchors_preset = 12
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 180.0
+offset_top = -54.0
+offset_right = -180.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.86, 0.94, 0.83, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="TransitionOverlay" type="ColorRect" parent="UI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.015, 0.012, 0.01, 1)
+

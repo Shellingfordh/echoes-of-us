@@ -2,7 +2,8 @@ class_name Act01Sequence
 extends Node
 
 ## 第一章完整闭环：P1 五件必调与物件信息 → 黄伞冲突 → P2 离开尝试
-## → P3 显线与强制回弹 → 主动试探真实阻力 → D018 后进入余响。
+## → P3 显线 → 回头重看行李箱与黄伞 → 强制回弹
+## → 主动试探真实阻力 → D018 后进入余响。
 
 signal objective_changed(text: String)
 signal act_finished
@@ -11,6 +12,7 @@ enum Beat {
 	P1_EXPLORE,
 	UMBRELLA_DIALOGUE,
 	P2_LEAVE,
+	P3_RECHECK,
 	FIRST_PULL,
 	WAIT_SECOND_REARM,
 	SECOND_ATTEMPT,
@@ -22,12 +24,17 @@ enum Beat {
 @export var reveal_trigger_z_max := 2.8
 @export_range(0.8, 1.0, 0.01) var pullback_trigger_tension := 0.99
 @export_range(0.1, 0.95, 0.01) var rearm_tension := 0.92
-@export var mother_dialogue_position := Vector3(7.0, 0.0, 7.5)
-@export var mother_after_dialogue_position := Vector3(6.4, 0.0, 9.2)
+@export var mother_dialogue_position := Vector3(9.0, 0.0, 7.0)
+@export var mother_after_dialogue_position := Vector3(4.35, 0.0, 7.8)
+@export var mother_walk_duration := 1.1
+@export var window_reflection_position := Vector3(7.0, 0.0, 1.5)
+@export var window_reflection_radius := 1.35
 
 var current_beat := Beat.P1_EXPLORE
 var _investigated_keys := 0
 var _key_total := 0
+var _window_reflection_triggered := false
+var _recheck_reported := -1
 
 var _player: PlayerController
 var _mother: Mother
@@ -43,7 +50,8 @@ var _umbrella: Interactable
 var _suitcase: Interactable
 var _thread_clue: Interactable
 var _photo: Interactable
-var _stool: Interactable
+var _wardrobe_inspect: Interactable
+var _stool: PushableStool
 
 
 func setup(room: RoomBase, player: PlayerController, tie_line: TieLine) -> void:
@@ -61,7 +69,8 @@ func setup(room: RoomBase, player: PlayerController, tie_line: TieLine) -> void:
 	_suitcase = room.get_node_or_null("Interactables/Suitcase") as Interactable
 	_thread_clue = room.get_node_or_null("Interactables/ThreadClue") as Interactable
 	_photo = room.get_node_or_null("Interactables/PhotoFrame") as Interactable
-	_stool = room.get_node_or_null("Interactables/Stool") as Interactable
+	_wardrobe_inspect = room.get_node_or_null("Interactables/WardrobeInspect") as Interactable
+	_stool = room.get_node_or_null("Interactables/Stool") as PushableStool
 
 	for node in get_tree().get_nodes_in_group(&"key_object"):
 		var key := node as Interactable
@@ -75,14 +84,19 @@ func setup(room: RoomBase, player: PlayerController, tie_line: TieLine) -> void:
 		if observable == null or observable.observation_id.is_empty():
 			continue
 		observable.auto_play_dialogue = false
-		observable.interaction_prompt_override = "Enter / 空格  查看：%s" % observable.display_name
+		if not observable is PushableStool:
+			observable.interaction_prompt_override = "Enter / 空格  查看：%s" % observable.display_name
 		observable.interacted.connect(_on_observation_interacted.bind(observable))
 
 	if _photo != null:
 		_photo.set_interaction_enabled(false)
 	if _stool != null:
-		_stool.auto_play_dialogue = false
-		_stool.interacted.connect(_on_stool_used)
+		_stool.placement_state_changed.connect(_on_stool_access_state_changed)
+		_stool.mounted_state_changed.connect(_on_stool_access_state_changed)
+	if _umbrella != null:
+		# 黄伞从开场起就在鞋柜旁，但 O046/D046 要到冲突结束后的 P2 才开放。
+		_umbrella.visible = true
+		_umbrella.set_interaction_enabled(false)
 	if _tie_line != null:
 		_tie_line.set_enabled(false)
 		_tie_line.clear_context()
@@ -92,10 +106,14 @@ func setup(room: RoomBase, player: PlayerController, tie_line: TieLine) -> void:
 
 
 func _process(_delta: float) -> void:
+	_update_photo_access()
 	_update_tension_context()
+	_check_window_reflection()
 	match current_beat:
 		Beat.P2_LEAVE:
 			_check_reveal()
+		Beat.P3_RECHECK:
+			_check_recheck_progress()
 		Beat.FIRST_PULL:
 			if _has_reached_pullback():
 				_on_first_pullback()
@@ -108,6 +126,26 @@ func _process(_delta: float) -> void:
 				_on_second_pullback()
 		_:
 			pass
+
+
+func _check_window_reflection() -> void:
+	if current_beat != Beat.P1_EXPLORE or _window_reflection_triggered or _player == null:
+		return
+	if _observation != null and _observation.is_open():
+		return
+	if _dialogue != null and _dialogue.is_playing():
+		return
+	var player_position := _player.get_logical_position()
+	var floor_delta := Vector2(
+		player_position.x - window_reflection_position.x,
+		player_position.z - window_reflection_position.z
+	)
+	if floor_delta.length() > window_reflection_radius:
+		return
+	_window_reflection_triggered = true
+	_set_story_flag(&"chapter1_window_reflection")
+	_play_dialogue("D044")
+	_emit_debug("[Act01] window reflection / D044")
 
 
 func _on_key_object_investigated(_player_ref: PlayerController) -> void:
@@ -127,14 +165,31 @@ func _on_key_object_investigated(_player_ref: PlayerController) -> void:
 	_start_umbrella_scene()
 
 
-func _on_stool_used(_player_ref: PlayerController) -> void:
-	if current_beat != Beat.P1_EXPLORE or _photo == null:
+func _on_stool_access_state_changed(_state: bool) -> void:
+	_update_photo_access()
+
+
+func _update_photo_access() -> void:
+	if _photo == null or _stool == null or _player == null:
 		return
-	_photo.set_interaction_enabled(true)
-	_photo.set_highlight(Color(1.0, 0.92, 0.72, 0.25), true)
-	_set_story_flag(&"chapter1_photo_unlocked")
-	objective_changed.emit("木凳放稳了，现在能看清柜顶相框。（%d/%d）" % [_investigated_keys, _key_total])
-	_emit_debug("[Act01] stool placed / photo unlocked")
+	var can_reach_photo := (
+		current_beat == Beat.P1_EXPLORE
+		and not _photo.investigated
+		and _stool.is_in_target_zone()
+		and _player.is_mounted_on_stool(_stool)
+	)
+	if _photo.interaction_enabled == can_reach_photo:
+		return
+	_photo.set_interaction_enabled(can_reach_photo)
+	# 相框和衣柜男装在画面上贴得很近。站上木椅时只留相框，
+	# 下来以后才把衣柜交还给玩家，两个触发不再互相抢。
+	if _wardrobe_inspect != null and (can_reach_photo or current_beat == Beat.P1_EXPLORE):
+		_wardrobe_inspect.set_interaction_enabled(not can_reach_photo)
+	if can_reach_photo:
+		_photo.set_highlight(Color(1.0, 0.92, 0.72, 0.25), true)
+		_set_story_flag(&"chapter1_photo_unlocked")
+		objective_changed.emit("站在柜前木椅上，现在能调查柜顶相框。（%d/%d）" % [_investigated_keys, _key_total])
+		_emit_debug("[Act01] stool placed + mounted / photo unlocked")
 
 
 func _on_observation_interacted(_player_ref: PlayerController, target: Interactable) -> void:
@@ -166,7 +221,7 @@ func _on_observation_closed(object_id: String) -> void:
 
 
 func _update_explore_objective() -> void:
-	objective_changed.emit("整理离家前的东西（%d/%d）；柜顶相框需要先移动木凳。" % [_investigated_keys, _key_total])
+	objective_changed.emit("整理离家前的东西（%d/%d）；把木椅推到衣柜正前方，再按空格跳上去看相框。" % [_investigated_keys, _key_total])
 
 
 func _start_umbrella_scene() -> void:
@@ -174,6 +229,10 @@ func _start_umbrella_scene() -> void:
 		return
 	current_beat = Beat.UMBRELLA_DIALOGUE
 	_set_story_flag(&"chapter1_p1_complete")
+	if _player != null and _player.is_mounted_on_stool():
+		_player.dismount_stool()
+	if _player != null and _player.is_crouching():
+		_player.stand_up()
 	if _mother != null:
 		_mother.visible = true
 		_mother.set_logical_position(mother_dialogue_position)
@@ -192,6 +251,14 @@ func _on_umbrella_dialogue_finished(_root_id: String) -> void:
 
 
 func _finish_umbrella_scene() -> void:
+	if current_beat != Beat.UMBRELLA_DIALOGUE:
+		return
+	if _game_flow != null:
+		_game_flow.set_mode(GameFlow.Mode.CUTSCENE)
+	objective_changed.emit("妈妈正走到纸箱旁边。")
+	if _mother != null:
+		await _mother.move_to_logical(mother_after_dialogue_position, mother_walk_duration)
+		_mother.face_away_from(_player.get_logical_position())
 	if _umbrella != null:
 		_umbrella.visible = true
 		_umbrella.set_interaction_enabled(true)
@@ -199,12 +266,9 @@ func _finish_umbrella_scene() -> void:
 	if _suitcase != null:
 		_suitcase.configure_dialogue("D045", true)
 		_suitcase.configure_observation("O045", false)
-	if _mother != null:
-		_mother.set_logical_position(mother_after_dialogue_position)
-		_mother.visible = true
-		_mother.face_towards(_player.get_logical_position())
-
 	current_beat = Beat.P2_LEAVE
+	if _game_flow != null:
+		_game_flow.set_mode(GameFlow.Mode.EXPLORE)
 	objective_changed.emit("可以再看看行李和黄伞，然后去门口。")
 
 
@@ -217,11 +281,50 @@ func _check_reveal() -> void:
 	):
 		return
 	_tie_line.set_enabled(true)
+	# 线已经显形并绷紧，但这一拍还不许它把人拽回去：
+	# 余念要先回头把母亲塞进来的东西再看一遍，才轮到第一次强制回弹。
+	_tie_line.set_pullback_locked(true)
 	_enter_p3_line_reveal()
-	current_beat = Beat.FIRST_PULL
+	current_beat = Beat.P3_RECHECK
 	_set_story_flag(&"chapter1_tie_revealed")
-	objective_changed.emit("继续向门口走。")
-	_emit_debug("[Act01] tie line revealed")
+	_check_recheck_progress()
+	_emit_debug("[Act01] tie line revealed / recheck gate armed")
+
+
+## 显线之后必须重新调查行李箱与黄伞，两件都看过才会重新给出“走向门口”的指引。
+func _check_recheck_progress() -> void:
+	var done := 0
+	if _suitcase != null and _suitcase.investigated:
+		done += 1
+	if _umbrella != null and _umbrella.investigated:
+		done += 1
+	if done != _recheck_reported:
+		_recheck_reported = done
+		objective_changed.emit(
+			"线从掌心伸出去了。回头再看一遍母亲塞进来的东西：行李箱和黄伞（%d/2）。" % done
+		)
+	if done < 2:
+		return
+	if _observation != null and _observation.is_open():
+		return
+	if _dialogue != null and _dialogue.is_playing():
+		return
+	_begin_door_attempt()
+
+
+func _begin_door_attempt() -> void:
+	if current_beat != Beat.P3_RECHECK:
+		return
+	current_beat = Beat.FIRST_PULL
+	_set_story_flag(&"chapter1_recheck_complete")
+	if _tie_line != null:
+		_tie_line.set_pullback_locked(false)
+	if _suitcase != null:
+		_suitcase.set_interaction_enabled(false)
+	if _umbrella != null:
+		_umbrella.set_interaction_enabled(false)
+	objective_changed.emit("现在，走向门口。")
+	_emit_debug("[Act01] recheck complete / door attempt unlocked")
 
 
 func _on_first_pullback() -> void:
@@ -270,6 +373,13 @@ func _enter_p3_line_reveal() -> void:
 	if _thread_clue != null:
 		_thread_clue.set_interaction_enabled(true)
 		_thread_clue.set_highlight(red, true)
+
+	# 行李箱与黄伞重新开放，并清掉 P2 的调查记录：这两件必须在显线之后再看一次。
+	for target in [_suitcase, _umbrella]:
+		if target == null:
+			continue
+		target.set_interaction_enabled(true)
+		target.reset_interaction()
 
 
 func _update_tension_context() -> void:

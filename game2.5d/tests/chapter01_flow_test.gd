@@ -26,8 +26,9 @@ func _run() -> void:
 	var umbrella := room.get_node("Interactables/Umbrella") as Interactable
 	var thread_clue := room.get_node("Interactables/ThreadClue") as Interactable
 	var photo := room.get_node("Interactables/PhotoFrame") as Interactable
-	var stool := room.get_node("Interactables/Stool") as Interactable
-	var bead := room.get_node("Interactables/BeadBracelet") as Interactable
+	var packing_box := room.get_node("Interactables/PackingBox") as Interactable
+	var stool := room.get_node("Interactables/Stool") as PushableStool
+	var bed_trigger := room.get_node("Interactables/BedCrouchTrigger") as Interactable
 
 	dialogue.characters_per_second = 0.0
 	dialogue.monologue_hold_seconds = 0.0
@@ -35,13 +36,23 @@ func _run() -> void:
 
 	assert(get_nodes_in_group(&"key_object").size() == 5)
 	assert(act.get_key_total() == 5)
-	assert(observation_db.get_all_ids().size() == 11)
-	assert(not umbrella.visible)
+	assert(observation_db.get_all_ids().size() == 10)
+	assert(umbrella.visible)
+	assert(not umbrella.interaction_enabled)
 	assert(not photo.interaction_enabled)
 	assert(not thread_clue.interaction_enabled)
-	assert(bead.observation_id == "O044")
+	assert(room.get_node_or_null("Interactables/Headphones") == null)
+	assert(room.get_node_or_null("Interactables/BeadBracelet") == null)
 
-	# P1 选调：窗玻璃和木珠串现在是两个独立 O-ID，信息卡不混入余念独白。
+	# 路过窗边只播放倒影对白 D044，不再生成木珠串或 O044 信息卡。
+	player.set_logical_position(act.window_reflection_position)
+	await process_frame
+	assert(dialogue.is_playing() and dialogue._root_id == "D044")
+	assert(not observation.is_open())
+	_finish_dialogue(dialogue)
+	await process_frame
+
+	# P1 选调：窗玻璃本身仍可调查，但与路过倒影对白相互独立。
 	await _inspect_object(
 		room.get_node("Interactables/WindowInspect") as Interactable,
 		observation,
@@ -49,7 +60,6 @@ func _run() -> void:
 		"O004",
 		"D004"
 	)
-	await _inspect_object(bead, observation, dialogue, "O044", "D044")
 	await _inspect_object(
 		room.get_node("Interactables/WardrobeInspect") as Interactable,
 		observation,
@@ -59,8 +69,14 @@ func _run() -> void:
 	)
 	assert(act.get_investigated_key_count() == 0)
 
-	# 相框需要先移动木凳解锁。
-	stool.interact(player)
+	# 相框需要箱子同时满足“推到柜前目标区”和“玩家站上箱顶”。
+	assert(packing_box.get_node("MathBody") is StaticBody3D)
+	stool.set_logical_position(stool.target_position)
+	await process_frame
+	assert(not photo.interaction_enabled)
+	assert(player.mount_stool(stool))
+	await physics_frame
+	await physics_frame
 	assert(photo.interaction_enabled)
 
 	# P1 五件主调查：每件都按 O 信息卡 → 独立 D 对话框的顺序播放。
@@ -68,39 +84,66 @@ func _run() -> void:
 		var target := room.get_node("Interactables/%s" % node_name) as Interactable
 		await _inspect_object(target, observation, dialogue, target.observation_id, target.dialogue_id)
 
-	await _inspect_object(
-		room.get_node("Interactables/Headphones") as Interactable,
+	await _crouch_and_inspect_bed(
+		player,
+		bed_trigger,
 		observation,
-		dialogue,
-		"O041",
-		"D041"
+		dialogue
 	)
+	assert(player.mount_stool(stool))
+	await physics_frame
+	await physics_frame
 	await _inspect_object(photo, observation, dialogue, "O042", "D042")
 	await process_frame
 	assert(act.get_investigated_key_count() == 5)
 	assert(act.current_beat == Act01Sequence.Beat.UMBRELLA_DIALOGUE)
+	assert(mother.get_logical_position().is_equal_approx(Vector3(9.0, 0.0, 7.0)))
 	_finish_dialogue(dialogue)
-	await process_frame
+	for _index in range(3):
+		await process_frame
+	var mother_mid_walk := mother.get_logical_position()
+	assert(mother_mid_walk.distance_to(Vector3(9.0, 0.0, 7.0)) > 0.01)
+	assert(mother_mid_walk.distance_to(Vector3(4.35, 0.0, 7.8)) > 0.01)
+	for _index in range(120):
+		await process_frame
+		if act.current_beat == Act01Sequence.Beat.P2_LEAVE:
+			break
 
 	# P2：行李箱切换到 O045/D045；黄伞使用 O046/D046。
 	assert(act.current_beat == Act01Sequence.Beat.P2_LEAVE)
-	assert(umbrella.visible and umbrella.observation_id == "O046")
+	assert(umbrella.visible and umbrella.interaction_enabled and umbrella.observation_id == "O046")
+	assert(not umbrella.investigated)
 	assert(suitcase.observation_id == "O045" and not suitcase.investigated)
 	assert(mother.visible)
-	assert(mother.get_logical_position().is_equal_approx(Vector3(6.4, 0.0, 9.2)))
+	assert(mother.get_logical_position().is_equal_approx(Vector3(4.35, 0.0, 7.8)))
+	assert(mother.is_facing_away())
 	assert(tie_line.get_target_anchor().is_equal_approx(mother.get_anchor_position()))
 	await _inspect_object(suitcase, observation, dialogue, "O045", "D045")
 	await _inspect_object(umbrella, observation, dialogue, "O046", "D046")
 
-	# 靠近玄关显线；第一章只做回弹和地面阻力，不进入悬挂状态。
+	# 靠近玄关显线。线立刻绷紧，但回拉被锁住：这时还不能直接走出门。
 	player.set_logical_position(Vector3(15.2, 0.0, 2.0))
 	await process_frame
 	await process_frame
 	assert(tie_line.enabled)
-	assert(act.current_beat == Act01Sequence.Beat.FIRST_PULL)
+	assert(act.current_beat == Act01Sequence.Beat.P3_RECHECK)
+	assert(tie_line.is_pullback_locked())
 	assert(thread_clue.interaction_enabled)
-	# P3 普通线共用 O047/D047，可在两次离门尝试之间选看。
+	# P3 普通线共用 O047/D047，可在离门尝试之间选看。
 	await _inspect_object(thread_clue, observation, dialogue, "O047", "D047")
+
+	# 显线之后行李箱与黄伞重新开放，两件都重看过才会放行到门口。
+	assert(suitcase.interaction_enabled and not suitcase.investigated)
+	assert(umbrella.interaction_enabled and not umbrella.investigated)
+	await _inspect_object(suitcase, observation, dialogue, "O045", "D045")
+	await process_frame
+	assert(act.current_beat == Act01Sequence.Beat.P3_RECHECK, "只看了行李箱就放行了")
+	assert(tie_line.is_pullback_locked())
+	await _inspect_object(umbrella, observation, dialogue, "O046", "D046")
+	await process_frame
+	assert(act.current_beat >= Act01Sequence.Beat.FIRST_PULL)
+	assert(not tie_line.is_pullback_locked())
+	assert(game_state.has_flag(&"chapter1_recheck_complete"))
 
 	player.set_logical_position(Vector3(16.8, 0.0, 1.0))
 	for _index in range(180):
@@ -128,7 +171,7 @@ func _run() -> void:
 	assert(transition.visible)
 	assert(transition.get_node_or_null("EchoTitle") is Label)
 
-	print("[CHAPTER01_FLOW] PASS observations=11 required=5 optional=3 p2=2 p3=1")
+	print("[CHAPTER01_FLOW] PASS observations=10 required=5 optional=2 p2=2 p3=1")
 	print("[CHAPTER01_FLOW] PASS item_card_then_dialogue=true no_chapter1_suspension=true")
 	quit(0)
 
@@ -148,6 +191,28 @@ func _inspect_object(
 	assert(dialogue.is_playing() and dialogue._root_id == expected_dialogue_id)
 	_finish_dialogue(dialogue)
 	await process_frame
+
+
+func _crouch_and_inspect_bed(
+	player: PlayerController,
+	bed_trigger: Interactable,
+	observation: FixedObservationUI,
+	dialogue: DialogueUI
+) -> void:
+	assert(bed_trigger.requires_crouch)
+	bed_trigger.interact(player)
+	assert(not bed_trigger.investigated)
+	player.set_logical_position(Vector3(12.4, 0.0, 5.4))
+	await physics_frame
+	assert(player.toggle_crouch())
+	assert(player.is_crouching())
+	assert(observation.is_open() and observation.current_object_id == bed_trigger.name)
+	observation.close_observation()
+	assert(dialogue.is_playing() and dialogue._root_id == "D041")
+	_finish_dialogue(dialogue)
+	await process_frame
+	assert(player.toggle_crouch())
+	assert(not player.is_crouching())
 
 
 func _finish_dialogue(dialogue: DialogueUI) -> void:

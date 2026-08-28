@@ -12,6 +12,9 @@ signal interacted(player: PlayerController)
 @export var logical_position := Vector3.ZERO
 @export var interaction_prompt_override := ""
 @export var auto_play_dialogue := true
+@export var requires_crouch := false
+## 交互范围不再用白色光斑标记。若某个特殊关卡确实需要，可单独开启。
+@export var show_interaction_highlight := false
 
 ## 同格物件的先后微调（正数更靠前），墙面物件用 Projection25D.BAND_WALL。
 @export var depth_offset := 0
@@ -19,14 +22,17 @@ signal interacted(player: PlayerController)
 var investigated := false
 
 @onready var _glow: Node2D = get_node_or_null("Glow") as Node2D
-@onready var _math_body: StaticBody3D = get_node_or_null("MathBody") as StaticBody3D
+@onready var _math_body: Node3D = get_node_or_null("MathBody") as Node3D
 
 
 func _ready() -> void:
 	add_to_group(&"interactable")
 	if is_key_object:
 		add_to_group(&"key_object")
+	if requires_crouch:
+		add_to_group(&"crouch_interactable")
 	_sync_projection()
+	_set_glow_visible(interaction_enabled and show_interaction_highlight)
 
 
 func set_logical_position(value: Vector3) -> void:
@@ -48,8 +54,14 @@ func can_interact() -> bool:
 	return interaction_enabled and (not once_only or not investigated)
 
 
-func interact(player: PlayerController) -> void:
+func can_interact_for_player(player: PlayerController) -> bool:
 	if not can_interact():
+		return false
+	return not requires_crouch or (player != null and player.is_crouching())
+
+
+func interact(player: PlayerController) -> void:
+	if not can_interact_for_player(player):
 		return
 	investigated = true
 	_hide_glow()
@@ -95,7 +107,7 @@ func set_interaction_enabled(value: bool) -> void:
 func set_highlight(color: Color, show_highlight := true) -> void:
 	if is_instance_valid(_glow):
 		_glow.self_modulate = color
-		_glow.visible = show_highlight
+		_glow.visible = show_highlight and show_interaction_highlight
 
 
 func _sync_projection() -> void:
@@ -111,4 +123,4 @@ func _hide_glow() -> void:
 
 func _set_glow_visible(value: bool) -> void:
 	if is_instance_valid(_glow):
-		_glow.visible = value
+		_glow.visible = value and show_interaction_highlight

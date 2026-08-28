@@ -35,6 +35,10 @@ var emotional_pressure := 0.0
 var intention_conflict := 0.0
 var exit_progress := 0.0
 var _force_critical := false
+## 线已经显形、但剧情还不允许它把玩家拽回去时锁住回拉。
+## 只屏蔽物理回拉，不影响张力读数与视觉，玩家仍然看得见线正在绷紧。
+var _pullback_locked := false
+var pullback_start_position := Vector3.ZERO
 
 var _source: Node2D
 var _target: Node2D
@@ -75,6 +79,8 @@ func _process(_delta: float) -> void:
 	if _force_critical or distance >= get_critical_distance() or tension >= critical_tension:
 		_pullback_active = true
 	elif _pullback_active and distance <= _get_pullback_release_distance() + 0.02 and tension < critical_tension:
+		_pullback_active = false
+	if _pullback_locked:
 		_pullback_active = false
 	_set_state(_resolve_state())
 	_update_visual()
@@ -142,6 +148,16 @@ func clear_context() -> void:
 	set_context(0.0, 0.0, 0.0)
 
 
+func set_pullback_locked(value: bool) -> void:
+	_pullback_locked = value
+	if value:
+		_pullback_active = false
+
+
+func is_pullback_locked() -> bool:
+	return _pullback_locked
+
+
 func set_force_critical(value: bool) -> void:
 	_force_critical = value
 	if value:
@@ -170,7 +186,7 @@ func is_moving_away(from_position: Vector3, direction: Vector3) -> bool:
 
 
 func get_logical_correction() -> Vector3:
-	if not enabled or not is_instance_valid(_source) or not is_instance_valid(_target):
+	if _pullback_locked or not enabled or not is_instance_valid(_source) or not is_instance_valid(_target):
 		return Vector3.ZERO
 	var target := get_target_logical_anchor()
 	var source := get_source_logical_anchor()
@@ -213,6 +229,10 @@ func _set_state(next_state: State) -> void:
 	if next_state == current_state:
 		return
 	var previous_state := current_state
+	if next_state == State.PULL_BACK:
+		# 只记录触发瞬间玩家的真实位置；绝不把玩家传送到预设拉回点。
+		pullback_start_position = get_source_logical_anchor()
+		pullback_start_position.y = 0.0
 	current_state = next_state
 	state_changed.emit(previous_state, current_state)
 
