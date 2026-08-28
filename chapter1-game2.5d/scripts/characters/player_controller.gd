@@ -15,6 +15,9 @@ signal empty_interact_pressed
 @export var swing_acceleration := 4.8
 @export var swing_damping := 3.2
 @export var swing_max_offset := 1.25
+@export var resistance_lean_pixels := 10.0
+@export var resistance_lean_degrees := 6.5
+@export var resistance_response_speed := 8.0
 
 @onready var math_body: CharacterBody3D = $MathBody
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -31,6 +34,11 @@ var _swing_offset := 0.0
 var _swing_velocity := 0.0
 var _suspension_input_seen := false
 var _context_action_prompt := ""
+var _sprite_rest_position := Vector2.ZERO
+var _sprite_rest_rotation := 0.0
+var _shadow_rest_scale := Vector2.ONE
+var _resistance_visual_strength := 0.0
+var _resistance_screen_direction := Vector2.RIGHT
 
 var logical_position: Vector3:
 	get:
@@ -41,17 +49,22 @@ var logical_position: Vector3:
 
 func _ready() -> void:
 	add_to_group(&"player")
+	_sprite_rest_position = animated_sprite.position
+	_sprite_rest_rotation = animated_sprite.rotation
+	_shadow_rest_scale = ground_shadow.scale
 	_sync_projection()
 
 
 func _physics_process(delta: float) -> void:
 	_game_flow = _get_game_flow()
 	if _suspended:
+		_update_resistance_feedback(0.0, Vector2.ZERO, delta)
 		_update_suspension(delta)
 		_update_interaction_target()
 		return
 	if _game_flow != null and not _game_flow.is_player_control_enabled():
 		math_body.velocity = Vector3.ZERO
+		_update_resistance_feedback(0.0, Vector2.ZERO, delta)
 		_play_idle_animation()
 		_update_interaction_target()
 		return
@@ -60,6 +73,7 @@ func _physics_process(delta: float) -> void:
 	var direction := _screen_input_to_logical_direction(input)
 	var input_velocity := direction * move_speed * _get_speed_scale(direction)
 	var pull_velocity := _get_tie_line_pull_velocity()
+	_update_resistance_from_motion(direction, pull_velocity, delta)
 	math_body.velocity = input_velocity + pull_velocity
 	math_body.move_and_slide()
 
@@ -91,6 +105,7 @@ func set_logical_position(value: Vector3) -> void:
 
 
 func begin_suspension() -> void:
+	_reset_resistance_feedback()
 	_suspended = true
 	_suspension_origin = get_logical_position()
 	_suspension_origin.y = 0.0
@@ -102,6 +117,7 @@ func begin_suspension() -> void:
 
 
 func end_suspension(landing_position: Vector3) -> void:
+	_reset_resistance_feedback()
 	_suspended = false
 	_swing_velocity = 0.0
 	_swing_offset = 0.0
@@ -170,6 +186,10 @@ func get_anchor_position() -> Vector2:
 	return Projection25D.project(get_logical_anchor_position())
 
 
+func get_resistance_visual_strength() -> float:
+	return _resistance_visual_strength
+
+
 func _sync_projection() -> void:
 	if not is_instance_valid(math_body):
 		return
@@ -194,6 +214,57 @@ func _get_tie_line_pull_velocity() -> Vector3:
 	if pull_velocity.length() > max_pull_speed:
 		pull_velocity = pull_velocity.normalized() * max_pull_speed
 	return pull_velocity
+
+
+func _update_resistance_from_motion(direction: Vector3, pull_velocity: Vector3, delta: float) -> void:
+	var target_strength := 0.0
+	var screen_direction := _resistance_screen_direction
+	var moving_away := (
+		_tie_line != null
+		and not direction.is_zero_approx()
+		and _tie_line.is_moving_away(get_logical_position(), direction)
+	)
+	if moving_away:
+		screen_direction = Projection25D.project_direction(direction).normalized()
+		target_strength = smoothstep(0.58, 1.0, _tie_line.tension)
+	if not pull_velocity.is_zero_approx():
+		screen_direction = -Projection25D.project_direction(pull_velocity.normalized()).normalized()
+		target_strength = maxf(target_strength, 1.0)
+	_update_resistance_feedback(target_strength, screen_direction, delta)
+
+
+func _update_resistance_feedback(target_strength: float, screen_direction: Vector2, delta: float) -> void:
+	if not screen_direction.is_zero_approx():
+		_resistance_screen_direction = screen_direction.normalized()
+	_resistance_visual_strength = move_toward(
+		_resistance_visual_strength,
+		clampf(target_strength, 0.0, 1.0),
+		resistance_response_speed * delta
+	)
+	var horizontal_sign := signf(_resistance_screen_direction.x)
+	if is_zero_approx(horizontal_sign):
+		horizontal_sign = 1.0
+	var tremor := sin(float(Time.get_ticks_msec()) * 0.055) * 1.15 * pow(_resistance_visual_strength, 2.0)
+	animated_sprite.position = (
+		_sprite_rest_position
+		+ _resistance_screen_direction * resistance_lean_pixels * _resistance_visual_strength
+		+ Vector2(0.0, tremor)
+	)
+	animated_sprite.rotation = (
+		_sprite_rest_rotation
+		+ deg_to_rad(resistance_lean_degrees) * horizontal_sign * _resistance_visual_strength
+	)
+	ground_shadow.scale = _shadow_rest_scale * Vector2(
+		1.0 + 0.24 * _resistance_visual_strength,
+		1.0 - 0.12 * _resistance_visual_strength
+	)
+
+
+func _reset_resistance_feedback() -> void:
+	_resistance_visual_strength = 0.0
+	animated_sprite.position = _sprite_rest_position
+	animated_sprite.rotation = _sprite_rest_rotation
+	ground_shadow.scale = _shadow_rest_scale
 
 
 func _get_tie_line() -> TieLine:

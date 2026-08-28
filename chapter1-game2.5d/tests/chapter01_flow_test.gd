@@ -25,6 +25,7 @@ func _run() -> void:
 	var objective := main.get_node("UI/ObjectiveLabel") as Label
 	var transition := main.get_node("UI/TransitionOverlay") as ColorRect
 	var room := main.get_node("World/Chapter01Room01")
+	var tension_feedback := room.get_node("TensionFeedback")
 	var mother := room.get_node("Characters/Mother") as Mother
 	var suitcase := room.get_node("Interactables/Suitcase") as Interactable
 	var umbrella := room.get_node("Interactables/Umbrella") as Interactable
@@ -199,6 +200,9 @@ func _run() -> void:
 	Input.action_press(&"move_right")
 	for _index in range(80):
 		await physics_frame
+		if _index == 4:
+			assert(player.get_resistance_visual_strength() > 0.5)
+			assert(tension_feedback.get_feedback_strength() > 0.5)
 		if act.current_beat == Act01Sequence.Beat.WAIT_FINAL_REARM:
 			break
 	Input.action_release(&"move_right")
@@ -243,7 +247,7 @@ func _run() -> void:
 	assert(transition.get_node_or_null("EchoTitle") is Label)
 
 	print("[CHAPTER01_FLOW] PASS fixed_observation=true stool_unlock=true umbrella_presentations=6")
-	print("[CHAPTER01_FLOW] PASS endpoint_reveal=true reaction_gated=true grounded_probe=true umbrella_echo=true")
+	print("[CHAPTER01_FLOW] PASS endpoint_reveal=true reaction_gated=true non_color_feedback=true grounded_probe=true umbrella_echo=true")
 	quit(0)
 
 

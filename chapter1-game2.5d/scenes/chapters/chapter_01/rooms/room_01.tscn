@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bbphf4til8kwv" path="res://scripts/interactions/interactable.gd" id="2_interactable"]
 [ext_resource type="Script" uid="uid://b3nmwcpwi8d77" path="res://scripts/spatial/spatial_prop_25d.gd" id="3_spatial"]
 [ext_resource type="PackedScene" path="res://scenes/characters/mother.tscn" id="4_mother"]
+[ext_resource type="Script" path="res://scripts/effects/tension_feedback.gd" id="5_tension_feedback"]
 
 [sub_resource type="BoxShape3D" id="Shape3D_wardrobe"]
 size = Vector3(2.1, 3.2, 1.1)
@@ -38,6 +39,9 @@ size = Vector2(75, 150)
 [node name="Chapter01Room01" type="Node2D" unique_id=1882105612]
 script = ExtResource("1_room")
 room_id = &"chapter_01_room_01"
+
+[node name="TensionFeedback" type="Node" parent="."]
+script = ExtResource("5_tension_feedback")
 
 [node name="Background" type="Node2D" parent="." unique_id=555897396]
 z_index = -4000
