@@ -1,6 +1,6 @@
 extends SceneTree
 
-const PREFIX := "/tmp/echoes-chapter1-audit-round7-after"
+const PREFIX := "/tmp/echoes-chapter1-audit-round8-after"
 
 
 func _initialize() -> void:
@@ -19,74 +19,89 @@ func _run() -> void:
 	var tie_line := main.get_node("TieLine") as TieLine
 	var dialogue := main.get_node("UI/DialogueUI") as DialogueUI
 	var camera_rig := main.get_node("CameraRig") as CameraRig
-	var tension_feedback := room.get_node("TensionFeedback")
+	var umbrella := room.get_node("Interactables/Umbrella") as Interactable
+	var transition := main.get_node("UI/TransitionOverlay") as ColorRect
 
 	dialogue.characters_per_second = 0.0
 	dialogue.monologue_hold_seconds = 30.0
 	dialogue.fade_duration = 0.0
+	await _reach_echo_threshold(act, player, tie_line, dialogue)
+	_snap_line_reveal(camera_rig, room)
+
+	assert(act.current_beat == Act01Sequence.Beat.AFTER_PROBE)
+	assert(dialogue.is_playing() and dialogue._current_id == "D018")
+	assert(tie_line.extended)
+	assert(tie_line.current_state == TieLine.State.PULL_BACK)
+	assert(tie_line.is_echo_resonating())
+	assert(umbrella.is_resonating())
+	await _save("%s-01-d018.png" % PREFIX)
+
+	dialogue.advance()
+	await _frames(3)
+	player.set_logical_position(umbrella.get_logical_position() + Vector3(-0.45, 0.0, 0.2))
+	await _physics_frames(6)
+	assert(umbrella.can_interact())
+	assert(tie_line.current_state == TieLine.State.NORMAL)
+	assert(tie_line.default_color.is_equal_approx(tie_line.echo_color))
+	assert(tie_line.get_echo_resonance_strength() > 0.0)
+	assert(umbrella.get_resonance_strength() > 0.0)
+	assert(absf(tie_line.get_echo_resonance_strength() - umbrella.get_resonance_strength()) < 0.03)
+	assert(not transition.visible)
+	await _save("%s-02-umbrella-ready.png" % PREFIX)
+
+	umbrella.interact(player)
+	assert(act.current_beat == Act01Sequence.Beat.ECHO_TRANSITION)
+	assert(not transition.visible)
+	await _seconds(0.36)
+	assert(act.current_beat == Act01Sequence.Beat.ECHO_TRANSITION)
+	await _save("%s-03-shared-resonance.png" % PREFIX)
+
+	while act.current_beat != Act01Sequence.Beat.DONE:
+		await process_frame
+	await _seconds(0.26)
+	assert(transition.visible)
+	await _save("%s-04-transition.png" % PREFIX)
+
+	print(
+		"[CAPTURE] after echo_state=", TieLine.State.keys()[tie_line.current_state],
+		" tension=", snappedf(tie_line.tension, 0.01),
+		" shared_resonance=", tie_line.is_echo_resonating() and umbrella.is_resonating(),
+		" transition=", transition.visible
+	)
+	print("[CAPTURE] %s-{01-d018,02-umbrella-ready,03-shared-resonance,04-transition}.png" % PREFIX)
+	quit(0)
+
+
+func _reach_echo_threshold(
+	act: Act01Sequence,
+	player: PlayerController,
+	tie_line: TieLine,
+	dialogue: DialogueUI
+) -> void:
 	act._finish_umbrella_scene()
-	player.set_logical_position(Vector3(15.1, 0.0, 2.4))
+	player.set_logical_position(Vector3(15.2, 0.0, 2.0))
 	while act.current_beat != Act01Sequence.Beat.FIRST_PULL:
 		await physics_frame
-	_snap_door(camera_rig, room)
 
-	player.set_logical_position(Vector3(13.2, 0.0, 3.1))
-	await _physics_frames(5)
-	assert(tie_line.current_state == TieLine.State.NORMAL)
-	assert(is_zero_approx(player.get_resistance_visual_strength()))
-	assert(is_zero_approx(tension_feedback.get_feedback_strength()))
-	await _save("%s-01-normal.png" % PREFIX)
-
-	player.move_speed = 1.5
-	Input.action_press(&"move_right")
-	var tension_frames := 0
-	while (
-		act.current_beat == Act01Sequence.Beat.FIRST_PULL
-		and tie_line.current_state != TieLine.State.TENSION
-		and tension_frames < 600
-	):
-		await physics_frame
-		tension_frames += 1
-	for _index in range(8):
-		await physics_frame
-		if act.current_beat != Act01Sequence.Beat.FIRST_PULL:
-			break
-	Input.action_release(&"move_right")
-	assert(act.current_beat == Act01Sequence.Beat.FIRST_PULL)
-	assert(tie_line.current_state == TieLine.State.TENSION)
-	assert(player.get_resistance_visual_strength() > 0.1)
-	assert(tension_feedback.get_feedback_strength() > 0.1)
-	await _save("%s-02-high-tension.png" % PREFIX)
-
-	Input.action_press(&"move_right")
+	player.set_logical_position(Vector3(16.8, 0.0, 1.0))
 	while act.current_beat != Act01Sequence.Beat.WAIT_PROBE_REARM:
 		await physics_frame
-	Input.action_release(&"move_right")
-	assert(dialogue._current_id == "D015")
 	dialogue.advance()
-	assert(dialogue._current_id == "D016")
 	dialogue.advance()
 	while act.current_beat != Act01Sequence.Beat.LINE_PROBE:
 		await physics_frame
-	act._on_empty_interact_pressed()
-	Input.action_press(&"interact")
-	Input.action_press(&"move_right")
-	await _physics_frames(8)
-	assert(act.current_beat == Act01Sequence.Beat.PROBING_RESISTANCE)
-	assert(player.get_resistance_visual_strength() > 0.8)
-	assert(tension_feedback.get_feedback_strength() > 0.8)
-	await _save("%s-03-active-resistance.png" % PREFIX)
-	Input.action_release(&"move_right")
-	Input.action_release(&"interact")
 
-	print(
-		"[CAPTURE] after sprite_rotation=", snappedf(player.animated_sprite.rotation, 0.001),
-		" sprite_offset=", player.animated_sprite.position,
-		" shadow_scale=", player.ground_shadow.scale,
-		" environment_feedback=", snappedf(tension_feedback.get_feedback_strength(), 0.01)
-	)
-	print("[CAPTURE] %s-{01-normal,02-high-tension,03-active-resistance}.png" % PREFIX)
-	quit(0)
+	act._on_empty_interact_pressed()
+	act.debug_finish_line_probe()
+	dialogue._finish_immediately(true)
+	player.set_logical_position(Vector3(13.0, 0.0, 3.0))
+	while act.current_beat != Act01Sequence.Beat.FINAL_ATTEMPT:
+		await physics_frame
+
+	player.set_logical_position(Vector3(17.0, 0.0, 1.0))
+	while act.current_beat != Act01Sequence.Beat.AFTER_PROBE:
+		await physics_frame
+	assert(tie_line.enabled)
 
 
 func _save(path: String) -> void:
@@ -107,10 +122,14 @@ func _physics_frames(count: int) -> void:
 		await physics_frame
 
 
-func _snap_door(camera_rig: CameraRig, room: RoomBase) -> void:
-	var door_view := room.get_camera_point(&"DoorView")
-	assert(door_view != null)
+func _seconds(duration: float) -> void:
+	await create_timer(duration).timeout
+
+
+func _snap_line_reveal(camera_rig: CameraRig, room: RoomBase) -> void:
+	var view := room.get_camera_point(&"LineRevealView")
+	assert(view != null)
 	camera_rig.stop_following()
 	camera_rig.camera.position_smoothing_enabled = false
-	camera_rig.snap_to(door_view, Vector2(1.15, 1.15))
+	camera_rig.snap_to(view, Vector2(1.05, 1.05))
 	camera_rig.camera.force_update_scroll()

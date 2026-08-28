@@ -17,6 +17,8 @@ enum State { HIDDEN, NORMAL, TENSION, PULL_BACK }
 @export var normal_color := Color(0.35, 0.95, 0.75, 0.55)
 @export var tension_color := Color(0.98, 0.83, 0.45, 0.85)
 @export var pull_back_color := Color(0.95, 0.35, 0.42, 0.95)
+@export var echo_color := Color(1.0, 0.24, 0.32, 1.0)
+@export_range(0.5, 4.0, 0.1) var echo_resonance_hz := 1.8
 @export var source_path: NodePath
 @export var target_path: NodePath
 @export_range(0.0, 1.0, 0.01) var distance_weight := 0.64
@@ -36,6 +38,8 @@ var intention_conflict := 0.0
 var exit_progress := 0.0
 var appearance_progress := 1.0
 var _force_critical := false
+var echo_resonance_active := false
+var echo_resonance_intensity := 0.0
 
 var _source: Node2D
 var _target: Node2D
@@ -167,6 +171,23 @@ func set_force_critical(value: bool) -> void:
 		_pullback_active = true
 
 
+func set_echo_resonance_active(value: bool, intensity := 1.0) -> void:
+	echo_resonance_active = value
+	echo_resonance_intensity = clampf(intensity, 0.0, 1.0) if value else 0.0
+
+
+func is_echo_resonating() -> bool:
+	return echo_resonance_active
+
+
+func get_echo_resonance_strength() -> float:
+	if not echo_resonance_active:
+		return 0.0
+	var phase := Time.get_ticks_msec() * 0.001 * TAU * echo_resonance_hz
+	var pulse := (sin(phase) + 1.0) * 0.5
+	return echo_resonance_intensity * lerpf(0.42, 1.0, pulse)
+
+
 func get_speed_multiplier() -> float:
 	if current_state == State.HIDDEN:
 		return 1.0
@@ -215,10 +236,14 @@ func get_pull_velocity(stiffness: float) -> Vector3:
 
 
 func _resolve_state() -> State:
-	if not enabled or distance < reveal_distance:
+	if not enabled:
 		return State.HIDDEN
 	if _pullback_active:
 		return State.PULL_BACK
+	if echo_resonance_active:
+		return State.NORMAL
+	if distance < reveal_distance:
+		return State.HIDDEN
 	if distance >= tension_distance:
 		return State.TENSION
 	return State.NORMAL
@@ -243,8 +268,12 @@ func _update_visual() -> void:
 
 	var start := get_source_anchor()
 	var finish := get_target_anchor()
+	var resonance_strength := get_echo_resonance_strength()
+	var visual_tension := tension
+	if echo_resonance_active:
+		visual_tension = maxf(visual_tension, lerpf(0.62, 0.78, resonance_strength))
 	var midpoint := (start + finish) * 0.5
-	var slack := lerpf(78.0, 6.0, tension)
+	var slack := lerpf(78.0, 6.0, visual_tension)
 	var control := midpoint + Vector2(0.0, slack)
 	var curve := PackedVector2Array()
 	for index in range(33):
@@ -262,10 +291,13 @@ func _update_visual() -> void:
 		State.TENSION:
 			yarn_color = tension_color
 			width_scale = 1.25
+	if echo_resonance_active:
+		yarn_color = echo_color
+		width_scale = maxf(width_scale, 1.22 + resonance_strength * 0.34)
 
 	default_color = yarn_color
 	width = visual_width * width_scale
-	_update_yarn_layers(visible_curve, yarn_color, width_scale)
+	_update_yarn_layers(visible_curve, yarn_color, width_scale, visual_tension)
 
 
 func _get_visible_curve(curve: PackedVector2Array) -> PackedVector2Array:
@@ -313,10 +345,20 @@ func _make_line(relative_z: int) -> Line2D:
 	return line
 
 
-func _update_yarn_layers(curve: PackedVector2Array, yarn_color: Color, width_scale: float) -> void:
+func _update_yarn_layers(
+	curve: PackedVector2Array,
+	yarn_color: Color,
+	width_scale: float,
+	visual_tension: float
+) -> void:
 	_glow_line.points = curve
 	_glow_line.width = visual_width * width_scale * glow_width_scale
-	_glow_line.default_color = Color(yarn_color.r, yarn_color.g, yarn_color.b, 0.16 + tension * 0.12)
+	_glow_line.default_color = Color(
+		yarn_color.r,
+		yarn_color.g,
+		yarn_color.b,
+		0.16 + visual_tension * 0.12
+	)
 
 	var light_points := PackedVector2Array()
 	var shadow_points := PackedVector2Array()

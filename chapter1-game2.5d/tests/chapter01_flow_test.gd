@@ -230,14 +230,34 @@ func _run() -> void:
 	assert(not player.is_suspended())
 	assert(is_zero_approx(player.get_logical_position().y))
 	assert(umbrella.interaction_enabled)
+	assert(tie_line.is_echo_resonating())
+	assert(umbrella.is_resonating())
 
-	# 第一章只在玩家主动触碰黄伞、越过余响阈值后结束。
+	# 接近黄伞时物理阻力已经解除，但红线与黄伞仍需共同共鸣，不能恢复普通青色。
 	_finish_dialogue(dialogue)
 	thread_clue.interact(player)
 	assert(object_info.current_info_id == "O047")
 	_finish_object_interaction(object_info, dialogue)
+	player.set_logical_position(umbrella.get_logical_position() + Vector3(-0.45, 0.0, 0.2))
+	for _index in range(8):
+		await physics_frame
+	assert(tie_line.current_state == TieLine.State.NORMAL)
+	assert(tie_line.default_color.is_equal_approx(tie_line.echo_color))
+	assert(tie_line.get_echo_resonance_strength() > 0.0)
+	assert(umbrella.get_resonance_strength() > 0.0)
+	assert(absf(tie_line.get_echo_resonance_strength() - umbrella.get_resonance_strength()) < 0.03)
+
+	# 触碰黄伞后先锁定一小段共同激活演出，再进入章节标题。
 	umbrella.interact(player)
-	await process_frame
+	assert(act.current_beat == Act01Sequence.Beat.ECHO_TRANSITION)
+	assert(game_flow.current_mode == GameFlow.Mode.CUTSCENE)
+	assert(not game_state.has_flag(&"chapter1_complete"))
+	assert(not transition.visible)
+	assert(umbrella.get_node("Glow").visible)
+	for _index in range(30):
+		await physics_frame
+		if act.current_beat == Act01Sequence.Beat.DONE:
+			break
 	assert(act.current_beat == Act01Sequence.Beat.DONE)
 	assert(game_state.has_flag(&"chapter1_photo_unlocked"))
 	assert(game_state.has_flag(&"chapter1_first_pullback"))
@@ -247,7 +267,7 @@ func _run() -> void:
 	assert(transition.get_node_or_null("EchoTitle") is Label)
 
 	print("[CHAPTER01_FLOW] PASS fixed_observation=true stool_unlock=true umbrella_presentations=6")
-	print("[CHAPTER01_FLOW] PASS endpoint_reveal=true reaction_gated=true non_color_feedback=true grounded_probe=true umbrella_echo=true")
+	print("[CHAPTER01_FLOW] PASS endpoint_reveal=true reaction_gated=true non_color_feedback=true grounded_probe=true shared_echo=true")
 	quit(0)
 
 

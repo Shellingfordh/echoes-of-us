@@ -19,6 +19,7 @@ enum Beat {
 	WAIT_FINAL_REARM,
 	FINAL_ATTEMPT,
 	AFTER_PROBE,
+	ECHO_TRANSITION,
 	DONE,
 }
 
@@ -65,6 +66,7 @@ const KEY_OBJECT_HINTS := {
 @export var probe_timeout_seconds := 4.0
 @export var stool_placed_position := Vector3(3.1, 0.0, 3.15)
 @export var stool_move_duration := 0.32
+@export var echo_transition_seconds := 0.8
 
 var current_beat := Beat.P1_EXPLORE
 var _investigated_keys := 0
@@ -73,6 +75,7 @@ var _probe_elapsed := 0.0
 var _probe_input_elapsed := 0.0
 var _line_reveal_elapsed := 0.0
 var _pullback_reaction_finished := false
+var _echo_transition_elapsed := 0.0
 var _key_objects: Dictionary = {}
 
 var _player: PlayerController
@@ -172,6 +175,8 @@ func _process(delta: float) -> void:
 		Beat.FINAL_ATTEMPT:
 			if _has_reached_pullback():
 				_prepare_echo_threshold()
+		Beat.ECHO_TRANSITION:
+			_update_echo_transition(delta)
 		_:
 			pass
 
@@ -433,12 +438,14 @@ func _prepare_echo_threshold() -> void:
 	if _tie_line != null:
 		_tie_line.set_extended(true)
 		_tie_line.clear_context()
+		_tie_line.set_echo_resonance_active(true, 0.72)
 	if _umbrella != null:
 		_umbrella.auto_play_dialogue = false
 		_umbrella.interaction_prompt_override = "Enter / 空格  触碰黄色旧雨伞，进入余响"
 		_umbrella.set_interaction_enabled(true)
 		_umbrella.reset_interaction()
 		_umbrella.set_highlight(Color(1.0, 0.68, 0.24, 0.72), true)
+		_umbrella.set_resonance_active(true, 0.72)
 	current_beat = Beat.AFTER_PROBE
 	_play_dialogue("D018")
 	objective_changed.emit("看一眼房间里的普通线，或触碰黄伞进入余响。")
@@ -447,6 +454,34 @@ func _prepare_echo_threshold() -> void:
 
 func _on_umbrella_interacted(_player_ref: PlayerController) -> void:
 	if current_beat == Beat.AFTER_PROBE:
+		_begin_echo_transition()
+
+
+func _begin_echo_transition() -> void:
+	current_beat = Beat.ECHO_TRANSITION
+	_echo_transition_elapsed = 0.0
+	_player.clear_context_action_prompt()
+	if _umbrella != null:
+		_umbrella.set_interaction_enabled(false)
+		_umbrella.set_highlight(Color(1.0, 0.76, 0.24, 1.0), true)
+		_umbrella.set_resonance_active(true, 1.0)
+	if _tie_line != null:
+		_tie_line.set_echo_resonance_active(true, 1.0)
+	if _game_flow != null:
+		_game_flow.set_mode(GameFlow.Mode.CUTSCENE)
+	objective_changed.emit("黄伞与牵挂线同时震动。")
+	_emit_debug("[Act01] umbrella and tie line resonating together")
+
+
+func _update_echo_transition(delta: float) -> void:
+	_echo_transition_elapsed += delta
+	var progress := clampf(_echo_transition_elapsed / maxf(echo_transition_seconds, 0.01), 0.0, 1.0)
+	var intensity := lerpf(0.72, 1.0, progress)
+	if _umbrella != null:
+		_umbrella.set_resonance_active(true, intensity)
+	if _tie_line != null:
+		_tie_line.set_echo_resonance_active(true, intensity)
+	if _echo_transition_elapsed >= echo_transition_seconds:
 		_finish_act()
 
 
