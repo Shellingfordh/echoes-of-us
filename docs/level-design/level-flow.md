@@ -8,14 +8,14 @@
 
 ### 位置示意图索引
 
-为让空间关系更直观，以下示意图与本文档配套，存放在 `game/assets/level-maps/`：
+为让空间关系更直观，以下示意图与本文档配套，存放在 `assets/level-maps/`：
 
 | 图 | 文件 | 内容 |
 |----|------|------|
-| 四幕情感弧线 | `game/assets/level-maps/act-flow.svg` | 牵挂之线的四次重新理解（束缚→可调整→属于世界→允许远行） |
-| Act 1 女儿房间 | `game/assets/level-maps/act1-room.svg` | 8m×5m 俯视布局，核心物件与可选记忆碎片位置 |
-| Act 2 街道教学 | `game/assets/level-maps/act2-street.svg` | 推自行车→水坑→快递柜缺口→路灯锚点 四阶段 |
-| Act 3 街道布局 | `game/assets/level-maps/act3-street.svg` | 楼道/仓库/天台三段合作 + 街道路人寻物 |
+| 四幕情感弧线 | `assets/level-maps/act-flow.svg` | 牵挂之线的四次重新理解（束缚→可调整→属于世界→允许远行） |
+| Act 1 女儿房间 | `assets/level-maps/act1-room.svg` | 8m×5m 俯视布局，核心物件与可选记忆碎片位置 |
+| Act 2 街道教学 | `assets/level-maps/act2-street.svg` | 推自行车→水坑→快递柜缺口→路灯锚点 四阶段 |
+| Act 3 街道布局 | `assets/level-maps/act3-street.svg` | 楼道/仓库/天台三段合作 + 街道路人寻物 |
 
 ---
 

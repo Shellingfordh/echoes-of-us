@@ -12,7 +12,7 @@
 | `level-flow.md` | 流程总章（六要素） | 节点扩展为 17+，每节点严格按六要素描述；顶部新增位置图索引 |
 | `interaction-sheet.md` | 交互规格 | 13 种交互（新增 Chair Climb / Character Switch / Heavy Push），每种含六要素 |
 | `puzzle-design.md` | 谜题设计 | P001 加椅子辅助；P002 拆四阶段教学；P003 加「走出家门」过渡 |
-| `game/assets/level-maps/*.svg` | 位置示意图 | 四幕弧线 / Act1 房间 / Act2 街道 / Act3 街道 |
+| `assets/level-maps/*.svg` | 位置示意图 | 四幕弧线 / Act1 房间 / Act2 街道 / Act3 街道 |
 
 ## 六要素方法论
 

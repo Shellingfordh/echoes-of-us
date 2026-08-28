@@ -5,7 +5,7 @@
 正式素材：
 
 ```text
-game/assets/
+assets/
 ├── characters/
 ├── environments/
 ├── props/
@@ -157,7 +157,7 @@ UI 如果使用 9-patch：
 目录：
 
 ```text
-game/assets/characters/mother/walk/
+assets/characters/mother/walk/
 ```
 
 文件：

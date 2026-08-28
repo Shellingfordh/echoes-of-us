@@ -14,7 +14,7 @@
 
 你只需要记住：
 
-> **文档放 `docs/`，完整 Godot 工程放 `game/`；工程内的素材、代码和场景分别放 `game/assets/`、`game/scripts/`、`game/scenes/`。**
+> **文档放 `docs/`，团队美术素材放仓库根目录 `assets/`，完整 Godot 工程放 `game/`；工程代码和场景分别放 `game/scripts/`、`game/scenes/`。**
 
 不要自己新建：
 
@@ -135,6 +135,8 @@ echoes-of-us/
 ├── README.md
 ├── .gitignore
 
+├── assets/
+
 ├── docs/
 │   ├── narrative/
 │   ├── level-design/
@@ -147,7 +149,6 @@ echoes-of-us/
 │   │   └── dialogue.json
 │   ├── scenes/
 │   ├── scripts/
-│   ├── assets/
 │   ├── audio/
 │   └── ui/
 
@@ -174,9 +175,9 @@ Godot 场景。
 
 GDScript 代码。
 
-## game/assets
+## assets
 
-已经确定进入游戏的正式图片、角色、场景、道具等素材。
+仓库级美术素材交付目录，包括已经确定使用的图片、角色、场景、道具等。技术接入时再按对应 Godot 工程的资源结构导入，不直接投放到某个工程目录。
 
 ## game/audio
 
@@ -198,7 +199,7 @@ AI 原图、参考图、废稿、PSD 等工作过程文件。
 | -- | --------------------------- | ---------- |
 | 剧情 | `docs/narrative/`           | 故事、角色、对白   |
 | 关卡 | `docs/level-design/`        | 关卡流程、交互、谜题 |
-| 美术 | `game/assets/`、`docs/art-bible/` | 游戏素材、视觉规范  |
+| 美术 | `assets/`、`docs/art-bible/` | 游戏素材、视觉规范  |
 | 技术 | `game/scenes/`、`game/scripts/`、`game/ui/`  | Godot 实现   |
 
 ---
@@ -298,16 +299,16 @@ puzzle-design.md
 正式进入游戏的素材：
 
 ```text
-game/assets/
+assets/
 ```
 
 例如：
 
 ```text
-game/assets/characters/mother_adult.png
-game/assets/characters/daughter_adult.png
-game/assets/props/yellow_umbrella.png
-game/assets/environments/home_background.png
+assets/characters/mother_adult.png
+assets/characters/daughter_adult.png
+assets/props/yellow_umbrella.png
+assets/environments/home_background.png
 ```
 
 AI 原图、PSD、参考图、废稿：
@@ -316,7 +317,7 @@ AI 原图、PSD、参考图、废稿：
 _artwork/
 ```
 
-不要把大量废稿放进 `game/assets/`。
+不要把大量废稿放进 `assets/`。
 
 正式素材命名必须清楚。
 
