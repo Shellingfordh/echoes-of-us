@@ -327,7 +327,12 @@ func _finish_umbrella_scene() -> void:
 		_mother.face_towards(_player.get_logical_position())
 
 	current_beat = Beat.P2_LEAVE
+	# P2 从对白/观察演出正式回到可移动探索。不能只依赖上一个 UI
+	# 保存的 return_mode：若它捕获到 CUTSCENE，剧情提示已经更新但角色会永久失去输入。
+	if _game_flow != null:
+		_game_flow.set_mode(GameFlow.Mode.EXPLORE)
 	objective_changed.emit("可以再看看行李和黄伞，然后去门口。")
+	_emit_debug("[Act01] p2 leave / control restored")
 
 
 func _check_reveal() -> void:
