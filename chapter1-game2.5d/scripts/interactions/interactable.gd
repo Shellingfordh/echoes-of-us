@@ -4,6 +4,7 @@ extends Area2D
 signal interacted(player: PlayerController)
 
 @export var display_name := "调查对象"
+@export var object_info_id := ""
 @export var dialogue_id := ""
 @export var is_key_object := false
 @export var once_only := true
@@ -55,6 +56,10 @@ func interact(player: PlayerController) -> void:
 	interacted.emit(player)
 	if not auto_play_dialogue:
 		return
+	if not object_info_id.is_empty():
+		var info_ui := get_tree().get_first_node_in_group(&"object_info_ui") as ObjectInfoUI
+		if info_ui != null and info_ui.present(object_info_id, display_name, dialogue_id):
+			return
 
 	var dialogue_ui := get_tree().get_first_node_in_group(&"dialogue_ui") as DialogueUI
 	if dialogue_ui == null:
@@ -65,7 +70,12 @@ func interact(player: PlayerController) -> void:
 	dialogue_ui.play(dialogue_id)
 
 
-func configure_dialogue(next_dialogue_id: String, reset_investigation := true) -> void:
+func configure_content(
+	next_object_info_id: String,
+	next_dialogue_id: String,
+	reset_investigation := true
+) -> void:
+	object_info_id = next_object_info_id
 	dialogue_id = next_dialogue_id
 	if reset_investigation:
 		investigated = false

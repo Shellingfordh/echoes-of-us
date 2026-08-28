@@ -5,7 +5,7 @@
 ## 已实现
 
 - 等距 2D 画面与隐藏 3D `CharacterBody3D` / `StaticBody3D` 碰撞；
-- 五件主调查、P1/P2/P3 阶段切换与 D001-D018、D041-D047 对话数据；
+- 五件主调查、P1/P2/P3 阶段切换，以及 O001-O047 客观信息 → D001-D047 人物反应的双层内容；
 - 木凳解锁柜顶相框；
 - 窗玻璃、床底耳机、柜顶相框的固定观察；
 - 黄伞冲突、行李箱二次调查与普通线状物的克制视觉呼应；
@@ -29,6 +29,12 @@ godot --path chapter1-game2.5d
 godot --headless --path chapter1-game2.5d --script res://tests/smoke_25d.gd
 godot --headless --path chapter1-game2.5d --script res://tests/chapter01_flow_test.gd
 ```
+
+## 内容维护
+
+- `data/object_info.json`：O-ID，只写玩家眼前可见、可摸到的客观事实；
+- `data/dialogues.json`：D-ID，只写角色态度、判断与情绪反应；
+- 普通调查顺序固定为 O-ID → D-ID；固定观察会在同一观察面板中按同样层次展示。
 
 ## 素材状态
 

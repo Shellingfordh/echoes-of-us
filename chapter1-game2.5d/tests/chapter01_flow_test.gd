@@ -17,6 +17,8 @@ func _run() -> void:
 	var tie_line := main.get_node("TieLine") as TieLine
 	var game_state := main.get_node("GameState") as GameState
 	var dialogue := main.get_node("UI/DialogueUI") as DialogueUI
+	var object_info := main.get_node("UI/ObjectInfoUI") as ObjectInfoUI
+	var object_info_db := main.get_node("ObjectInfoDatabase") as ObjectInfoDatabase
 	var observation := main.get_node("UI/FixedObservationUI") as FixedObservationUI
 	var transition := main.get_node("UI/TransitionOverlay") as ColorRect
 	var room := main.get_node("World/Chapter01Room01")
@@ -36,19 +38,23 @@ func _run() -> void:
 	assert(not umbrella.visible)
 	assert(not photo.interaction_enabled)
 	assert(not thread_clue.interaction_enabled)
+	assert(object_info_db.get_all_ids().size() == 11)
 
 	# SR-002：窗、床底耳机和柜顶相框进入同一套固定观察；相框先由木凳解锁。
 	var window_inspect := room.get_node("Interactables/WindowInspect") as Interactable
 	window_inspect.interact(player)
 	assert(observation.is_open() and observation.current_object_id == "WindowInspect")
+	assert(object_info_db.get_text("O004") in observation._body_label.text)
+	assert(object_info_db.get_text("O044") in observation._body_label.text)
 	observation.close_observation()
 	stool.interact(player)
 	assert(photo.interaction_enabled)
 
-	# P1 五件主调查。普通独白可直接结束，固定观察必须退出后才推进黄伞冲突。
-	for node_name in ["PackingBox", "Suitcase", "Desk"]:
+	# P1 五件主调查：普通物件必须先显示 O-ID 客观事实，再播放 D-ID 主观反应。
+	for node_name in ["PackingBox", "Suitcase"]:
 		(room.get_node("Interactables/%s" % node_name) as Interactable).interact(player)
-		_finish_dialogue(dialogue)
+		assert(object_info.is_open())
+		_finish_object_interaction(object_info, dialogue)
 		await process_frame
 
 	var headphones := room.get_node("Interactables/Headphones") as Interactable
@@ -62,6 +68,17 @@ func _run() -> void:
 	assert("小学春游合影" in observation._body_label.text)
 	observation.close_observation()
 	await process_frame
+
+	# 将普通物件放在最后，验证 O-ID 与 D-ID 都结束前不会提前触发黄伞冲突。
+	var desk := room.get_node("Interactables/Desk") as Interactable
+	desk.interact(player)
+	assert(object_info.is_open() and object_info.current_info_id == "O003")
+	assert(act.current_beat == Act01Sequence.Beat.P1_EXPLORE)
+	object_info.advance()
+	assert(dialogue.is_playing())
+	assert(act.current_beat == Act01Sequence.Beat.P1_EXPLORE)
+	_finish_dialogue(dialogue)
+	await process_frame
 	await process_frame
 	assert(act.get_investigated_key_count() == 5)
 	assert(act.current_beat == Act01Sequence.Beat.UMBRELLA_DIALOGUE)
@@ -70,11 +87,20 @@ func _run() -> void:
 
 	# P2：黄伞与行李箱二次调查存在，母亲仍是牵挂线的真实端点。
 	assert(act.current_beat == Act01Sequence.Beat.P2_LEAVE)
-	assert(umbrella.visible and umbrella.dialogue_id == "D046")
-	assert(suitcase.dialogue_id == "D045" and not suitcase.investigated)
+	assert(umbrella.visible and umbrella.object_info_id == "O046" and umbrella.dialogue_id == "D046")
+	assert(suitcase.object_info_id == "O045" and suitcase.dialogue_id == "D045" and not suitcase.investigated)
 	assert(mother.visible)
 	assert(mother.get_logical_position().is_equal_approx(Vector3(6.4, 0.0, 9.2)))
 	assert(tie_line.get_target_anchor().is_equal_approx(mother.get_anchor_position()))
+
+	# P2 状态变化也必须先给事实，再给人物态度。
+	suitcase.interact(player)
+	assert(object_info.current_info_id == "O045")
+	assert("又多出两盒药" in object_info._body_label.text)
+	_finish_object_interaction(object_info, dialogue)
+	umbrella.interact(player)
+	assert(object_info.current_info_id == "O046")
+	_finish_object_interaction(object_info, dialogue)
 
 	# SR-004/005：走向玄关时显线，张力同时包含距离、情绪与离开意图。
 	player.set_logical_position(Vector3(15.2, 0.0, 2.0))
@@ -138,7 +164,8 @@ func _run() -> void:
 	# 第一章只在玩家主动触碰黄伞、越过余响阈值后结束。
 	_finish_dialogue(dialogue)
 	thread_clue.interact(player)
-	_finish_dialogue(dialogue)
+	assert(object_info.current_info_id == "O047")
+	_finish_object_interaction(object_info, dialogue)
 	umbrella.interact(player)
 	await process_frame
 	assert(act.current_beat == Act01Sequence.Beat.DONE)
@@ -157,3 +184,10 @@ func _run() -> void:
 func _finish_dialogue(dialogue: DialogueUI) -> void:
 	if dialogue.is_playing():
 		dialogue._finish_immediately(true)
+
+
+func _finish_object_interaction(object_info: ObjectInfoUI, dialogue: DialogueUI) -> void:
+	assert(object_info.is_open())
+	object_info.advance()
+	assert(dialogue.is_playing())
+	_finish_dialogue(dialogue)

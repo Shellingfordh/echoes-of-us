@@ -1,6 +1,6 @@
 extends SceneTree
 
-const PREFIX := "/tmp/echoes-chapter1-audit-after"
+const PREFIX := "/tmp/echoes-chapter1-audit-round2-after"
 
 
 func _initialize() -> void:
@@ -16,6 +16,17 @@ func _run() -> void:
 
 	var room := main.get_node("World/Chapter01Room01")
 	var player := main.get_node("Player") as PlayerController
+	var dialogue := main.get_node("UI/DialogueUI") as DialogueUI
+	var object_info := main.get_node("UI/ObjectInfoUI") as ObjectInfoUI
+	(room.get_node("Interactables/PackingBox") as Interactable).interact(player)
+	await _frames(8)
+	await _save("%s-packing-box-facts.png" % PREFIX)
+	object_info.advance()
+	await _frames(50)
+	await _save("%s-packing-box-reaction.png" % PREFIX)
+	dialogue._finish_immediately(true)
+	await _frames(2)
+
 	var observation := main.get_node("UI/FixedObservationUI") as FixedObservationUI
 	(room.get_node("Interactables/WindowInspect") as Interactable).interact(player)
 	await _frames(4)
@@ -40,7 +51,7 @@ func _run() -> void:
 	await _frames(3)
 	await _save("%s-grounded-probe.png" % PREFIX)
 
-	print("[CAPTURE] %s-{room,observation,grounded-probe}.png" % PREFIX)
+	print("[CAPTURE] %s-{room,packing-box-facts,packing-box-reaction,observation,grounded-probe}.png" % PREFIX)
 	quit(0)
 
 

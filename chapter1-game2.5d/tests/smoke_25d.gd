@@ -14,6 +14,7 @@ func _run() -> void:
 	var player := main.get_node("Player") as PlayerController
 	var tie_line := main.get_node("TieLine") as TieLine
 	var dialogue_db := main.get_node("DialogueDatabase") as DialogueDatabase
+	var object_info_db := main.get_node("ObjectInfoDatabase") as ObjectInfoDatabase
 	var start := player.get_logical_position()
 	assert(start.is_equal_approx(Vector3(5.0, 0.0, 10.2)))
 	assert(player.global_position.is_equal_approx(Projection25D.project(start)))
@@ -64,6 +65,18 @@ func _run() -> void:
 		"D017", "D018", "D041", "D042", "D043", "D044", "D045", "D046", "D047",
 	]:
 		assert(dialogue_db.has_dialogue(dialogue_id))
+	for info_id in [
+		"O001", "O002", "O003", "O004", "O041", "O042",
+		"O043", "O044", "O045", "O046", "O047",
+	]:
+		assert(object_info_db.has_info(info_id))
+		assert(dialogue_db.has_dialogue(object_info_db.get_dialogue_id(info_id)))
+	assert((room.get_node("Interactables/PackingBox") as Interactable).object_info_id == "O001")
+	assert((room.get_node("Interactables/Suitcase") as Interactable).object_info_id == "O002")
+	assert((room.get_node("Interactables/Desk") as Interactable).object_info_id == "O003")
+	assert((room.get_node("Interactables/WardrobeInspect") as Interactable).object_info_id == "O043")
+	assert((room.get_node("Interactables/Umbrella") as Interactable).object_info_id == "O046")
+	assert((room.get_node("Interactables/ThreadClue") as Interactable).object_info_id == "O047")
 	assert((room.get_node("Interactables/PhotoFrame") as Interactable).is_key_object)
 	assert((room.get_node("Interactables/Headphones") as Interactable).is_key_object)
 	assert(not (room.get_node("Interactables/WardrobeInspect") as Interactable).is_key_object)
@@ -77,6 +90,7 @@ func _run() -> void:
 	assert(photo.get_logical_position().is_equal_approx(Vector3(3.0, 0.0, 2.9)))
 	assert(not photo.interaction_enabled)
 	assert(stool.get_node("MathBody") is StaticBody3D)
+	assert("相框" not in stool.get_interaction_prompt())
 	stool.interact(player)
 	assert(photo.interaction_enabled)
 	player.set_logical_position(Vector3(3.0, 0.0, 3.0))

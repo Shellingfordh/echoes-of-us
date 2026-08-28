@@ -24,15 +24,15 @@ enum Beat {
 const OBSERVATION_COPY := {
 	"WindowInspect": {
 		"title": "窗玻璃与旧串珠",
-		"body": "玻璃没擦干净，边角留着水印和灰。楼下早点摊正在收摊，蒸汽还没散，对面有人把纸箱搬上三轮车。玻璃里能照出余念半张脸，和屋里的东西叠在一起。\n\n木珠颜色已经磨浅，常碰到皮肤的那一面发亮。穿珠子的旧线起了毛，打结处也有点松，但还没有断。",
+		"info_ids": ["O004", "O044"],
 	},
 	"Headphones": {
 		"title": "床底的耳机",
-		"body": "一副有线耳机卡在床底最里面，耳机线绕了好几圈，还粘着一点灰。床沿到地面的缝很窄，手伸进去够不到，只能整个人钻进去。",
+		"info_ids": ["O041"],
 	},
 	"PhotoFrame": {
 		"title": "柜顶相框",
-		"body": "一张小学春游合影。学生挤在前面，七八岁的余念站在中间偏左，余秀兰在最后一排。相框顶边积灰最厚，右下角还有一道擦过又没擦净的指痕。",
+		"info_ids": ["O042"],
 	},
 }
 
@@ -55,6 +55,8 @@ var _player: PlayerController
 var _mother: Mother
 var _tie_line: TieLine
 var _dialogue: DialogueUI
+var _object_info: ObjectInfoUI
+var _object_info_database: ObjectInfoDatabase
 var _observation: FixedObservationUI
 var _camera_rig: CameraRig
 var _game_flow: GameFlow
@@ -73,6 +75,8 @@ func setup(room: RoomBase, player: PlayerController, tie_line: TieLine) -> void:
 	_tie_line = tie_line
 	_mother = room.get_mother()
 	_dialogue = get_tree().get_first_node_in_group(&"dialogue_ui") as DialogueUI
+	_object_info = get_tree().get_first_node_in_group(&"object_info_ui") as ObjectInfoUI
+	_object_info_database = get_tree().get_first_node_in_group(&"object_info_database") as ObjectInfoDatabase
 	_observation = get_tree().get_first_node_in_group(&"fixed_observation_ui") as FixedObservationUI
 	_camera_rig = get_tree().get_first_node_in_group(&"camera_rig") as CameraRig
 	_game_flow = get_tree().get_first_node_in_group(&"game_flow") as GameFlow
@@ -151,6 +155,8 @@ func _on_key_object_investigated(_player_ref: PlayerController) -> void:
 
 	# interacted 在对白或固定观察真正结束之前发出，必须等玩家回到房间后再进冲突。
 	await get_tree().process_frame
+	if _object_info != null and _object_info.is_open():
+		await _object_info.info_closed
 	if _observation != null and _observation.is_open():
 		await _observation.observation_closed
 	if _dialogue != null and _dialogue.is_playing():
@@ -180,9 +186,20 @@ func _on_observation_interacted(_player_ref: PlayerController, target: Interacta
 	_observation.open_observation(
 		target.name,
 		str(copy.get("title", target.display_name)),
-		str(copy.get("body", "")),
+		_compose_object_info(copy.get("info_ids", []) as Array),
 		target.dialogue_id
 	)
+
+
+func _compose_object_info(info_ids: Array) -> String:
+	if _object_info_database == null:
+		return ""
+	var paragraphs: Array[String] = []
+	for raw_id: Variant in info_ids:
+		var info_id := str(raw_id)
+		if _object_info_database.has_info(info_id):
+			paragraphs.append(_object_info_database.get_text(info_id))
+	return "\n\n".join(paragraphs)
 
 
 func _on_observation_closed(_object_id: String) -> void:
@@ -228,7 +245,7 @@ func _finish_umbrella_scene() -> void:
 		_umbrella.auto_play_dialogue = true
 		_umbrella.set_interaction_enabled(true)
 	if _suitcase != null:
-		_suitcase.configure_dialogue("D045", true)
+		_suitcase.configure_content("O045", "D045", true)
 	if _mother != null:
 		_mother.set_logical_position(mother_after_dialogue_position)
 		_mother.visible = true
