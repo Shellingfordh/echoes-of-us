@@ -29,6 +29,9 @@ size = Vector3(2.7, 1.35, 1.3)
 [sub_resource type="BoxShape3D" id="Shape3D_suitcase"]
 size = Vector3(1.8, 1.1, 1)
 
+[sub_resource type="BoxShape3D" id="Shape3D_stool"]
+size = Vector3(1.05, 0.8, 0.9)
+
 [sub_resource type="RectangleShape2D" id="Shape_interact_tall"]
 size = Vector2(75, 150)
 
@@ -208,6 +211,7 @@ collision_mask = 0
 script = ExtResource("2_interactable")
 display_name = "打包纸箱"
 dialogue_id = "D001"
+observation_id = "O001"
 is_key_object = true
 logical_position = Vector3(5, 0, 8.8)
 
@@ -254,6 +258,7 @@ collision_mask = 0
 script = ExtResource("2_interactable")
 display_name = "书桌"
 dialogue_id = "D003"
+observation_id = "O003"
 is_key_object = true
 logical_position = Vector3(8.5, 0, 4)
 
@@ -295,6 +300,7 @@ collision_mask = 0
 script = ExtResource("2_interactable")
 display_name = "行李箱"
 dialogue_id = "D002"
+observation_id = "O002"
 is_key_object = true
 logical_position = Vector3(11.5, 0, 8.8)
 
@@ -327,6 +333,7 @@ collision_mask = 0
 script = ExtResource("2_interactable")
 display_name = "柜顶相框"
 dialogue_id = "D042"
+observation_id = "O042"
 is_key_object = true
 logical_position = Vector3(3, 0, 2.9)
 depth_offset = 2
@@ -356,6 +363,7 @@ collision_mask = 0
 script = ExtResource("2_interactable")
 display_name = "床底耳机"
 dialogue_id = "D041"
+observation_id = "O041"
 is_key_object = true
 logical_position = Vector3(12.8, 0, 5.7)
 
@@ -373,6 +381,39 @@ points = PackedVector2Array(-32, -10, -23, -34, 0, -43, 23, -34, 32, -10)
 width = 12.0
 default_color = Color(1, 1, 1, 0.12)
 
+[node name="Stool" type="Area2D" parent="Interactables"]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_interactable")
+display_name = "木凳"
+once_only = true
+logical_position = Vector3(4.25, 0, 3.65)
+interaction_prompt_override = "Enter / 空格  移动木凳，够到柜顶相框"
+auto_play_dialogue = false
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/Stool"]
+position = Vector2(0, -30)
+shape = SubResource("Shape_interact_medium")
+
+[node name="MathBody" type="StaticBody3D" parent="Interactables/Stool"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interactables/Stool/MathBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("Shape3D_stool")
+
+[node name="Seat" type="Polygon2D" parent="Interactables/Stool"]
+color = Color(0.38, 0.29, 0.2, 1)
+polygon = PackedVector2Array(-38, -54, 0, -74, 38, -54, 0, -34)
+
+[node name="Legs" type="Line2D" parent="Interactables/Stool"]
+points = PackedVector2Array(-28, -49, -28, -7, 0, -34, 0, 8, 28, -49, 28, -7)
+width = 6.0
+default_color = Color(0.25, 0.19, 0.14, 1)
+
+[node name="Glow" type="Polygon2D" parent="Interactables/Stool"]
+color = Color(1, 1, 1, 0.1)
+polygon = PackedVector2Array(-48, -60, 0, -86, 48, -60, 48, -4, 0, 20, -48, -4)
+
 [node name="Umbrella" type="Area2D" parent="Interactables" unique_id=385713340]
 visible = false
 collision_layer = 2
@@ -380,6 +421,7 @@ collision_mask = 0
 script = ExtResource("2_interactable")
 display_name = "黄色猫咪雨伞"
 dialogue_id = "D046"
+observation_id = "O046"
 logical_position = Vector3(14.4, 0, 6.2)
 
 [node name="Shape" type="CollisionShape2D" parent="Interactables/Umbrella" unique_id=1095558978]
@@ -405,6 +447,7 @@ collision_mask = 0
 script = ExtResource("2_interactable")
 display_name = "衣柜里的男式外套"
 dialogue_id = "D043"
+observation_id = "O043"
 logical_position = Vector3(1.6, 0, 2.4)
 
 [node name="Shape" type="CollisionShape2D" parent="Interactables/WardrobeInspect" unique_id=1962955912]
@@ -421,6 +464,7 @@ collision_mask = 0
 script = ExtResource("2_interactable")
 display_name = "窗玻璃和旧串珠"
 dialogue_id = "D004"
+observation_id = "O004"
 logical_position = Vector3(7, 0, 1.1)
 
 [node name="Shape" type="CollisionShape2D" parent="Interactables/WindowInspect" unique_id=577255677]
@@ -432,12 +476,36 @@ position = Vector2(0, -82)
 color = Color(1, 1, 1, 0.07)
 polygon = PackedVector2Array(-45, -55, 45, -10, 45, 48, -45, 3)
 
+[node name="BeadBracelet" type="Area2D" parent="Interactables"]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_interactable")
+display_name = "腕上的木珠串"
+dialogue_id = "D044"
+observation_id = "O044"
+logical_position = Vector3(8.3, 0, 1.5)
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/BeadBracelet"]
+position = Vector2(0, -42)
+shape = SubResource("Shape_interact_medium")
+
+[node name="Cord" type="Line2D" parent="Interactables/BeadBracelet" groups=["ordinary_line"]]
+points = PackedVector2Array(-31, -49, -18, -64, 0, -69, 18, -64, 31, -49, 18, -34, 0, -29, -18, -34, -31, -49)
+width = 3.0
+default_color = Color(0.46, 0.30, 0.20, 0.92)
+
+[node name="Glow" type="Line2D" parent="Interactables/BeadBracelet"]
+points = PackedVector2Array(-34, -49, -20, -68, 0, -74, 20, -68, 34, -49, 20, -30, 0, -24, -20, -30, -34, -49)
+width = 10.0
+default_color = Color(1, 0.9, 0.68, 0.12)
+
 [node name="ThreadClue" type="Area2D" parent="Interactables" unique_id=1885857095]
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("2_interactable")
 display_name = "墙上的旧电线"
 dialogue_id = "D047"
+observation_id = "O047"
 interaction_enabled = false
 logical_position = Vector3(9.3, 0, 1.25)
 

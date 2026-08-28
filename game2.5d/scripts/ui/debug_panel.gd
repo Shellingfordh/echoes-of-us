@@ -52,6 +52,11 @@ func _process(_delta: float) -> void:
 			_tie_line.tension,
 			_bar(_tie_line.tension),
 		])
+		lines.append("context     emo %.2f | intent %.2f | exit %.2f" % [
+			_tie_line.emotional_pressure,
+			_tie_line.intention_conflict,
+			_tie_line.exit_progress,
+		])
 		lines.append("line_state  %s%s" % [
 			_tie_line.get_state_name(),
 			"  (EXTENDED)" if _tie_line.extended else "",
@@ -60,6 +65,10 @@ func _process(_delta: float) -> void:
 			_tie_line.reveal_distance,
 			_tie_line.tension_distance,
 			_tie_line.max_distance,
+		])
+		lines.append("critical     distance %.2f | tension %.3f" % [
+			_tie_line.get_critical_distance(),
+			_tie_line.critical_tension,
 		])
 	else:
 		lines.append("line_state  <no TieLine>")

@@ -14,6 +14,8 @@
 [ext_resource type="Script" uid="uid://b1ylhclch4sy7" path="res://scripts/core/dialogue_database.gd" id="12_dialogue_db"]
 [ext_resource type="Script" uid="uid://yenx6veaip7a" path="res://scripts/chapters/act_01_sequence.gd" id="13_act01"]
 [ext_resource type="Script" uid="uid://dphl7dm2iqx1h" path="res://scripts/ui/objective_label.gd" id="14_objective"]
+[ext_resource type="Script" path="res://scripts/ui/fixed_observation_ui.gd" id="15_observation"]
+[ext_resource type="Script" path="res://scripts/core/observation_database.gd" id="16_observation_db"]
 
 [node name="Main" type="Node2D" unique_id=624362405]
 script = ExtResource("1_main")
@@ -30,6 +32,9 @@ script = ExtResource("6_flow")
 
 [node name="DialogueDatabase" type="Node" parent="." unique_id=923051172]
 script = ExtResource("12_dialogue_db")
+
+[node name="ObservationDatabase" type="Node" parent="."]
+script = ExtResource("16_observation_db")
 
 [node name="Act01Sequence" type="Node" parent="." unique_id=1241166545]
 script = ExtResource("13_act01")
@@ -117,6 +122,15 @@ text = "[F3] DEBUG"
 script = ExtResource("11_debug")
 
 [node name="DialogueUI" parent="UI" unique_id=1247812197 instance=ExtResource("7_dialogue")]
+
+[node name="FixedObservationUI" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("15_observation")
 
 [node name="InventoryUI" type="Control" parent="UI" unique_id=1573946072]
 visible = false
