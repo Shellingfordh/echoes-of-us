@@ -1,6 +1,6 @@
 {
-  "_comment": "第一章屋内对白 Source of Truth。依据 docs/narrative/03_剧情对白表.md；剧情同学只改 speaker、lines、next。",
-  "_schema": "mode = monologue/dialogue；speaker = 说话人；lines = 当前节点的句子；next = 下一节点 ID 或 END。",
+  "_comment": "第一章屋内对白 Source of Truth。依据 docs/narrative/03_剧情对白表.md；剧情同学只改 speaker、lines、next。presentation_group 只控制连续同角色台词是否同屏呈现，不改变对白 ID、正文或顺序。",
+  "_schema": "mode = monologue/dialogue；speaker = 说话人；lines = 当前节点的句子；next = 下一节点 ID 或 END；presentation_group = 可选，仅将连续同角色节点合并为同一表现屏。",
 
   "D001": {
     "mode": "monologue",
@@ -29,36 +29,42 @@
   "D005": {
     "mode": "dialogue",
     "speaker": "余秀兰",
+    "presentation_group": "umbrella_opening",
     "lines": ["雨伞没拿，来，给你装上。你这拉链怎么又卡了？"],
     "next": "D006"
   },
   "D006": {
     "mode": "dialogue",
     "speaker": "余秀兰",
+    "presentation_group": "umbrella_opening",
     "lines": ["那边这两天有雨。塞着吧，省得到地方现买。"],
     "next": "D007"
   },
   "D007": {
     "mode": "dialogue",
     "speaker": "余念",
+    "presentation_group": "umbrella_boundary",
     "lines": ["妈，真塞不下了，你别硬塞啊。"],
     "next": "D008"
   },
   "D008": {
     "mode": "dialogue",
     "speaker": "余念",
+    "presentation_group": "umbrella_boundary",
     "lines": ["到那儿再买就行，便利店多的是。"],
     "next": "D009"
   },
   "D009": {
     "mode": "dialogue",
     "speaker": "余秀兰",
+    "presentation_group": "umbrella_pressure",
     "lines": ["十几二十块不是钱啊？家里有，还买。"],
     "next": "D010"
   },
   "D010": {
     "mode": "dialogue",
     "speaker": "余秀兰",
+    "presentation_group": "umbrella_pressure",
     "lines": ["还有这两盒药你别给我拿出来，啊，你一忙起来，饭都不按点吃。"],
     "next": "D011"
   },
@@ -77,12 +83,14 @@
   "D013": {
     "mode": "dialogue",
     "speaker": "余秀兰",
+    "presentation_group": "umbrella_withdrawal",
     "lines": ["行。你不要就不要。"],
     "next": "D014"
   },
   "D014": {
     "mode": "dialogue",
     "speaker": "余秀兰",
+    "presentation_group": "umbrella_withdrawal",
     "lines": ["放这儿了。爱拿不拿。"],
     "next": "END"
   },

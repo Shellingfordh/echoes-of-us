@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://scripts/ui/fixed_observation_ui.gd" id="15_observation"]
 [ext_resource type="Script" path="res://scripts/core/object_info_database.gd" id="16_object_info_db"]
 [ext_resource type="Script" path="res://scripts/ui/object_info_ui.gd" id="17_object_info_ui"]
+[ext_resource type="Theme" path="res://themes/ui_theme.tres" id="18_ui_theme"]
 
 [node name="Main" type="Node2D" unique_id=624362405]
 script = ExtResource("1_main")
@@ -78,6 +79,7 @@ layer = 10
 layer = 20
 
 [node name="InteractionHint" type="Label" parent="UI" unique_id=977522465]
+theme = ExtResource("18_ui_theme")
 offset_left = 390.0
 offset_top = 638.0
 offset_right = 890.0
@@ -93,6 +95,7 @@ vertical_alignment = 1
 script = ExtResource("8_hint")
 
 [node name="ObjectiveLabel" type="Label" parent="UI" unique_id=1662468928]
+theme = ExtResource("18_ui_theme")
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
@@ -110,6 +113,7 @@ horizontal_alignment = 1
 script = ExtResource("14_objective")
 
 [node name="DebugPanel" type="Label" parent="UI" unique_id=1138176796]
+theme = ExtResource("18_ui_theme")
 offset_left = 18.0
 offset_top = 14.0
 offset_right = 560.0
@@ -123,8 +127,10 @@ text = "[F3] DEBUG"
 script = ExtResource("11_debug")
 
 [node name="DialogueUI" parent="UI" unique_id=1247812197 instance=ExtResource("7_dialogue")]
+theme = ExtResource("18_ui_theme")
 
 [node name="ObjectInfoUI" type="Control" parent="UI"]
+theme = ExtResource("18_ui_theme")
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -134,6 +140,7 @@ grow_vertical = 2
 script = ExtResource("17_object_info_ui")
 
 [node name="FixedObservationUI" type="Control" parent="UI"]
+theme = ExtResource("18_ui_theme")
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -143,6 +150,7 @@ grow_vertical = 2
 script = ExtResource("15_observation")
 
 [node name="InventoryUI" type="Control" parent="UI" unique_id=1573946072]
+theme = ExtResource("18_ui_theme")
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -152,6 +160,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PuzzleUI" type="Control" parent="UI" unique_id=2014414078]
+theme = ExtResource("18_ui_theme")
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -161,6 +170,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PauseMenu" type="Control" parent="UI" unique_id=1220017987]
+theme = ExtResource("18_ui_theme")
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -170,6 +180,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TransitionOverlay" type="ColorRect" parent="UI" unique_id=2033825871]
+theme = ExtResource("18_ui_theme")
 visible = false
 anchors_preset = 15
 anchor_right = 1.0

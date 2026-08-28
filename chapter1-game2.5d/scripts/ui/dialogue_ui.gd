@@ -35,6 +35,7 @@ var _control_locked := false
 
 var _root_id := ""
 var _current_id := ""
+var _presentation_ids: Array[String] = []
 var _next_id := END_DIALOGUE_ID
 var _speaker := ""
 var _lines: Array = []
@@ -117,25 +118,86 @@ func is_playing() -> bool:
 
 
 func _begin_entry(dialogue_id: String) -> bool:
-	var entry := _database.get_entry(dialogue_id)
-	if entry.is_empty():
+	var presentation := _build_presentation(dialogue_id)
+	if presentation.is_empty():
 		return false
 
-	var entry_lines: Variant = entry.get("lines", [])
+	var entry_lines: Variant = presentation.get("lines", [])
 	if typeof(entry_lines) != TYPE_ARRAY or (entry_lines as Array).is_empty():
 		push_error("[Dialogue] %s 没有可播放的 lines" % dialogue_id)
 		return false
 
 	_current_id = dialogue_id
-	_next_id = str(entry.get("next", END_DIALOGUE_ID))
-	_speaker = str(entry.get("speaker", ""))
+	_presentation_ids.clear()
+	for raw_id: Variant in presentation.get("ids", []) as Array:
+		_presentation_ids.append(str(raw_id))
+	_next_id = str(presentation.get("next", END_DIALOGUE_ID))
+	_speaker = str(presentation.get("speaker", ""))
 	_lines = entry_lines as Array
 	_line_index = 0
-	_mode = str(entry.get("mode", "dialogue"))
+	_mode = str(presentation.get("mode", "dialogue"))
 	_set_control_lock(_mode == "dialogue")
 	_apply_mode_style()
 	_show_current_line()
 	return true
+
+
+func _build_presentation(dialogue_id: String) -> Dictionary:
+	var first_entry := _database.get_entry(dialogue_id)
+	if first_entry.is_empty():
+		return {}
+
+	var group := str(first_entry.get("presentation_group", ""))
+	if group.is_empty():
+		return {
+			"ids": [dialogue_id],
+			"mode": str(first_entry.get("mode", "dialogue")),
+			"speaker": str(first_entry.get("speaker", "")),
+			"lines": first_entry.get("lines", []),
+			"next": str(first_entry.get("next", END_DIALOGUE_ID)),
+		}
+
+	var mode := str(first_entry.get("mode", "dialogue"))
+	var speaker := str(first_entry.get("speaker", ""))
+	var presentation_ids: Array[String] = []
+	var paragraphs: Array[String] = []
+	var current_id := dialogue_id
+	var next_id := END_DIALOGUE_ID
+	var visited: Dictionary = {}
+
+	while current_id != END_DIALOGUE_ID and not visited.has(current_id):
+		visited[current_id] = true
+		var entry := _database.get_entry(current_id)
+		if entry.is_empty():
+			break
+		presentation_ids.append(current_id)
+		for raw_line: Variant in entry.get("lines", []) as Array:
+			paragraphs.append(str(raw_line))
+
+		next_id = str(entry.get("next", END_DIALOGUE_ID))
+		if next_id == END_DIALOGUE_ID:
+			break
+		var next_entry := _database.get_entry(next_id)
+		if (
+			next_entry.is_empty()
+			or str(next_entry.get("presentation_group", "")) != group
+			or str(next_entry.get("mode", "dialogue")) != mode
+			or str(next_entry.get("speaker", "")) != speaker
+		):
+			break
+		current_id = next_id
+
+	return {
+		"ids": presentation_ids,
+		"mode": mode,
+		"speaker": speaker,
+		"lines": ["\n".join(paragraphs)],
+		"next": next_id,
+	}
+
+
+func get_current_presentation_ids() -> Array[String]:
+	return _presentation_ids.duplicate()
 
 
 func _show_current_line() -> void:
@@ -295,6 +357,7 @@ func _finalize_close(finished_id: String, emit_finished_signal: bool) -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root_id = ""
 	_current_id = ""
+	_presentation_ids.clear()
 	_next_id = END_DIALOGUE_ID
 	_speaker = ""
 	_lines = []

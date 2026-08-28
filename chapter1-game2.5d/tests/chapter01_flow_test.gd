@@ -106,7 +106,23 @@ func _run() -> void:
 	await process_frame
 	assert(act.get_investigated_key_count() == 5)
 	assert(act.current_beat == Act01Sequence.Beat.UMBRELLA_DIALOGUE)
-	_finish_dialogue(dialogue)
+	var expected_umbrella_presentations: Array = [
+		["D005", "D006"],
+		["D007", "D008"],
+		["D009", "D010"],
+		["D011"],
+		["D012"],
+		["D013", "D014"],
+	]
+	var actual_umbrella_presentations: Array = []
+	var umbrella_confirmations := 0
+	while dialogue.is_playing():
+		actual_umbrella_presentations.append(dialogue.get_current_presentation_ids())
+		dialogue.advance()
+		umbrella_confirmations += 1
+		await process_frame
+	assert(actual_umbrella_presentations == expected_umbrella_presentations)
+	assert(umbrella_confirmations == 6)
 	await process_frame
 
 	# P2：黄伞与行李箱二次调查存在，母亲仍是牵挂线的真实端点。
@@ -200,7 +216,7 @@ func _run() -> void:
 	assert(transition.visible)
 	assert(transition.get_node_or_null("EchoTitle") is Label)
 
-	print("[CHAPTER01_FLOW] PASS fixed_observation=true stool_unlock=true composite_tension=true")
+	print("[CHAPTER01_FLOW] PASS fixed_observation=true stool_unlock=true umbrella_presentations=6")
 	print("[CHAPTER01_FLOW] PASS first_pull=true grounded_probe=true no_chapter1_support=true umbrella_echo=true")
 	quit(0)
 

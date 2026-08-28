@@ -16,6 +16,9 @@ func _run() -> void:
 	var act := main.get_node("Act01Sequence") as Act01Sequence
 	var hint := main.get_node("UI/InteractionHint") as InteractionHint
 	var objective := main.get_node("UI/ObjectiveLabel") as Label
+	var dialogue_text := main.get_node(
+		"UI/DialogueUI/DialogueFrame/Panel/Margin/VBox/Body/TextColumn/DialogueText"
+	) as RichTextLabel
 	var dialogue_db := main.get_node("DialogueDatabase") as DialogueDatabase
 	var object_info_db := main.get_node("ObjectInfoDatabase") as ObjectInfoDatabase
 	var start := player.get_logical_position()
@@ -44,6 +47,7 @@ func _run() -> void:
 	assert(finish.z >= player.movement_min.y and finish.z <= player.movement_max.y)
 	assert(player.global_position.is_equal_approx(Projection25D.project(finish)))
 	assert(tie_line.distance >= 0.0)
+	assert(dialogue_text.get_theme_font("normal_font").has_char("远".unicode_at(0)))
 
 	player.set_logical_position(Vector3(7.0, 0.0, 5.0))
 	await physics_frame
@@ -75,6 +79,16 @@ func _run() -> void:
 		"D017", "D018", "D041", "D042", "D043", "D044", "D045", "D046", "D047",
 	]:
 		assert(dialogue_db.has_dialogue(dialogue_id))
+	assert(dialogue_db.get_entry("D005").get("presentation_group") == "umbrella_opening")
+	assert(dialogue_db.get_entry("D006").get("presentation_group") == "umbrella_opening")
+	assert(dialogue_db.get_entry("D007").get("presentation_group") == "umbrella_boundary")
+	assert(dialogue_db.get_entry("D008").get("presentation_group") == "umbrella_boundary")
+	assert(dialogue_db.get_entry("D009").get("presentation_group") == "umbrella_pressure")
+	assert(dialogue_db.get_entry("D010").get("presentation_group") == "umbrella_pressure")
+	assert(not dialogue_db.get_entry("D011").has("presentation_group"))
+	assert(not dialogue_db.get_entry("D012").has("presentation_group"))
+	assert(dialogue_db.get_entry("D013").get("presentation_group") == "umbrella_withdrawal")
+	assert(dialogue_db.get_entry("D014").get("presentation_group") == "umbrella_withdrawal")
 	for info_id in [
 		"O001", "O002", "O003", "O004", "O041", "O042",
 		"O043", "O044", "O045", "O046", "O047",
