@@ -50,9 +50,8 @@ var reset_queued := false
 var debug_visible := false
 
 var ui_font: Font = preload("res://art/fonts/NotoSansCJKsc-Regular.otf")
-var player_walk_one: Texture2D = preload("res://art/playerGrey_walk1.png")
-var player_walk_two: Texture2D = preload("res://art/playerGrey_walk2.png")
-var player_anchor_pose: Texture2D = preload("res://art/playerGrey_up1.png")
+var daughter_sprite_frames: SpriteFrames = preload("res://resources/chapter3_yunian_frames.tres")
+var mother_sprite_frames: SpriteFrames = preload("res://resources/chapter3_yuxiulan_frames.tres")
 var suitcase_texture: Texture2D = preload("res://art/suitcase.png")
 var wooden_box_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_warehouse_heavy_crate.png")
 var yellow_umbrella_texture: Texture2D = preload("res://art/cute-umbrella.png")
@@ -210,6 +209,8 @@ func _make_character(
 		"vy": 0.0,
 		"on_ground": false,
 		"anchored": false,
+		"climbing": false,
+		"pushing": false,
 		"face": 1.0,
 		"can_push": can_push,
 	}
@@ -300,6 +301,8 @@ func _place_at(daughter_feet: Vector2, mother_feet: Vector2) -> void:
 		character["vx"] = 0.0
 		character["vy"] = 0.0
 		character["anchored"] = false
+		character["climbing"] = false
+		character["pushing"] = false
 		character["on_ground"] = true
 	active_character = 0
 
@@ -316,6 +319,8 @@ func _update_play(delta: float) -> void:
 		_toggle_anchor()
 	for character in characters:
 		character["frame_start_x"] = character["x"]
+		character["climbing"] = false
+		character["pushing"] = false
 
 	var active: Dictionary = characters[active_character]
 	var other: Dictionary = characters[1 - active_character]
@@ -419,6 +424,7 @@ func _move_collide(character: Dictionary, delta: float, direction: float) -> voi
 			continue
 		var direction_to_box := signf(_center(box).x - _center(character).x)
 		if character["can_push"] and character["on_ground"] and not is_zero_approx(direction_to_box) and signf(character["vx"] if not is_zero_approx(character["vx"]) else direction) == direction_to_box:
+			character["pushing"] = true
 			box["push_dir"] = direction_to_box
 			box["x"] = character["x"] + character["w"] if direction_to_box > 0.0 else character["x"] - box["w"]
 			if _resolve_box_wall_overlap(box, direction_to_box, box["x"]):
@@ -501,6 +507,7 @@ func _tether_constrain(character: Dictionary, anchor: Dictionary, delta: float, 
 	var offset := _center(character) - _center(anchor)
 	var distance := maxf(offset.length(), 0.001)
 	if is_active and Input.is_action_pressed(&"climb"):
+		character["climbing"] = true
 		if distance > 90.0:
 			character["vx"] -= offset.x / distance * 3000.0 * delta
 			character["vy"] -= offset.y / distance * 3000.0 * delta
@@ -1054,18 +1061,38 @@ func _sync_actor_node(body: CharacterBody2D, character: Dictionary, is_active: b
 		character["x"] + character["w"] * 0.5 - camera_position.x,
 		character["y"] + character["h"] - camera_position.y
 	)
-	var sprite := body.get_node_or_null("Sprite2D") as Sprite2D
+	var sprite := body.get_node_or_null("Sprite2D") as AnimatedSprite2D
 	if sprite != null:
-		sprite.texture = player_anchor_pose if character["anchored"] else player_walk_one
-		if not character["anchored"] and absf(character["vx"]) > 30.0 and int(Time.get_ticks_msec() / 160) % 2 == 1:
-			sprite.texture = player_walk_two
-		sprite.modulate = character["color"]
+		var animation := _character_animation(character)
+		if sprite.animation != animation or not sprite.is_playing():
+			sprite.play(animation)
+		sprite.flip_h = character["face"] < 0.0
 	var active_marker := body.get_node_or_null("ActiveMarker") as CanvasItem
 	if active_marker != null:
 		active_marker.visible = is_active
 	var anchor_label := body.get_node_or_null("Anchor") as CanvasItem
 	if anchor_label != null:
 		anchor_label.visible = character["anchored"]
+
+
+func _character_animation(character: Dictionary) -> StringName:
+	if character["anchored"]:
+		return &"anchor"
+	if bool(character.get("climbing", false)):
+		return &"climb"
+	if bool(character.get("pushing", false)) or _is_daughter_crawling(character):
+		return &"special"
+	if not character["on_ground"]:
+		return &"jump" if character["vy"] < 0.0 else &"fall"
+	if absf(character["vx"]) > 30.0:
+		return &"walk"
+	return &"idle"
+
+
+func _is_daughter_crawling(character: Dictionary) -> bool:
+	# 仓库中段净高只有 42px；余念的 38px 碰撞体可以通过，母亲不能。
+	# 在同一区间使用低身动作，让视觉表现和既有通行规则一致。
+	return character == daughter and level_index == 1 and character["on_ground"] and _center(character).x >= 1750.0 and _center(character).x <= 2080.0
 
 
 func _sync_tie_line(should_show: bool) -> void:
@@ -1262,17 +1289,19 @@ func _draw_tether() -> void:
 
 func _draw_character(character: Dictionary, is_active: bool) -> void:
 	var screen_position := Vector2(character["x"], character["y"]) - camera_position
-	var visual_size := Vector2(48, 60) if character == daughter else Vector2(56, 70)
+	var visual_size := Vector2(72, 96) if character == daughter else Vector2(78, 104)
 	var visual_position := Vector2(
 		screen_position.x + character["w"] * 0.5 - visual_size.x * 0.5,
 		screen_position.y + character["h"] - visual_size.y
 	)
 	var visual_rect := Rect2(visual_position, visual_size)
-	var texture := player_anchor_pose if character["anchored"] else player_walk_one
-	if not character["anchored"] and absf(character["vx"]) > 30.0 and int(Time.get_ticks_msec() / 160) % 2 == 1:
-		texture = player_walk_two
+	var frames := daughter_sprite_frames if character == daughter else mother_sprite_frames
+	var animation := _character_animation(character)
+	var frame_count := frames.get_frame_count(animation)
+	var frame_index := int(Time.get_ticks_msec() / 160) % maxi(frame_count, 1)
+	var texture := frames.get_frame_texture(animation, frame_index)
 	draw_ellipse_shadow(Vector2(screen_position.x + character["w"] * 0.5, screen_position.y + character["h"] + 2.0), visual_size.x * 0.34)
-	draw_texture_rect(texture, visual_rect, false, character["color"])
+	draw_texture_rect(texture, visual_rect, false, Color.WHITE)
 	_draw_text(character["name"], Vector2(screen_position.x + character["w"] * 0.5, visual_position.y - (16.0 if is_active else 6.0)), 12, Color("e3ecec") if is_active else character["dark"], HORIZONTAL_ALIGNMENT_CENTER, 82.0)
 	if is_active:
 		var top := visual_position.y - 13.0

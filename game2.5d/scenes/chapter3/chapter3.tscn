@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" path="res://scripts/chapter3/chapter3.gd" id="1_chapter3"]
 [ext_resource type="PackedScene" path="res://scenes/chapter3/levels/chapter3_stairwell.tscn" id="2_stairwell"]
-[ext_resource type="Texture2D" path="res://art/playerGrey_walk1.png" id="3_player"]
-[ext_resource type="Texture2D" path="res://art/playerGrey_up1.png" id="4_mother"]
+[ext_resource type="SpriteFrames" path="res://resources/chapter3_yunian_frames.tres" id="3_player"]
+[ext_resource type="SpriteFrames" path="res://resources/chapter3_yuxiulan_frames.tres" id="4_mother"]
 [ext_resource type="Texture2D" path="res://art/cute-umbrella.png" id="5_umbrella"]
 [ext_resource type="Texture2D" path="res://art/suitcase.png" id="6_suitcase"]
 [ext_resource type="VideoStream" path="res://art/ending/echoes_ending.ogv" id="7_ending"]
@@ -37,22 +37,23 @@ collision_mask = 0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="World/Actors/Daughter"]
 position = Vector2(0, -19)
 shape = SubResource("Shape_daughter")
-[node name="Sprite2D" type="Sprite2D" parent="World/Actors/Daughter"]
-position = Vector2(0, -30)
-texture = ExtResource("3_player")
-modulate = Color(0.84, 0.77, 0.73, 1)
-scale = Vector2(0.44, 0.44)
+[node name="Sprite2D" type="AnimatedSprite2D" parent="World/Actors/Daughter"]
+position = Vector2(0, -40)
+sprite_frames = ExtResource("3_player")
+animation = &"idle"
+autoplay = "idle"
+scale = Vector2(0.22, 0.22)
 [node name="Name" type="Label" parent="World/Actors/Daughter"]
 offset_left = -42.0
-offset_top = -84.0
+offset_top = -100.0
 offset_right = 42.0
-offset_bottom = -60.0
+offset_bottom = -76.0
 text = "余念"
 horizontal_alignment = 1
 theme_override_colors/font_color = Color(0.89, 0.93, 0.93, 1)
 theme_override_font_sizes/font_size = 12
 [node name="ActiveMarker" type="Polygon2D" parent="World/Actors/Daughter"]
-position = Vector2(0, -72)
+position = Vector2(0, -90)
 polygon = PackedVector2Array(-6, 0, 6, 0, 0, 7)
 color = Color(0.94, 0.35, 0.38, 1)
 [node name="Anchor" type="Label" parent="World/Actors/Daughter"]
@@ -73,23 +74,24 @@ collision_mask = 0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="World/Actors/Mother"]
 position = Vector2(0, -24)
 shape = SubResource("Shape_mother")
-[node name="Sprite2D" type="Sprite2D" parent="World/Actors/Mother"]
-position = Vector2(0, -35)
-texture = ExtResource("4_mother")
-modulate = Color(0.78, 0.91, 0.87, 1)
-scale = Vector2(0.52, 0.52)
+[node name="Sprite2D" type="AnimatedSprite2D" parent="World/Actors/Mother"]
+position = Vector2(0, -41)
+sprite_frames = ExtResource("4_mother")
+animation = &"idle"
+autoplay = "idle"
+scale = Vector2(0.22, 0.22)
 [node name="Name" type="Label" parent="World/Actors/Mother"]
 offset_left = -45.0
-offset_top = -93.0
+offset_top = -108.0
 offset_right = 45.0
-offset_bottom = -69.0
+offset_bottom = -84.0
 text = "余秀兰"
 horizontal_alignment = 1
 theme_override_colors/font_color = Color(0.72, 0.83, 0.82, 1)
 theme_override_font_sizes/font_size = 12
 [node name="ActiveMarker" type="Polygon2D" parent="World/Actors/Mother"]
 visible = false
-position = Vector2(0, -80)
+position = Vector2(0, -98)
 polygon = PackedVector2Array(-6, 0, 6, 0, 0, 7)
 color = Color(0.94, 0.35, 0.38, 1)
 [node name="Anchor" type="Label" parent="World/Actors/Mother"]
