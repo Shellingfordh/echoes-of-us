@@ -144,14 +144,3 @@ collision_layer = 0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StoryProps/WaterTank"]
 position = Vector2(77.5, 71)
 shape = SubResource("Shape_tank")
-[node name="Clothesline1" type="Line2D" parent="StoryProps"]
-points = PackedVector2Array(120, 245, 3200, 290)
-width = 2.0
-default_color = Color(0.66, 0.71, 0.71, 1)
-[node name="Clothesline2" type="Line2D" parent="StoryProps"]
-points = PackedVector2Array(120, 285, 3200, 330)
-width = 2.0
-default_color = Color(0.66, 0.71, 0.71, 1)
-[node name="Sheet" type="Polygon2D" parent="StoryProps"]
-polygon = PackedVector2Array(820, 260, 925, 265, 925, 352, 828, 352)
-color = Color(0.78, 0.82, 0.8, 0.66)
