@@ -1,12 +1,13 @@
 # 第三章现有素材接入清单
 
-第三章的 24 张候选 PNG 已复制或处理后保存到 `game-chapter3/assets/`，并使用英文资源名。Godot 通过当前工程内的 `res://assets/...` 直接访问，不依赖个人 Downloads 路径、仓库根素材目录或外部软链接。当前 18 张用于游戏画面，6 张仅保留为候选参考。原有 3 张楼梯/断梯图片因透视、比例和现有关卡结构不匹配，已从工程整体移除。
+第三章的 25 张候选 PNG 已复制或处理后保存到 `game-chapter3/assets/`，并使用英文资源名。Godot 通过当前工程内的 `res://assets/...` 直接访问，不依赖个人 Downloads 路径、仓库根素材目录或外部软链接。当前 19 张用于游戏画面，6 张仅保留为候选参考。原有 3 张楼梯/断梯图片因透视、比例和现有关卡结构不匹配，已从工程整体移除。
 
 ## 当前使用范围
 
 | 原文件 | 仓库文件 | 运行时用途 |
 |---|---|---|
 | `wall.png` | `environments/chapter3/stairwell/environment_ch03_stairwell_wall.png` | 楼道墙面底层 |
+| 用户提供的地下储藏层图 | `environments/chapter3/stairwell/environment_ch03_stairwell_underfloor_storage.png` | 第一关末段木路面下方的无碰撞远景；运行时只裁取有效横条 |
 | `light.png` | `props/chapter3/prop_ch03_stairwell_lamp.png` | 声控灯明暗显示 |
 | `v.png` | `props/chapter3/platforms/prop_ch03_wood_floor_repeat.png` | 三关长路面与大型平台的连续木板结构 |
 | `a.png` | `props/chapter3/platforms/prop_ch03_wood_platform_long.png` | 中型悬空木平台与短路面 |

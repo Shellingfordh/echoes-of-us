@@ -53,6 +53,7 @@ var suitcase_texture: Texture2D = preload("res://art/suitcase.png")
 var wooden_box_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_warehouse_heavy_crate.png")
 var yellow_umbrella_texture: Texture2D = preload("res://art/cute-umbrella.png")
 var stairwell_wall_texture: Texture2D = preload("res://assets/environments/chapter3/stairwell/environment_ch03_stairwell_wall.png")
+var stairwell_underfloor_texture: Texture2D = preload("res://assets/environments/chapter3/stairwell/environment_ch03_stairwell_underfloor_storage.png")
 var stairwell_lamp_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_stairwell_lamp.png")
 var warehouse_background_texture: Texture2D = preload("res://assets/environments/chapter3/warehouse/environment_ch03_warehouse_background.png")
 var warehouse_fabric_rack_texture: Texture2D = preload("res://assets/props/chapter3/warehouse/prop_ch03_warehouse_fabric_rack.png")
@@ -1144,6 +1145,13 @@ func _draw_stairwell_dressing() -> void:
 	# 楼道墙面直接显示原始素材；玩法碰撞仍由关卡节点负责。
 	for panel_index in range(5):
 		_draw_world_texture(stairwell_wall_texture, Rect2(panel_index * 1020.0, 95.0, 1022.0, 365.0), Color.WHITE)
+	# 地下储藏层仅在末段低处露出。裁取原图中的横向实景，不参与任何碰撞。
+	_draw_world_texture_region(
+		stairwell_underfloor_texture,
+		Rect2(3370.0, 505.0, 780.0, 203.0),
+		Rect2(0.0, 1066.0, 2048.0, 534.0),
+		Color.WHITE
+	)
 	# 黄伞与行李延续前两章，并明确第三章从现实时间重新开始。
 	_draw_world_texture(yellow_umbrella_texture, Rect2(245, 396, 60, 60), Color.WHITE)
 	_draw_world_texture(suitcase_texture, Rect2(330, 404, 54, 54), Color(0.82, 0.88, 0.90))
@@ -1214,6 +1222,11 @@ func _draw_rooftop_dressing() -> void:
 func _draw_world_texture(texture: Texture2D, world_rect: Rect2, tint: Color) -> void:
 	var screen_rect := Rect2(world_rect.position - camera_position, world_rect.size)
 	draw_texture_rect(texture, screen_rect, false, tint)
+
+
+func _draw_world_texture_region(texture: Texture2D, world_rect: Rect2, source_rect: Rect2, tint: Color) -> void:
+	var screen_rect := Rect2(world_rect.position - camera_position, world_rect.size)
+	draw_texture_rect_region(texture, screen_rect, source_rect, tint)
 
 
 func _draw_tether() -> void:
