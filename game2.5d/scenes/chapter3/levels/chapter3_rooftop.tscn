@@ -1,0 +1,147 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/chapter3/chapter3_level_layout.gd" id="1_layout"]
+[ext_resource type="Script" path="res://scripts/chapter3/chapter3_layout_item.gd" id="2_item"]
+
+[sub_resource type="RectangleShape2D" id="Shape_floor"]
+size = Vector2(900, 60)
+[sub_resource type="RectangleShape2D" id="Shape_step"]
+size = Vector2(170, 14)
+[sub_resource type="RectangleShape2D" id="Shape_top"]
+size = Vector2(1400, 40)
+[sub_resource type="RectangleShape2D" id="Shape_plate"]
+size = Vector2(70, 12)
+[sub_resource type="RectangleShape2D" id="Shape_door"]
+size = Vector2(26, 160)
+[sub_resource type="RectangleShape2D" id="Shape_tank"]
+size = Vector2(155, 142)
+[sub_resource type="RectangleShape2D" id="Shape_exit"]
+size = Vector2(100, 180)
+[node name="Rooftop" type="Node2D"]
+script = ExtResource("1_layout")
+level_name = "天台"
+objective = "台阶一节比一节高——交替锚定接龙：一人锚定，另一人借线上去，再回头拉对方"
+quote = "牵挂，也可以成为彼此的支点。"
+world_width = 3400.0
+background_color = Color(0.2, 0.31, 0.36, 1)
+
+[node name="Platforms" type="Node2D" parent="."]
+[node name="FloorStart" type="StaticBody2D" parent="Platforms"]
+position = Vector2(0, 460)
+script = ExtResource("2_item")
+size = Vector2(900, 60)
+fill_color = Color(0.39, 0.46, 0.49, 1)
+edge_color = Color(0.67, 0.71, 0.72, 1)
+label_text = "天台入口"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/FloorStart"]
+position = Vector2(450, 30)
+shape = SubResource("Shape_floor")
+[node name="Step1" type="StaticBody2D" parent="Platforms"]
+position = Vector2(980, 370)
+script = ExtResource("2_item")
+size = Vector2(170, 14)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Step1"]
+position = Vector2(85, 7)
+shape = SubResource("Shape_step")
+[node name="Step2" type="StaticBody2D" parent="Platforms"]
+position = Vector2(1300, 280)
+script = ExtResource("2_item")
+size = Vector2(170, 14)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Step2"]
+position = Vector2(85, 7)
+shape = SubResource("Shape_step")
+[node name="Step3" type="StaticBody2D" parent="Platforms"]
+position = Vector2(1720, 220)
+script = ExtResource("2_item")
+size = Vector2(170, 14)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Step3"]
+position = Vector2(85, 7)
+shape = SubResource("Shape_step")
+[node name="RoofTop" type="StaticBody2D" parent="Platforms"]
+position = Vector2(2000, 130)
+script = ExtResource("2_item")
+size = Vector2(1400, 40)
+fill_color = Color(0.39, 0.46, 0.49, 1)
+edge_color = Color(0.67, 0.71, 0.72, 1)
+label_text = "最高处"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/RoofTop"]
+position = Vector2(700, 20)
+shape = SubResource("Shape_top")
+
+[node name="Walls" type="Node2D" parent="."]
+[node name="Planks" type="Node2D" parent="."]
+[node name="Boxes" type="Node2D" parent="."]
+[node name="Plates" type="Node2D" parent="."]
+[node name="DaughterPlate" type="Area2D" parent="Plates"]
+position = Vector2(2350, 122)
+script = ExtResource("2_item")
+size = Vector2(70, 12)
+fill_color = Color(0.77, 0.62, 0.27, 1)
+edge_color = Color(0.96, 0.79, 0.35, 1)
+label_text = "踏板 1"
+metadata/y = 130.0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Plates/DaughterPlate"]
+position = Vector2(35, 6)
+shape = SubResource("Shape_plate")
+[node name="MotherPlate" type="Area2D" parent="Plates"]
+position = Vector2(2700, 122)
+script = ExtResource("2_item")
+size = Vector2(70, 12)
+fill_color = Color(0.77, 0.62, 0.27, 1)
+edge_color = Color(0.96, 0.79, 0.35, 1)
+label_text = "踏板 2"
+metadata/y = 130.0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Plates/MotherPlate"]
+position = Vector2(35, 6)
+shape = SubResource("Shape_plate")
+
+[node name="Doors" type="Node2D" parent="."]
+[node name="FinalDoor" type="StaticBody2D" parent="Doors"]
+position = Vector2(2900, -30)
+script = ExtResource("2_item")
+size = Vector2(26, 160)
+fill_color = Color(0.15, 0.25, 0.28, 1)
+edge_color = Color(0.55, 0.68, 0.7, 1)
+label_text = "最终门"
+metadata/plates = [0, 1]
+metadata/external_visual = true
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Doors/FinalDoor"]
+position = Vector2(13, 80)
+shape = SubResource("Shape_door")
+
+[node name="Markers" type="Node2D" parent="."]
+[node name="SpawnDaughter" type="Marker2D" parent="Markers"]
+position = Vector2(200, 460)
+[node name="SpawnMother" type="Marker2D" parent="Markers"]
+position = Vector2(120, 460)
+[node name="Exit" type="Marker2D" parent="Markers"]
+position = Vector2(3100, 130)
+[node name="ExitTrigger" type="Area2D" parent="Markers"]
+position = Vector2(3100, -50)
+collision_layer = 0
+collision_mask = 0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Markers/ExitTrigger"]
+position = Vector2(50, 90)
+shape = SubResource("Shape_exit")
+[node name="Checkpoints" type="Node2D" parent="Markers"]
+[node name="Checkpoint1" type="Marker2D" parent="Markers/Checkpoints"]
+position = Vector2(1150, 370)
+metadata/daughter_spawn = Vector2(1030, 370)
+metadata/mother_spawn = Vector2(1000, 370)
+[node name="Checkpoint2" type="Marker2D" parent="Markers/Checkpoints"]
+position = Vector2(2050, 130)
+metadata/daughter_spawn = Vector2(2120, 130)
+metadata/mother_spawn = Vector2(2080, 130)
+
+[node name="StoryProps" type="Node2D" parent="."]
+[node name="WaterTank" type="StaticBody2D" parent="StoryProps"]
+position = Vector2(540, 315)
+script = ExtResource("2_item")
+size = Vector2(155, 142)
+fill_color = Color(0.27, 0.35, 0.38, 1)
+edge_color = Color(0.5, 0.58, 0.6, 1)
+label_text = "水箱"
+collision_layer = 0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StoryProps/WaterTank"]
+position = Vector2(77.5, 71)
+shape = SubResource("Shape_tank")
