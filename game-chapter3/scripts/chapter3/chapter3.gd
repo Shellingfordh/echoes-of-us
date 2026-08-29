@@ -179,6 +179,7 @@ func _make_character(
 		"vy": 0.0,
 		"on_ground": false,
 		"anchored": false,
+		"fallen": false,
 		"face": 1.0,
 		"can_push": can_push,
 	}
@@ -247,6 +248,7 @@ func _place_at(daughter_feet: Vector2, mother_feet: Vector2) -> void:
 		character["vx"] = 0.0
 		character["vy"] = 0.0
 		character["anchored"] = false
+		character["fallen"] = false
 		character["on_ground"] = true
 	active_character = 0
 
@@ -283,8 +285,28 @@ func _update_play(delta: float) -> void:
 			var follow_delta: float = _center(daughter).x - _center(mother).x
 			if absf(follow_delta) > 50.0:
 				direction = signf(follow_delta)
+
+		# 空中沿线摆荡/攀线时，左右键不再直接改变水平速度。
+		# 普通空中跳跃仍保留左右控制；只有存在稳定支点且角色
+		# 正在被牵挂线约束时才屏蔽水平输入。
+		var tethered_airborne: bool = (
+			not character["on_ground"]
+			and not character["fallen"]
+			and _supported(characters[1 - index])
+			and _center(character).distance_to(_center(characters[1 - index])) > 90.0
+		)
+		if tethered_airborne:
+			direction = 0.0
+
 		if not is_zero_approx(direction):
 			character["face"] = signf(direction)
+
+		if character["fallen"]:
+			# 坠落态由牵挂线恢复，不再继续受到重力累积。
+			character["vx"] = 0.0
+			character["vy"] = 0.0
+			continue
+
 		var acceleration := 2600.0 if character["on_ground"] else 1700.0
 		var max_speed: float = character["speed"] * (speed_multiplier if index == active_character else minf(1.0, speed_multiplier + 0.2))
 		if not is_zero_approx(direction) and (character["on_ground"] or absf(character["vx"]) < max_speed or signf(character["vx"]) != signf(direction)):
@@ -422,17 +444,26 @@ func _tether_constrain(character: Dictionary, anchor: Dictionary, delta: float, 
 	var offset := _center(character) - _center(anchor)
 	var distance := maxf(offset.length(), 0.001)
 	if is_active and Input.is_action_pressed(&"climb"):
-		if distance > 90.0:
+		var vertical_gap := _center(character).y - _center(anchor).y
+		var anchor_is_above := vertical_gap > 24.0
+
+		# W 攀线只允许向上接近稳定支点。
+		# 同高度跳跃不能进入攀线吸附；支点在下方时也不能
+		# 把正常向上跳跃错误地拉回去。
+		if anchor_is_above and distance > 90.0:
 			character["vx"] -= offset.x / distance * 3000.0 * delta
 			character["vy"] -= offset.y / distance * 3000.0 * delta
 			character["vx"] += (_center(anchor).x - _center(character).x) * 2.5 * delta
-		# W/↑ 同时也是地面跳跃键。两人并肩时不能立刻把刚起跳的人
-		# 吸回地面；只有确实从高低差沿线抵达支点时才完成攀线吸附。
-		elif anchor["on_ground"] and absf(_center(character).y - _center(anchor).y) > 24.0:
+		elif anchor["on_ground"] and anchor_is_above:
 			character["x"] = anchor["x"] - character["w"] - 2.0 if _center(character).x < _center(anchor).x else anchor["x"] + anchor["w"] + 2.0
 			character["y"] = anchor["y"] + anchor["h"] - character["h"]
 			character["vx"] = 0.0
 			character["vy"] = 0.0
+
+		# 掉落状态被 W 拉回到安全高度后，恢复普通物理。
+		if character["fallen"] and _center(character).y < FALL_LIMIT - 60.0:
+			character["fallen"] = false
+			character["vy"] = minf(character["vy"], 0.0)
 	if distance <= MAX_DISTANCE + 8.0:
 		return false
 	var constrained_center := _center(anchor) + offset * (MAX_DISTANCE / distance)
@@ -493,9 +524,16 @@ func _check_falls() -> void:
 		if character["y"] <= FALL_LIMIT:
 			continue
 		var other: Dictionary = characters[1 - index]
+		if character["fallen"]:
+			continue
 		if _supported(other):
-			character["y"] = 1000.0
-			character["vy"] = -50.0
+			# 进入稳定坠落态：不再在 FALL_LIMIT 附近反复穿越阈值。
+			# 角色仍可由上方支点通过 W 沿线拉回。
+			character["fallen"] = true
+			character["y"] = FALL_LIMIT - 40.0
+			character["vy"] = 0.0
+			character["vx"] = 0.0
+			character["on_ground"] = false
 		else:
 			_respawn_checkpoint()
 			return
