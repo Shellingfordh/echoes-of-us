@@ -1,0 +1,188 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/chapter3/chapter3_level_layout.gd" id="1_layout"]
+[ext_resource type="Script" path="res://scripts/chapter3/chapter3_layout_item.gd" id="2_item"]
+[ext_resource type="Texture2D" path="res://art/wooden-box.png" id="3_box"]
+[ext_resource type="Texture2D" path="res://art/playerGrey_up1.png" id="4_helper"]
+
+[sub_resource type="RectangleShape2D" id="Shape_floor_start"]
+size = Vector2(1100, 60)
+[sub_resource type="RectangleShape2D" id="Shape_floor_middle"]
+size = Vector2(1200, 60)
+[sub_resource type="RectangleShape2D" id="Shape_lower"]
+size = Vector2(250, 30)
+[sub_resource type="RectangleShape2D" id="Shape_floor_exit"]
+size = Vector2(750, 60)
+[sub_resource type="RectangleShape2D" id="Shape_tunnel"]
+size = Vector2(330, 118)
+[sub_resource type="RectangleShape2D" id="Shape_box"]
+size = Vector2(56, 56)
+[sub_resource type="RectangleShape2D" id="Shape_plate"]
+size = Vector2(70, 12)
+[sub_resource type="RectangleShape2D" id="Shape_door"]
+size = Vector2(26, 160)
+
+[node name="Warehouse" type="Node2D"]
+script = ExtResource("1_layout")
+level_name = "仓库"
+objective = "把箱子推上金色踏板，压住大门。（母亲能推动重物，女儿不行）"
+quote = "各尽所能，就是相互支撑。"
+world_width = 3600.0
+background_color = Color(0.08, 0.15, 0.18, 1)
+
+[node name="Platforms" type="Node2D" parent="."]
+[node name="FloorStart" type="StaticBody2D" parent="Platforms"]
+position = Vector2(0, 460)
+script = ExtResource("2_item")
+size = Vector2(1100, 60)
+label_text = "仓库地面"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/FloorStart"]
+position = Vector2(550, 30)
+shape = SubResource("Shape_floor_start")
+[node name="FloorMiddle" type="StaticBody2D" parent="Platforms"]
+position = Vector2(1400, 460)
+script = ExtResource("2_item")
+size = Vector2(1200, 60)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/FloorMiddle"]
+position = Vector2(600, 30)
+shape = SubResource("Shape_floor_middle")
+[node name="LowerStep" type="StaticBody2D" parent="Platforms"]
+position = Vector2(2600, 560)
+script = ExtResource("2_item")
+size = Vector2(250, 30)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/LowerStep"]
+position = Vector2(125, 15)
+shape = SubResource("Shape_lower")
+[node name="FloorExit" type="StaticBody2D" parent="Platforms"]
+position = Vector2(2850, 460)
+script = ExtResource("2_item")
+size = Vector2(750, 60)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/FloorExit"]
+position = Vector2(375, 30)
+shape = SubResource("Shape_floor_exit")
+
+[node name="Walls" type="Node2D" parent="."]
+[node name="LowTunnel" type="StaticBody2D" parent="Walls"]
+position = Vector2(1750, 300)
+script = ExtResource("2_item")
+size = Vector2(330, 118)
+fill_color = Color(0.18, 0.28, 0.31, 1)
+edge_color = Color(0.48, 0.58, 0.6, 1)
+label_text = "女儿可通过的低通道"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/LowTunnel"]
+position = Vector2(165, 59)
+shape = SubResource("Shape_tunnel")
+
+[node name="Planks" type="Node2D" parent="."]
+[node name="Boxes" type="Node2D" parent="."]
+[node name="HeavyBox" type="CharacterBody2D" parent="Boxes"]
+position = Vector2(640, 404)
+script = ExtResource("2_item")
+size = Vector2(56, 56)
+fill_color = Color(0.48, 0.31, 0.15, 1)
+edge_color = Color(0.82, 0.62, 0.37, 1)
+label_text = "重箱 1"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Boxes/HeavyBox"]
+position = Vector2(28, 28)
+shape = SubResource("Shape_box")
+[node name="Sprite2D" type="Sprite2D" parent="Boxes/HeavyBox"]
+position = Vector2(28, 28)
+texture = ExtResource("3_box")
+scale = Vector2(0.06, 0.06)
+[node name="StepBox" type="CharacterBody2D" parent="Boxes"]
+position = Vector2(2480, 404)
+script = ExtResource("2_item")
+size = Vector2(56, 56)
+fill_color = Color(0.48, 0.31, 0.15, 1)
+edge_color = Color(0.82, 0.62, 0.37, 1)
+label_text = "垫脚箱"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Boxes/StepBox"]
+position = Vector2(28, 28)
+shape = SubResource("Shape_box")
+[node name="Sprite2D" type="Sprite2D" parent="Boxes/StepBox"]
+position = Vector2(28, 28)
+texture = ExtResource("3_box")
+scale = Vector2(0.06, 0.06)
+
+[node name="Plates" type="Node2D" parent="."]
+[node name="EntrancePlate" type="Area2D" parent="Plates"]
+position = Vector2(420, 452)
+script = ExtResource("2_item")
+size = Vector2(70, 12)
+fill_color = Color(0.77, 0.62, 0.27, 1)
+edge_color = Color(0.96, 0.79, 0.35, 1)
+label_text = "踏板 1"
+metadata/y = 460.0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Plates/EntrancePlate"]
+position = Vector2(35, 6)
+shape = SubResource("Shape_plate")
+[node name="TunnelPlate" type="Area2D" parent="Plates"]
+position = Vector2(2140, 452)
+script = ExtResource("2_item")
+size = Vector2(70, 12)
+fill_color = Color(0.77, 0.62, 0.27, 1)
+edge_color = Color(0.96, 0.79, 0.35, 1)
+label_text = "踏板 2"
+metadata/y = 460.0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Plates/TunnelPlate"]
+position = Vector2(35, 6)
+shape = SubResource("Shape_plate")
+
+[node name="Doors" type="Node2D" parent="."]
+[node name="EntranceDoor" type="StaticBody2D" parent="Doors"]
+position = Vector2(1000, 300)
+script = ExtResource("2_item")
+size = Vector2(26, 160)
+fill_color = Color(0.15, 0.25, 0.28, 1)
+edge_color = Color(0.55, 0.68, 0.7, 1)
+label_text = "箱压门"
+metadata/plates = [0]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Doors/EntranceDoor"]
+position = Vector2(13, 80)
+shape = SubResource("Shape_door")
+[node name="TunnelDoor" type="StaticBody2D" parent="Doors"]
+position = Vector2(2350, 300)
+script = ExtResource("2_item")
+size = Vector2(26, 160)
+fill_color = Color(0.15, 0.25, 0.28, 1)
+edge_color = Color(0.55, 0.68, 0.7, 1)
+label_text = "通道机关门"
+metadata/plates = [1]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Doors/TunnelDoor"]
+position = Vector2(13, 80)
+shape = SubResource("Shape_door")
+
+[node name="Markers" type="Node2D" parent="."]
+[node name="SpawnDaughter" type="Marker2D" parent="Markers"]
+position = Vector2(200, 460)
+[node name="SpawnMother" type="Marker2D" parent="Markers"]
+position = Vector2(120, 460)
+[node name="Exit" type="Marker2D" parent="Markers"]
+position = Vector2(3450, 460)
+[node name="Checkpoints" type="Node2D" parent="Markers"]
+[node name="Checkpoint1" type="Marker2D" parent="Markers/Checkpoints"]
+position = Vector2(1450, 460)
+metadata/daughter_spawn = Vector2(1520, 460)
+metadata/mother_spawn = Vector2(1450, 460)
+[node name="Checkpoint2" type="Marker2D" parent="Markers/Checkpoints"]
+position = Vector2(2400, 460)
+metadata/daughter_spawn = Vector2(2460, 460)
+metadata/mother_spawn = Vector2(2400, 460)
+[node name="Checkpoint3" type="Marker2D" parent="Markers/Checkpoints"]
+position = Vector2(2900, 460)
+metadata/daughter_spawn = Vector2(2960, 460)
+metadata/mother_spawn = Vector2(2900, 460)
+
+[node name="StoryProps" type="Node2D" parent="."]
+[node name="Helper" type="Sprite2D" parent="StoryProps"]
+position = Vector2(1603, 429)
+texture = ExtResource("4_helper")
+modulate = Color(0.67, 0.72, 0.79, 1)
+scale = Vector2(0.43, 0.43)
+[node name="Label" type="Label" parent="StoryProps/Helper"]
+offset_left = -54.0
+offset_top = -89.0
+offset_right = 64.0
+offset_bottom = -63.0
+text = "帮忙的高中姑娘"
+horizontal_alignment = 1

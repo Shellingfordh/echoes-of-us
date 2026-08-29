@@ -16,6 +16,16 @@
 - 复用前两章的人物、黄伞、行李和木箱素材，并补齐楼道声控灯、信箱、仓库货架、天台水箱与晾晒物等场景表现；
 - 不依赖新生成素材。
 
+## 场景结构
+
+第三章不再是只有一个脚本节点的空场景。`scenes/chapter3/chapter3.tscn` 中可以直接查看双角色、碰撞形状、牵挂线、HUD 和第一关布局预览；三个关卡布局分别位于：
+
+- `scenes/chapter3/levels/chapter3_stairwell.tscn`
+- `scenes/chapter3/levels/chapter3_warehouse.tscn`
+- `scenes/chapter3/levels/chapter3_rooftop.tscn`
+
+平台使用 `StaticBody2D`，箱子使用 `CharacterBody2D`，踏板使用 `Area2D`，出生点、检查点和出口使用 `Marker2D`。运行时玩法数据直接从这些场景节点读取，因此可以在 Godot 编辑器中调整布局。
+
 ## 运行
 
 ```bash
@@ -29,6 +39,7 @@ godot --path game-chapter3
 ```bash
 godot --headless --path game-chapter3 --script res://tests/chapter03_flow_test.gd
 godot --headless --path game-chapter3 --script res://tests/chapter03_input_test.gd
+godot --headless --path game-chapter3 --script res://tests/chapter03_scene_structure_test.gd
 ```
 
 需要生成四张白盒检查图时，可运行：

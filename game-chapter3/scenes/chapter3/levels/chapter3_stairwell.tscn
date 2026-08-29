@@ -1,0 +1,226 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Script" path="res://scripts/chapter3/chapter3_level_layout.gd" id="1_layout"]
+[ext_resource type="Script" path="res://scripts/chapter3/chapter3_layout_item.gd" id="2_item"]
+[ext_resource type="Texture2D" path="res://art/cute-umbrella.png" id="3_umbrella"]
+[ext_resource type="Texture2D" path="res://art/suitcase.png" id="4_suitcase"]
+
+[sub_resource type="RectangleShape2D" id="Shape_floor_a"]
+size = Vector2(1500, 60)
+[sub_resource type="RectangleShape2D" id="Shape_small_110"]
+size = Vector2(110, 14)
+[sub_resource type="RectangleShape2D" id="Shape_floor_b"]
+size = Vector2(630, 60)
+[sub_resource type="RectangleShape2D" id="Shape_step"]
+size = Vector2(84, 14)
+[sub_resource type="RectangleShape2D" id="Shape_floor_c"]
+size = Vector2(550, 60)
+[sub_resource type="RectangleShape2D" id="Shape_pit"]
+size = Vector2(160, 30)
+[sub_resource type="RectangleShape2D" id="Shape_floor_d"]
+size = Vector2(440, 60)
+[sub_resource type="RectangleShape2D" id="Shape_small_90"]
+size = Vector2(90, 14)
+[sub_resource type="RectangleShape2D" id="Shape_plank"]
+size = Vector2(560, 16)
+[sub_resource type="RectangleShape2D" id="Shape_plate_60"]
+size = Vector2(60, 12)
+[sub_resource type="RectangleShape2D" id="Shape_door"]
+size = Vector2(26, 160)
+[sub_resource type="RectangleShape2D" id="Shape_floor_end"]
+size = Vector2(440, 60)
+
+[node name="Stairwell" type="Node2D"]
+script = ExtResource("1_layout")
+level_name = "楼道与出口"
+objective = "一起向右走——感受线的距离。"
+quote = "线不是限制，而是连接。"
+world_width = 4300.0
+background_color = Color(0.12, 0.2, 0.24, 1)
+
+[node name="Platforms" type="Node2D" parent="."]
+[node name="FloorStart" type="StaticBody2D" parent="Platforms"]
+position = Vector2(0, 460)
+script = ExtResource("2_item")
+size = Vector2(1500, 60)
+label_text = "楼道地面"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/FloorStart"]
+position = Vector2(750, 30)
+shape = SubResource("Shape_floor_a")
+[node name="MidPlateColumn" type="StaticBody2D" parent="Platforms"]
+position = Vector2(1740, 400)
+script = ExtResource("2_item")
+size = Vector2(110, 14)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/MidPlateColumn"]
+position = Vector2(55, 7)
+shape = SubResource("Shape_small_110")
+[node name="FloorMiddle" type="StaticBody2D" parent="Platforms"]
+position = Vector2(1850, 460)
+script = ExtResource("2_item")
+size = Vector2(630, 60)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/FloorMiddle"]
+position = Vector2(315, 30)
+shape = SubResource("Shape_floor_b")
+[node name="Step1" type="StaticBody2D" parent="Platforms"]
+position = Vector2(2540, 376)
+script = ExtResource("2_item")
+size = Vector2(84, 14)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Step1"]
+position = Vector2(42, 7)
+shape = SubResource("Shape_step")
+[node name="Step2" type="StaticBody2D" parent="Platforms"]
+position = Vector2(2680, 292)
+script = ExtResource("2_item")
+size = Vector2(84, 14)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Step2"]
+position = Vector2(42, 7)
+shape = SubResource("Shape_step")
+[node name="Step3" type="StaticBody2D" parent="Platforms"]
+position = Vector2(2820, 376)
+script = ExtResource("2_item")
+size = Vector2(84, 14)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Step3"]
+position = Vector2(42, 7)
+shape = SubResource("Shape_step")
+[node name="Step4" type="StaticBody2D" parent="Platforms"]
+position = Vector2(2960, 292)
+script = ExtResource("2_item")
+size = Vector2(84, 14)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Step4"]
+position = Vector2(42, 7)
+shape = SubResource("Shape_step")
+[node name="FloorGate" type="StaticBody2D" parent="Platforms"]
+position = Vector2(3150, 460)
+script = ExtResource("2_item")
+size = Vector2(550, 60)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/FloorGate"]
+position = Vector2(275, 30)
+shape = SubResource("Shape_floor_c")
+[node name="LowerPit" type="StaticBody2D" parent="Platforms"]
+position = Vector2(3700, 520)
+script = ExtResource("2_item")
+size = Vector2(160, 30)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/LowerPit"]
+position = Vector2(80, 15)
+shape = SubResource("Shape_pit")
+[node name="FloorExit" type="StaticBody2D" parent="Platforms"]
+position = Vector2(3860, 460)
+script = ExtResource("2_item")
+size = Vector2(440, 60)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/FloorExit"]
+position = Vector2(220, 30)
+shape = SubResource("Shape_floor_end")
+[node name="UpperPlate" type="StaticBody2D" parent="Platforms"]
+position = Vector2(3450, 370)
+script = ExtResource("2_item")
+size = Vector2(90, 14)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/UpperPlate"]
+position = Vector2(45, 7)
+shape = SubResource("Shape_small_90")
+
+[node name="Walls" type="Node2D" parent="."]
+[node name="Planks" type="Node2D" parent="."]
+[node name="BreakablePlank" type="StaticBody2D" parent="Planks"]
+position = Vector2(2500, 460)
+script = ExtResource("2_item")
+size = Vector2(560, 16)
+fill_color = Color(0.55, 0.34, 0.18, 1)
+edge_color = Color(0.82, 0.62, 0.37, 1)
+label_text = "可断木板"
+metadata/break_x = 2620.0
+metadata/break_by = "mother"
+metadata/armed = false
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Planks/BreakablePlank"]
+position = Vector2(280, 8)
+shape = SubResource("Shape_plank")
+
+[node name="Boxes" type="Node2D" parent="."]
+[node name="Plates" type="Node2D" parent="."]
+[node name="DoorOnePlate" type="Area2D" parent="Plates"]
+position = Vector2(1760, 392)
+script = ExtResource("2_item")
+size = Vector2(60, 12)
+fill_color = Color(0.77, 0.62, 0.27, 1)
+edge_color = Color(0.96, 0.79, 0.35, 1)
+label_text = "踏板 1"
+metadata/y = 400.0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Plates/DoorOnePlate"]
+position = Vector2(30, 6)
+shape = SubResource("Shape_plate_60")
+[node name="UpperGatePlate" type="Area2D" parent="Plates"]
+position = Vector2(3465, 362)
+script = ExtResource("2_item")
+size = Vector2(60, 12)
+fill_color = Color(0.77, 0.62, 0.27, 1)
+edge_color = Color(0.96, 0.79, 0.35, 1)
+label_text = "踏板 2"
+metadata/y = 370.0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Plates/UpperGatePlate"]
+position = Vector2(30, 6)
+shape = SubResource("Shape_plate_60")
+[node name="LowerGatePlate" type="Area2D" parent="Plates"]
+position = Vector2(3765, 512)
+script = ExtResource("2_item")
+size = Vector2(60, 12)
+fill_color = Color(0.77, 0.62, 0.27, 1)
+edge_color = Color(0.96, 0.79, 0.35, 1)
+label_text = "踏板 3"
+metadata/y = 520.0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Plates/LowerGatePlate"]
+position = Vector2(30, 6)
+shape = SubResource("Shape_plate_60")
+
+[node name="Doors" type="Node2D" parent="."]
+[node name="MiddleDoor" type="StaticBody2D" parent="Doors"]
+position = Vector2(2100, 300)
+script = ExtResource("2_item")
+size = Vector2(26, 160)
+fill_color = Color(0.15, 0.25, 0.28, 1)
+edge_color = Color(0.55, 0.68, 0.7, 1)
+label_text = "门 1"
+metadata/plates = [0]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Doors/MiddleDoor"]
+position = Vector2(13, 80)
+shape = SubResource("Shape_door")
+[node name="ExitDoor" type="StaticBody2D" parent="Doors"]
+position = Vector2(3960, 300)
+script = ExtResource("2_item")
+size = Vector2(26, 160)
+fill_color = Color(0.15, 0.25, 0.28, 1)
+edge_color = Color(0.55, 0.68, 0.7, 1)
+label_text = "双踏板门"
+metadata/plates = [1, 2]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Doors/ExitDoor"]
+position = Vector2(13, 80)
+shape = SubResource("Shape_door")
+
+[node name="Markers" type="Node2D" parent="."]
+[node name="SpawnDaughter" type="Marker2D" parent="Markers"]
+position = Vector2(220, 460)
+[node name="SpawnMother" type="Marker2D" parent="Markers"]
+position = Vector2(130, 460)
+[node name="Exit" type="Marker2D" parent="Markers"]
+position = Vector2(4140, 460)
+[node name="Checkpoints" type="Node2D" parent="Markers"]
+[node name="Checkpoint1" type="Marker2D" parent="Markers/Checkpoints"]
+position = Vector2(1100, 460)
+metadata/daughter_spawn = Vector2(1300, 460)
+metadata/mother_spawn = Vector2(1230, 460)
+[node name="Checkpoint2" type="Marker2D" parent="Markers/Checkpoints"]
+position = Vector2(2150, 460)
+metadata/daughter_spawn = Vector2(2200, 460)
+metadata/mother_spawn = Vector2(2130, 460)
+[node name="Checkpoint3" type="Marker2D" parent="Markers/Checkpoints"]
+position = Vector2(3180, 460)
+metadata/daughter_spawn = Vector2(3250, 460)
+metadata/mother_spawn = Vector2(3180, 460)
+
+[node name="StoryProps" type="Node2D" parent="."]
+[node name="YellowUmbrella" type="Sprite2D" parent="StoryProps"]
+texture = ExtResource("3_umbrella")
+position = Vector2(275, 426)
+scale = Vector2(0.058, 0.058)
+[node name="Suitcase" type="Sprite2D" parent="StoryProps"]
+texture = ExtResource("4_suitcase")
+position = Vector2(357, 431)
+scale = Vector2(0.052, 0.052)

@@ -50,6 +50,23 @@ var player_anchor_pose: Texture2D = preload("res://art/playerGrey_up1.png")
 var suitcase_texture: Texture2D = preload("res://art/suitcase.png")
 var wooden_box_texture: Texture2D = preload("res://art/wooden-box.png")
 var yellow_umbrella_texture: Texture2D = preload("res://art/cute-umbrella.png")
+var level_scene_resources: Array[PackedScene] = [
+	preload("res://scenes/chapter3/levels/chapter3_stairwell.tscn"),
+	preload("res://scenes/chapter3/levels/chapter3_warehouse.tscn"),
+	preload("res://scenes/chapter3/levels/chapter3_rooftop.tscn"),
+]
+
+@onready var level_source_preview: Node2D = get_node_or_null("World/LevelSourcePreview") as Node2D
+@onready var daughter_body: CharacterBody2D = get_node_or_null("World/Actors/Daughter") as CharacterBody2D
+@onready var mother_body: CharacterBody2D = get_node_or_null("World/Actors/Mother") as CharacterBody2D
+@onready var tie_line_node: Line2D = get_node_or_null("World/TieLine") as Line2D
+@onready var hud_layer: CanvasLayer = get_node_or_null("HUD") as CanvasLayer
+@onready var hud_top_bar: Control = get_node_or_null("HUD/TopBar") as Control
+@onready var hud_objective: Label = get_node_or_null("HUD/TopBar/Objective") as Label
+@onready var hud_status: Label = get_node_or_null("HUD/TopBar/Status") as Label
+@onready var hud_bottom_bar: Control = get_node_or_null("HUD/BottomBar") as Control
+@onready var hud_controls: Label = get_node_or_null("HUD/BottomBar/Controls") as Label
+@onready var title_overlay: Control = get_node_or_null("HUD/TitleOverlay") as Control
 
 
 func _ready() -> void:
@@ -58,7 +75,14 @@ func _ready() -> void:
 	characters = [daughter, mother]
 	levels = _create_levels()
 	_load_level(0)
+	if level_source_preview != null:
+		level_source_preview.visible = false
+	_sync_scene_nodes()
 	queue_redraw()
+
+
+func _process(_delta: float) -> void:
+	_sync_scene_nodes()
 
 
 func _input(event: InputEvent) -> void:
@@ -161,114 +185,15 @@ func _make_character(
 
 
 func _create_levels() -> Array:
-	return [
-		{
-			"name": "楼道与出口",
-			"quote": "线不是限制，而是连接。",
-			"world_w": 4300.0,
-			"spawn": {"d": Vector2(220, 460), "m": Vector2(130, 460)},
-			"checkpoints": [
-				{"x": 1100.0, "d": Vector2(1300, 460), "m": Vector2(1230, 460)},
-				{"x": 2150.0, "d": Vector2(2200, 460), "m": Vector2(2130, 460)},
-				{"x": 3180.0, "d": Vector2(3250, 460), "m": Vector2(3180, 460)},
-			],
-			"statics": [
-				_rect(0, 460, 1500, 60),
-				_rect(1740, 400, 110, 14),
-				_rect(1850, 460, 630, 60),
-				_rect(2540, 376, 84, 14),
-				_rect(2680, 292, 84, 14),
-				_rect(2820, 376, 84, 14),
-				_rect(2960, 292, 84, 14),
-				_rect(3150, 460, 550, 60),
-				_rect(3700, 520, 160, 30),
-				_rect(3860, 460, 440, 60),
-				_rect(3450, 370, 90, 14),
-			],
-			"walls": [],
-			"planks": [
-				{"x": 2500.0, "y": 460.0, "w": 560.0, "h": 16.0, "break_x": 2620.0, "break_by": "mother", "armed": false},
-			],
-			"boxes": [],
-			"plates": [
-				{"x": 1760.0, "y": 400.0, "w": 60.0},
-				{"x": 3465.0, "y": 370.0, "w": 60.0},
-				{"x": 3765.0, "y": 520.0, "w": 60.0},
-			],
-			"doors": [
-				{"x": 2100.0, "y": 300.0, "w": 26.0, "h": 160.0, "plates": [0]},
-				{"x": 3960.0, "y": 300.0, "w": 26.0, "h": 160.0, "plates": [1, 2]},
-			],
-			"exit_x": 4140.0,
-			"objective": "一起向右走——感受线的距离。",
-		},
-		{
-			"name": "仓库",
-			"quote": "各尽所能，就是相互支撑。",
-			"world_w": 3600.0,
-			"spawn": {"d": Vector2(200, 460), "m": Vector2(120, 460)},
-			"checkpoints": [
-				{"x": 1450.0, "d": Vector2(1520, 460), "m": Vector2(1450, 460)},
-				{"x": 2400.0, "d": Vector2(2460, 460), "m": Vector2(2400, 460)},
-				{"x": 2900.0, "d": Vector2(2960, 460), "m": Vector2(2900, 460)},
-			],
-			"statics": [
-				_rect(0, 460, 1100, 60),
-				_rect(1400, 460, 1200, 60),
-				_rect(2600, 560, 250, 30),
-				_rect(2850, 460, 750, 60),
-			],
-			"walls": [_rect(1750, 300, 330, 118)],
-			"planks": [],
-			"boxes": [
-				{"x": 640.0, "y": 404.0, "w": 56.0, "h": 56.0},
-				{"x": 2480.0, "y": 404.0, "w": 56.0, "h": 56.0},
-			],
-			"plates": [
-				{"x": 420.0, "y": 460.0, "w": 70.0},
-				{"x": 2140.0, "y": 460.0, "w": 70.0},
-			],
-			"doors": [
-				{"x": 1000.0, "y": 300.0, "w": 26.0, "h": 160.0, "plates": [0]},
-				{"x": 2350.0, "y": 300.0, "w": 26.0, "h": 160.0, "plates": [1]},
-			],
-			"exit_x": 3450.0,
-			"objective": "把箱子推上金色踏板，压住大门。（母亲能推动重物，女儿不行）",
-		},
-		{
-			"name": "天台",
-			"quote": "牵挂，也可以成为彼此的支点。",
-			"world_w": 3400.0,
-			"spawn": {"d": Vector2(200, 460), "m": Vector2(120, 460)},
-			"checkpoints": [
-				{"x": 1150.0, "d": Vector2(1030, 370), "m": Vector2(1000, 370)},
-				{"x": 2050.0, "d": Vector2(2120, 130), "m": Vector2(2080, 130)},
-			],
-			"statics": [
-				_rect(0, 460, 900, 60),
-				_rect(980, 370, 170, 14),
-				_rect(1300, 280, 170, 14),
-				_rect(1720, 220, 170, 14),
-				_rect(2000, 130, 1400, 40),
-			],
-			"walls": [],
-			"planks": [],
-			"boxes": [],
-			"plates": [
-				{"x": 2350.0, "y": 130.0, "w": 70.0},
-				{"x": 2700.0, "y": 130.0, "w": 70.0},
-			],
-			"doors": [
-				{"x": 2900.0, "y": -30.0, "w": 26.0, "h": 160.0, "plates": [0, 1]},
-			],
-			"exit_x": 3100.0,
-			"objective": "台阶一节比一节高——交替锚定接龙：一人锚定，另一人借线上去，再回头拉对方",
-		},
-	]
-
-
-func _rect(x: float, y: float, width: float, height: float) -> Dictionary:
-	return {"x": x, "y": y, "w": width, "h": height}
+	var definitions: Array = []
+	for packed_scene in level_scene_resources:
+		var layout := packed_scene.instantiate()
+		if layout == null or not layout.has_method("to_level_definition"):
+			push_error("第三章关卡场景缺少 Chapter3LevelLayout 脚本")
+			continue
+		definitions.append(layout.to_level_definition())
+		layout.free()
+	return definitions
 
 
 func _load_level(index: int) -> void:
@@ -817,13 +742,86 @@ func debug_update_plates_and_doors() -> void:
 	_update_plates_and_doors()
 
 
+func _sync_scene_nodes() -> void:
+	if characters.is_empty() or level.is_empty():
+		return
+	var actors_visible := game_state == GameState.PLAY or game_state == GameState.LEVEL_DONE
+	_sync_actor_node(daughter_body, daughter, active_character == 0, actors_visible)
+	_sync_actor_node(mother_body, mother, active_character == 1, actors_visible)
+	_sync_tie_line(actors_visible)
+	_sync_hud_nodes()
+
+
+func _sync_actor_node(body: CharacterBody2D, character: Dictionary, is_active: bool, should_show: bool) -> void:
+	if body == null:
+		return
+	body.visible = should_show
+	body.position = Vector2(
+		character["x"] + character["w"] * 0.5 - camera_position.x,
+		character["y"] + character["h"] - camera_position.y
+	)
+	var sprite := body.get_node_or_null("Sprite2D") as Sprite2D
+	if sprite != null:
+		sprite.texture = player_anchor_pose if character["anchored"] else player_walk_one
+		if not character["anchored"] and absf(character["vx"]) > 30.0 and int(Time.get_ticks_msec() / 160) % 2 == 1:
+			sprite.texture = player_walk_two
+		sprite.modulate = character["color"]
+	var active_marker := body.get_node_or_null("ActiveMarker") as CanvasItem
+	if active_marker != null:
+		active_marker.visible = is_active
+	var anchor_label := body.get_node_or_null("Anchor") as CanvasItem
+	if anchor_label != null:
+		anchor_label.visible = character["anchored"]
+
+
+func _sync_tie_line(should_show: bool) -> void:
+	if tie_line_node == null:
+		return
+	tie_line_node.visible = should_show
+	var start := _center(daughter) - camera_position
+	var finish := _center(mother) - camera_position
+	var distance := start.distance_to(finish)
+	var sag := (1.0 - distance / REST_DISTANCE) * 60.0 if distance < REST_DISTANCE else 0.0
+	var control := (start + finish) * 0.5 + Vector2(0, sag)
+	var points := PackedVector2Array()
+	for index in range(25):
+		var t := float(index) / 24.0
+		points.append((1.0 - t) * (1.0 - t) * start + 2.0 * (1.0 - t) * t * control + t * t * finish)
+	tie_line_node.points = points
+	tie_line_node.default_color = Color(0.91, 0.30, 0.24, 1.0) if distance >= MAX_DISTANCE else Color(0.75, 0.22, 0.17, 0.9)
+	tie_line_node.width = 4.5 if distance >= MAX_DISTANCE else (3.5 if distance >= REST_DISTANCE else 2.5)
+
+
+func _sync_hud_nodes() -> void:
+	if hud_layer == null:
+		return
+	var playing := game_state == GameState.PLAY
+	if hud_top_bar != null:
+		hud_top_bar.visible = playing
+	if hud_bottom_bar != null:
+		hud_bottom_bar.visible = playing
+	if title_overlay != null:
+		title_overlay.visible = game_state == GameState.TITLE
+	if not playing:
+		return
+	var distance := _center(daughter).distance_to(_center(mother))
+	var line_state := "松弛" if distance < REST_DISTANCE else ("张力" if distance < MAX_DISTANCE else "极限张力")
+	if hud_objective != null:
+		hud_objective.text = "第三章 · 第 %d/3 关 · %s — %s" % [level_index + 1, level["name"], level["objective"]]
+	if hud_status != null:
+		hud_status.text = "当前：%s（Tab 切换）  红线：%s  距离 %d / %d" % [characters[active_character]["name"], line_state, roundi(distance), int(MAX_DISTANCE)]
+	if hud_controls != null:
+		hud_controls.text = "A/D 或 ←/→ 移动 · Space/W/↑ 跳跃 · E 锚定 · 空中 W/↑ 爬线 · R 检查点"
+
+
 func _draw() -> void:
 	_draw_background()
 	if game_state != GameState.TITLE:
 		_draw_world()
-		_draw_tether()
-		_draw_character(daughter, active_character == 0)
-		_draw_character(mother, active_character == 1)
+		if daughter_body == null or mother_body == null or tie_line_node == null:
+			_draw_tether()
+			_draw_character(daughter, active_character == 0)
+			_draw_character(mother, active_character == 1)
 	_draw_hud()
 
 
@@ -1034,7 +1032,7 @@ func draw_ellipse_shadow(center: Vector2, radius: float) -> void:
 
 
 func _draw_hud() -> void:
-	if game_state == GameState.PLAY:
+	if game_state == GameState.PLAY and hud_layer == null:
 		draw_rect(Rect2(0, 0, VIEW_W, 62), Color(0.025, 0.065, 0.075, 0.90))
 		_draw_text("第三章 · 第 %d/3 关 · %s — %s" % [level_index + 1, level["name"], level["objective"]], Vector2(16, 25), 14, Color("edf3f2"))
 		var distance := _center(daughter).distance_to(_center(mother))
@@ -1044,7 +1042,8 @@ func _draw_hud() -> void:
 		_draw_text("A/D 或 ←/→ 移动 · Space/W/↑ 跳跃 · E 锚定 · 空中 W/↑ 爬线 · R 检查点", Vector2(16, VIEW_H - 12), 12, Color("cad5d5"))
 	_draw_toasts()
 	if game_state == GameState.TITLE:
-		_draw_title()
+		if title_overlay == null:
+			_draw_title()
 	elif game_state == GameState.LEVEL_DONE:
 		_draw_level_done()
 	elif game_state == GameState.END:
