@@ -3,6 +3,7 @@ extends SceneTree
 const ASSET_PATHS: Array[String] = [
 	"res://assets/environments/chapter3/stairwell/environment_ch03_stairwell_wall.png",
 	"res://assets/environments/chapter3/stairwell/environment_ch03_stairwell_underfloor_storage.png",
+	"res://assets/environments/chapter3/stairwell/environment_ch03_stairwell_full_scene.png",
 	"res://assets/props/chapter3/prop_ch03_stairwell_lamp.png",
 	"res://assets/props/chapter3/prop_ch03_stairwell_window.png",
 	"res://assets/environments/chapter3/warehouse/environment_ch03_warehouse_background.png",
@@ -29,6 +30,9 @@ const ASSET_PATHS: Array[String] = [
 ]
 
 const RUNTIME_REJECTED_ASSETS: Array[String] = [
+	"environment_ch03_stairwell_wall.png",
+	"environment_ch03_stairwell_underfloor_storage.png",
+	"prop_ch03_stairwell_lamp.png",
 	"environment_ch03_stairwell_broken_stairs.png",
 	"environment_ch03_stairwell_stairs.png",
 	"environment_ch03_stairwell_stairs_landing.png",
@@ -56,8 +60,7 @@ func _run() -> void:
 	assert(not chapter_script.contains("/Users/allen/Downloads"), "运行时不能依赖个人 Downloads 路径")
 	assert(not layout_item_script.contains("/Users/allen/Downloads"), "关卡组件不能依赖个人 Downloads 路径")
 	assert(chapter_script.contains("res://assets/environments/chapter3/stairwell/"))
-	assert(chapter_script.contains("environment_ch03_stairwell_underfloor_storage.png"))
-	assert(chapter_script.contains("Rect2(0.0, 1066.0, 2048.0, 534.0)"), "地下储藏层必须裁掉原图透明留白")
+	assert(chapter_script.contains("environment_ch03_stairwell_full_scene.png"))
 	assert(chapter_script.contains("res://assets/environments/chapter3/warehouse/"))
 	assert(chapter_script.contains("res://assets/environments/chapter3/rooftop/"))
 	assert(chapter_script.contains("res://assets/props/chapter3/prop_ch03_warehouse_heavy_crate.png"))
@@ -76,5 +79,5 @@ func _run() -> void:
 	await process_frame
 	assert(chapter != null and chapter.levels.size() == 3)
 
-	print("[CHAPTER03_ASSETS] PASS 25 project-local textures load, 19 scene-matched textures remain active")
+	print("[CHAPTER03_ASSETS] PASS 26 project-local textures load, 17 scene-matched textures remain active")
 	quit(0)

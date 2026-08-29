@@ -52,9 +52,7 @@ var player_anchor_pose: Texture2D = preload("res://art/playerGrey_up1.png")
 var suitcase_texture: Texture2D = preload("res://art/suitcase.png")
 var wooden_box_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_warehouse_heavy_crate.png")
 var yellow_umbrella_texture: Texture2D = preload("res://art/cute-umbrella.png")
-var stairwell_wall_texture: Texture2D = preload("res://assets/environments/chapter3/stairwell/environment_ch03_stairwell_wall.png")
-var stairwell_underfloor_texture: Texture2D = preload("res://assets/environments/chapter3/stairwell/environment_ch03_stairwell_underfloor_storage.png")
-var stairwell_lamp_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_stairwell_lamp.png")
+var stairwell_full_scene_texture: Texture2D = preload("res://assets/environments/chapter3/stairwell/environment_ch03_stairwell_full_scene.png")
 var warehouse_background_texture: Texture2D = preload("res://assets/environments/chapter3/warehouse/environment_ch03_warehouse_background.png")
 var warehouse_fabric_rack_texture: Texture2D = preload("res://assets/props/chapter3/warehouse/prop_ch03_warehouse_fabric_rack.png")
 var warehouse_pattern_textures: Array[Texture2D] = [
@@ -1142,32 +1140,10 @@ func _draw_scene_dressing() -> void:
 
 
 func _draw_stairwell_dressing() -> void:
-	# 楼道墙面直接显示原始素材；玩法碰撞仍由关卡节点负责。
-	for panel_index in range(5):
-		_draw_world_texture(stairwell_wall_texture, Rect2(panel_index * 1020.0, 95.0, 1022.0, 365.0), Color.WHITE)
-	# 地下储藏层仅在末段低处露出。裁取原图中的横向实景，不参与任何碰撞。
-	_draw_world_texture_region(
-		stairwell_underfloor_texture,
-		Rect2(3370.0, 505.0, 780.0, 203.0),
-		Rect2(0.0, 1066.0, 2048.0, 534.0),
-		Color.WHITE
-	)
+	_draw_repeating_world_background(stairwell_full_scene_texture, -65.0)
 	# 黄伞与行李延续前两章，并明确第三章从现实时间重新开始。
 	_draw_world_texture(yellow_umbrella_texture, Rect2(245, 396, 60, 60), Color.WHITE)
 	_draw_world_texture(suitcase_texture, Rect2(330, 404, 54, 54), Color(0.82, 0.88, 0.90))
-	for lamp_x in [520.0, 1320.0, 2220.0, 3320.0, 4100.0]:
-		var lamp_position := Vector2(lamp_x, 120.0) - camera_position
-		var midpoint_x: float = (_center(daughter).x + _center(mother).x) * 0.5
-		var lit := absf(midpoint_x - lamp_x) < 430.0
-		if lit:
-			draw_circle(lamp_position, 95.0, Color(0.96, 0.79, 0.44, 0.10))
-		_draw_world_texture(stairwell_lamp_texture, Rect2(lamp_x - 38.0, 82.0, 76.0, 76.0), Color(1.0, 0.92, 0.72, 0.90) if lit else Color(0.48, 0.57, 0.60, 0.62))
-	# 信箱与剥落墙皮延续老楼道细节。
-	for mailbox_x in [760.0, 900.0, 1040.0]:
-		var mailbox := Rect2(Vector2(mailbox_x, 270.0) - camera_position, Vector2(92, 62))
-		draw_rect(mailbox, Color("52656b"))
-		draw_rect(mailbox.grow(-7.0), Color("7c8b8e"), false, 2.0)
-		draw_line(mailbox.position + Vector2(12, 21), mailbox.position + Vector2(80, 21), Color(0.82, 0.86, 0.84, 0.4), 2.0)
 
 
 func _draw_warehouse_dressing() -> void:
@@ -1220,9 +1196,13 @@ func _draw_world_texture(texture: Texture2D, world_rect: Rect2, tint: Color) -> 
 	draw_texture_rect(texture, screen_rect, false, tint)
 
 
-func _draw_world_texture_region(texture: Texture2D, world_rect: Rect2, source_rect: Rect2, tint: Color) -> void:
-	var screen_rect := Rect2(world_rect.position - camera_position, world_rect.size)
-	draw_texture_rect_region(texture, screen_rect, source_rect, tint)
+func _draw_repeating_world_background(texture: Texture2D, world_y: float) -> void:
+	var tile_width := float(texture.get_width())
+	var tile_height := float(texture.get_height())
+	var world_width := float(level.get("world_w", VIEW_W))
+	var tile_count := ceili(world_width / tile_width)
+	for tile_index in range(tile_count):
+		_draw_world_texture(texture, Rect2(tile_index * tile_width, world_y, tile_width, tile_height), Color.WHITE)
 
 
 func _draw_tether() -> void:
