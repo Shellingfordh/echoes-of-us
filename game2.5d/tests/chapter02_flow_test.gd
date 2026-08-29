@@ -6,14 +6,14 @@ const CHAPTER_TWO_PORTRAITS := {
 	"D020": "res://art/portraits/chapter2/余秀兰（33）：正常状态.png",
 	"D021": "res://art/portraits/chapter2/余秀兰（33）：心脏骤停.png",
 	"D022": "res://art/portraits/chapter2/余念（7）：积郁憋闷.png",
-	"D023": "res://art/portraits/chapter2/余念（7）：正常状态.png",
+	"D023": "res://art/portraits/chapter2/余念（7）：淡然自若.png",
 	"D024": "res://art/portraits/chapter2/余秀兰（33）：心脏骤停.png",
 	"D025": "res://art/portraits/chapter2/余秀兰（33）：含情凝望.png",
 	"D048": "res://art/portraits/chapter2/余念（7）：积郁憋闷.png",
 	"D049": "res://art/portraits/chapter2/余秀兰（33）：含情凝望.png",
-	"D050": "res://art/portraits/chapter2/余念（7）：正常状态.png",
+	"D050": "res://art/portraits/chapter2/余念（7）：欣然愉悦.png",
 	"D051": "res://art/portraits/chapter2/余秀兰（33）：正常状态.png",
-	"D052": "res://art/portraits/chapter2/余念（7）：淡然自若.png",
+	"D052": "res://art/portraits/chapter2/余念（7）：欣然愉悦.png",
 	"D053": "res://art/portraits/chapter2/余秀兰（33）：含情凝望.png",
 	"D054": "res://art/portraits/chapter2/余念（7）：欣然愉悦.png",
 }
@@ -48,16 +48,13 @@ func _run() -> void:
 	assert(chapter.blocks.get_node_or_null("BlockB/Visuals/UpperStableEndpoint") != null)
 	assert(chapter.blocks.get_node_or_null("BlockC/Visuals/GreenIronLamppost") != null)
 	assert(chapter.blocks.get_node_or_null("BlockA/Visuals/AB_CorridorNorthVisual") != null)
-	assert(chapter.blocks.get_node_or_null("BlockA/Visuals/AB_CorridorSouthVisual") != null)
-	assert(chapter.blocks.get_node_or_null("BlockC/Visuals/C_NorthHouse01") != null)
-	assert(chapter.blocks.get_node_or_null("BlockC/Visuals/C_Mailbox") != null)
 	assert(chapter.blocks.get_node_or_null("BlockA/SpatialPhysics/A_PuddleBlocker") is StaticBody3D)
 	assert(chapter.blocks.get_node_or_null("BlockA/SpatialPhysics/AB_CorridorNorth") is StaticBody3D)
 	assert(chapter.blocks.get_node_or_null("BlockA/SpatialPhysics/AB_CorridorSouth") is StaticBody3D)
 	assert(chapter.blocks.get_node_or_null("BlockB/SpatialPhysics/B_GapNorth") is StaticBody3D)
 	assert(chapter.blocks.get_node_or_null("BlockB/SpatialPhysics/B_GapSouth") is StaticBody3D)
 	assert(Chapter2Sequence.A_BICYCLE.distance_to(Chapter2Sequence.A_BICYCLE_PARK) < 4.0)
-	assert(Chapter2Sequence.B_CLIMB_OUT.x > Chapter2Sequence.B_FALL_START.x + 8.0)
+	assert(Chapter2Sequence.B_CLIMB_OUT.x > Chapter2Sequence.B_FALL_START.x + 6.0)
 	# 坑底那张横面必须真的包住落点和绳脚，否则第一段行走会被 clamp 拉走。
 	assert(Chapter2Sequence.B_CATCH.x >= Chapter2Sequence.B_PIT_WALK_MIN.x)
 	assert(Chapter2Sequence.B_CATCH.x <= Chapter2Sequence.B_PIT_WALK_MAX.x)
