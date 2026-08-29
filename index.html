@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -9,12 +10,14 @@
 
   <title>Echoes of Us — 牵挂线</title>
 
-  <meta
-    name="description"
-    content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的叙事互动游戏。"
-  >
+<meta
+name="description"
+content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的叙事互动游戏。"
+
+>
 
   <!-- Fonts -->
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -23,10 +26,12 @@
     rel="stylesheet"
   >
 
-  <!-- Tailwind -->
+  <!-- Tailwind CSS -->
+
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- React -->
+
   <script
     src="https://unpkg.com/react@18/umd/react.production.min.js"
     crossorigin
@@ -40,14 +45,11 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
+
     * {
       box-sizing: border-box;
       font-family: 'Inter', sans-serif;
       -webkit-tap-highlight-color: transparent;
-    }
-
-    html {
-      scroll-behavior: smooth;
     }
 
     html,
@@ -56,6 +58,10 @@
       width: 100%;
       min-height: 100%;
       margin: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
@@ -70,24 +76,18 @@
       user-select: none;
     }
 
-    /* ========================================
+    /* --------------------------------
        Glass
-    ======================================== */
+    -------------------------------- */
 
     .glass {
       background: rgba(255, 255, 255, 0.055);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border: 1px solid rgba(255, 255, 255, 0.12);
-
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.08),
         0 12px 40px rgba(0, 0, 0, 0.18);
-
-      transition:
-        background 0.3s ease,
-        border-color 0.3s ease,
-        transform 0.3s ease;
     }
 
     .glass:hover {
@@ -95,11 +95,34 @@
       border-color: rgba(255, 255, 255, 0.18);
     }
 
-    /* ========================================
+    /* --------------------------------
+       Trailer
+    -------------------------------- */
+
+    .trailer-frame {
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(255, 255, 255, 0.06),
+          rgba(255, 255, 255, 0.015) 45%,
+          rgba(0, 0, 0, 0.4) 100%
+        );
+    }
+
+    .trailer-video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+
+    /* --------------------------------
        Marquee
-    ======================================== */
+    -------------------------------- */
 
     @keyframes marquee {
+
       from {
         transform: translateX(0);
       }
@@ -107,6 +130,7 @@
       to {
         transform: translateX(-50%);
       }
+
     }
 
     .marquee {
@@ -114,11 +138,12 @@
       animation: marquee 32s linear infinite;
     }
 
-    /* ========================================
+    /* --------------------------------
        Fade animations
-    ======================================== */
+    -------------------------------- */
 
     @keyframes fadeUp {
+
       from {
         opacity: 0;
         transform: translateY(24px);
@@ -128,11 +153,13 @@
         opacity: 1;
         transform: translateY(0);
       }
+
     }
 
     .fade-up {
       animation:
-        fadeUp 0.9s
+        fadeUp
+        0.9s
         cubic-bezier(0.22, 1, 0.36, 1)
         forwards;
     }
@@ -152,11 +179,12 @@
       opacity: 0;
     }
 
-    /* ========================================
-       Pulse
-    ======================================== */
+    /* --------------------------------
+       Floating line
+    -------------------------------- */
 
     @keyframes pulseLine {
+
       0%,
       100% {
         opacity: 0.25;
@@ -165,107 +193,55 @@
       50% {
         opacity: 0.7;
       }
+
     }
 
     .pulse-line {
       animation: pulseLine 3s ease-in-out infinite;
     }
 
-    /* ========================================
-       Trailer
-    ======================================== */
-
-    .trailer-frame {
-      position: relative;
-      overflow: hidden;
-      background: #000;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow:
-        0 30px 100px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    }
-
-    .trailer-frame::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-
-      background:
-        linear-gradient(
-          180deg,
-          rgba(0, 0, 0, 0.12),
-          transparent 20%,
-          transparent 75%,
-          rgba(0, 0, 0, 0.28)
-        );
-    }
-
-    .trailer-video {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background: #000;
-    }
-
-    /* ========================================
-       Trailer loading
-    ======================================== */
-
-    @keyframes trailerPulse {
-      0%,
-      100% {
-        opacity: 0.35;
-      }
-
-      50% {
-        opacity: 1;
-      }
-    }
-
-    .trailer-loading {
-      animation: trailerPulse 1.8s ease-in-out infinite;
-    }
-
-    /* ========================================
-       Scrollbar
-    ======================================== */
-
-    .scroll-area {
-      scrollbar-width: none;
-    }
-
-    .scroll-area::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* ========================================
+    /* --------------------------------
        Mobile
-    ======================================== */
+    -------------------------------- */
 
     @media (max-width: 640px) {
+
       .hero-title {
         font-size: 4.5rem !important;
       }
 
-      .trailer-frame {
-        border-radius: 1.25rem;
+      .trailer-video {
+        object-fit: contain;
       }
+
     }
 
-    /* ========================================
-       Selection
-    ======================================== */
+    /* --------------------------------
+       Reduced motion
+    -------------------------------- */
 
-    ::selection {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
+    @media (prefers-reduced-motion: reduce) {
+
+      html {
+        scroll-behavior: auto;
+      }
+
+      .marquee,
+      .fade-up,
+      .pulse-line {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+
     }
+
   </style>
+
 </head>
 
 <body>
+
   <div id="root"></div>
 
   <script type="text/babel">
@@ -277,9 +253,11 @@
     } = React;
 
 
-    /* ==========================================
-       Game resources
-       ========================================== */
+    /*
+     * ==========================================
+     * Game resources
+     * ==========================================
+     */
 
     const BG_IMAGE =
       "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260713_140344_79e1296a-86d7-43fd-9b5f-63ffe560f291.png&w=1600&q=90";
@@ -296,17 +274,7 @@
 
 
     /*
-     * Hero spotlight video
-     *
-     * 保留原来的动态视觉资源。
-     */
-
-    const FRONT_VIDEO =
-      "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260713_162101_0d7498c5-29bb-47bf-a99f-2773c0a880a9.mp4";
-
-
-    /*
-     * GitHub
+     * GitHub repository
      */
 
     const GITHUB_REPO =
@@ -314,26 +282,38 @@
 
 
     /*
-     * Demo Download
+     * GitHub Releases
      *
-     * 当前先进入 GitHub Releases。
-     * 创建正式 Release 后可以替换成具体下载地址。
+     * 目前先指向 Releases 页面。
+     *
+     * 以后如果你们有明确的 Demo 下载文件，
+     * 可以直接把这里换成：
+     *
+     * https://github.com/Shellingfordh/echoes-of-us/releases/download/v0.1.0/EchoesOfUs-Demo.zip
      */
 
     const DOWNLOAD_URL =
       "https://github.com/Shellingfordh/echoes-of-us/releases";
 
 
-    /* ==========================================
-       Story text
-       ========================================== */
+    /*
+     * ==========================================
+     * Story text
+     * ==========================================
+     */
 
     const STORY_QUOTES = [
+
       "有些距离，并不会让人真正分开。",
+
       "我们之间，总有一根看不见的线。",
+
       "它曾经像束缚，也曾经成为支撑。",
+
       "当距离越来越远，牵挂反而越来越清晰。",
+
       "站在线的另一端，她一直都在。"
+
     ];
 
 
@@ -367,18 +347,11 @@
         useState(false);
 
 
-      const [maskDataUrl, setMaskDataUrl] =
-        useState("");
-
-
-      const [trailerLoaded, setTrailerLoaded] =
-        useState(false);
-
-
       const mousePos =
         useRef({
 
           x: window.innerWidth / 2,
+
           y: window.innerHeight / 2
 
         });
@@ -388,6 +361,7 @@
         useRef({
 
           x: window.innerWidth / 2,
+
           y: window.innerHeight / 2
 
         });
@@ -397,9 +371,15 @@
         useRef(null);
 
 
-      /* ========================================
-         Body scroll lock
-      ======================================== */
+      const [maskDataUrl, setMaskDataUrl] =
+        useState("");
+
+
+      /*
+       * ------------------------------------------
+       * Body scroll lock
+       * ------------------------------------------
+       */
 
       useEffect(() => {
 
@@ -418,14 +398,17 @@
       }, [isMenuOpen]);
 
 
-      /* ========================================
-         Mouse / spotlight
-      ======================================== */
+      /*
+       * ------------------------------------------
+       * Mouse / spotlight
+       * ------------------------------------------
+       */
 
       useEffect(() => {
 
         const canvas =
           document.createElement("canvas");
+
 
         canvasRef.current =
           canvas;
@@ -458,6 +441,7 @@
             mousePos.current = {
 
               x: event.clientX,
+
               y: event.clientY
 
             };
@@ -472,10 +456,14 @@
               return;
             }
 
+
             mousePos.current = {
 
-              x: event.touches[0].clientX,
-              y: event.touches[0].clientY
+              x:
+                event.touches[0].clientX,
+
+              y:
+                event.touches[0].clientY
 
             };
 
@@ -574,11 +562,13 @@
 
 
           ctx.arc(
+
             smoothPos.current.x,
             smoothPos.current.y,
             radius,
             0,
             Math.PI * 2
+
           );
 
 
@@ -638,20 +628,26 @@
       }, []);
 
 
-      /* ========================================
-         Tether calculation
-      ======================================== */
+      /*
+       * ------------------------------------------
+       * Tether calculation
+       * ------------------------------------------
+       */
 
       const distance =
         Math.abs(
+
           charPos.yunia.x -
           charPos.mother.x
+
         );
 
 
-      /* ========================================
-         Move character
-      ======================================== */
+      /*
+       * ------------------------------------------
+       * Move character
+       * ------------------------------------------
+       */
 
       const handleMoveCharacter =
         (direction) => {
@@ -667,7 +663,9 @@
             current.x;
 
 
-          if (direction === "left") {
+          if (
+            direction === "left"
+          ) {
 
             newX =
               Math.max(
@@ -678,7 +676,9 @@
           }
 
 
-          if (direction === "right") {
+          if (
+            direction === "right"
+          ) {
 
             newX =
               Math.min(
@@ -715,58 +715,64 @@
             !isAnchored
           ) {
 
-            setCharPos(prev => ({
+            setCharPos(
+              prev => ({
 
-              ...prev,
+                ...prev,
 
-              [activeChar]: {
+                [activeChar]: {
 
-                ...prev[activeChar],
+                  ...prev[activeChar],
 
-                x: newX
+                  x: newX
 
-              },
+                },
 
-              [otherCharKey]: {
+                [otherCharKey]: {
 
-                ...prev[otherCharKey],
+                  ...prev[otherCharKey],
 
-                x:
-                  prev[otherCharKey].x +
-                  (
-                    direction === "right"
-                      ? 2
-                      : -2
-                  )
+                  x:
+                    prev[otherCharKey].x +
+                    (
+                      direction === "right"
+                        ? 2
+                        : -2
+                    )
 
-              }
+                }
 
-            }));
+              })
+            );
 
           } else {
 
-            setCharPos(prev => ({
+            setCharPos(
+              prev => ({
 
-              ...prev,
+                ...prev,
 
-              [activeChar]: {
+                [activeChar]: {
 
-                ...prev[activeChar],
+                  ...prev[activeChar],
 
-                x: newX
+                  x: newX
 
-              }
+                }
 
-            }));
+              })
+            );
 
           }
 
         };
 
 
-      /* ========================================
-         Navigation
-      ======================================== */
+      /*
+       * ------------------------------------------
+       * Navigation
+       * ------------------------------------------
+       */
 
       const scrollTo =
         (id) => {
@@ -804,7 +810,7 @@
 
 
           {/* ======================================
-              NAVIGATION
+              Navigation
           ====================================== */}
 
           <nav
@@ -822,6 +828,7 @@
               py-5
             "
           >
+
 
             {/* Logo */}
 
@@ -880,7 +887,7 @@
             </button>
 
 
-            {/* Desktop Navigation */}
+            {/* Desktop navigation */}
 
             <div
               className="
@@ -1004,70 +1011,28 @@
                 <path
                   d="
                     M12 .5
-                    C5.65 .5
-                    .5 5.65
-                    .5 12
-                    c0 5.08
-                    3.29 9.39
-                    7.86 10.91
-                    .58.11
-                    .79-.25
-                    .79-.56
-                    v-2.15
-                    c-3.2.7
-                    -3.87-1.54
-                    -3.87-1.54
-                    -.53-1.33
-                    -1.28-1.68
-                    -1.28-1.68
-                    -1.04-.71
-                    .08-.7
-                    .08-.7
-                    1.15.08
-                    1.76 1.18
-                    1.76 1.18
-                    1.02 1.75
-                    2.67 1.25
-                    3.32.96
-                    .1-.74
-                    .4-1.25
-                    .73-1.54
-                    -2.55-.29
-                    -5.23-1.27
-                    -5.23-5.66
-                    0-1.25
-                    .45-2.27
-                    1.18-3.07
-                    -.12-.29
-                    -.51-1.46
-                    .11-3.04
-                    0 0
-                    .96-.31
-                    3.15 1.17
+                    C5.65 .5 .5 5.65 .5 12
+                    c0 5.08 3.29 9.39 7.86 10.91
+                    .58.11.79-.25.79-.56v-2.15
+                    c-3.2.7-3.87-1.54-3.87-1.54
+                    -.53-1.33-1.28-1.68-1.28-1.68
+                    -1.04-.71.08-.7.08-.7
+                    1.15.08 1.76 1.18 1.76 1.18
+                    1.02 1.75 2.67 1.25 3.32.96
+                    .1-.74.4-1.25.73-1.54
+                    -2.55-.29-5.23-1.27-5.23-5.66
+                    0-1.25.45-2.27 1.18-3.07
+                    -.12-.29-.51-1.46.11-3.04
+                    0 0 .96-.31 3.15 1.17
                     a10.94 10.94 0 0 1 5.74 0
-                    c2.19-1.48
-                    3.15-1.17
-                    3.15-1.17
-                    .62 1.58
-                    .23 2.75
-                    .11 3.04
-                    .73.8
-                    1.18 1.82
-                    1.18 3.07
-                    0 4.4
-                    -2.69 5.36
-                    -5.25 5.64
-                    .41.36
-                    .78 1.08
-                    .78 2.18
-                    v3.23
-                    c0 .31
-                    .21 .67
-                    .8 .56
+                    c2.19-1.48 3.15-1.17 3.15-1.17
+                    .62 1.58.23 2.75.11 3.04
+                    .73.8 1.18 1.82 1.18 3.07
+                    0 4.4-2.69 5.36-5.25 5.64
+                    .41.36.78 1.08.78 2.18v3.23
+                    c0 .31.21.67.8.56
                     A11.5 11.5 0 0 0 23.5 12
-                    C23.5 5.65
-                    18.35.5
-                    12 .5Z
+                    C23.5 5.65 18.35.5 12 .5Z
                   "
                 />
 
@@ -1078,7 +1043,7 @@
             </a>
 
 
-            {/* Mobile Menu Button */}
+            {/* Mobile menu */}
 
             <button
               onClick={() =>
@@ -1120,7 +1085,7 @@
 
 
           {/* ======================================
-              MOBILE MENU
+              Mobile menu
           ====================================== */}
 
           {isMenuOpen && (
@@ -1152,6 +1117,7 @@
                     flex
                     items-center
                     justify-center
+                    relative
                   "
                 >
 
@@ -1277,6 +1243,7 @@
 
           <main id="top">
 
+
             <section
               id="game"
               className="
@@ -1288,6 +1255,7 @@
                 items-end
               "
             >
+
 
               {/* Background */}
 
@@ -1350,17 +1318,14 @@
                   }}
                 >
 
-                  <video
-                    src={FRONT_VIDEO}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="metadata"
+                  <img
+                    src={BG_IMAGE}
+                    alt=""
                     className="
                       w-full
                       h-full
                       object-cover
+                      opacity-30
                     "
                   />
 
@@ -1520,11 +1485,7 @@
                       >
 
                         <path
-                          d="M5 12h14"
-                        />
-
-                        <path
-                          d="m13 6 6 6-6 6"
+                          d="M5 12h14M13 6l6 6-6 6"
                         />
 
                       </svg>
@@ -1563,6 +1524,7 @@
                 "
               >
 
+
                 {/* Trailer heading */}
 
                 <div
@@ -1571,8 +1533,8 @@
                     flex-col
                     md:flex-row
                     md:items-end
-                    justify-between
-                    gap-8
+                    md:justify-between
+                    gap-6
                     mb-10
                   "
                 >
@@ -1587,7 +1549,7 @@
                         text-white/40
                       "
                     >
-                      Trailer
+                      Official Trailer
                     </span>
 
 
@@ -1616,133 +1578,93 @@
                       font-light
                     "
                   >
-                    一段关于距离、记忆与牵挂的故事。
-                    <br />
-                    这一次，跟随余念走进这条看不见的连接。
+                    一段关于距离、记忆与牵挂的旅程。
+                    观看 Trailer，了解《牵挂线》的世界。
                   </p>
 
                 </div>
 
 
-                {/* Video */}
+                {/* Trailer player */}
 
                 <div
                   className="
                     trailer-frame
+                    glass
+                    relative
                     w-full
                     aspect-video
-                    rounded-2xl
-                    md:rounded-3xl
+                    rounded-3xl
+                    overflow-hidden
                   "
                 >
 
-                  {!trailerLoaded && (
+                  <video
+                    className="trailer-video"
+                    src={TRAILER_VIDEO}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    controls
+                    preload="metadata"
+                    controlsList="nodownload"
+                  >
+
+                    您的浏览器不支持 HTML5 视频播放。
+
+                  </video>
+
+
+                  {/* Trailer label */}
+
+                  <div
+                    className="
+                      absolute
+                      top-5
+                      left-5
+                      z-10
+                      pointer-events-none
+                    "
+                  >
 
                     <div
                       className="
-                        absolute
-                        inset-0
-                        z-10
-                        flex
-                        items-center
-                        justify-center
-                        bg-black
+                        glass
+                        rounded-full
+                        px-4
+                        py-2
+                        text-[11px]
+                        tracking-[0.2em]
+                        uppercase
+                        text-white/80
                       "
                     >
-
-                      <div
-                        className="
-                          flex
-                          flex-col
-                          items-center
-                          gap-4
-                        "
-                      >
-
-                        <div
-                          className="
-                            w-8
-                            h-8
-                            rounded-full
-                            border
-                            border-white/20
-                            border-t-white
-                            animate-spin
-                          "
-                        />
-
-                        <span
-                          className="
-                            trailer-loading
-                            text-[10px]
-                            tracking-[0.3em]
-                            uppercase
-                            text-white/40
-                          "
-                        >
-                          Loading Trailer
-                        </span>
-
-                      </div>
-
+                      Trailer
                     </div>
 
-                  )}
-
-
-                  <video
-                    src={TRAILER_VIDEO}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    onLoadedData={() =>
-                      setTrailerLoaded(true)
-                    }
-                    onCanPlay={() =>
-                      setTrailerLoaded(true)
-                    }
-                    className="
-                      trailer-video
-                    "
-                  />
+                  </div>
 
                 </div>
 
-
-                {/* Video footer */}
 
                 <div
                   className="
                     mt-5
                     flex
-                    flex-col
-                    sm:flex-row
-                    items-start
-                    sm:items-center
+                    items-center
                     justify-between
-                    gap-3
+                    text-xs
+                    text-white/30
                   "
                 >
 
-                  <span
-                    className="
-                      text-xs
-                      tracking-[0.2em]
-                      uppercase
-                      text-white/25
-                    "
-                  >
-                    Echoes of Us · Official Trailer
+                  <span>
+                    Echoes of Us · 牵挂线
                   </span>
 
-
-                  <span
-                    className="
-                      text-xs
-                      text-white/25
-                    "
-                  >
-                    Demo · Early Development
+                  <span>
+                    Play Trailer
                   </span>
 
                 </div>
@@ -1818,6 +1740,7 @@
                       >
                         看不见。
                       </span>
+
                     </h2>
 
                   </div>
@@ -1859,7 +1782,9 @@
                     >
                       你越想走远，
                       它就越提醒你——
+
                       <br />
+
                       有些关系从来没有真正离开。
                     </p>
 
@@ -1885,12 +1810,14 @@
               "
             >
 
-              <div className="marquee flex">
+              <div
+                className="
+                  marquee
+                  flex
+                "
+              >
 
-                {[
-                  ...STORY_QUOTES,
-                  ...STORY_QUOTES
-                ].map(
+                {[...STORY_QUOTES, ...STORY_QUOTES].map(
                   (text, index) => (
 
                     <div
@@ -1954,6 +1881,7 @@
                 "
               >
 
+
                 <div
                   className="
                     text-center
@@ -1992,8 +1920,7 @@
                       text-white/45
                     "
                   >
-                    点击角色并尝试移动，
-                    感受两人之间的距离。
+                    点击角色并尝试移动，感受两人之间的距离。
                   </p>
 
                 </div>
@@ -2011,6 +1938,7 @@
                     overflow-hidden
                   "
                 >
+
 
                   {/* Grid */}
 
@@ -2244,28 +2172,6 @@
 
                 </div>
 
-
-                {/* Interaction explanation */}
-
-                <div
-                  className="
-                    mt-10
-                    text-center
-                  "
-                >
-
-                  <p
-                    className="
-                      text-xs
-                      text-white/25
-                      leading-6
-                    "
-                  >
-                    选择角色 · 移动 · 感受连接
-                  </p>
-
-                </div>
-
               </div>
 
             </section>
@@ -2350,8 +2256,6 @@
                   "
                 >
 
-                  {/* Download */}
-
                   <a
                     href={DOWNLOAD_URL}
                     target="_blank"
@@ -2378,6 +2282,7 @@
 
                     下载 Demo
 
+
                     <svg
                       className="w-4 h-4"
                       viewBox="0 0 24 24"
@@ -2402,8 +2307,6 @@
 
                   </a>
 
-
-                  {/* GitHub */}
 
                   <a
                     href={GITHUB_REPO}
@@ -2511,17 +2414,11 @@
     }
 
 
-    /* ==========================================
-       React Mount
-    ========================================== */
-
     ReactDOM
       .createRoot(
         document.getElementById("root")
       )
-      .render(
-        <App />
-      );
+      .render(<App />);
 
   </script>
 
