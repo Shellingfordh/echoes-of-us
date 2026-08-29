@@ -808,14 +808,12 @@ function drawWorldProps() {
   drawLamp(11, 4.8, mx > 8 && mx < 15);
   drawLamp(22, 4.8, mx > 18 && mx < 25);
 
-  // A：报箱、杂物、扶手、断口钢筋
+  // A：报箱、杂物、断口钢筋
   ctx.save();
   ctx.translate(-cameraX, -cameraY);
   ctx.fillStyle = "#53636d"; ctx.fillRect(px(.9), footY(1.55), px(1.2), px(1.55));
   ctx.strokeStyle = "#a8b7be"; ctx.strokeRect(px(1.08), footY(1.32), px(.84), px(.46));
   ctx.fillStyle = "#896b43"; ctx.fillRect(px(4.5), footY(.8), px(1.4), px(.8));
-  ctx.strokeStyle = "#b4c0c5"; ctx.lineWidth = 4;
-  ctx.beginPath(); ctx.moveTo(px(7.2), footY(.75)); ctx.lineTo(px(12.8), footY(2.75)); ctx.stroke();
   ctx.strokeStyle = "#ff6379"; ctx.lineWidth = 3;
   for (let x = 16.2; x <= 18.2; x += .48) {
     ctx.beginPath(); ctx.moveTo(px(x), footY(2)); ctx.lineTo(px(x + .25), footY(2.55)); ctx.stroke();
