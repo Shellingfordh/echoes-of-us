@@ -10,7 +10,7 @@
 | `wall.png` | `environments/chapter3/stairwell/environment_ch03_stairwell_wall.png` | 候选参考；已由楼道整景图替换 |
 | 用户提供的地下储藏层图 | `environments/chapter3/stairwell/environment_ch03_stairwell_underfloor_storage.png` | 候选参考；已合并到楼道整景图方案 |
 | `light.png` | `props/chapter3/prop_ch03_stairwell_lamp.png` | 候选参考；整景图已包含环境灯光 |
-| `v.png` | `props/chapter3/platforms/prop_ch03_wood_floor_repeat.png` | 三关长路面与大型平台的连续木板结构 |
+| `v.png` | `props/chapter3/platforms/prop_ch03_wood_floor_repeat.png` | 三关长路面与大型平台的连续木板结构；第二关低闸门截取横梁区域分行平铺，避免拉伸木箱 |
 | `a.png` | `props/chapter3/platforms/prop_ch03_wood_platform_long.png` | 中型悬空木平台与短路面 |
 | `w.png` | `props/chapter3/platforms/prop_ch03_wood_platform_bracket.png` | 窄平台与台阶的木质斜撑结构 |
 | 用户提供的抬起踏板图 | `props/chapter3/plates/prop_ch03_pressure_plate_raised.png` | 未触发踏板状态；透明背景游戏贴图 |

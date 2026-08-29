@@ -15,6 +15,7 @@ const MECHANISM_DOOR_CLOSED_TEXTURE: Texture2D = preload("res://assets/props/cha
 const WOOD_FLOOR_REGION := Rect2(0.0, 202.0, 2048.0, 348.0)
 const WOOD_LONG_PLATFORM_REGION := Rect2(122.0, 224.0, 1809.0, 356.0)
 const WOOD_BRACKET_PLATFORM_REGION := Rect2(136.0, 71.0, 572.0, 564.0)
+const WOOD_GATE_STRIP_REGION := Rect2(0.0, 240.0, 2048.0, 190.0)
 const PRESSURE_PLATE_RAISED_REGION := Rect2(0.0, 9.0, 1660.0, 908.0)
 const PRESSURE_PLATE_PRESSED_REGION := Rect2(45.0, 37.0, 1933.0, 716.0)
 const MECHANISM_DOOR_CLOSED_REGION := Rect2(600.0, 67.0, 846.0, 1402.0)
@@ -51,6 +52,8 @@ func _draw() -> void:
 	elif _is_door():
 		if not bool(get_meta(&"external_visual", false)):
 			_draw_mechanism_door()
+	elif _is_wood_gate():
+		_draw_wood_gate()
 	elif _uses_wood_surface():
 		_draw_wood_surface()
 	else:
@@ -59,7 +62,7 @@ func _draw() -> void:
 	if label_text.is_empty() or not Engine.is_editor_hint():
 		return
 	var font := ThemeDB.fallback_font
-	var label_color := Color("d6a45e") if _uses_wood_surface() else edge_color
+	var label_color := Color("d6a45e") if _uses_wood_surface() or _is_wood_gate() else edge_color
 	draw_string(font, Vector2(4.0, -6.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13, label_color)
 
 
@@ -76,6 +79,10 @@ func _is_pressure_plate() -> bool:
 func _is_door() -> bool:
 	var parent := get_parent()
 	return parent != null and parent.name == &"Doors"
+
+
+func _is_wood_gate() -> bool:
+	return bool(get_meta(&"wood_gate_visual", false))
 
 
 func _draw_pressure_plate() -> void:
@@ -108,6 +115,21 @@ func _draw_mechanism_door() -> void:
 		MECHANISM_DOOR_CLOSED_REGION,
 		Color.WHITE
 	)
+
+
+func _draw_wood_gate() -> void:
+	# 取木平台中连续的横梁区域分行平铺，避免把方形木箱非等比拉伸成墙体。
+	var natural_row_height := size.x * WOOD_GATE_STRIP_REGION.size.y / WOOD_GATE_STRIP_REGION.size.x
+	var row_count := maxi(1, ceili(size.y / natural_row_height))
+	var row_height := size.y / float(row_count)
+	draw_rect(Rect2(Vector2.ZERO, size), Color("251a12"))
+	for row_index in range(row_count):
+		draw_texture_rect_region(
+			WOOD_FLOOR_TEXTURE,
+			Rect2(0.0, row_index * row_height, size.x, row_height + 1.0),
+			WOOD_GATE_STRIP_REGION,
+			Color(0.78, 0.73, 0.66, 1.0)
+		)
 
 
 func _draw_wood_surface() -> void:

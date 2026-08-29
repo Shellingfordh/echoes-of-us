@@ -74,6 +74,7 @@ fill_color = Color(0.18, 0.28, 0.31, 1)
 edge_color = Color(0.48, 0.58, 0.6, 1)
 label_text = "女儿先行的升降闸门"
 metadata/unlock_door = 1
+metadata/wood_gate_visual = true
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/LowTunnel"]
 position = Vector2(165, 59)
 shape = SubResource("Shape_tunnel")

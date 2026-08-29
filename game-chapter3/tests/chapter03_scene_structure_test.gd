@@ -59,6 +59,8 @@ func _run() -> void:
 		for plate in layout.get_node("Plates").get_children():
 			assert(plate.call("_is_pressure_plate"), "踏板必须使用双状态贴图：%s" % plate.name)
 		if index == 1:
+			var low_gate := layout.get_node("Walls/LowTunnel") as Chapter3LayoutItem
+			assert(low_gate.call("_is_wood_gate"), "仓库低闸门必须使用横向平铺的木质视觉")
 			for box_name in ["HeavyBox", "StepBox"]:
 				var box := layout.get_node("Boxes/%s" % box_name) as Chapter3LayoutItem
 				var sprite := box.get_node("Sprite2D") as Sprite2D
