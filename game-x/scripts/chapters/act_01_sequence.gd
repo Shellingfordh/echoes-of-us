@@ -61,18 +61,13 @@ const KEY_OBJECT_HINTS := {
 @export var line_reveal_camera_zoom := Vector2(0.9, 0.9)
 @export_range(0.8, 1.0, 0.01) var pullback_trigger_tension := 0.99
 @export_range(0.1, 0.95, 0.01) var rearm_tension := 0.92
-@export var mother_dialogue_position := Vector3(7.0, 0.0, 7.5)
-@export var mother_after_dialogue_position := Vector3(6.4, 0.0, 9.2)
+@export var mother_dialogue_position := Vector3(9.0, 0.0, 7.0)
+@export var mother_after_dialogue_position := Vector3(4.35, 0.0, 7.8)
+@export var mother_walk_duration := 1.1
 @export var minimum_probe_input_seconds := 0.65
 @export var probe_timeout_seconds := 4.0
-@export var stool_placed_position := Vector3(3.1, 0.0, 3.15)
-@export var stool_move_duration := 0.32
-@export var photo_stool_step_offset := Vector3(0.95, 0.0, 0.95)
+@export var stool_placed_position := Vector3(1.5, 0.0, 3.1)
 @export var photo_stool_height := 0.82
-@export var photo_stool_approach_duration := 0.24
-@export var photo_stool_climb_duration := 0.34
-@export var photo_stool_settle_seconds := 0.12
-@export var photo_stool_descend_duration := 0.34
 @export var echo_transition_seconds := 0.8
 
 var current_beat := Beat.P1_EXPLORE
@@ -100,8 +95,7 @@ var _umbrella: Interactable
 var _suitcase: Interactable
 var _thread_clue: Interactable
 var _photo: Interactable
-var _stool: Interactable
-var _stool_move_tween: Tween
+var _stool: PushableStool
 var _photo_stool_sequence_active := false
 
 
@@ -121,7 +115,7 @@ func setup(room: RoomBase, player: PlayerController, tie_line: TieLine) -> void:
 	_suitcase = room.get_node_or_null("Interactables/Suitcase") as Interactable
 	_thread_clue = room.get_node_or_null("Interactables/ThreadClue") as Interactable
 	_photo = room.get_node_or_null("Interactables/PhotoFrame") as Interactable
-	_stool = room.get_node_or_null("Interactables/Stool") as Interactable
+	_stool = room.get_node_or_null("Interactables/Stool") as PushableStool
 
 	_key_total = 0
 	_investigated_keys = 0
@@ -145,9 +139,13 @@ func setup(room: RoomBase, player: PlayerController, tie_line: TieLine) -> void:
 	if _photo != null:
 		_photo.set_interaction_enabled(false)
 	if _stool != null:
-		_stool.auto_play_dialogue = false
-		_stool.interacted.connect(_on_stool_used)
+		_stool.placement_state_changed.connect(_on_stool_placement_state_changed)
+		_stool.mounted_state_changed.connect(_on_stool_placement_state_changed)
+		stool_placed_position = _stool.target_position
 	if _umbrella != null:
+		# 黄伞从开场起就在房间里，但冲突结束前不能提前读取 O046/D046。
+		_umbrella.visible = true
+		_umbrella.set_interaction_enabled(false)
 		_umbrella.interacted.connect(_on_umbrella_interacted)
 	if _tie_line != null:
 		_tie_line.set_enabled(false)
@@ -155,6 +153,7 @@ func setup(room: RoomBase, player: PlayerController, tie_line: TieLine) -> void:
 	_player.empty_interact_pressed.connect(_on_empty_interact_pressed)
 	if _thread_clue != null:
 		_thread_clue.set_interaction_enabled(false)
+	_update_photo_access()
 	_update_explore_objective()
 
 
@@ -210,33 +209,32 @@ func _on_key_object_investigated(_player_ref: PlayerController) -> void:
 	_start_umbrella_scene()
 
 
-func _on_stool_used(_player_ref: PlayerController) -> void:
-	if current_beat != Beat.P1_EXPLORE or _photo == null or _stool == null:
+func _on_stool_placement_state_changed(_in_target: bool) -> void:
+	_update_photo_access()
+
+
+func _update_photo_access() -> void:
+	if _photo == null or _stool == null or _player == null:
 		return
-	objective_changed.emit("余念把木凳往衣柜边挪。")
-	var start_position := _stool.get_logical_position()
-	if stool_move_duration <= 0.0 or start_position.is_equal_approx(stool_placed_position):
-		_stool.set_logical_position(stool_placed_position)
-		_finish_stool_move()
-		return
-	_stool_move_tween = create_tween()
-	_stool_move_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_stool_move_tween.tween_method(
-		Callable(_stool, "set_logical_position"),
-		start_position,
-		stool_placed_position,
-		stool_move_duration
+	var can_reach_photo := (
+		current_beat == Beat.P1_EXPLORE
+		and not _photo.investigated
+		and _stool.is_in_target_zone()
+		and _player.is_mounted_on_stool(_stool)
 	)
-	_stool_move_tween.finished.connect(_finish_stool_move)
-
-
-func _finish_stool_move() -> void:
-	_stool_move_tween = null
-	_photo.set_interaction_enabled(true)
-	_photo.set_highlight(Color(1.0, 0.92, 0.72, 0.25), true)
-	_set_story_flag(&"chapter1_photo_unlocked")
-	objective_changed.emit("木凳挪到衣柜边了。靠近相框看看。")
-	_emit_debug("[Act01] stool placed / photo unlocked")
+	var access_changed := _photo.interaction_enabled != can_reach_photo
+	if access_changed:
+		_photo.set_interaction_enabled(can_reach_photo)
+	if can_reach_photo:
+		_photo.set_highlight(Color(1.0, 0.92, 0.72, 0.25), true)
+		_set_story_flag(&"chapter1_photo_unlocked")
+		objective_changed.emit("站在衣柜前的木凳上，现在可以查看柜顶相框。")
+		if access_changed:
+			_emit_debug("[Act01] stool placed + mounted / photo unlocked")
+	elif _stool.is_in_target_zone():
+		objective_changed.emit("木凳已经推到衣柜前。靠近后按空格站上去。")
+	else:
+		objective_changed.emit("木凳偏离了位置，把它推回衣柜前的标记区。")
 
 
 func _on_observation_interacted(_player_ref: PlayerController, target: Interactable) -> void:
@@ -271,19 +269,11 @@ func _compose_object_info(info_ids: Array) -> String:
 
 
 func _start_photo_stool_observation(target: Interactable, copy: Dictionary) -> void:
-	if _photo_stool_sequence_active:
+	if _photo_stool_sequence_active or not _player.is_mounted_on_stool(_stool):
 		return
 	_photo_stool_sequence_active = true
 	if _game_flow != null:
 		_game_flow.set_mode(GameFlow.Mode.CUTSCENE)
-	objective_changed.emit("余念走到木凳前，踩上去看相框。")
-	if _camera_rig != null:
-		_camera_rig.move_to(target, Vector2(1.35, 1.35), 0.32)
-
-	await _move_player_scripted(get_photo_stool_step_position(), photo_stool_approach_duration)
-	await _move_player_scripted(get_photo_stool_stand_position(), photo_stool_climb_duration)
-	if photo_stool_settle_seconds > 0.0:
-		await get_tree().create_timer(photo_stool_settle_seconds).timeout
 	objective_changed.emit("站稳了。仔细看看柜顶的相框。")
 	if _camera_rig != null:
 		_camera_rig.move_to(target, Vector2(1.55, 1.55), 0.22)
@@ -298,8 +288,8 @@ func _start_photo_stool_observation(target: Interactable, copy: Dictionary) -> v
 
 
 func _on_photo_observation_closed(_object_id: String) -> void:
-	objective_changed.emit("看完了，先从木凳上下来。")
-	await _move_player_scripted(get_photo_stool_step_position(), photo_stool_descend_duration)
+	if _player != null and _player.is_mounted_on_stool(_stool):
+		_player.dismount_stool()
 	if _camera_rig != null:
 		_camera_rig.follow(_player, Vector2.ONE, true)
 	if current_beat == Beat.P1_EXPLORE and _investigated_keys < _key_total:
@@ -311,31 +301,15 @@ func _on_photo_observation_closed(_object_id: String) -> void:
 	photo_stool_sequence_finished.emit()
 
 
-func _move_player_scripted(target_position: Vector3, duration: float) -> void:
-	var start_position := _player.get_logical_position()
-	_player.begin_scripted_motion(target_position)
-	if duration <= 0.0 or start_position.is_equal_approx(target_position):
-		_player.set_logical_position(target_position)
-		_player.end_scripted_motion()
-		return
-	var motion_tween := create_tween()
-	motion_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	motion_tween.tween_method(
-		Callable(_player, "set_logical_position"),
-		start_position,
-		target_position,
-		duration
-	)
-	await motion_tween.finished
-	_player.set_logical_position(target_position)
-	_player.end_scripted_motion()
-
-
 func get_photo_stool_step_position() -> Vector3:
-	return stool_placed_position + photo_stool_step_offset
+	if _player != null:
+		return _player.get_mount_return_position()
+	return stool_placed_position
 
 
 func get_photo_stool_stand_position() -> Vector3:
+	if _stool != null:
+		return _stool.get_mount_position()
 	return stool_placed_position + Vector3.UP * photo_stool_height
 
 
@@ -352,7 +326,7 @@ func _update_explore_objective() -> void:
 	var remaining_hints := _get_remaining_key_hints()
 	var remaining := remaining_hints.size()
 	if _investigated_keys == 0:
-		objective_changed.emit("离开前，再确认一下房间里的东西。柜顶有张相框，在这里看不清。")
+		objective_changed.emit("离开前，再确认一下房间里的东西。柜顶相框太高，可以把木凳推到标记区。")
 	elif remaining > 1:
 		if remaining == 2:
 			objective_changed.emit("再确认一下%s，还有%s。" % [remaining_hints[0], remaining_hints[1]])
@@ -397,10 +371,12 @@ func _start_umbrella_scene() -> void:
 
 
 func _on_umbrella_dialogue_finished(_root_id: String) -> void:
-	_finish_umbrella_scene()
+	await _finish_umbrella_scene()
 
 
 func _finish_umbrella_scene() -> void:
+	if _game_flow != null:
+		_game_flow.set_mode(GameFlow.Mode.CUTSCENE)
 	if _umbrella != null:
 		_umbrella.visible = true
 		_umbrella.auto_play_dialogue = true
@@ -408,9 +384,9 @@ func _finish_umbrella_scene() -> void:
 	if _suitcase != null:
 		_suitcase.configure_content("O045", "D045", true)
 	if _mother != null:
-		_mother.set_logical_position(mother_after_dialogue_position)
 		_mother.visible = true
-		_mother.face_towards(_player.get_logical_position())
+		await _mother.move_to_logical(mother_after_dialogue_position, mother_walk_duration)
+		_mother.face_away_from(_player.get_logical_position())
 
 	current_beat = Beat.P2_LEAVE
 	# P2 从对白/观察演出正式回到可移动探索。不能只依赖上一个 UI

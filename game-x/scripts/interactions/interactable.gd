@@ -25,7 +25,7 @@ var _resonance_intensity := 0.0
 var _glow_base_scale := Vector2.ONE
 
 @onready var _glow: Node2D = get_node_or_null("Glow") as Node2D
-@onready var _math_body: StaticBody3D = get_node_or_null("MathBody") as StaticBody3D
+@onready var _math_body: Node3D = get_node_or_null("MathBody") as Node3D
 
 
 func _ready() -> void:

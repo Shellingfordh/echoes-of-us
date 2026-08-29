@@ -22,6 +22,7 @@ func _run() -> void:
 	var umbrella := room.get_node("Interactables/Umbrella") as Interactable
 	var transition := main.get_node("UI/TransitionOverlay") as ColorRect
 
+	await _save("%s-00-room.png" % PREFIX)
 	dialogue.characters_per_second = 0.0
 	dialogue.monologue_hold_seconds = 30.0
 	dialogue.fade_duration = 0.0
@@ -68,7 +69,7 @@ func _run() -> void:
 		" shared_resonance=", tie_line.is_echo_resonating() and umbrella.is_resonating(),
 		" transition=", transition.visible
 	)
-	print("[CAPTURE] %s-{01-d018,02-umbrella-ready,03-shared-resonance,04-transition}.png" % PREFIX)
+	print("[CAPTURE] %s-{00-room,01-d018,02-umbrella-ready,03-shared-resonance,04-transition}.png" % PREFIX)
 	quit(0)
 
 
@@ -78,7 +79,7 @@ func _reach_echo_threshold(
 	tie_line: TieLine,
 	dialogue: DialogueUI
 ) -> void:
-	act._finish_umbrella_scene()
+	await act._finish_umbrella_scene()
 	player.set_logical_position(Vector3(15.2, 0.0, 2.0))
 	while act.current_beat != Act01Sequence.Beat.FIRST_PULL:
 		await physics_frame

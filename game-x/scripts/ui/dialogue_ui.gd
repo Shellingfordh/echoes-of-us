@@ -13,12 +13,15 @@ const END_DIALOGUE_ID := "END"
 @export_range(1.0, 120.0, 1.0) var characters_per_second := 42.0
 @export_range(0.0, 10.0, 0.1) var monologue_hold_seconds := MONOLOGUE_DURATION
 @export_range(0.0, 1.0, 0.01) var fade_duration := 0.18
+## 只用于普通对白；独白继续使用更克制的无立绘布局。
+@export var speaker_portraits: Dictionary = {}
 
 @onready var dimmer: ColorRect = $Dimmer
 @onready var dialogue_frame: MarginContainer = $DialogueFrame
 @onready var dialogue_header: HBoxContainer = $DialogueFrame/Panel/Margin/VBox/Header
 @onready var speaker_name: Label = $DialogueFrame/Panel/Margin/VBox/Header/SpeakerName
 @onready var portrait_panel: PanelContainer = $DialogueFrame/Panel/Margin/VBox/Body/PortraitPanel
+@onready var portrait_texture: TextureRect = $DialogueFrame/Panel/Margin/VBox/Body/PortraitPanel/PortraitMargin/PortraitTexture
 @onready var portrait_initial: Label = $DialogueFrame/Panel/Margin/VBox/Body/PortraitPanel/PortraitMargin/PortraitInitial
 @onready var dialogue_text: RichTextLabel = $DialogueFrame/Panel/Margin/VBox/Body/TextColumn/DialogueText
 @onready var line_status: Label = $DialogueFrame/Panel/Margin/VBox/Body/TextColumn/Footer/LineStatus
@@ -49,12 +52,33 @@ var _typing_tween: Tween
 var _fade_tween: Tween
 var _session_generation := 0
 var _line_generation := 0
+var _portraits_by_speaker: Dictionary = {}
 
 
 func _ready() -> void:
 	add_to_group(&"dialogue_ui")
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_load_configured_portraits()
 	hide()
+
+
+func _load_configured_portraits() -> void:
+	for raw_speaker: Variant in speaker_portraits.keys():
+		var speaker := str(raw_speaker)
+		var texture := speaker_portraits[raw_speaker] as Texture2D
+		if speaker.is_empty() or texture == null:
+			continue
+		_portraits_by_speaker[speaker] = texture
+
+
+func register_portrait(speaker: String, texture: Texture2D) -> void:
+	if speaker.is_empty():
+		return
+	_portraits_by_speaker[speaker] = texture
+
+
+func clear_portrait(speaker: String) -> void:
+	_portraits_by_speaker.erase(speaker)
 
 
 ## 唯一播放入口：外部只传 data/dialogues.json 中的对白 ID。
@@ -211,6 +235,10 @@ func _show_current_line() -> void:
 		dialogue_header.visible = has_speaker
 		portrait_panel.visible = has_speaker
 		speaker_name.text = _speaker
+		var speaker_portrait := _portraits_by_speaker.get(_speaker) as Texture2D
+		portrait_texture.texture = speaker_portrait
+		portrait_texture.visible = speaker_portrait != null
+		portrait_initial.visible = speaker_portrait == null
 		portrait_initial.text = _speaker.left(1) if has_speaker else ""
 		line_status.text = "%d / %d" % [_line_index + 1, _lines.size()]
 		line_status.visible = _lines.size() > 1

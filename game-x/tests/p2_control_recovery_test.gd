@@ -17,6 +17,8 @@ func _run() -> void:
 
 	dialogue.characters_per_second = 0.0
 	dialogue.fade_duration = 0.0
+	# 该用例只验证 P2 控制恢复；母亲的落地行走由完整流程测试覆盖。
+	act.mother_walk_duration = 0.0
 
 	# 复现实机截图中的前置状态：冲突对白开始前，流程仍残留在 CUTSCENE。
 	game_flow.set_mode(GameFlow.Mode.CUTSCENE)
@@ -24,7 +26,10 @@ func _run() -> void:
 	while dialogue.is_playing():
 		dialogue.advance()
 		await process_frame
-	await process_frame
+	for _index in range(120):
+		await process_frame
+		if act.current_beat == Act01Sequence.Beat.P2_LEAVE:
+			break
 
 	assert(act.current_beat == Act01Sequence.Beat.P2_LEAVE)
 	assert(

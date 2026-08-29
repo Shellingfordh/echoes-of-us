@@ -16,11 +16,14 @@ func _run() -> void:
 	var act := main.get_node("Act01Sequence") as Act01Sequence
 	var hint := main.get_node("UI/InteractionHint") as InteractionHint
 	var objective := main.get_node("UI/ObjectiveLabel") as Label
+	var dialogue_ui := main.get_node("UI/DialogueUI") as DialogueUI
 	var dialogue_text := main.get_node(
 		"UI/DialogueUI/DialogueFrame/Panel/Margin/VBox/Body/TextColumn/DialogueText"
 	) as RichTextLabel
 	var dialogue_db := main.get_node("DialogueDatabase") as DialogueDatabase
 	var object_info_db := main.get_node("ObjectInfoDatabase") as ObjectInfoDatabase
+	assert(dialogue_ui.portrait_texture is TextureRect)
+	assert(dialogue_ui.speaker_portraits.size() == 2)
 	var start := player.get_logical_position()
 	assert(start.is_equal_approx(Vector3(5.0, 0.0, 10.2)))
 	assert(player.global_position.is_equal_approx(Projection25D.project(start)))
@@ -49,7 +52,7 @@ func _run() -> void:
 	assert(tie_line.distance >= 0.0)
 	assert(dialogue_text.get_theme_font("normal_font").has_char("远".unicode_at(0)))
 
-	player.set_logical_position(Vector3(7.0, 0.0, 5.0))
+	player.set_logical_position(Vector3(7.0, 0.0, 4.0))
 	await physics_frame
 	Input.action_press(&"move_right")
 	Input.action_press(&"move_down")
@@ -59,8 +62,16 @@ func _run() -> void:
 	Input.action_release(&"move_down")
 	await physics_frame
 	var bed_stop := player.get_logical_position()
-	assert(bed_stop.x > 8.3 and bed_stop.x < 9.0)
-	assert(is_equal_approx(bed_stop.z, 5.0))
+	var bed_body := main.get_node("World/Chapter01Room01/Midground/Bed/MathBody") as StaticBody3D
+	var bed_shape := bed_body.get_node("CollisionShape3D") as CollisionShape3D
+	var bed_size := (bed_shape.shape as BoxShape3D).size
+	var bed_min_x: float = bed_body.position.x + bed_shape.position.x - bed_size.x * 0.5
+	assert(bed_size.x > 2.0 and bed_size.z > 2.0, "bed collider still default-sized: %s" % bed_size)
+	assert(
+		bed_stop.x > bed_min_x - 0.6 and bed_stop.x < bed_min_x,
+		"bed_stop=%s bed_min_x=%f body=%s size=%s" % [bed_stop, bed_min_x, bed_body.position, bed_size]
+	)
+	assert(is_equal_approx(bed_stop.z, 4.0))
 
 	# 遮挡排序：排序键只能来自地面深度 x + z，高度不参与。
 	# 柜顶相框和衣柜站在同一格地面上，相框必须靠 depth_offset 排到衣柜前面。
@@ -110,13 +121,15 @@ func _run() -> void:
 	assert(not (room.get_node("Interactables/ThreadClue") as Interactable).interaction_enabled)
 	var wardrobe := room.get_node("Midground/Wardrobe") as SpatialProp25D
 	var photo := room.get_node("Interactables/PhotoFrame") as Interactable
-	var stool := room.get_node("Interactables/Stool") as Interactable
+	var stool := room.get_node("Interactables/Stool") as PushableStool
 	var window := room.get_node("Midground/Window") as SpatialProp25D
-	# 相框画面仍在柜顶；先移动有真实碰撞的木凳，才开放交互锚点。
+	# 相框仍在柜顶；木凳必须通过隐藏 CharacterBody3D 推到目标区，才开放交互锚点。
 	assert(photo.get_logical_position().is_equal_approx(Vector3(3.0, 0.0, 2.9)))
 	assert(not photo.interaction_enabled)
-	assert(stool.get_node("MathBody") is StaticBody3D)
-	assert("相框" not in stool.get_interaction_prompt())
+	assert(stool.get_node("MathBody") is CharacterBody3D)
+	assert("方向键" in stool.get_interaction_prompt())
+	assert(stool.get_logical_position().is_equal_approx(Vector3(2.0, 0.0, 8.0)))
+	assert(stool.target_position.is_equal_approx(Vector3(1.5, 0.0, 3.1)))
 	player.set_logical_position(Vector3(3.0, 0.0, 3.0))
 	await physics_frame
 	await physics_frame
@@ -124,37 +137,52 @@ func _run() -> void:
 	assert(player._current_hint_only_interactable == photo)
 	assert(hint.visible and hint.text == "柜顶相框太高了，站在这里看不清。")
 	var stool_start := stool.get_logical_position()
-	stool.interact(player)
-	for _index in range(60):
+	# 用真实玩家输入撞上木凳，验证 PlayerController → CharacterBody3D 的推动链路。
+	player.set_logical_position(stool_start + Vector3(-1.2, 0.0, 0.0))
+	Input.action_press(&"move_right")
+	Input.action_press(&"move_down")
+	for _index in range(30):
 		await physics_frame
-		if photo.interaction_enabled:
-			break
+	Input.action_release(&"move_right")
+	Input.action_release(&"move_down")
+	await physics_frame
+	assert(stool.get_logical_position().x > stool_start.x + 0.05)
+	assert(not photo.interaction_enabled)
+	stool.set_logical_position(stool.target_position)
+	await physics_frame
+	assert(stool.is_in_target_zone())
+	assert(not photo.interaction_enabled)
+	assert((stool.get_node("MathBody") as CharacterBody3D).position.is_equal_approx(stool.target_position))
+	assert(stool.global_position.is_equal_approx(Projection25D.project(stool.target_position)))
+	assert("空格站上去" in objective.text)
+	player.set_logical_position(stool.target_position + Vector3(0.8, 0.0, 0.8))
+	assert(player.mount_stool(stool))
+	await physics_frame
+	await physics_frame
 	assert(photo.interaction_enabled)
-	assert(not stool.get_logical_position().is_equal_approx(stool_start))
-	assert(stool.get_logical_position().is_equal_approx(act.stool_placed_position))
-	assert((stool.get_node("MathBody") as StaticBody3D).position.is_equal_approx(act.stool_placed_position))
-	assert(stool.global_position.is_equal_approx(Projection25D.project(act.stool_placed_position)))
-	assert("靠近相框" in objective.text)
-	player.set_logical_position(Vector3(3.0, 0.0, 3.0))
-	await physics_frame
-	await physics_frame
+	assert(player.get_logical_position().is_equal_approx(stool.get_mount_position()))
 	assert(player._current_interactable == photo)
+	assert("下来" in hint.text)
 	assert(photo.z_index > wardrobe.z_index)
+	player.dismount_stool()
+	await physics_frame
+	assert(not photo.interaction_enabled)
 	# 墙面物件永远在地面物件之后，但仍在背景层（z_index = -1000）之前。
 	assert(window.z_index < wardrobe.z_index and window.z_index > -4000)
 
 	# 拉回必须通过 CharacterBody3D.move_and_slide()：妈妈在床东侧、玩家在床西侧，
 	# 即使牵挂线持续施力，玩家也应被床的 StaticBody3D 挡在西侧。
 	var mother := room.get_node("Characters/Mother") as Mother
-	mother.set_logical_position(Vector3(15.0, 0.0, 5.0))
-	player.set_logical_position(Vector3(7.0, 0.0, 5.0))
+	assert(mother.get_node_or_null("GroundShadow") is Polygon2D)
+	mother.set_logical_position(Vector3(15.0, 0.0, 4.0))
+	player.set_logical_position(Vector3(7.0, 0.0, 4.0))
 	tie_line.max_distance = 2.0
 	tie_line.set_enabled(true)
 	for _index in range(120):
 		await physics_frame
 	var pull_blocked := player.get_logical_position()
-	assert(pull_blocked.x > 8.3 and pull_blocked.x < 9.0)
-	assert(is_equal_approx(pull_blocked.z, 5.0))
+	assert(pull_blocked.x > bed_min_x - 0.6 and pull_blocked.x < bed_min_x)
+	assert(is_equal_approx(pull_blocked.z, 4.0))
 
 	print("[SMOKE_25D] PASS free_move=", finish, " bed_collision_stop=", bed_stop)
 	print("[SMOKE_25D] rope pull blocked by bed at=", pull_blocked)

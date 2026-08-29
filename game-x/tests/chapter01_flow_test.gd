@@ -31,7 +31,7 @@ func _run() -> void:
 	var umbrella := room.get_node("Interactables/Umbrella") as Interactable
 	var thread_clue := room.get_node("Interactables/ThreadClue") as Interactable
 	var photo := room.get_node("Interactables/PhotoFrame") as Interactable
-	var stool := room.get_node("Interactables/Stool") as Interactable
+	var stool := room.get_node("Interactables/Stool") as PushableStool
 
 	dialogue.characters_per_second = 0.0
 	dialogue.monologue_hold_seconds = 0.0
@@ -39,10 +39,12 @@ func _run() -> void:
 
 	assert(get_nodes_in_group(&"key_object").size() == 5)
 	assert(act.get_key_total() == 5)
-	assert(not umbrella.visible)
+	assert(umbrella.visible and not umbrella.interaction_enabled)
 	assert(not photo.interaction_enabled)
 	assert(not thread_clue.interaction_enabled)
 	assert(object_info_db.get_all_ids().size() == 11)
+	assert(stool.get_logical_position().is_equal_approx(Vector3(2.0, 0.0, 8.0)))
+	assert(stool.target_position.is_equal_approx(Vector3(1.5, 0.0, 3.1)))
 
 	# SR-002：窗、床底耳机和柜顶相框进入同一套固定观察；相框先由木凳解锁。
 	var window_inspect := room.get_node("Interactables/WindowInspect") as Interactable
@@ -61,15 +63,21 @@ func _run() -> void:
 	assert(player._current_hint_only_interactable == photo)
 	assert(hint.visible and "太高" in hint.text)
 	var stool_start := stool.get_logical_position()
-	stool.interact(player)
-	for _index in range(20):
+	for _index in range(8):
+		stool.try_push(Vector3(1.0, 0.0, 0.0))
 		await physics_frame
-		if photo.interaction_enabled:
-			break
-	assert(photo.interaction_enabled)
 	assert(not stool.get_logical_position().is_equal_approx(stool_start))
-	assert(stool.get_logical_position().is_equal_approx(act.stool_placed_position))
-	assert("靠近相框" in objective.text)
+	assert(not photo.interaction_enabled)
+	stool.set_logical_position(stool.target_position)
+	await physics_frame
+	assert(stool.is_in_target_zone())
+	assert(not photo.interaction_enabled)
+	assert("空格站上去" in objective.text)
+	assert(player.mount_stool(stool))
+	await physics_frame
+	await physics_frame
+	assert(photo.interaction_enabled)
+	assert(player.get_logical_position().is_equal_approx(stool.get_mount_position()))
 
 	# P1 五件主调查：普通物件必须先显示 O-ID 客观事实，再播放 D-ID 主观反应。
 	for node_name in ["PackingBox", "Suitcase"]:
@@ -90,12 +98,8 @@ func _run() -> void:
 	photo.interact(player)
 	assert(act.is_photo_stool_sequence_active())
 	assert(game_flow.current_mode == GameFlow.Mode.CUTSCENE)
-	assert(not observation.is_open())
-	for _index in range(60):
-		await process_frame
-		if observation.is_open():
-			break
 	assert(observation.is_open() and observation.current_object_id == "PhotoFrame")
+	assert(player.is_mounted_on_stool(stool))
 	assert(player.get_logical_position().is_equal_approx(act.get_photo_stool_stand_position()))
 	assert(is_equal_approx(player.get_logical_position().y, act.photo_stool_height))
 	assert(not player.is_scripted_motion_active())
@@ -107,6 +111,7 @@ func _run() -> void:
 		if not act.is_photo_stool_sequence_active():
 			break
 	assert(not act.is_photo_stool_sequence_active())
+	assert(not player.is_mounted_on_stool())
 	assert(player.get_logical_position().is_equal_approx(act.get_photo_stool_step_position()))
 	assert(is_zero_approx(player.get_logical_position().y))
 	assert(game_flow.current_mode == GameFlow.Mode.EXPLORE)
@@ -145,14 +150,23 @@ func _run() -> void:
 		await process_frame
 	assert(actual_umbrella_presentations == expected_umbrella_presentations)
 	assert(umbrella_confirmations == 6)
-	await process_frame
+	for _index in range(3):
+		await process_frame
+	var mother_mid_walk := mother.get_logical_position()
+	assert(mother_mid_walk.distance_to(act.mother_dialogue_position) > 0.01)
+	assert(mother_mid_walk.distance_to(act.mother_after_dialogue_position) > 0.01)
+	for _index in range(120):
+		await process_frame
+		if act.current_beat == Act01Sequence.Beat.P2_LEAVE:
+			break
 
 	# P2：黄伞与行李箱二次调查存在，母亲仍是牵挂线的真实端点。
 	assert(act.current_beat == Act01Sequence.Beat.P2_LEAVE)
 	assert(umbrella.visible and umbrella.object_info_id == "O046" and umbrella.dialogue_id == "D046")
 	assert(suitcase.object_info_id == "O045" and suitcase.dialogue_id == "D045" and not suitcase.investigated)
 	assert(mother.visible)
-	assert(mother.get_logical_position().is_equal_approx(Vector3(6.4, 0.0, 9.2)))
+	assert(mother.get_logical_position().is_equal_approx(act.mother_after_dialogue_position))
+	assert(mother.is_facing_away())
 	assert(tie_line.get_target_anchor().is_equal_approx(mother.get_anchor_position()))
 
 	# P2 状态变化也必须先给事实，再给人物态度。
@@ -176,7 +190,7 @@ func _run() -> void:
 	assert(tie_line.emotional_pressure > 0.0)
 	assert(tie_line.intention_conflict > 0.0)
 	assert(tie_line.exit_progress > 0.0)
-	for _index in range(60):
+	for _index in range(180):
 		await physics_frame
 		if act.current_beat == Act01Sequence.Beat.FIRST_PULL:
 			break

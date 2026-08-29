@@ -18,6 +18,7 @@ signal empty_interact_pressed
 @export var resistance_lean_pixels := 10.0
 @export var resistance_lean_degrees := 6.5
 @export var resistance_response_speed := 8.0
+@export var mounted_reach_distance := 3.2
 
 @onready var math_body: CharacterBody3D = $MathBody
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -40,6 +41,8 @@ var _shadow_rest_scale := Vector2.ONE
 var _resistance_visual_strength := 0.0
 var _resistance_screen_direction := Vector2.RIGHT
 var _scripted_motion_active := false
+var _mounted_stool: PushableStool
+var _mount_return_position := Vector3.ZERO
 
 var logical_position: Vector3:
 	get:
@@ -58,6 +61,12 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_game_flow = _get_game_flow()
+	if is_mounted_on_stool():
+		_update_resistance_feedback(0.0, Vector2.ZERO, delta)
+		_update_mounted_stool_position()
+		_play_idle_animation()
+		_update_interaction_target()
+		return
 	if _suspended:
 		_update_resistance_feedback(0.0, Vector2.ZERO, delta)
 		_update_suspension(delta)
@@ -78,6 +87,7 @@ func _physics_process(delta: float) -> void:
 	_update_resistance_from_motion(direction, pull_velocity, delta)
 	math_body.velocity = input_velocity + pull_velocity
 	math_body.move_and_slide()
+	_try_push_colliding_stool(direction)
 
 	var logical := math_body.position
 	logical.x = clampf(logical.x, movement_min.x, movement_max.x)
@@ -102,8 +112,45 @@ func _physics_process(delta: float) -> void:
 
 
 func set_logical_position(value: Vector3) -> void:
+	if is_mounted_on_stool():
+		_mounted_stool.clear_mounted_player(self)
+		_mounted_stool = null
 	math_body.position = value
 	_sync_projection()
+
+
+func mount_stool(stool: PushableStool) -> bool:
+	if stool == null or stool.is_player_mounted() or _suspended:
+		return false
+	_mount_return_position = get_logical_position()
+	_mount_return_position.y = 0.0
+	_mounted_stool = stool
+	stool.set_mounted_player(self)
+	math_body.velocity = Vector3.ZERO
+	_update_mounted_stool_position()
+	return true
+
+
+func dismount_stool() -> void:
+	if not is_mounted_on_stool():
+		return
+	var previous_stool := _mounted_stool
+	_mounted_stool = null
+	previous_stool.clear_mounted_player(self)
+	math_body.position = _mount_return_position
+	math_body.velocity = Vector3.ZERO
+	_sync_projection()
+
+
+func is_mounted_on_stool(stool: PushableStool = null) -> bool:
+	if not is_instance_valid(_mounted_stool):
+		_mounted_stool = null
+		return false
+	return stool == null or _mounted_stool == stool
+
+
+func get_mount_return_position() -> Vector3:
+	return _mount_return_position
 
 
 func begin_scripted_motion(target_position: Vector3) -> void:
@@ -220,11 +267,36 @@ func _sync_projection() -> void:
 		ground_shadow.position = Vector2.ZERO
 
 
+func _update_mounted_stool_position() -> void:
+	if not is_mounted_on_stool():
+		return
+	math_body.position = _mounted_stool.get_mount_position()
+	math_body.velocity = Vector3.ZERO
+	global_position = Projection25D.project(math_body.position)
+	z_index = Projection25D.depth_index(math_body.position) + 6
+	if is_instance_valid(ground_shadow):
+		var ground_position := Vector3(math_body.position.x, 0.0, math_body.position.z)
+		ground_shadow.position = Projection25D.project(ground_position) - global_position
+
+
 func _get_speed_scale(direction: Vector3) -> float:
 	_tie_line = _get_tie_line()
 	if _tie_line == null or not _tie_line.is_moving_away(get_logical_position(), direction):
 		return 1.0
 	return _tie_line.get_speed_multiplier()
+
+
+func _try_push_colliding_stool(direction: Vector3) -> void:
+	if direction.is_zero_approx():
+		return
+	for index in range(math_body.get_slide_collision_count()):
+		var collision := math_body.get_slide_collision(index)
+		var collider := collision.get_collider() as Node
+		if collider == null:
+			continue
+		var stool := collider.get_parent() as PushableStool
+		if stool != null and stool.try_push(direction):
+			return
 
 
 func _get_tie_line_pull_velocity() -> Vector3:
@@ -299,9 +371,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _game_flow != null and not _game_flow.is_player_control_enabled():
 		return
+	if _is_space_key(event) and is_mounted_on_stool():
+		dismount_stool()
+		get_viewport().set_input_as_handled()
+		return
 	if _current_interactable == null:
 		if _current_hint_only_interactable == null:
 			empty_interact_pressed.emit()
+		get_viewport().set_input_as_handled()
+		return
+	if _is_space_key(event) and _current_interactable is PushableStool:
+		mount_stool(_current_interactable as PushableStool)
 		get_viewport().set_input_as_handled()
 		return
 	if _current_interactable.has_method(&"interact"):
@@ -315,6 +395,10 @@ func _update_interaction_target() -> void:
 	var nearest_interaction_distance := INF
 	var nearest_hint_distance := INF
 	var player_ground := get_logical_position()
+	if is_mounted_on_stool():
+		_current_interactable = _find_mounted_reach_target(player_ground)
+		_update_interaction_hint()
+		return
 	for area in interaction_area.get_overlapping_areas():
 		if not area.has_method(&"interact"):
 			continue
@@ -344,8 +428,35 @@ func _update_interaction_target() -> void:
 	else:
 		_current_hint_only_interactable = null
 
+	_update_interaction_hint()
+
+
+func _find_mounted_reach_target(player_ground: Vector3) -> Area2D:
+	var nearest: Area2D
+	var nearest_distance := mounted_reach_distance
+	for node in get_tree().get_nodes_in_group(&"interactable"):
+		var target := node as Interactable
+		if target == null or target == _mounted_stool or not target.can_interact():
+			continue
+		var target_position := target.get_logical_position()
+		var distance := Vector2(player_ground.x, player_ground.z).distance_to(
+			Vector2(target_position.x, target_position.z)
+		)
+		if distance <= nearest_distance:
+			nearest_distance = distance
+			nearest = target
+	return nearest
+
+
+func _update_interaction_hint() -> void:
 	var hint := get_tree().get_first_node_in_group(&"interaction_hint")
 	if hint == null:
+		return
+	if is_mounted_on_stool():
+		if _current_interactable == null:
+			hint.show_hint("空格  从木凳下来")
+		else:
+			hint.show_hint("Enter  查看：%s；空格  从木凳下来" % _current_interactable.display_name)
 		return
 	if _current_interactable != null:
 		hint.show_hint(_current_interactable.get_interaction_prompt())
@@ -355,6 +466,13 @@ func _update_interaction_target() -> void:
 		hint.show_hint(_current_hint_only_interactable.get_disabled_interaction_prompt())
 	else:
 		hint.hide_hint()
+
+
+func _is_space_key(event: InputEvent) -> bool:
+	var key_event := event as InputEventKey
+	return key_event != null and (
+		key_event.physical_keycode == KEY_SPACE or key_event.keycode == KEY_SPACE
+	)
 
 
 func _clear_interaction_target() -> void:
