@@ -1076,34 +1076,12 @@ func _draw() -> void:
 
 
 func _draw_background() -> void:
-	var top_color := Color("1d303a")
-	var bottom_color := Color("70818a")
-	match level_index:
-		1:
-			top_color = Color("172932")
-			bottom_color = Color("53656e")
-		2:
-			top_color = Color("304754")
-			bottom_color = Color("94a3aa")
-	for band in range(8):
-		var color := top_color.lerp(bottom_color, float(band) / 7.0)
-		draw_rect(Rect2(0, band * VIEW_H / 8.0, VIEW_W, VIEW_H / 8.0 + 1.0), color)
+	# 背景保持原始素材观感，不再叠加渐变网格、竖缝或统一灰蓝蒙层。
+	draw_rect(Rect2(0, 0, VIEW_W, VIEW_H), Color("161b1d"))
 	if level_index == 1:
-		draw_texture_rect(warehouse_background_texture, Rect2(0, 74, VIEW_W, 410), false, Color(0.50, 0.62, 0.68, 0.30))
+		draw_texture_rect(warehouse_background_texture, Rect2(0, 62, VIEW_W, 444), false, Color.WHITE)
 	elif level_index == 2:
-		draw_texture_rect(rooftop_sky_texture, Rect2(0, 62, VIEW_W, 410), false, Color(0.36, 0.43, 0.47, 0.36))
-	if level_index == 2:
-		for index in range(11):
-			var building_x := fposmod(index * 180.0 - camera_position.x * 0.18, 2100.0) - 170.0
-			var height := 90.0 + float((index * 47) % 120)
-			draw_rect(Rect2(building_x, VIEW_H - 155.0 - height, 130.0, height + 155.0), Color(0.09, 0.16, 0.19, 0.55))
-			for window_index in range(3):
-				draw_rect(Rect2(building_x + 18.0 + window_index * 34.0, VIEW_H - height - 120.0, 10.0, 6.0), Color(0.82, 0.68, 0.40, 0.22))
-	else:
-		draw_rect(Rect2(0, 95, VIEW_W, 360), Color(0.05, 0.10, 0.12, 0.23))
-		for seam in range(7):
-			var seam_x := seam * 170.0 - fposmod(camera_position.x * 0.12, 170.0)
-			draw_line(Vector2(seam_x, 95), Vector2(seam_x, 455), Color(0.66, 0.75, 0.78, 0.08), 2.0)
+		draw_texture_rect(rooftop_sky_texture, Rect2(0, 62, VIEW_W, 444), false, Color.WHITE)
 
 
 func _draw_world() -> void:
@@ -1162,9 +1140,9 @@ func _draw_scene_dressing() -> void:
 
 
 func _draw_stairwell_dressing() -> void:
-	# 现有楼道素材以低对比背景层接入，玩法碰撞仍由关卡节点负责。
+	# 楼道墙面直接显示原始素材；玩法碰撞仍由关卡节点负责。
 	for panel_index in range(5):
-		_draw_world_texture(stairwell_wall_texture, Rect2(panel_index * 1020.0, 95.0, 1022.0, 365.0), Color(0.42, 0.55, 0.60, 0.32))
+		_draw_world_texture(stairwell_wall_texture, Rect2(panel_index * 1020.0, 95.0, 1022.0, 365.0), Color.WHITE)
 	# 黄伞与行李延续前两章，并明确第三章从现实时间重新开始。
 	_draw_world_texture(yellow_umbrella_texture, Rect2(245, 396, 60, 60), Color.WHITE)
 	_draw_world_texture(suitcase_texture, Rect2(330, 404, 54, 54), Color(0.82, 0.88, 0.90))

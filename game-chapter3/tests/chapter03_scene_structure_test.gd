@@ -30,6 +30,9 @@ func _run() -> void:
 	var chapter_script := FileAccess.get_file_as_string("res://scripts/chapter3/chapter3.gd")
 	assert(not chapter_script.contains("高中姑娘"))
 	assert(not chapter_script.contains("helper_rect"))
+	assert(not chapter_script.contains("for band in range(8)"), "背景不能叠加横向渐变网格")
+	assert(not chapter_script.contains("for seam in range(7)"), "背景不能叠加竖向网格")
+	assert(not chapter_script.contains("Color(0.05, 0.10, 0.12, 0.23)"), "背景不能叠加统一深色蒙层")
 
 	var scene_paths := [
 		"res://scenes/chapter3/levels/chapter3_stairwell.tscn",
