@@ -10,6 +10,7 @@ extends Node2D
 
 
 func _ready() -> void:
+	get_node("/root/GameSession").enter_chapter(1)
 	player.set_logical_position(current_room.get_player_spawn_logical())
 
 	# Player 与 Mother 都属于房间；牵挂线仍由章节主场景统一绑定。
@@ -29,6 +30,8 @@ func _ready() -> void:
 
 
 func _on_act_01_finished() -> void:
+	get_node("/root/GameSession").complete_chapter(1)
+	get_node("/root/GameSession").enter_chapter(2)
 	transition_overlay.visible = true
 	transition_overlay.color = Color(0.22, 0.075, 0.06, 1.0)
 	transition_overlay.modulate.a = 0.0

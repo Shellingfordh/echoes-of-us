@@ -80,6 +80,7 @@ var current_level_layout: Node2D
 
 
 func _ready() -> void:
+	get_node("/root/GameSession").enter_chapter(3)
 	daughter = _make_character("余念", 26.0, 38.0, 285.0, 560.0, Color("d5c4ba"), Color("d6a894"), false)
 	mother = _make_character("余秀兰", 32.0, 48.0, 190.0, 470.0, Color("c7e8df"), Color("8fbeb1"), true)
 	characters = [daughter, mother]
@@ -770,6 +771,7 @@ func _check_level_complete() -> void:
 		level_done_timer = 0.0
 	else:
 		game_state = GameState.END
+		get_node("/root/GameSession").complete_chapter(3)
 		end_index = 0
 		end_timer = -1.0
 

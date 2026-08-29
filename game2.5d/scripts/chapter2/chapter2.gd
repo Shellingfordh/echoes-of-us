@@ -66,6 +66,7 @@ const STAGE_NAMES := [
 	"坑底与沿线爬回",
 	"路灯与学校",
 ]
+const CHAPTER_THREE_SCENE := "res://scenes/chapter3/chapter3.tscn"
 
 @export var debug_skip_intro := false
 
@@ -134,6 +135,7 @@ var _upper_anchor_visual: Node2D
 
 
 func _ready() -> void:
+	get_node("/root/GameSession").enter_chapter(2)
 	_bind_block_nodes()
 	_build_control_glows()
 	player.set_logical_position(A_MOTHER_SPAWN)
@@ -178,6 +180,11 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if current_stage == Stage.COMPLETE:
+		if event.is_action_pressed(&"start_game"):
+			get_viewport().set_input_as_handled()
+			_start_chapter_three()
+		return
 	if _transition_busy or dialogue_ui.is_playing():
 		return
 
@@ -685,6 +692,7 @@ func _finish_chapter() -> void:
 	child.set_logical_position(C_GOAL)
 	game_flow.set_mode(GameFlow.Mode.CUTSCENE)
 	flags["CH2_COMPLETE"] = true
+	get_node("/root/GameSession").complete_chapter(2)
 	checkpoint_id = "CH2_COMPLETE"
 	current_stage = Stage.COMPLETE
 	progress_label.text = "教学完成 6 / 6"
@@ -692,11 +700,20 @@ func _finish_chapter() -> void:
 	hint_label.text = ""
 	transition_overlay.show()
 	transition_overlay.modulate.a = 0.0
-	transition_text.text = "牵挂，不只是拉住，\n也可以守护。"
+	transition_text.text = "牵挂，不只是拉住，\n也可以守护。\n\n按 Enter / Space 继续第三章"
 	var ending := create_tween()
 	ending.tween_interval(0.65)
 	ending.tween_property(transition_overlay, "modulate:a", 0.92, 1.1)
 	await ending.finished
+	_transition_busy = false
+
+
+func _start_chapter_three() -> void:
+	if _transition_busy or current_stage != Stage.COMPLETE:
+		return
+	_transition_busy = true
+	get_node("/root/GameSession").enter_chapter(3)
+	get_tree().change_scene_to_file(CHAPTER_THREE_SCENE)
 
 
 func _play_dialogue(dialogue_id: String) -> void:
