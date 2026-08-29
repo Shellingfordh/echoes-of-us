@@ -44,3 +44,11 @@ godot --headless --path chapter1-game2.5d --script res://tests/chapter01_flow_te
 
 - 调整对话立绘的显示大小与构图，使其更好地适配当前对话框；
 - 为独白模式增加立绘显示，并处理独白与普通对话之间的立绘布局切换。
+
+## 第二章框架
+
+第一章完成后会进入 `scenes/chapter2/chapter2.tscn`。第二章采用三个大型 Block、六段顺序教学：自行车、水坑、窄缝切换、断板承重、按 W 沿线爬回、路灯锚定与学校终点。场景画面使用简化 2D 白盒，道路与角色碰撞仍位于隐藏的 XYZ 世界。
+
+```bash
+godot --headless --path game2.5d --script res://tests/chapter02_flow_test.gd
+```

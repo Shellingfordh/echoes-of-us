@@ -14,7 +14,7 @@ const END_DIALOGUE_ID := "END"
 @export_range(0.0, 10.0, 0.1) var monologue_hold_seconds := MONOLOGUE_DURATION
 @export_range(0.0, 1.0, 0.01) var fade_duration := 0.18
 
-## speaker 名 → 立绘。dialogue 模式才会用到；monologue 走 MonologueFrame，没有立绘位。
+## speaker 名 → 默认立绘。JSON 中的 portrait 可为每条对白覆盖具体表情。
 ## 在 dialogue_ui.tscn 里配好即可，运行时也可以用 register_portrait() 覆盖。
 @export var speaker_portraits: Dictionary = {}
 
@@ -22,9 +22,7 @@ const END_DIALOGUE_ID := "END"
 @onready var dialogue_frame: MarginContainer = $DialogueFrame
 @onready var dialogue_header: HBoxContainer = $DialogueFrame/Panel/Margin/VBox/Header
 @onready var speaker_name: Label = $DialogueFrame/Panel/Margin/VBox/Header/SpeakerName
-@onready var portrait_panel: PanelContainer = $DialogueFrame/Panel/Margin/VBox/Body/PortraitPanel
-@onready var portrait_texture: TextureRect = $DialogueFrame/Panel/Margin/VBox/Body/PortraitPanel/PortraitMargin/PortraitTexture
-@onready var portrait_initial: Label = $DialogueFrame/Panel/Margin/VBox/Body/PortraitPanel/PortraitMargin/PortraitInitial
+@onready var portrait_texture: TextureRect = $PortraitTexture
 @onready var dialogue_text: RichTextLabel = $DialogueFrame/Panel/Margin/VBox/Body/TextColumn/DialogueText
 @onready var line_status: Label = $DialogueFrame/Panel/Margin/VBox/Body/TextColumn/Footer/LineStatus
 @onready var continue_hint: Label = $DialogueFrame/Panel/Margin/VBox/Body/TextColumn/Footer/ContinueHint
@@ -42,9 +40,11 @@ var _root_id := ""
 var _current_id := ""
 var _next_id := END_DIALOGUE_ID
 var _speaker := ""
+var _portrait_path := ""
 var _lines: Array = []
 var _line_index := 0
 var _mode := "dialogue"
+var _blocking := true
 
 var _typing := false
 var _line_revealed := false
@@ -54,6 +54,7 @@ var _fade_tween: Tween
 var _session_generation := 0
 var _line_generation := 0
 var _portraits_by_speaker: Dictionary = {}
+var _portraits_by_path: Dictionary = {}
 
 
 func _ready() -> void:
@@ -157,10 +158,12 @@ func _begin_entry(dialogue_id: String) -> bool:
 	_current_id = dialogue_id
 	_next_id = str(entry.get("next", END_DIALOGUE_ID))
 	_speaker = str(entry.get("speaker", ""))
+	_portrait_path = str(entry.get("portrait", ""))
 	_lines = entry_lines as Array
 	_line_index = 0
 	_mode = str(entry.get("mode", "dialogue"))
-	_set_control_lock(_mode == "dialogue")
+	_blocking = bool(entry.get("blocking", _mode == "dialogue"))
+	_set_control_lock(_blocking)
 	_apply_mode_style()
 	_show_current_line()
 	return true
@@ -175,13 +178,10 @@ func _show_current_line() -> void:
 	var has_speaker := not _speaker.is_empty()
 	if _mode == "dialogue":
 		dialogue_header.visible = has_speaker
-		portrait_panel.visible = has_speaker
 		speaker_name.text = _speaker
-		var speaker_portrait := _portraits_by_speaker.get(_speaker) as Texture2D
+		var speaker_portrait := _resolve_portrait()
 		portrait_texture.texture = speaker_portrait
 		portrait_texture.visible = speaker_portrait != null
-		portrait_initial.visible = speaker_portrait == null
-		portrait_initial.text = _speaker.left(1) if has_speaker else ""
 		line_status.text = "%d / %d" % [_line_index + 1, _lines.size()]
 		line_status.visible = _lines.size() > 1
 		continue_hint.hide()
@@ -194,6 +194,19 @@ func _show_current_line() -> void:
 
 	_start_typewriter(_active_text, text, _line_generation)
 	dialogue_node_changed.emit(_current_id, _line_index, _speaker, text)
+
+
+func _resolve_portrait() -> Texture2D:
+	if not _portrait_path.is_empty():
+		if _portraits_by_path.has(_portrait_path):
+			return _portraits_by_path[_portrait_path] as Texture2D
+		var loaded := ResourceLoader.load(_portrait_path, "Texture2D") as Texture2D
+		if loaded == null:
+			push_error("[Dialogue] 无法加载立绘：%s" % _portrait_path)
+		else:
+			_portraits_by_path[_portrait_path] = loaded
+		return loaded
+	return _portraits_by_speaker.get(_speaker) as Texture2D
 
 
 func _start_typewriter(label: RichTextLabel, text: String, generation: int) -> void:
@@ -329,6 +342,7 @@ func _finalize_close(finished_id: String, emit_finished_signal: bool) -> void:
 	_current_id = ""
 	_next_id = END_DIALOGUE_ID
 	_speaker = ""
+	_portrait_path = ""
 	_lines = []
 	_line_index = 0
 	if emit_finished_signal and not finished_id.is_empty():

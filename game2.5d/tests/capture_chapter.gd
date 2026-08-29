@@ -15,7 +15,7 @@ func _run() -> void:
 	await _save("%s-room.png" % PREFIX)
 
 	var room := main.get_node("World/Chapter01Room01")
-	var player := main.get_node("Player") as PlayerController
+	var player := main.get_node("World/Chapter01Room01/Characters/Player") as PlayerController
 	var observation := main.get_node("UI/FixedObservationUI") as FixedObservationUI
 	var dialogue := main.get_node("UI/DialogueUI") as DialogueUI
 	(room.get_node("Interactables/WindowInspect") as Interactable).interact(player)

@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://di520kvmi8myj" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" uid="uid://decnwbxv4j3o8" path="res://scripts/camera/camera_rig.gd" id="2_camera"]
 [ext_resource type="PackedScene" uid="uid://b4tu23nqgvb3v" path="res://scenes/chapters/chapter_01/rooms/room_01.tscn" id="3_room"]
-[ext_resource type="PackedScene" uid="uid://ch3x3qkb35lup" path="res://scenes/characters/player.tscn" id="4_player"]
 [ext_resource type="Script" uid="uid://wm4tt6afkuvd" path="res://scripts/core/game_state.gd" id="5_state"]
 [ext_resource type="Script" uid="uid://d23g5abk18hsb" path="res://scripts/core/game_flow.gd" id="6_flow"]
 [ext_resource type="PackedScene" path="res://scenes/ui/dialogue_ui.tscn" id="7_dialogue"]
@@ -38,8 +37,6 @@ script = ExtResource("16_observation_db")
 
 [node name="Act01Sequence" type="Node" parent="." unique_id=1241166545]
 script = ExtResource("13_act01")
-
-[node name="Player" parent="." unique_id=943449422 instance=ExtResource("4_player")]
 
 [node name="TieLine" type="Line2D" parent="." unique_id=821686117]
 z_index = 2500

@@ -13,7 +13,7 @@ func _run() -> void:
 	await process_frame
 
 	var act := main.get_node("Act01Sequence") as Act01Sequence
-	var player := main.get_node("Player") as PlayerController
+	var player := main.get_node("World/Chapter01Room01/Characters/Player") as PlayerController
 	var tie_line := main.get_node("TieLine") as TieLine
 	var game_state := main.get_node("GameState") as GameState
 	var dialogue := main.get_node("UI/DialogueUI") as DialogueUI

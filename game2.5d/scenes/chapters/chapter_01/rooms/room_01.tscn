@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://ppqxh4jgfqqn" path="res://art/window.png" id="11_window"]
 [ext_resource type="Texture2D" uid="uid://tk3nc2fs1rv7" path="res://art/door.png" id="12_door"]
 [ext_resource type="Texture2D" uid="uid://ovsb1xtwo675" path="res://art/cardboard-box-1.png" id="13_cardboard_box"]
+[ext_resource type="PackedScene" uid="uid://ch3x3qkb35lup" path="res://scenes/characters/player.tscn" id="14_player"]
 [ext_resource type="Texture2D" uid="uid://r6eb71yamkj8" path="res://art/bookshelf.png" id="15_bookshelf"]
 [ext_resource type="Texture2D" uid="uid://bm3ngy1rv4g3y" path="res://art/suitcase.png" id="16_suitcase"]
 [ext_resource type="Texture2D" uid="uid://bq6n6dw0uj8xd" path="res://art/photo-frame.png" id="17_photo_frame"]
@@ -22,8 +23,6 @@
 [sub_resource type="BoxShape3D" id="Shape3D_wardrobe"]
 size = Vector3(2.1, 3.2, 1.1)
 
-; 床：贴图不透明区在等距下的地面足迹（屏幕宽 398px / 64 = 6.22 = 2.82 + 3.40）。
-; 高度取 1.4，比玩家胶囊（半高 0.775）高，杜绝从床上/床底穿过去。
 [sub_resource type="BoxShape3D" id="BoxShape3D_oqpq0"]
 size = Vector3(2.82, 1.4, 3.4)
 
@@ -36,13 +35,9 @@ size = Vector2(110, 100)
 [sub_resource type="BoxShape3D" id="Shape3D_box"]
 size = Vector3(1.6, 1.2, 1.4)
 
-; 书桌交互区盖住整个地面菱形（宽 256px / 高 128px）再加一圈余量，
-; 走到桌沿就能触发，不必贴到桌子中心。
 [sub_resource type="RectangleShape2D" id="Shape_interact_wide"]
 size = Vector2(240, 160)
 
-; 书桌：贴图（书桌 + 椅子 + 背包）不透明区的屏幕宽 253px / 64 ≈ 3.96 = 2.0 + 2.0。
-; 高度 1.6 高过玩家胶囊，不会出现“走到桌子底下”。
 [sub_resource type="BoxShape3D" id="Shape3D_desk"]
 size = Vector3(2, 1.6, 2)
 
@@ -369,11 +364,11 @@ requires_crouch = true
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("5_pushable_stool")
+target_marker_path = NodePath("../StoolTargetMarker")
 display_name = "木椅"
 once_only = false
 logical_position = Vector3(2, 0, 8)
 auto_play_dialogue = false
-target_marker_path = NodePath("../StoolTargetMarker")
 
 [node name="Shape" type="CollisionShape2D" parent="Interactables/Stool" unique_id=1022637935]
 position = Vector2(0, -30)
@@ -495,6 +490,17 @@ default_color = Color(0.95, 0.18, 0.22, 0.28)
 [node name="Mother" parent="Characters" unique_id=1737417525 instance=ExtResource("4_mother")]
 visible = false
 logical_position = Vector3(10, 0, 7.5)
+
+[node name="Player" parent="Characters" unique_id=738127892 instance=ExtResource("14_player")]
+
+[node name="StandaloneCamera" type="Camera2D" parent="Characters/Player" unique_id=456572993]
+enabled = false
+limit_left = 180
+limit_top = -180
+limit_right = 2290
+limit_bottom = 1210
+position_smoothing_enabled = true
+position_smoothing_speed = 7.0
 
 [node name="SpatialPhysics" type="Node3D" parent="." unique_id=874235621]
 

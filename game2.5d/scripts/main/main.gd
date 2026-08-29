@@ -2,7 +2,7 @@ extends Node2D
 
 @onready var camera_rig: CameraRig = $CameraRig
 @onready var current_room: RoomBase = $World/Chapter01Room01
-@onready var player: PlayerController = $Player
+@onready var player: PlayerController = current_room.get_player()
 @onready var tie_line: TieLine = $TieLine
 @onready var act_01: Act01Sequence = $Act01Sequence
 @onready var objective_label: ObjectiveLabel = $UI/ObjectiveLabel
@@ -12,7 +12,7 @@ extends Node2D
 func _ready() -> void:
 	player.set_logical_position(current_room.get_player_spawn_logical())
 
-	# Player 在 main.tscn、Mother 在房间场景里，跨场景所以运行时绑定。
+	# Player 与 Mother 都属于房间；牵挂线仍由章节主场景统一绑定。
 	var mother := current_room.get_mother()
 	if mother != null:
 		tie_line.bind(player, mother)

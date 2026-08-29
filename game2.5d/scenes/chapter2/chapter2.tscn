@@ -1,152 +1,227 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene format=3 uid="uid://dmk00odifbnx7"]
 
-[ext_resource type="Script" path="res://scripts/chapter2/chapter2.gd" id="1_chapter2"]
-[ext_resource type="PackedScene" path="res://scenes/characters/player.tscn" id="2_player"]
-[ext_resource type="Script" path="res://scripts/characters/chapter2_child.gd" id="3_child"]
-[ext_resource type="Texture2D" path="res://art/playerGrey_walk1.png" id="4_child_idle"]
-[ext_resource type="Texture2D" path="res://art/playerGrey_walk2.png" id="5_child_walk"]
-[ext_resource type="Script" path="res://scripts/mechanics/tie_line.gd" id="6_tie"]
-[ext_resource type="Script" path="res://scripts/camera/camera_rig.gd" id="7_camera"]
-[ext_resource type="Script" path="res://scripts/core/game_flow.gd" id="8_flow"]
+[ext_resource type="Script" uid="uid://62yx01w8q6rr" path="res://scripts/chapter2/chapter2.gd" id="1_chapter2"]
+[ext_resource type="PackedScene" uid="uid://ch3x3qkb35lup" path="res://scenes/characters/player.tscn" id="2_player"]
+[ext_resource type="Script" uid="uid://cgp3tpvmwg52d" path="res://scripts/characters/chapter2_child.gd" id="3_child"]
+[ext_resource type="Texture2D" uid="uid://duod0avws1xi" path="res://art/playerGrey_walk1.png" id="4_child_idle"]
+[ext_resource type="Texture2D" uid="uid://cke22yrxmskeq" path="res://art/playerGrey_walk2.png" id="5_child_walk"]
+[ext_resource type="Script" uid="uid://cn0267djfulyu" path="res://scripts/mechanics/tie_line.gd" id="6_tie"]
+[ext_resource type="Script" uid="uid://decnwbxv4j3o8" path="res://scripts/camera/camera_rig.gd" id="7_camera"]
+[ext_resource type="Script" uid="uid://d23g5abk18hsb" path="res://scripts/core/game_flow.gd" id="8_flow"]
+[ext_resource type="Script" uid="uid://b1ylhclch4sy7" path="res://scripts/core/dialogue_database.gd" id="9_dialogue_db"]
+[ext_resource type="PackedScene" uid="uid://ypnlkw4chkig" path="res://scenes/ui/dialogue_ui.tscn" id="10_dialogue_ui"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_child"]
+radius = 0.28
+height = 1.15
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_child"]
 animations = [{
-"frames": [{"duration": 1.0, "texture": ExtResource("4_child_idle")}],
-"loop": true,
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_child_idle")
+}],
+"loop": 1,
 "name": &"idle",
 "speed": 1.0
 }, {
-"frames": [{"duration": 1.0, "texture": ExtResource("4_child_idle")}, {"duration": 1.0, "texture": ExtResource("5_child_walk")}],
-"loop": true,
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_child_idle")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_child_walk")
+}],
+"loop": 1,
 "name": &"walk",
 "speed": 7.0
 }]
 
-[node name="Chapter2" type="Node2D"]
+[node name="Chapter2" type="Node2D" unique_id=1149846212]
 script = ExtResource("1_chapter2")
 
-[node name="World" type="Node2D" parent="."]
+[node name="World" type="Node2D" parent="." unique_id=266939853]
 
-[node name="GeneratedMap" type="Node2D" parent="World"]
+[node name="GeneratedMap" type="Node2D" parent="World" unique_id=1822542701]
 
-[node name="SpatialPhysics" type="Node3D" parent="World"]
+[node name="SpatialPhysics" type="Node3D" parent="World" unique_id=7386260]
 
-[node name="Characters" type="Node2D" parent="."]
+[node name="Characters" type="Node2D" parent="." unique_id=552470917]
 
-[node name="YoungMother" parent="Characters" instance=ExtResource("2_player")]
+[node name="YoungMother" parent="Characters" unique_id=1135130979 instance=ExtResource("2_player")]
 move_speed = 5.2
-movement_min = Vector2(-4, -55)
-movement_max = Vector2(70, 20)
+movement_min = Vector2(0.4, 2.4)
+movement_max = Vector2(12, 21.6)
 
-[node name="AnimatedSprite2D" parent="Characters/YoungMother"]
-scale = Vector2(0.78, 0.78)
-self_modulate = Color(0.82, 0.64, 0.48, 1)
-
-[node name="Child" type="Node2D" parent="Characters"]
+[node name="Child" type="Node2D" parent="Characters" unique_id=1988379355]
 script = ExtResource("3_child")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Characters/Child"]
+[node name="MathBody" type="CharacterBody3D" parent="Characters/Child" unique_id=1665805023]
+floor_stop_on_slope = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Characters/Child/MathBody" unique_id=52814843]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.575, 0)
+shape = SubResource("CapsuleShape_child")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Characters/Child" unique_id=1204523581]
+self_modulate = Color(1, 0.76, 0.28, 1)
 position = Vector2(0, -43)
 scale = Vector2(0.52, 0.52)
-self_modulate = Color(1, 0.82, 0.34, 1)
 sprite_frames = SubResource("SpriteFrames_child")
 animation = &"idle"
 
-[node name="GroundShadow" type="Polygon2D" parent="Characters/Child"]
+[node name="GroundShadow" type="Polygon2D" parent="Characters/Child" unique_id=1068321777]
 z_index = -1
 position = Vector2(13, 7)
 color = Color(0.005, 0.012, 0.011, 0.32)
 polygon = PackedVector2Array(-15, -4, 0, -8, 25, 3, 8, 10)
 
-[node name="TieLine" type="Line2D" parent="."]
+[node name="Umbrella" type="Node2D" parent="Characters/Child" unique_id=438048082]
+position = Vector2(8, -40)
+
+[node name="Canopy" type="Polygon2D" parent="Characters/Child/Umbrella" unique_id=2049544474]
+color = Color(0.98, 0.76, 0.18, 1)
+polygon = PackedVector2Array(-18, 2, -12, -8, 0, -13, 12, -8, 18, 2, 9, -1, 0, 3, -9, -1)
+
+[node name="Handle" type="Line2D" parent="Characters/Child/Umbrella" unique_id=1356827528]
+points = PackedVector2Array(0, 0, 0, 27, 7, 31)
+width = 2.5
+default_color = Color(0.32, 0.22, 0.13, 1)
+
+[node name="CatEarLeft" type="Polygon2D" parent="Characters/Child/Umbrella" unique_id=16558500]
+color = Color(0.98, 0.76, 0.18, 1)
+polygon = PackedVector2Array(-11, -7, -8, -18, -2, -10)
+
+[node name="CatEarRight" type="Polygon2D" parent="Characters/Child/Umbrella" unique_id=2096246062]
+color = Color(0.98, 0.76, 0.18, 1)
+polygon = PackedVector2Array(2, -10, 8, -18, 11, -7)
+
+[node name="RopeTopAnchor" type="Node2D" parent="Characters" unique_id=881379421]
+
+[node name="TieLine" type="Line2D" parent="." unique_id=840369709]
 z_index = 2500
 width = 5.0
 texture_mode = 1
 script = ExtResource("6_tie")
 reveal_distance = 0.0
-tension_distance = 5.5
-max_distance = 18.0
+tension_distance = 4.5
+max_distance = 7.5
 visual_width = 5.0
 normal_color = Color(0.66, 0.16, 0.13, 0.78)
-tension_color = Color(0.88, 0.22, 0.16, 0.96)
-pull_back_color = Color(1, 0.28, 0.20, 1)
-distance_weight = 0.2
-critical_tension = 1.0
-critical_distance_ratio = 1.0
+tension_color = Color(0.94, 0.24, 0.15, 0.96)
+pull_back_color = Color(1, 0.31, 0.18, 1)
+distance_weight = 0.82
+critical_tension = 0.98
+critical_distance_ratio = 0.98
 
-[node name="GameFlow" type="Node" parent="."]
+[node name="GameFlow" type="Node" parent="." unique_id=1622359431]
 script = ExtResource("8_flow")
 initial_mode = 4
 
-[node name="CameraRig" type="Node2D" parent="."]
+[node name="DialogueDatabase" type="Node" parent="." unique_id=2135441790]
+script = ExtResource("9_dialogue_db")
+
+[node name="CameraRig" type="Node2D" parent="." unique_id=1937909981]
 script = ExtResource("7_camera")
 
-[node name="Camera2D" type="Camera2D" parent="CameraRig"]
-limit_left = -400
-limit_top = -300
-limit_right = 8650
-limit_bottom = 1550
+[node name="Camera2D" type="Camera2D" parent="CameraRig" unique_id=1073173101]
+limit_left = -600
+limit_top = -1800
+limit_right = 15000
+limit_bottom = 7800
 position_smoothing_enabled = true
 position_smoothing_speed = 6.0
 
-[node name="Lighting" type="Node2D" parent="."]
+[node name="Lighting" type="Node2D" parent="." unique_id=1682403771]
 
-[node name="CanvasModulate" type="CanvasModulate" parent="Lighting"]
+[node name="CanvasModulate" type="CanvasModulate" parent="Lighting" unique_id=1909435855]
 color = Color(1, 0.78, 0.52, 1)
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=66487683]
 layer = 20
 
-[node name="ChapterTitle" type="Label" parent="UI"]
+[node name="ChapterTitle" type="Label" parent="UI" unique_id=1944300634]
 offset_left = 24.0
-offset_top = 18.0
-offset_right = 460.0
-offset_bottom = 58.0
+offset_top = 16.0
+offset_right = 520.0
+offset_bottom = 54.0
 theme_override_colors/font_color = Color(0.98, 0.86, 0.64, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 24
-text = "第二章 · 第一次放手 〔大型 Blockout〕"
+text = "第二章 · 第一次放手"
 
-[node name="ObjectiveLabel" type="Label" parent="UI"]
+[node name="ProgressLabel" type="Label" parent="UI" unique_id=855237172]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -292.0
+offset_top = 18.0
+offset_right = -28.0
+offset_bottom = 54.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(0.98, 0.79, 0.38, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 21
+text = "教学 1 / 6"
+horizontal_alignment = 2
+
+[node name="ObjectiveLabel" type="Label" parent="UI" unique_id=1797441618]
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 220.0
-offset_top = 24.0
-offset_right = -80.0
-offset_bottom = 68.0
+offset_left = 170.0
+offset_top = 62.0
+offset_right = -170.0
+offset_bottom = 104.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(0.94, 0.94, 0.88, 1)
+theme_override_colors/font_color = Color(0.96, 0.94, 0.84, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 20
-horizontal_alignment = 2
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
 
-[node name="HintLabel" type="Label" parent="UI"]
-anchors_preset = 12
+[node name="HintLabel" type="Label" parent="UI" unique_id=764069717]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 180.0
-offset_top = -54.0
-offset_right = -180.0
-offset_bottom = -16.0
+offset_left = 170.0
+offset_top = -58.0
+offset_right = -170.0
+offset_bottom = -18.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_colors/font_color = Color(0.86, 0.94, 0.83, 1)
+theme_override_colors/font_color = Color(0.88, 0.96, 0.82, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 
-[node name="TransitionOverlay" type="ColorRect" parent="UI"]
+[node name="TransitionOverlay" type="ColorRect" parent="UI" unique_id=1237106999]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.015, 0.012, 0.01, 1)
+color = Color(0.08, 0.035, 0.018, 1)
 
+[node name="TransitionText" type="Label" parent="UI/TransitionOverlay" unique_id=1917550777]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.86, 0.62, 1)
+theme_override_font_sizes/font_size = 32
+text = "余响
+2009 年秋"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DialogueUI" parent="UI" unique_id=490139389 instance=ExtResource("10_dialogue_ui")]

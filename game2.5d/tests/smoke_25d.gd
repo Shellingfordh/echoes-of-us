@@ -11,7 +11,7 @@ func _run() -> void:
 	root.add_child(main)
 	await process_frame
 
-	var player := main.get_node("Player") as PlayerController
+	var player := main.get_node("World/Chapter01Room01/Characters/Player") as PlayerController
 	var tie_line := main.get_node("TieLine") as TieLine
 	var dialogue_db := main.get_node("DialogueDatabase") as DialogueDatabase
 	var observation_db := main.get_node("ObservationDatabase") as ObservationDatabase
