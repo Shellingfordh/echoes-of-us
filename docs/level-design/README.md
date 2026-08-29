@@ -17,6 +17,5 @@
 
 1. `docs/narrative/04_剧情需求 - 副本.md`
 2. `docs/level-design/CURRENT_IMPLEMENTATION.md`
-3. `game/` 中已经通过流程测试的实现
+3. `game2.5d/` 主工程中已经通过流程测试的实现
 4. 其余历史设计材料
-

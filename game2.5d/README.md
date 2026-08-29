@@ -1,6 +1,6 @@
-# 第一章等距 2.5D 主体工程
+# 《不断线》2.5D 游戏主工程
 
-本目录从 `main` 分支的 `game2.5d` 复制而来，保留原工程作为对照，当前副本负责实现最新剧情文档中的第一章完整主体玩法。
+`game2.5d/` 是仓库当前正式 Godot 主工程目录，负责承载最新剧情、玩法与关卡实现。第一章主体流程已经可玩，第二章框架与教学流程也在本工程内继续开发。
 
 ## 已实现
 
@@ -24,7 +24,7 @@
 ## 运行
 
 ```bash
-godot --path chapter1-game2.5d
+godot --path game2.5d
 ```
 
 移动使用 WASD / 方向键，Enter 或空格调查，Esc 退出固定观察，F3 显示调试信息。
@@ -32,8 +32,10 @@ godot --path chapter1-game2.5d
 ## 验证
 
 ```bash
-godot --headless --path chapter1-game2.5d --script res://tests/smoke_25d.gd
-godot --headless --path chapter1-game2.5d --script res://tests/chapter01_flow_test.gd
+godot --headless --path game2.5d --script res://tests/smoke_25d.gd
+godot --headless --path game2.5d --script res://tests/chapter01_flow_test.gd
+godot --headless --path game2.5d --script res://tests/chapter01_portrait_test.gd
+godot --headless --path game2.5d --script res://tests/chapter02_flow_test.gd
 ```
 
 ## 素材状态

@@ -14,7 +14,7 @@
 
 你只需要记住：
 
-> **文档放 `docs/`，团队美术素材放仓库根目录 `assets/`，完整 Godot 工程放 `game/`；工程代码和场景分别放 `game/scripts/`、`game/scenes/`。**
+> **文档放 `docs/`，团队美术素材放仓库根目录 `assets/`，正式 Godot 主工程放 `game2.5d/`；工程代码和场景分别放 `game2.5d/scripts/`、`game2.5d/scenes/`。**
 
 不要自己新建：
 
@@ -79,19 +79,15 @@ Relationship Physics / 关系物理
 
 # 🕹️ 当前可玩原型
 
-仓库已经包含一个可从头到尾完成的四幕 Godot 可玩 Demo，当前仍采用程序化绘制的原型角色与场景，已实现：
+仓库当前正式可运行入口是 `game2.5d/`。该工程采用等距 2D 画面与隐藏 3D 碰撞，当前已实现：
 
-- 序章：从旧城缝纫铺的普通红线，连续揭示到楼上熟睡女儿掌心的无对白演出；
-- 第一幕：离家探索、5 个可选记忆碎片、3 个环境回响、牵挂线显现、回弹承重/短摆与雨伞记忆；
-- 第二幕：母女视角切换、自行车协作、水洼、柜子机关、路灯锚点、坠落承重与玩家主动攀回；
-- 第三幕：双向锚定、仓库推箱/钻洞与屋顶交替协作；
-- 第四幕：新住处搬箱、边界冲突、牵挂线沉默与松弛，以及门后黄伞的无对白尾声；
-- Hidden / Tense / Adjustable / Silent / Stable 五种牵挂线状态；
-- `D001–D040` 稳定对白 ID、数据驱动的正式台词目录，以及独立的碎片/回响文本；
-- 分章节的程序化环境音，以及碎片、回响、显线、张力和检查点反馈音；
-- 水彩纸张颗粒、分层景深、生活化环境细节和默认收起的轻量 HUD；
-- 可持久化的声音与减少动态效果设置，以及支持鼠标/键盘的暂停菜单；
-- 零失败流程、章节转场、检查点反馈和可切换的实时 Debug 面板。
+- 第一章完整主体流程：五件主调查、木凳推动与相框解锁、床边蹲下调查、黄伞冲突、牵挂线显现与主动试探；
+- 第二章三个大型 Block 与顺序教学流程：自行车、水坑、窄缝切换、断板承重、沿线爬回、路灯锚定与学校终点；
+- O-ID 客观信息与 D-ID 人物反应分层的数据驱动内容；
+- 第一章场景美术、角色立绘、中文字体与对话 UI；
+- 第一章、第二章的无界面流程测试。
+
+`game/` 保留早期四幕原型，`game-x/` 保留第一章开发实验版本；二者均不是当前主工程入口。
 
 开发验证版本：
 
@@ -100,29 +96,25 @@ Relationship Physics / 关系物理
 运行：
 
 ```bash
-godot --path game
+godot --path game2.5d
 ```
 
 操作：
 
 ```text
 WASD / 方向键    移动
-E / 鼠标左键      互动
-Tab              切换控制角色
-空格 / 鼠标左键   主动控制牵挂线
-Shift            奔跑
-R                重新开始
-Esc              暂停/继续
-M（暂停菜单）     开启/关闭声音
-V（暂停菜单）     完整/减少动态效果
-F1               显示/隐藏操作帮助
+Enter / 空格     调查、确认
+S                在床边蹲下或起身
+Esc              退出固定观察
 F3               显示/隐藏 Debug
 ```
 
 无界面流程测试：
 
 ```bash
-godot --headless --path game --script res://scripts/tests/smoke_test.gd
+godot --headless --path game2.5d --script res://tests/smoke_25d.gd
+godot --headless --path game2.5d --script res://tests/chapter01_flow_test.gd
+godot --headless --path game2.5d --script res://tests/chapter02_flow_test.gd
 ```
 
 ---
@@ -143,14 +135,19 @@ echoes-of-us/
 │   ├── art-bible/
 │   └── technical/
 
-├── game/
+├── game2.5d/                 # 正式 Godot 主工程
 │   ├── project.godot
 │   ├── data/
-│   │   └── dialogue.json
+│   │   ├── dialogues.json
+│   │   └── observations.json
+│   ├── art/
 │   ├── scenes/
 │   ├── scripts/
-│   ├── audio/
+│   ├── tests/
 │   └── ui/
+
+├── game/                     # 早期四幕原型（保留）
+├── game-x/                   # 第一章开发实验版本（保留）
 
 └── _artwork/
 ```
@@ -161,17 +158,17 @@ echoes-of-us/
 
 当前关卡制作入口：`docs/level-design/CURRENT_IMPLEMENTATION.md`。同目录中标记为“历史方案”的路人钥匙与无限长跑文档仅供追溯。
 
-## game
+## game2.5d
 
-完整的 Godot 工程目录。用 Godot 导入 `game/project.godot`，或者在仓库根目录运行 `godot --path game`。
+正式 Godot 主工程目录。用 Godot 导入 `game2.5d/project.godot`，或者在仓库根目录运行 `godot --path game2.5d`。
 
-`game/data/dialogue.json` 是运行时对白目录；玩法代码只引用稳定对白 ID。
+`game2.5d/data/dialogues.json` 是运行时对白目录，`game2.5d/data/observations.json` 是物件观察内容；玩法代码只引用稳定内容 ID。
 
-## game/scenes
+## game2.5d/scenes
 
 Godot 场景。
 
-## game/scripts
+## game2.5d/scripts
 
 GDScript 代码。
 
@@ -179,11 +176,7 @@ GDScript 代码。
 
 仓库级美术素材交付目录，包括已经确定使用的图片、角色、场景、道具等。技术接入时再按对应 Godot 工程的资源结构导入，不直接投放到某个工程目录。
 
-## game/audio
-
-BGM、音效、配音。
-
-## game/ui
+## game2.5d/ui
 
 游戏 UI。
 
@@ -200,7 +193,7 @@ AI 原图、参考图、废稿、PSD 等工作过程文件。
 | 剧情 | `docs/narrative/`           | 故事、角色、对白   |
 | 关卡 | `docs/level-design/`        | 关卡流程、交互、谜题 |
 | 美术 | `assets/`、`docs/art-bible/` | 游戏素材、视觉规范  |
-| 技术 | `game/scenes/`、`game/scripts/`、`game/ui/`  | Godot 实现   |
+| 技术 | `game2.5d/scenes/`、`game2.5d/scripts/`、`game2.5d/ui/` | Godot 实现 |
 
 ---
 
@@ -347,9 +340,9 @@ IMG_001.png
 技术同学负责：
 
 ```text
-game/scenes/
-game/scripts/
-game/ui/
+game2.5d/scenes/
+game2.5d/scripts/
+game2.5d/ui/
 ```
 
 ## 第一步：创建自己的 Branch
@@ -679,7 +672,7 @@ PR 正文模板：
 
 ### 注意事项
 - 参数为 Prototype 数值，后续需要调参
-- 影响文件：`game/scripts/tie_line.gd`, `game/scenes/level01.tscn`
+- 影响文件：`game2.5d/scripts/mechanics/tie_line.gd`、`game2.5d/scenes/chapters/chapter_01/rooms/room_01.tscn`
 
 复审者请检查：性能（连接数上限）、资源路径是否破坏场景引用
 
