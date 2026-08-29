@@ -25,6 +25,7 @@
 - 双角色切换、锚定、借力跳跃、沿线攀爬、推动箱子与双踏板机关；
 - 门和闸门具有真实阻挡与解锁条件；
 - 使用项目内三张完整场景背景和 11 个实际运行素材，不依赖 `game-chapter3/` 或个人下载目录。
+- 天台通关后先播放剧情收束文案，再自动进入带声音的“余响：牵挂”片尾动画；Enter / Space 可跳过或重播，R 重新开始。
 
 ## 运行
 
@@ -47,13 +48,14 @@ godot --headless --path game2.5d --script res://tests/chapter03_input_test.gd
 godot --headless --path game2.5d --script res://tests/chapter03_door_rules_test.gd
 godot --headless --path game2.5d --script res://tests/chapter03_playability_test.gd
 godot --headless --path game2.5d --script res://tests/chapter03_flow_test.gd
+godot --headless --path game2.5d --script res://tests/chapter03_ending_test.gd
 godot --headless --path game2.5d --script res://tests/game_session_test.gd
 godot --headless --path game2.5d --script res://tests/chapter_progression_test.gd
 ```
 
 ## 素材目录
 
-- `art/`：三章共享人物、立绘、字体、UI 和第一、二章场景素材；
+- `art/`：三章共享人物、立绘、字体、UI、第一/二章场景素材与最终片尾视频；
 - `assets/environments/chapter3/`：第三章三张完整场景背景；
 - `assets/props/chapter3/`：第三章机关门、踏板、木质平台、箱子和出口素材。
 

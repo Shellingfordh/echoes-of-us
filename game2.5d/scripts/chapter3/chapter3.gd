@@ -5,6 +5,7 @@ extends Node2D
 ## HTML 原型仅用于玩法与关卡结构；人物、场景和叙事延续第一、二章设定。
 
 enum GameState { TITLE, PLAY, LEVEL_DONE, END }
+enum EndingPhase { STORY, MOVIE, COMPLETE }
 
 const VIEW_W := 1280.0
 const VIEW_H := 720.0
@@ -16,6 +17,8 @@ const BOOST_VX := 200.0
 const CLIMB_SPEED := 420.0
 const CLIMB_TRAVERSE_SPEED := 260.0
 const FALL_LIMIT := 1100.0
+const ENDING_LINE_DURATION := 2.1
+const ENDING_FINAL_HOLD_DURATION := 2.4
 
 const END_SCRIPT := [
 	"最后一批东西搬完了。",
@@ -39,6 +42,7 @@ var toasts: Array = []
 var level_done_timer := 0.0
 var end_timer := 0.0
 var end_index := 0
+var ending_phase := EndingPhase.STORY
 var jump_queued := false
 var switch_queued := false
 var anchor_queued := false
@@ -75,6 +79,8 @@ var level_scene_resources: Array[PackedScene] = [
 @onready var hud_controls: Label = get_node_or_null("HUD/BottomBar/Controls") as Label
 @onready var toast_container: Control = get_node_or_null("HUD/Toasts") as Control
 @onready var title_overlay: Control = get_node_or_null("HUD/TitleOverlay") as Control
+@onready var ending_video: VideoStreamPlayer = get_node_or_null("HUD/EndingVideo") as VideoStreamPlayer
+@onready var ending_controls: Label = get_node_or_null("HUD/EndingControls") as Label
 
 var current_level_layout: Node2D
 
@@ -86,6 +92,8 @@ func _ready() -> void:
 	characters = [daughter, mother]
 	levels = _create_levels()
 	_load_level(0)
+	if ending_video != null:
+		ending_video.finished.connect(_on_ending_video_finished)
 	if editor_preview != null:
 		editor_preview.visible = false
 	_sync_scene_nodes()
@@ -108,9 +116,18 @@ func _input(event: InputEvent) -> void:
 		start_game()
 		get_viewport().set_input_as_handled()
 		return
-	if game_state == GameState.END and event.is_action_pressed(&"reset_checkpoint"):
-		start_game()
-		get_viewport().set_input_as_handled()
+	if game_state == GameState.END:
+		if event.is_action_pressed(&"reset_checkpoint"):
+			start_game()
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed(&"start_game"):
+			if ending_phase == EndingPhase.STORY:
+				_begin_ending_movie()
+			elif ending_phase == EndingPhase.MOVIE:
+				_finish_ending_movie(false)
+			else:
+				_begin_ending_movie()
+			get_viewport().set_input_as_handled()
 		return
 	if game_state != GameState.PLAY:
 		return
@@ -147,10 +164,13 @@ func _physics_process(delta: float) -> void:
 			queue_redraw()
 			return
 		GameState.END:
-			end_timer += delta
-			if end_timer > 2.6 and end_index < END_SCRIPT.size() - 1:
-				end_timer = 0.0
-				end_index += 1
+			if ending_phase == EndingPhase.STORY:
+				end_timer += delta
+				if end_index < END_SCRIPT.size() - 1 and end_timer > ENDING_LINE_DURATION:
+					end_timer = 0.0
+					end_index += 1
+				elif end_index == END_SCRIPT.size() - 1 and end_timer > ENDING_FINAL_HOLD_DURATION:
+					_begin_ending_movie()
 			queue_redraw()
 			return
 
@@ -159,6 +179,7 @@ func _physics_process(delta: float) -> void:
 
 
 func start_game() -> void:
+	_reset_ending_sequence()
 	game_state = GameState.PLAY
 	level_index = 0
 	toasts.clear()
@@ -772,8 +793,64 @@ func _check_level_complete() -> void:
 	else:
 		game_state = GameState.END
 		get_node("/root/GameSession").complete_chapter(3)
-		end_index = 0
-		end_timer = -1.0
+		_start_ending_sequence()
+
+
+func _start_ending_sequence() -> void:
+	ending_phase = EndingPhase.STORY
+	end_index = 0
+	end_timer = 0.0
+	if ending_video != null:
+		ending_video.stop()
+		ending_video.stream_position = 0.0
+		ending_video.hide()
+	if ending_controls != null:
+		ending_controls.hide()
+	queue_redraw()
+
+
+func _begin_ending_movie() -> void:
+	if game_state != GameState.END:
+		return
+	ending_phase = EndingPhase.MOVIE
+	if ending_controls != null:
+		ending_controls.hide()
+	if ending_video == null or ending_video.stream == null:
+		_finish_ending_movie(false)
+		return
+	ending_video.stream_position = 0.0
+	ending_video.show()
+	# Headless 验证环境没有可见的视频输出；保留状态供流程测试主动结束。
+	if DisplayServer.get_name() != "headless":
+		ending_video.play()
+	queue_redraw()
+
+
+func _on_ending_video_finished() -> void:
+	if game_state == GameState.END and ending_phase == EndingPhase.MOVIE:
+		_finish_ending_movie(true)
+
+
+func _finish_ending_movie(preserve_last_frame: bool) -> void:
+	ending_phase = EndingPhase.COMPLETE
+	if ending_video != null and not preserve_last_frame:
+		ending_video.stop()
+		ending_video.hide()
+	if ending_controls != null:
+		ending_controls.show()
+	queue_redraw()
+
+
+func _reset_ending_sequence() -> void:
+	ending_phase = EndingPhase.STORY
+	end_index = 0
+	end_timer = 0.0
+	if ending_video != null:
+		ending_video.stop()
+		ending_video.stream_position = 0.0
+		ending_video.hide()
+	if ending_controls != null:
+		ending_controls.hide()
 
 
 func _update_camera(delta: float) -> void:
@@ -844,6 +921,7 @@ func get_progress_snapshot() -> Dictionary:
 		"active": characters[active_character]["name"] if not characters.is_empty() else "",
 		"daughter": Vector2(daughter.get("x", 0.0), daughter.get("y", 0.0)),
 		"mother": Vector2(mother.get("x", 0.0), mother.get("y", 0.0)),
+		"ending_phase": EndingPhase.keys()[ending_phase],
 	}
 
 
@@ -1012,7 +1090,10 @@ func _sync_tie_line(should_show: bool) -> void:
 func _sync_hud_nodes() -> void:
 	if hud_layer == null:
 		return
-	_sync_toast_nodes()
+	if game_state == GameState.END and toast_container != null:
+		toast_container.hide()
+	else:
+		_sync_toast_nodes()
 	var playing := game_state == GameState.PLAY
 	if hud_top_bar != null:
 		hud_top_bar.visible = playing
@@ -1267,15 +1348,24 @@ func _draw_level_done() -> void:
 
 
 func _draw_ending() -> void:
-	draw_rect(Rect2(0, 0, VIEW_W, VIEW_H), Color(0.02, 0.06, 0.075, 0.84))
-	_draw_text("第三章 · 一起走一段", Vector2(VIEW_W * 0.5, 78), 28, Color("eef3f2"), HORIZONTAL_ALIGNMENT_CENTER, 700.0)
-	# 先画黄伞，再以箱子遮住，只留下未合严箱盖旁的一角黄色。
-	draw_texture_rect(yellow_umbrella_texture, Rect2(VIEW_W * 0.5 - 64.0, 118, 92, 92), false, Color.WHITE)
-	draw_texture_rect(wooden_box_texture, Rect2(VIEW_W * 0.5 - 28.0, 105, 126, 126), false, Color.WHITE)
-	for index in range(mini(end_index + 1, END_SCRIPT.size())):
-		var color := Color("eef3f2") if index == end_index else Color(0.76, 0.83, 0.82, 0.45)
-		_draw_text(END_SCRIPT[index], Vector2(VIEW_W * 0.5, 270 + index * 31), 18 if index < 4 else 16, color, HORIZONTAL_ALIGNMENT_CENTER, 880.0)
-	_draw_text("按 R 重新开始", Vector2(VIEW_W * 0.5, VIEW_H - 35.0), 13, Color("b8c5c5"), HORIZONTAL_ALIGNMENT_CENTER, 300.0)
+	if ending_phase == EndingPhase.STORY:
+		draw_rect(Rect2(0, 0, VIEW_W, VIEW_H), Color(0.02, 0.06, 0.075, 0.84))
+		_draw_text("第三章 · 一起走一段", Vector2(VIEW_W * 0.5, 78), 28, Color("eef3f2"), HORIZONTAL_ALIGNMENT_CENTER, 700.0)
+		# 先画黄伞，再以箱子遮住，只留下未合严箱盖旁的一角黄色。
+		draw_texture_rect(yellow_umbrella_texture, Rect2(VIEW_W * 0.5 - 64.0, 118, 92, 92), false, Color.WHITE)
+		draw_texture_rect(wooden_box_texture, Rect2(VIEW_W * 0.5 - 28.0, 105, 126, 126), false, Color.WHITE)
+		for index in range(mini(end_index + 1, END_SCRIPT.size())):
+			var color := Color("eef3f2") if index == end_index else Color(0.76, 0.83, 0.82, 0.45)
+			_draw_text(END_SCRIPT[index], Vector2(VIEW_W * 0.5, 270 + index * 31), 18 if index < 4 else 16, color, HORIZONTAL_ALIGNMENT_CENTER, 880.0)
+		_draw_text("Enter / Space 跳过 · R 重新开始", Vector2(VIEW_W * 0.5, VIEW_H - 35.0), 13, Color("b8c5c5"), HORIZONTAL_ALIGNMENT_CENTER, 380.0)
+		return
+
+	# 视频加载失败或被玩家跳过时仍保留完整的最终标题卡。
+	draw_rect(Rect2(0, 0, VIEW_W, VIEW_H), Color.BLACK)
+	if ending_phase == EndingPhase.COMPLETE and (ending_video == null or not ending_video.visible):
+		_draw_text("余响：牵挂", Vector2(VIEW_W * 0.5, VIEW_H * 0.5 + 10.0), 42, Color("f8e5d8"), HORIZONTAL_ALIGNMENT_CENTER, 720.0)
+		draw_line(Vector2(170, VIEW_H * 0.5 + 28.0), Vector2(455, VIEW_H * 0.5 + 28.0), Color("dc2036"), 2.5, true)
+		draw_line(Vector2(825, VIEW_H * 0.5 + 28.0), Vector2(1110, VIEW_H * 0.5 + 28.0), Color("dc2036"), 2.5, true)
 
 
 func _draw_debug() -> void:
