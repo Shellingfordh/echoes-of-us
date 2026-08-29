@@ -1162,11 +1162,7 @@ func _draw_stairwell_dressing() -> void:
 		if lit:
 			draw_circle(lamp_position, 95.0, Color(0.96, 0.79, 0.44, 0.10))
 		_draw_world_texture(stairwell_lamp_texture, Rect2(lamp_x - 38.0, 82.0, 76.0, 76.0), Color(1.0, 0.92, 0.72, 0.90) if lit else Color(0.48, 0.57, 0.60, 0.62))
-	# 老楼道的栏杆、信箱与剥落墙皮。
-	for rail_x in [1450.0, 2470.0, 3070.0, 3670.0]:
-		var start := Vector2(rail_x, 350.0) - camera_position
-		draw_line(start, start + Vector2(0, 108), Color("94a2a3"), 5.0)
-		draw_line(start, start + Vector2(120, 38), Color("94a2a3"), 5.0)
+	# 信箱与剥落墙皮延续老楼道细节。
 	for mailbox_x in [760.0, 900.0, 1040.0]:
 		var mailbox := Rect2(Vector2(mailbox_x, 270.0) - camera_position, Vector2(92, 62))
 		draw_rect(mailbox, Color("52656b"))
