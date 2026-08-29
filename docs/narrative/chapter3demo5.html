@@ -480,6 +480,18 @@ function handleInteract() {
 
 function handleJump() {
   const c = me();
+  // 低洞出口的攀爬必须先于通用的“蹲伏不可跳跃”规则处理。
+  if (phase === PHASE.B_TUNNEL && c === daughter && centerX(c) >= px(47.6)) {
+    beginRide(daughter, 50.2, 3.4, .62, () => {
+      setCrouch(daughter, false);
+      // 纯 2D 白盒中让演出站位避开已锁定箱体的实体轮廓。
+      setPosition(mother, 37.25, 0);
+      setPhase(PHASE.B_DAUGHTER_TOP);
+      writeCheckpoint(PHASE.B_DAUGHTER_TOP, [50.2, 3.4], [37.25, 0], 0);
+      notice("余念先到了高处", 2.4);
+    });
+    return;
+  }
   if (c.crouching || c.anchored || c.ride) return;
   if (phase === PHASE.A_MOTHER_ANCHORED && c === daughter && near(c, 15.1, 2.5)) {
     beginRide(daughter, 20.0, 2.0, .78, () => {
@@ -504,17 +516,6 @@ function handleJump() {
       setPosition(mother, 37.25, 0);
       setPhase(PHASE.B_TUNNEL);
       notice("按住 S / ↓，再向右移动", 3.2);
-    });
-    return;
-  }
-  if (phase === PHASE.B_TUNNEL && c === daughter && centerX(c) >= px(47.6)) {
-    beginRide(daughter, 50.2, 3.4, .62, () => {
-      setCrouch(daughter, false);
-      // 纯 2D 白盒中让演出站位避开已锁定箱体的实体轮廓。
-      setPosition(mother, 37.25, 0);
-      setPhase(PHASE.B_DAUGHTER_TOP);
-      writeCheckpoint(PHASE.B_DAUGHTER_TOP, [50.2, 3.4], [37.25, 0], 0);
-      notice("余念先到了高处", 2.4);
     });
     return;
   }
@@ -1106,6 +1107,7 @@ function render() {
   canvas.dataset.phase = phase;
   canvas.dataset.active = me().id;
   canvas.dataset.gameState = gameState;
+  canvas.dataset.daughterCrouching = String(daughter.crouching);
   canvas.dataset.daughterPosition = `${(centerX(daughter) / SCALE).toFixed(2)},${feet(daughter).toFixed(1)}`;
   canvas.dataset.motherPosition = `${(centerX(mother) / SCALE).toFixed(2)},${feet(mother).toFixed(1)}`;
   drawBackground();
@@ -1193,6 +1195,7 @@ window.__chapter3Demo = {
     setPhase(p[0]);
     setPosition(daughter, p[1][0], p[1][1]);
     setPosition(mother, p[2][0], p[2][1]);
+    if (name === "TUNNEL_EXIT") setCrouch(daughter, true);
     active = p[3];
     checkpoint = { phase: p[0], d: [...p[1]], m: [...p[2]], active: p[3] };
     cameraX = clamp(centerX(me()) - W / 2, 0, WORLD_W - W);
