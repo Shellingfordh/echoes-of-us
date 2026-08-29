@@ -24,17 +24,20 @@ enum Beat {
 @export var reveal_trigger_z_max := 2.8
 @export_range(0.8, 1.0, 0.01) var pullback_trigger_tension := 0.99
 @export_range(0.1, 0.95, 0.01) var rearm_tension := 0.92
-@export var mother_dialogue_position := Vector3(9.0, 0.0, 7.0)
-@export var mother_after_dialogue_position := Vector3(4.35, 0.0, 7.8)
+@export var mother_dialogue_position := Vector3(9.2, 0.0, 6.5)
+@export var mother_walk_waypoint := Vector3(7.0, 0.0, 5.8)
+@export var mother_after_dialogue_position := Vector3(4.0, 0.0, 5.8)
 @export var mother_walk_duration := 1.1
-@export var window_reflection_position := Vector3(7.0, 0.0, 1.5)
-@export var window_reflection_radius := 1.35
+@export var window_reflection_position := Vector3(7.25, 0.0, 2.85)
+@export var window_reflection_radius := 1.0
 
 var current_beat := Beat.P1_EXPLORE
 var _investigated_keys := 0
 var _key_total := 0
 var _window_reflection_triggered := false
 var _recheck_reported := -1
+var _suitcase_opened := false
+var _wardrobe_opened := false
 
 var _player: PlayerController
 var _mother: Mother
@@ -188,11 +191,15 @@ func _update_photo_access() -> void:
 	if can_reach_photo:
 		_photo.set_highlight(Color(1.0, 0.92, 0.72, 0.25), true)
 		_set_story_flag(&"chapter1_photo_unlocked")
-		objective_changed.emit("站在柜前木椅上，现在能调查柜顶相框。（%d/%d）" % [_investigated_keys, _key_total])
+		objective_changed.emit("整理离家前的东西（%d/%d）\n站在柜前木椅上，现在能调查柜顶相框。" % [_investigated_keys, _key_total])
 		_emit_debug("[Act01] stool placed + mounted / photo unlocked")
 
 
 func _on_observation_interacted(_player_ref: PlayerController, target: Interactable) -> void:
+	if target == _suitcase:
+		_open_suitcase_once()
+	if target == _wardrobe_inspect:
+		_open_wardrobe_once()
 	if _observation == null or _observation_database == null:
 		return
 	var copy := _observation_database.get_entry(target.observation_id)
@@ -204,8 +211,41 @@ func _on_observation_interacted(_player_ref: PlayerController, target: Interacta
 	_observation.open_observation(
 		target.name,
 		str(copy.get("title", target.display_name)),
-		str(copy.get("body", ""))
+		str(copy.get("body", "")),
+		str(copy.get("image", ""))
 	)
+
+
+func _open_suitcase_once() -> void:
+	if _suitcase_opened or _suitcase == null:
+		return
+	var closed_visual := _suitcase.get_node_or_null("Visual") as Sprite2D
+	var open_visual := _suitcase.get_node_or_null("OpenVisual") as Sprite2D
+	if closed_visual == null or open_visual == null:
+		return
+	closed_visual.visible = false
+	open_visual.visible = true
+	var closed_collision := _suitcase.get_node_or_null("MathBody/CollisionShape3D") as CollisionShape3D
+	var open_collision := _suitcase.get_node_or_null("MathBody/OpenCollisionShape3D") as CollisionShape3D
+	if closed_collision != null and open_collision != null:
+		closed_collision.set_deferred("disabled", true)
+		open_collision.set_deferred("disabled", false)
+	_suitcase_opened = true
+
+
+func _open_wardrobe_once() -> void:
+	if _wardrobe_opened or _room == null:
+		return
+	var wardrobe := _room.get_node_or_null("Midground/Wardrobe") as Node2D
+	if wardrobe == null:
+		return
+	var closed_visual := wardrobe.get_node_or_null("Visual") as Sprite2D
+	var open_visual := wardrobe.get_node_or_null("OpenVisual") as Sprite2D
+	if closed_visual == null or open_visual == null:
+		return
+	closed_visual.visible = false
+	open_visual.visible = true
+	_wardrobe_opened = true
 
 
 func _on_observation_closed(object_id: String) -> void:
@@ -221,7 +261,7 @@ func _on_observation_closed(object_id: String) -> void:
 
 
 func _update_explore_objective() -> void:
-	objective_changed.emit("整理离家前的东西（%d/%d）；把木椅推到衣柜正前方，再按空格跳上去看相框。" % [_investigated_keys, _key_total])
+	objective_changed.emit("整理离家前的东西（%d/%d）\n把木椅推到衣柜正前方，再按空格跳上去看相框。" % [_investigated_keys, _key_total])
 
 
 func _start_umbrella_scene() -> void:
@@ -257,7 +297,9 @@ func _finish_umbrella_scene() -> void:
 		_game_flow.set_mode(GameFlow.Mode.CUTSCENE)
 	objective_changed.emit("妈妈正走到纸箱旁边。")
 	if _mother != null:
-		await _mother.move_to_logical(mother_after_dialogue_position, mother_walk_duration)
+		# 两段短路径绕开纸箱：直接插值到旧终点会让母亲穿进纸箱贴图。
+		await _mother.move_to_logical(mother_walk_waypoint, mother_walk_duration * 0.38)
+		await _mother.move_to_logical(mother_after_dialogue_position, mother_walk_duration * 0.62)
 		_mother.face_away_from(_player.get_logical_position())
 	if _umbrella != null:
 		_umbrella.visible = true
@@ -301,7 +343,7 @@ func _check_recheck_progress() -> void:
 	if done != _recheck_reported:
 		_recheck_reported = done
 		objective_changed.emit(
-			"线从掌心伸出去了。回头再看一遍母亲塞进来的东西：行李箱和黄伞（%d/2）。" % done
+			"再看一遍母亲塞进来的东西（%d/2）\n线从掌心伸出去了。回头看看行李箱和黄伞。" % done
 		)
 	if done < 2:
 		return

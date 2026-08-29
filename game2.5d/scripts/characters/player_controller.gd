@@ -21,8 +21,10 @@ extends Node2D
 
 @onready var math_body: CharacterBody3D = $MathBody
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var push_pose: Sprite2D = get_node_or_null("PushPose") as Sprite2D
+@onready var crouch_pose: Sprite2D = get_node_or_null("CrouchPose") as Sprite2D
 @onready var interaction_area: Area2D = $InteractionArea
-@onready var ground_shadow: Polygon2D = $GroundShadow
+@onready var ground_shadow: Polygon2D = get_node_or_null("GroundShadow") as Polygon2D
 
 var _game_flow: GameFlow
 var _current_interactable: Area2D
@@ -37,6 +39,9 @@ var _mount_return_position := Vector3.ZERO
 var _crouching := false
 var _crouch_target: Interactable
 var _crouch_key_consumed := false
+## 当前朝向：down / up / left / right。停下来时保留最后一次的朝向，
+## 这样 idle 不会莫名转回正面。
+var _facing := StringName("down")
 
 var logical_position: Vector3:
 	get:
@@ -58,7 +63,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if _crouching:
 		math_body.velocity = Vector3.ZERO
-		_play_idle_animation()
+		_show_crouch_pose()
 		_update_interaction_target()
 		return
 	if _suspended:
@@ -79,7 +84,7 @@ func _physics_process(delta: float) -> void:
 	var pull_velocity := _get_tie_line_pull_velocity()
 	math_body.velocity = input_velocity + pull_velocity
 	math_body.move_and_slide()
-	_try_push_colliding_stool(direction)
+	var pushed_stool := _try_push_colliding_stool(direction)
 
 	var logical := math_body.position
 	logical.x = clampf(logical.x, movement_min.x, movement_max.x)
@@ -96,9 +101,11 @@ func _physics_process(delta: float) -> void:
 		_play_idle_animation()
 	else:
 		var screen_direction := Projection25D.project_direction(visual_motion.normalized())
-		if not is_zero_approx(screen_direction.x):
-			animated_sprite.flip_h = screen_direction.x < 0.0
-		animated_sprite.play(&"walk")
+		_update_facing(screen_direction)
+		if pushed_stool:
+			_show_push_pose(screen_direction)
+		else:
+			_play_directional(&"walk", screen_direction)
 
 	_update_interaction_target()
 
@@ -158,6 +165,7 @@ func toggle_crouch() -> bool:
 	_crouch_key_consumed = true
 	_crouch_target = target
 	math_body.velocity = Vector3.ZERO
+	_show_crouch_pose()
 	_update_interaction_target()
 	# 床底故事只由床边按 S 进入蹲下时触发，不能站着按 Enter 越过条件。
 	target.interact(self)
@@ -168,6 +176,7 @@ func stand_up() -> void:
 	_crouching = false
 	_crouch_key_consumed = true
 	_crouch_target = null
+	_play_idle_animation()
 	_update_interaction_target()
 
 
@@ -272,9 +281,9 @@ func _update_mounted_stool_position() -> void:
 		ground_shadow.position = Projection25D.project(ground_position) - global_position + ground_shadow_offset
 
 
-func _try_push_colliding_stool(direction: Vector3) -> void:
+func _try_push_colliding_stool(direction: Vector3) -> bool:
 	if direction.is_zero_approx():
-		return
+		return false
 	for index in range(math_body.get_slide_collision_count()):
 		var collision := math_body.get_slide_collision(index)
 		var collider := collision.get_collider() as Node
@@ -282,7 +291,8 @@ func _try_push_colliding_stool(direction: Vector3) -> void:
 			continue
 		var stool := collider.get_parent() as PushableStool
 		if stool != null and stool.try_push(direction):
-			return
+			return true
+	return false
 
 
 func _get_speed_scale(direction: Vector3) -> float:
@@ -435,8 +445,77 @@ func _find_nearby_crouch_target() -> Interactable:
 	return nearest
 
 
+## 剧情把控制权收走时用：立刻停下并切回站立姿势。
+## _physics_process 被关掉后不会再自动播 idle，所以必须由外部显式调用一次，
+## 否则角色会僵在被夺走控制权那一帧的 walk 动画上。
+func stop_and_idle() -> void:
+	if is_instance_valid(math_body):
+		math_body.velocity = Vector3.ZERO
+	_play_idle_animation()
+
+
 func _play_idle_animation() -> void:
-	animated_sprite.play(&"idle")
+	_play_directional(&"idle", Vector2.ZERO)
+
+
+## 屏幕上看到的方向决定用哪一组贴图：横向位移压过纵向就走左右，否则走上下。
+## 判据用投影后的屏幕向量而不是逻辑 XZ，因为等距投影把两条轴各转了 45°，
+## 玩家眼里的"往右走"对应的是逻辑 x 增、z 减，直接读逻辑轴会选错朝向。
+func _update_facing(screen_direction: Vector2) -> void:
+	if screen_direction.is_zero_approx():
+		return
+	if absf(screen_direction.x) >= absf(screen_direction.y):
+		_facing = &"right" if screen_direction.x > 0.0 else &"left"
+	else:
+		_facing = &"down" if screen_direction.y > 0.0 else &"up"
+
+
+## 有四向贴图就用四向，没有就退回原来的 idle / walk 加 flip_h。
+## 第一章的小精灵只有两个动画，这个回退让它完全按老样子跑。
+func _play_directional(base: StringName, screen_direction: Vector2) -> void:
+	if not is_instance_valid(animated_sprite):
+		return
+	_show_normal_pose()
+	var frames := animated_sprite.sprite_frames
+	var directional := StringName("%s_%s" % [base, _facing])
+	if frames != null and frames.has_animation(directional):
+		animated_sprite.flip_h = false
+		animated_sprite.play(directional)
+		return
+	if not screen_direction.is_zero_approx() and not is_zero_approx(screen_direction.x):
+		animated_sprite.flip_h = screen_direction.x < 0.0
+	animated_sprite.play(base)
+
+
+func _show_normal_pose() -> void:
+	animated_sprite.show()
+	if is_instance_valid(push_pose):
+		push_pose.hide()
+	if is_instance_valid(crouch_pose):
+		crouch_pose.hide()
+
+
+func _show_push_pose(screen_direction: Vector2) -> void:
+	if not is_instance_valid(push_pose):
+		_play_directional(&"walk", screen_direction)
+		return
+	animated_sprite.hide()
+	if is_instance_valid(crouch_pose):
+		crouch_pose.hide()
+	push_pose.show()
+	var face_left := screen_direction.x < 0.0 if not is_zero_approx(screen_direction.x) else _facing == &"left"
+	push_pose.flip_h = face_left
+	push_pose.position.x = -15.0 if face_left else 15.0
+
+
+func _show_crouch_pose() -> void:
+	if not is_instance_valid(crouch_pose):
+		_play_idle_animation()
+		return
+	animated_sprite.hide()
+	if is_instance_valid(push_pose):
+		push_pose.hide()
+	crouch_pose.show()
 
 
 func _get_game_flow() -> GameFlow:

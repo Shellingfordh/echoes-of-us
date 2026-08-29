@@ -48,5 +48,14 @@ static func depth_index(spatial_position: Vector3) -> int:
 	return clampi(int(roundf(ground_depth)), -DEPTH_LIMIT, DEPTH_LIMIT)
 
 
+## project() 在 y = 0 平面上的逆运算：屏幕坐标还原成地面逻辑坐标。
+## 推导：a = px - ORIGIN.x = 64(x - z)，b = py - ORIGIN.y = 32(x + z)。
+## 用于读取编辑器里手摆的 Node2D 位置，避免在脚本里重复写死坐标。
+static func unproject_ground(screen_position: Vector2) -> Vector3:
+	var a := (screen_position.x - ORIGIN.x) / AXIS_X.x
+	var b := (screen_position.y - ORIGIN.y) / AXIS_X.y
+	return Vector3((a + b) * 0.5, 0.0, (b - a) * 0.5)
+
+
 static func ground_distance(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x, a.z).distance_to(Vector2(b.x, b.z))

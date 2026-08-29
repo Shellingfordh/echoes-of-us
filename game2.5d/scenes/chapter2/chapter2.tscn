@@ -1,50 +1,870 @@
 [gd_scene format=3 uid="uid://dmk00odifbnx7"]
 
 [ext_resource type="Script" uid="uid://62yx01w8q6rr" path="res://scripts/chapter2/chapter2.gd" id="1_chapter2"]
-[ext_resource type="PackedScene" uid="uid://ch3x3qkb35lup" path="res://scenes/characters/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/chapter2/mother2_player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://cgp3tpvmwg52d" path="res://scripts/characters/chapter2_child.gd" id="3_child"]
-[ext_resource type="Texture2D" uid="uid://duod0avws1xi" path="res://art/playerGrey_walk1.png" id="4_child_idle"]
-[ext_resource type="Texture2D" uid="uid://cke22yrxmskeq" path="res://art/playerGrey_walk2.png" id="5_child_walk"]
+[ext_resource type="SpriteFrames" uid="uid://b2d8kqx4vnhla" path="res://resources/daughter2_frames.tres" id="4_daughter2"]
 [ext_resource type="Script" uid="uid://cn0267djfulyu" path="res://scripts/mechanics/tie_line.gd" id="6_tie"]
 [ext_resource type="Script" uid="uid://decnwbxv4j3o8" path="res://scripts/camera/camera_rig.gd" id="7_camera"]
 [ext_resource type="Script" uid="uid://d23g5abk18hsb" path="res://scripts/core/game_flow.gd" id="8_flow"]
 [ext_resource type="Script" uid="uid://b1ylhclch4sy7" path="res://scripts/core/dialogue_database.gd" id="9_dialogue_db"]
 [ext_resource type="PackedScene" uid="uid://ypnlkw4chkig" path="res://scenes/ui/dialogue_ui.tscn" id="10_dialogue_ui"]
+[ext_resource type="Texture2D" uid="uid://pbjclueceqoo" path="res://art/chapter2_scene/bike.png" id="11_bike"]
+[ext_resource type="Texture2D" uid="uid://b7siboap2nnlu" path="res://art/chapter2_scene/concrete-wall.png" id="12_concrete"]
+[ext_resource type="Texture2D" uid="uid://ol2k46ub8t1d" path="res://art/chapter2_scene/debris-pile.png" id="13_debris_1"]
+[ext_resource type="Texture2D" uid="uid://dhxlp67fk6750" path="res://art/chapter2_scene/debris-pile-2.png" id="14_debris_2"]
+[ext_resource type="Texture2D" uid="uid://4b330sdaejip" path="res://art/chapter2_scene/debris-pile-3.png" id="15_debris_3"]
+[ext_resource type="Texture2D" uid="uid://dj8ccd7k7f8ho" path="res://art/chapter2_scene/deep-pit-wall.png" id="16_pit_wall_north"]
+[ext_resource type="Texture2D" uid="uid://epvfpq6gimvq" path="res://art/chapter2_scene/deep-pit-wall-2.png" id="17_pit_wall_west"]
+[ext_resource type="Texture2D" uid="uid://bggm3bwserbu0" path="res://art/chapter2_scene/ground-brick.png" id="18_ground"]
+[ext_resource type="Texture2D" uid="uid://cbhyvom413ham" path="res://art/chapter2_scene/ground-water-stain.png" id="19_water_stain"]
+[ext_resource type="Texture2D" uid="uid://dh60bjdi2ggsd" path="res://art/chapter2_scene/school-gate.png" id="20_tb0am"]
+[ext_resource type="Texture2D" uid="uid://c18spex7iry6d" path="res://art/chapter2_scene/streetlight.png" id="22_streetlight"]
+[ext_resource type="Texture2D" uid="uid://630a38u7h20w" path="res://art/chapter2_scene/warning-post.png" id="23_warning"]
+[ext_resource type="Texture2D" uid="uid://cll0n41gucfdg" path="res://art/chapter2_scene/water.png" id="24_water"]
+[ext_resource type="Texture2D" uid="uid://dffye53fh8s66" path="res://art/chapter2_scene/wood.png" id="25_wood"]
+[ext_resource type="Texture2D" uid="uid://ckpmc4uiwctal" path="res://art/chapter2_scene/wood2.png" id="26_wood_broken"]
+[ext_resource type="Texture2D" uid="uid://dmnpiygty10f2" path="res://art/chapter2_scene/wooden-plank.png" id="27_wood_splinter"]
+[ext_resource type="Texture2D" uid="uid://b60wjmx33cex4" path="res://art/chapter2_scene/cute-umbrella-open.png" id="28_umbrella"]
+[ext_resource type="Texture2D" uid="uid://co0lus30er0a8" path="res://art/ui/plaque_panel.png" id="30_panel_plaque"]
+[ext_resource type="FontVariation" path="res://ui/font_hint.tres" id="31_font_bold"]
+[ext_resource type="FontFile" uid="uid://bqi8p1yi4wocu" path="res://art/fonts/NotoSansCJKsc-Regular.otf" id="32_font_print"]
+[ext_resource type="Texture2D" uid="uid://bm5qxf2ifvfo1" path="res://art/chapter2_scene/cabinet01.png" id="33_cabinet01"]
+[ext_resource type="Texture2D" uid="uid://ddwl27fgrvv5l" path="res://art/chapter2_scene/cabinet02.png" id="34_cabinet02"]
+[ext_resource type="Texture2D" uid="uid://b4u5h7ug4yvwm" path="res://art/chapter2_scene/cabinet03.png" id="35_cabinet03"]
+[ext_resource type="Texture2D" uid="uid://dwfgmqibuxfbr" path="res://art/chapter2_scene/jinggai.png" id="37_jinggai"]
+[ext_resource type="Texture2D" uid="uid://b87rx1nhcufip" path="res://art/chapter2_scene/car.png" id="38_car"]
+
+[sub_resource type="Gradient" id="Gradient_rainy_backdrop"]
+offsets = PackedFloat32Array(0, 0.38, 0.7, 1)
+colors = PackedColorArray(0.404, 0.447, 0.494, 1, 0.478, 0.51, 0.533, 1, 0.451, 0.463, 0.451, 1, 0.376, 0.373, 0.357, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_rainy_backdrop"]
+gradient = SubResource("Gradient_rainy_backdrop")
+width = 8
+height = 512
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_476hs"]
+size = Vector3(48, 2.4, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_v3ydr"]
+size = Vector3(48, 2.4, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5xaw8"]
+size = Vector3(18, 2, 10)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0bdiw"]
+size = Vector3(24, 3.6, 0.7)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vgsrl"]
+size = Vector3(24, 3.2, 0.7)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1r4ex"]
+size = Vector3(12, 2.4, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8nmv2"]
+size = Vector3(12, 2.4, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wr4hs"]
+size = Vector3(1, 2.4, 8.65)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1piev"]
+size = Vector3(1, 2.4, 8.65)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pitwn"]
+size = Vector3(14.2, 4.7, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pitww"]
+size = Vector3(0.5, 4.7, 10.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_l21df"]
+size = Vector3(48, 2.4, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bj5yf"]
+size = Vector3(48, 2.4, 0.4)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_child"]
 radius = 0.28
 height = 1.15
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_child"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("4_child_idle")
-}],
-"loop": 1,
-"name": &"idle",
-"speed": 1.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("4_child_idle")
-}, {
-"duration": 1.0,
-"texture": ExtResource("5_child_walk")
-}],
-"loop": 1,
-"name": &"walk",
-"speed": 7.0
-}]
+[sub_resource type="StyleBoxFlat" id="Style_c2_capsule"]
+content_margin_left = 22.0
+content_margin_top = 8.0
+content_margin_right = 22.0
+content_margin_bottom = 8.0
+bg_color = Color(0.08, 0.07, 0.06, 0.78)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.38)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+
+[sub_resource type="StyleBoxTexture" id="Style_c2_plaque"]
+content_margin_left = 20.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+texture = ExtResource("30_panel_plaque")
+texture_margin_left = 18.0
+texture_margin_top = 18.0
+texture_margin_right = 18.0
+texture_margin_bottom = 18.0
+
+[sub_resource type="StyleBoxEmpty" id="Style_c2_hint"]
 
 [node name="Chapter2" type="Node2D" unique_id=1149846212]
 script = ExtResource("1_chapter2")
+
+[node name="BackdropLayer" type="CanvasLayer" parent="." unique_id=111878401]
+layer = -100
+
+[node name="RainyBackdrop" type="TextureRect" parent="BackdropLayer" unique_id=111878402]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_rainy_backdrop")
+expand_mode = 1
+stretch_mode = 6
 
 [node name="World" type="Node2D" parent="." unique_id=266939853]
 
 [node name="GeneratedMap" type="Node2D" parent="World" unique_id=1822542701]
 
 [node name="SpatialPhysics" type="Node3D" parent="World" unique_id=7386260]
+
+[node name="Blocks" type="Node2D" parent="World" unique_id=355761716]
+
+[node name="BlockA" type="Node2D" parent="World/Blocks" unique_id=393966446]
+
+[node name="Visuals" type="Node2D" parent="World/Blocks/BlockA" unique_id=2119258146]
+
+[node name="BlockA_Road" type="Polygon2D" parent="World/Blocks/BlockA/Visuals" unique_id=2140388393]
+z_index = -1700
+texture_repeat = 2
+texture = ExtResource("18_ground")
+polygon = PackedVector2Array(1050, 170, 4122, 1706, 2586, 2474, -486, 938)
+uv = PackedVector2Array(0, 0, 4108, 0, 4108, 2048, 0, 2048)
+
+[node name="A_to_B_Connector" type="Polygon2D" parent="World/Blocks/BlockA/Visuals" unique_id=1360513243]
+z_index = -1700
+texture_repeat = 2
+texture = ExtResource("18_ground")
+polygon = PackedVector2Array(3578, 1978, 5114, 2746, 4794, 2906, 3258, 2138)
+uv = PackedVector2Array(0, 0, 4108, 0, 4108, 1024, 0, 1024)
+
+[node name="TailorShop" type="Node2D" parent="World/Blocks/BlockA/Visuals" unique_id=2075452490]
+z_index = 314
+
+[node name="_Polygon2D_12" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/TailorShop" unique_id=1968603288]
+visible = false
+color = Color(0.38880002, 0.2088, 0.115200005, 1)
+polygon = PackedVector2Array(1754, 650, 1651.6, 701.2, 1651.6, 445.2, 1754, 394)
+
+[node name="_Polygon2D_13" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/TailorShop" unique_id=411336328]
+visible = false
+color = Color(0.45360005, 0.2436, 0.1344, 1)
+polygon = PackedVector2Array(883.6, 317.2, 1651.6, 701.2, 1651.6, 445.2, 883.6, 61.199997)
+
+[node name="_Polygon2D_14" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/TailorShop" unique_id=1089197831]
+visible = false
+color = Color(0.60440004, 0.3894, 0.2776, 1)
+polygon = PackedVector2Array(986, 10, 1754, 394, 1651.6, 445.2, 883.6, 61.199997)
+
+[node name="Art" type="Sprite2D" parent="World/Blocks/BlockA/Visuals/TailorShop" unique_id=111878501]
+position = Vector2(1320, 420)
+scale = Vector2(0.34, 0.34)
+texture = ExtResource("34_cabinet02")
+
+[node name="A_Cabinet01" type="Node2D" parent="World/Blocks/BlockA/Visuals" unique_id=1739755508]
+z_index = 758
+
+[node name="_Polygon2D_18" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/A_Cabinet01" unique_id=861069314]
+visible = false
+color = Color(0.324, 0.2088, 0.12240001, 1)
+polygon = PackedVector2Array(2291.6, 989.2, 2214.8, 1027.6, 2214.8, 899.6, 2291.6, 861.2)
+
+[node name="_Polygon2D_19" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/A_Cabinet01" unique_id=818201567]
+visible = false
+color = Color(0.378, 0.2436, 0.1428, 1)
+polygon = PackedVector2Array(1894.8, 867.6, 2214.8, 1027.6, 2214.8, 899.6, 1894.8, 739.6)
+
+[node name="_Polygon2D_20" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/A_Cabinet01" unique_id=1898239820]
+visible = false
+color = Color(0.527, 0.3894, 0.2862, 1)
+polygon = PackedVector2Array(1971.6, 701.2, 2291.6, 861.2, 2214.8, 899.6, 1894.8, 739.6)
+
+[node name="Art" type="Sprite2D" parent="World/Blocks/BlockA/Visuals/A_Cabinet01" unique_id=111878502]
+position = Vector2(2060, 717)
+scale = Vector2(0.29923826, 0.30412108)
+texture = ExtResource("35_cabinet03")
+
+[node name="A_Cabinet02" type="Node2D" parent="World/Blocks/BlockA/Visuals" unique_id=1627001741]
+z_index = 1110
+
+[node name="_Polygon2D_21" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/A_Cabinet02" unique_id=1078189270]
+visible = false
+color = Color(0.3456, 0.22320001, 0.1296, 1)
+polygon = PackedVector2Array(3027.6, 1357.2, 2950.8, 1395.6, 2950.8, 1242, 3027.6, 1203.6)
+
+[node name="_Polygon2D_22" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/A_Cabinet02" unique_id=183768139]
+visible = false
+color = Color(0.4032, 0.26040003, 0.15120001, 1)
+polygon = PackedVector2Array(2566.8, 1203.6, 2950.8, 1395.6, 2950.8, 1242, 2566.8, 1050)
+
+[node name="_Polygon2D_23" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/A_Cabinet02" unique_id=1134753013]
+visible = false
+color = Color(0.5528, 0.4066, 0.2948, 1)
+polygon = PackedVector2Array(2643.6, 1011.60004, 3027.6, 1203.6, 2950.8, 1242, 2566.8, 1050)
+
+[node name="Art" type="Sprite2D" parent="World/Blocks/BlockA/Visuals/A_Cabinet02" unique_id=111878503]
+position = Vector2(3383.5, 1350.5)
+scale = Vector2(0.5014648, 0.41943356)
+texture = ExtResource("33_cabinet01")
+flip_h = true
+
+[node name="A_NorthWallVisual" type="Node2D" parent="World/Blocks/BlockA/Visuals" unique_id=218411263]
+z_index = 854
+
+[node name="_Polygon2D_24" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/A_NorthWallVisual" unique_id=1876720456]
+texture_repeat = 2
+color = Color(0.55, 0.57, 0.58, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(4035.6, 1749.2, 3990.8, 1771.6, 3990.8, 1566.7999, 4035.6, 1544.3999)
+
+[node name="_Polygon2D_25" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/A_NorthWallVisual" unique_id=965969210]
+z_index = -1000
+texture_repeat = 2
+color = Color(0.74, 0.76, 0.77, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(1046.8, 299.6, 3990.8, 1771.6, 3990.8, 1566.7999, 1046.8, 94.799995)
+
+[node name="_Polygon2D_26" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/A_NorthWallVisual" unique_id=1578076913]
+z_index = -1000
+texture_repeat = 2
+color = Color(0.9, 0.91, 0.92, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.28, 0.28)
+polygon = PackedVector2Array(1091.6, 72.399994, 4035.6, 1544.3999, 3990.8, 1566.7999, 1046.8, 94.799995)
+
+[node name="A_SouthWallVisual" type="Node2D" parent="World/Blocks/BlockA/Visuals" unique_id=852854038]
+z_index = 1514
+
+[node name="_Polygon2D_27" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/A_SouthWallVisual" unique_id=888716556]
+texture_repeat = 2
+color = Color(0.52, 0.54, 0.55, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(2717.2002, 2408.4, 2672.4, 2430.8, 2672.4, 2251.6, 2717.2002, 2229.2)
+
+[node name="_Polygon2D_28" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/A_SouthWallVisual" unique_id=1591847167]
+texture_repeat = 2
+color = Color(0.7, 0.72, 0.73, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(-271.59998, 958.8, 2672.4, 2430.8, 2672.4, 2251.6, -271.59998, 779.6)
+
+[node name="_Polygon2D_29" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/A_SouthWallVisual" unique_id=1575823907]
+texture_repeat = 2
+color = Color(0.88, 0.89, 0.9, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.28, 0.28)
+polygon = PackedVector2Array(-226.79993, 757.19995, 2717.2002, 2229.2, 2672.4, 2251.6, -271.59998, 779.6)
+
+[node name="AB_CorridorNorthVisual" type="Node2D" parent="World/Blocks/BlockA/Visuals" unique_id=487950900]
+z_index = 1900
+
+[node name="_Polygon2D_42" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/AB_CorridorNorthVisual" unique_id=1682802659]
+texture_repeat = 2
+color = Color(0.5, 0.52, 0.53, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(5158.8, 2723.6, 5114, 2746, 5114, 2515.6, 5158.8, 2493.2002)
+
+[node name="_Polygon2D_43" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/AB_CorridorNorthVisual" unique_id=1058836582]
+texture_repeat = 2
+color = Color(0.68, 0.7, 0.71, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(3578, 1978, 5114, 2746, 5114, 2515.6, 3578, 1747.6)
+
+[node name="_Polygon2D_44" type="Polygon2D" parent="World/Blocks/BlockA/Visuals/AB_CorridorNorthVisual" unique_id=107075381]
+texture_repeat = 2
+color = Color(0.86, 0.87, 0.88, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.28, 0.28)
+polygon = PackedVector2Array(3622.8, 1725.2, 5158.8, 2493.2002, 5114, 2515.6, 3578, 1747.6)
+
+[node name="CorridorLightPatch" type="Polygon2D" parent="World/Blocks/BlockA/Visuals" unique_id=92694140]
+z_index = -1100
+color = Color(0.94, 0.63, 0.25, 0.12)
+polygon = PackedVector2Array(3731.5999, 2072.72, 3898.0002, 2155.92, 3616.4001, 2296.72, 3449.9998, 2213.52)
+
+[node name="_Polygon2D_48" type="Polygon2D" parent="World/Blocks/BlockA/Visuals" unique_id=1318336225]
+z_index = -1100
+color = Color(0.94, 0.63, 0.25, 0.12)
+polygon = PackedVector2Array(4243.5996, 2328.72, 4410, 2411.9202, 4128.4004, 2552.72, 3961.9998, 2469.5198)
+
+[node name="_Polygon2D_49" type="Polygon2D" parent="World/Blocks/BlockA/Visuals" unique_id=1619233073]
+z_index = -1100
+color = Color(0.94, 0.63, 0.25, 0.12)
+polygon = PackedVector2Array(4755.5996, 2584.72, 4922, 2667.9202, 4640.4004, 2808.72, 4474, 2725.5198)
+
+[node name="BicyclePlaceholder" type="Node2D" parent="World/Blocks/BlockA/Visuals" unique_id=812953123]
+z_index = 700
+position = Vector2(794, 810)
+
+[node name="Art" type="Sprite2D" parent="World/Blocks/BlockA/Visuals/BicyclePlaceholder" unique_id=1371996177]
+position = Vector2(0, -58)
+scale = Vector2(0.095, 0.095)
+texture = ExtResource("11_bike")
+
+[node name="_Line2D_50" type="Line2D" parent="World/Blocks/BlockA/Visuals/BicyclePlaceholder" unique_id=567189883]
+visible = false
+points = PackedVector2Array(-9, -7, -10.266455, 0.18242311, -13.913067, 6.49854, -19.5, 11.186533, -26.353388, 13.680962, -33.64661, 13.680962, -40.5, 11.186533, -46.086933, 6.49854, -49.733543, 0.18242311, -51, -7, -49.733543, -14.182423, -46.086933, -20.498539, -40.5, -25.186533, -33.64661, -27.680962, -26.353388, -27.680962, -19.5, -25.186533, -13.913067, -20.498539, -10.266455, -14.182423)
+closed = true
+width = 5.0
+default_color = Color(0.08, 0.07, 0.06, 1)
+
+[node name="_Line2D_51" type="Line2D" parent="World/Blocks/BlockA/Visuals/BicyclePlaceholder" unique_id=1255966528]
+visible = false
+points = PackedVector2Array(51, -7, 49.733543, 0.18242311, 46.086933, 6.49854, 40.5, 11.186533, 33.64661, 13.680962, 26.353388, 13.680962, 19.5, 11.186533, 13.913067, 6.49854, 10.266455, 0.18242311, 9, -7, 10.266455, -14.182423, 13.913067, -20.498539, 19.5, -25.186533, 26.353388, -27.680962, 33.64661, -27.680962, 40.5, -25.186533, 46.086933, -20.498539, 49.733543, -14.182423)
+closed = true
+width = 5.0
+default_color = Color(0.08, 0.07, 0.06, 1)
+
+[node name="_Line2D_52" type="Line2D" parent="World/Blocks/BlockA/Visuals/BicyclePlaceholder" unique_id=1859503250]
+visible = false
+points = PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+width = 6.0
+default_color = Color(0.82, 0.56, 0.16, 1)
+
+[node name="A_Puddle" type="Polygon2D" parent="World/Blocks/BlockA/Visuals" unique_id=111878220]
+z_index = -1200
+color = Color(0.82, 0.9, 0.96, 0.94)
+texture = ExtResource("24_water")
+texture_offset = Vector2(954, 922)
+texture_scale = Vector2(0.65, 0.65)
+polygon = PackedVector2Array(1594, 922, 2746, 1498, 2106, 1818, 954, 1242)
+
+[node name="A_WetGroundDetail" type="Sprite2D" parent="World/Blocks/BlockA/Visuals" unique_id=432576888]
+modulate = Color(0.78, 0.86, 0.9, 0.72)
+z_index = -1300
+position = Vector2(2105.32, 1517)
+scale = Vector2(0.72722644, 0.48242185)
+texture = ExtResource("19_water_stain")
+
+[node name="A_BicycleParkingSlot" type="Node2D" parent="World/Blocks/BlockA/Visuals" unique_id=111878301]
+z_index = -1250
+
+[node name="_SlotOutline" type="Line2D" parent="World/Blocks/BlockA/Visuals/A_BicycleParkingSlot" unique_id=111878302]
+points = PackedVector2Array(902.8, 608.4, 1082, 698, 915.6, 781.2, 736.4, 691.6)
+closed = true
+width = 5.0
+default_color = Color(0.94, 0.94, 0.9, 0.85)
+
+[node name="_SlotDivider01" type="Line2D" parent="World/Blocks/BlockA/Visuals/A_BicycleParkingSlot" unique_id=111878303]
+points = PackedVector2Array(962.5, 638.3, 796.1, 721.5)
+width = 3.0
+default_color = Color(0.94, 0.94, 0.9, 0.55)
+
+[node name="_SlotDivider02" type="Line2D" parent="World/Blocks/BlockA/Visuals/A_BicycleParkingSlot" unique_id=111878304]
+points = PackedVector2Array(1022.3, 668.1, 855.9, 751.3)
+width = 3.0
+default_color = Color(0.94, 0.94, 0.9, 0.55)
+
+[node name="_Line2D_124" type="Line2D" parent="World/Blocks/BlockA/Visuals" unique_id=747539661]
+z_index = 900
+position = Vector2(46, -337.2002)
+points = PackedVector2Array(11034, 6365.2, 11930, 6813.2)
+width = 5.0
+default_color = Color(0.12, 0.22, 0.17, 1)
+
+[node name="OrdinaryClothesline" type="Line2D" parent="World/Blocks/BlockA/Visuals" unique_id=1234217667]
+z_index = -300
+points = PackedVector2Array(1178, 189.2, 858, 1206.8)
+width = 2.0
+default_color = Color(0.16, 0.12, 0.09, 0.68)
+
+[node name="_Line2D_125" type="Line2D" parent="World/Blocks/BlockA/Visuals" unique_id=902446235]
+z_index = -300
+points = PackedVector2Array(2266, 714, 2010, 1776.4)
+width = 2.0
+default_color = Color(0.16, 0.12, 0.09, 0.68)
+
+[node name="_Line2D_126" type="Line2D" parent="World/Blocks/BlockA/Visuals" unique_id=786883846]
+z_index = -300
+position = Vector2(46, -337.2002)
+points = PackedVector2Array(10458, 4803.6, 10586, 6307.6)
+width = 2.0
+default_color = Color(0.16, 0.12, 0.09, 0.68)
+
+[node name="SpatialPhysics" type="Node3D" parent="World/Blocks/BlockA" unique_id=1467837790]
+
+[node name="A_North" type="StaticBody3D" parent="World/Blocks/BlockA/SpatialPhysics" unique_id=1132285217]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1.2, 2)
+
+[node name="_CollisionShape3D_127" type="CollisionShape3D" parent="World/Blocks/BlockA/SpatialPhysics/A_North" unique_id=1082398848]
+shape = SubResource("BoxShape3D_476hs")
+
+[node name="A_South" type="StaticBody3D" parent="World/Blocks/BlockA/SpatialPhysics" unique_id=1187968720]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1.2, 22)
+
+[node name="_CollisionShape3D_128" type="CollisionShape3D" parent="World/Blocks/BlockA/SpatialPhysics/A_South" unique_id=594486727]
+shape = SubResource("BoxShape3D_v3ydr")
+
+[node name="A_PuddleBlocker" type="StaticBody3D" parent="World/Blocks/BlockA/SpatialPhysics" unique_id=1961227367]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 1, 12.5)
+
+[node name="_CollisionShape3D_129" type="CollisionShape3D" parent="World/Blocks/BlockA/SpatialPhysics/A_PuddleBlocker" unique_id=874757151]
+shape = SubResource("BoxShape3D_5xaw8")
+
+[node name="AB_CorridorNorth" type="StaticBody3D" parent="World/Blocks/BlockA/SpatialPhysics" unique_id=1796670244]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 1.8, 8.15)
+
+[node name="_CollisionShape3D_130" type="CollisionShape3D" parent="World/Blocks/BlockA/SpatialPhysics/AB_CorridorNorth" unique_id=92486391]
+shape = SubResource("BoxShape3D_0bdiw")
+
+[node name="AB_CorridorSouth" type="StaticBody3D" parent="World/Blocks/BlockA/SpatialPhysics" unique_id=1202502920]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 1.6, 13.85)
+
+[node name="_CollisionShape3D_131" type="CollisionShape3D" parent="World/Blocks/BlockA/SpatialPhysics/AB_CorridorSouth" unique_id=1027193067]
+shape = SubResource("BoxShape3D_vgsrl")
+
+[node name="BlockB" type="Node2D" parent="World/Blocks" unique_id=591769184]
+
+[node name="Visuals" type="Node2D" parent="World/Blocks/BlockB" unique_id=498796401]
+
+[node name="BlockB_Approach" type="Polygon2D" parent="World/Blocks/BlockB/Visuals" unique_id=1864792446]
+z_index = -1700
+texture_repeat = 2
+texture = ExtResource("18_ground")
+polygon = PackedVector2Array(5530, 2538, 6426, 2986, 5274, 3562, 4378, 3114)
+uv = PackedVector2Array(0, 0, 2054, 0, 2054, 2048, 0, 2048)
+
+[node name="BlockB_Farside" type="Polygon2D" parent="World/Blocks/BlockB/Visuals" unique_id=1715246053]
+texture_repeat = 2
+position = Vector2(867, 437)
+texture = ExtResource("18_ground")
+polygon = PackedVector2Array(5530, 2538, 6429, 2955, 5878, 3243, 5042, 2792)
+uv = PackedVector2Array(0, 0, 2054, 0, 2054, 1024, 0, 1024)
+
+[node name="B_to_C_Connector" type="Polygon2D" parent="World/Blocks/BlockB/Visuals" unique_id=961389725]
+z_index = -1700
+texture_repeat = 2
+position = Vector2(180, -401)
+texture = ExtResource("18_ground")
+polygon = PackedVector2Array(7130, 3786, 9690, 5066, 9114, 5354, 6554, 4074)
+uv = PackedVector2Array(0, 0, 5135, 0, 5135, 1024, 0, 1024)
+
+[node name="ConstructionDebrisNorth" type="Sprite2D" parent="World/Blocks/BlockB/Visuals" unique_id=1790195145]
+z_index = 1840
+position = Vector2(5480, 2760)
+scale = Vector2(0.18, 0.18)
+texture = ExtResource("14_debris_2")
+
+[node name="ConstructionDebrisSouth" type="Sprite2D" parent="World/Blocks/BlockB/Visuals" unique_id=760677079]
+z_index = 1880
+position = Vector2(4860, 3110)
+scale = Vector2(0.17, 0.17)
+texture = ExtResource("13_debris_1")
+
+[node name="ConstructionDebrisFarside" type="Sprite2D" parent="World/Blocks/BlockB/Visuals" unique_id=1560947624]
+z_index = 1920
+position = Vector2(6960, 3520)
+scale = Vector2(0.16, 0.16)
+texture = ExtResource("15_debris_3")
+
+[node name="WarningPostNear" type="Sprite2D" parent="World/Blocks/BlockB/Visuals" unique_id=479645531]
+z_index = 2050
+position = Vector2(5580, 3370)
+scale = Vector2(0.08, 0.08)
+texture = ExtResource("23_warning")
+
+[node name="WarningPostFar" type="Sprite2D" parent="World/Blocks/BlockB/Visuals" unique_id=597674883]
+z_index = 2070
+position = Vector2(6700, 3580)
+scale = Vector2(0.08, 0.08)
+texture = ExtResource("23_warning")
+
+[node name="B_NorthWallVisual" type="Node2D" parent="World/Blocks/BlockB/Visuals" unique_id=1076986938]
+z_index = 1900
+
+[node name="_Polygon2D_30" type="Polygon2D" parent="World/Blocks/BlockB/Visuals/B_NorthWallVisual" unique_id=801948694]
+texture_repeat = 2
+color = Color(0.54, 0.56, 0.57, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(6339.6, 2901.2, 6294.8, 2923.6, 6294.8, 2706, 6339.6, 2683.5999)
+
+[node name="_Polygon2D_31" type="Polygon2D" parent="World/Blocks/BlockB/Visuals/B_NorthWallVisual" unique_id=1824459062]
+texture_repeat = 2
+color = Color(0.72, 0.74, 0.75, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(5526.8, 2539.6, 6294.8, 2923.6, 6294.8, 2706, 5526.8, 2322)
+
+[node name="_Polygon2D_32" type="Polygon2D" parent="World/Blocks/BlockB/Visuals/B_NorthWallVisual" unique_id=1951202476]
+texture_repeat = 2
+color = Color(0.89, 0.9, 0.91, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.28, 0.28)
+polygon = PackedVector2Array(5571.6, 2299.5999, 6339.6, 2683.5999, 6294.8, 2706, 5526.8, 2322)
+
+[node name="B_SouthWallVisual" type="Node2D" parent="World/Blocks/BlockB/Visuals" unique_id=146779087]
+z_index = 1900
+
+[node name="_Polygon2D_33" type="Polygon2D" parent="World/Blocks/BlockB/Visuals/B_SouthWallVisual" unique_id=1543983465]
+texture_repeat = 2
+color = Color(0.51, 0.53, 0.54, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(5149.2, 3496.4, 5104.4, 3518.8, 5104.4, 3326.8, 5149.2, 3304.4)
+
+[node name="_Polygon2D_34" type="Polygon2D" parent="World/Blocks/BlockB/Visuals/B_SouthWallVisual" unique_id=125771362]
+texture_repeat = 2
+color = Color(0.69, 0.71, 0.72, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(4336.4, 3134.8, 5104.4, 3518.8, 5104.4, 3326.8, 4336.4, 2942.8)
+
+[node name="_Polygon2D_35" type="Polygon2D" parent="World/Blocks/BlockB/Visuals/B_SouthWallVisual" unique_id=263399805]
+texture_repeat = 2
+color = Color(0.87, 0.88, 0.89, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.28, 0.28)
+polygon = PackedVector2Array(4381.2, 2920.4, 5149.2, 3304.4, 5104.4, 3326.8, 4336.4, 2942.8)
+
+[node name="NarrowWallNorth" type="Node2D" parent="World/Blocks/BlockB/Visuals" unique_id=1460354542]
+z_index = 1900
+
+[node name="_Polygon2D_53" type="Polygon2D" parent="World/Blocks/BlockB/Visuals/NarrowWallNorth" unique_id=1520675860]
+texture_repeat = 2
+color = Color(0.52, 0.54, 0.55, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(6202, 2874, 5651.6, 3149.2, 5651.6, 2970, 6202, 2694.8)
+
+[node name="_Polygon2D_54" type="Polygon2D" parent="World/Blocks/BlockB/Visuals/NarrowWallNorth" unique_id=95507087]
+texture_repeat = 2
+color = Color(0.7, 0.72, 0.73, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(5587.6, 3117.2, 5651.6, 3149.2, 5651.6, 2970, 5587.6, 2938)
+
+[node name="_Polygon2D_55" type="Polygon2D" parent="World/Blocks/BlockB/Visuals/NarrowWallNorth" unique_id=1912830655]
+texture_repeat = 2
+color = Color(0.88, 0.89, 0.9, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.28, 0.28)
+polygon = PackedVector2Array(6138, 2662.8, 6202, 2694.8, 5651.6, 2970, 5587.6, 2938)
+
+[node name="NarrowWallSouth" type="Node2D" parent="World/Blocks/BlockB/Visuals" unique_id=471601955]
+z_index = 1910
+
+[node name="_Polygon2D_56" type="Polygon2D" parent="World/Blocks/BlockB/Visuals/NarrowWallSouth" unique_id=1619944295]
+texture_repeat = 2
+color = Color(0.52, 0.54, 0.55, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(5600.4, 3174.8, 5050, 3450, 5050, 3270.8, 5600.4, 2995.6)
+
+[node name="_Polygon2D_57" type="Polygon2D" parent="World/Blocks/BlockB/Visuals/NarrowWallSouth" unique_id=903304802]
+texture_repeat = 2
+color = Color(0.7, 0.72, 0.73, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(4986, 3418, 5050, 3450, 5050, 3270.8, 4986, 3238.8)
+
+[node name="_Polygon2D_58" type="Polygon2D" parent="World/Blocks/BlockB/Visuals/NarrowWallSouth" unique_id=392008364]
+texture_repeat = 2
+color = Color(0.88, 0.89, 0.9, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.28, 0.28)
+polygon = PackedVector2Array(5536.4, 2963.6, 5600.4, 2995.6, 5050, 3270.8, 4986, 3238.8)
+
+[node name="PitBottom" type="Polygon2D" parent="World/Blocks/BlockB/Visuals" unique_id=1215224838]
+z_index = -1400
+color = Color(0.58, 0.55, 0.5, 1)
+texture = ExtResource("12_concrete")
+polygon = PackedVector2Array(5964, 3599, 6889, 4039, 6170, 4394, 5274, 3946)
+uv = PackedVector2Array(0, 0, 1027, 0, 1027, 1024, 0, 1024)
+
+[node name="PitWallNorth" type="Polygon2D" parent="World/Blocks/BlockB/Visuals" unique_id=1215224901]
+z_index = -1460
+color = Color(0.88, 0.88, 0.88, 1)
+texture = ExtResource("16_pit_wall_north")
+polygon = PackedVector2Array(5968, 3610, 6878, 4054, 6963, 3780, 6080, 3317)
+uv = PackedVector2Array(0, 1024, 1027, 1024, 1027, 0, 0, 0)
+
+[node name="PitWallWest" type="Polygon2D" parent="World/Blocks/BlockB/Visuals" unique_id=1215224902]
+z_index = -1470
+position = Vector2(-1, 12)
+color = Color(0.82, 0.82, 0.82, 1)
+texture = ExtResource("17_pit_wall_west")
+polygon = PackedVector2Array(6012, 3598, 5274, 3946, 5290, 3545, 6129, 3106)
+uv = PackedVector2Array(1027, 1024, 0, 1024, 0, 0, 1027, 0)
+
+[node name="UpperStableEndpoint" type="Node2D" parent="World/Blocks/BlockB/Visuals" unique_id=358534075]
+visible = false
+z_index = 2450
+position = Vector2(6598.8, 3530)
+
+[node name="_Line2D_78" type="Line2D" parent="World/Blocks/BlockB/Visuals/UpperStableEndpoint" unique_id=558661981]
+points = PackedVector2Array(12, 0, 11.412679, 3.708204, 9.708204, 7.053423, 7.053423, 9.708204, 3.708204, 11.412679, 7.347638e-16, 12, -3.708204, 11.412679, -7.053423, 9.708204, -9.708204, 7.053423, -11.412679, 3.708204, -12, 1.4695276e-15, -11.412679, -3.708204, -9.708204, -7.053423, -7.053423, -9.708204, -3.708204, -11.412679, -2.2042914e-15, -12, 3.708204, -11.412679, 7.053423, -9.708204, 9.708204, -7.053423, 11.412679, -3.708204)
+closed = true
+width = 4.0
+default_color = Color(1, 0.27, 0.17, 0.95)
+
+[node name="BreakablePlank" type="Node2D" parent="World/Blocks/BlockB/Visuals" unique_id=1510731341]
+z_index = 500
+
+[node name="BoardArt" type="Sprite2D" parent="World/Blocks/BlockB/Visuals/BreakablePlank" unique_id=1079696658]
+position = Vector2(5985.135, 3303.4763)
+rotation = -3.3432906
+scale = Vector2(0.49855632, 0.26235035)
+texture = ExtResource("25_wood")
+flip_v = true
+
+[node name="BrokenPlank" type="Node2D" parent="World/Blocks/BlockB/Visuals" unique_id=505773052]
+visible = false
+z_index = 500
+
+[node name="BrokenBoardArt" type="Sprite2D" parent="World/Blocks/BlockB/Visuals/BrokenPlank" unique_id=693239009]
+position = Vector2(5847, 3272)
+rotation = 0.927295
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("26_wood_broken")
+
+[node name="PitFallDebris" type="Node2D" parent="World/Blocks/BlockB/Visuals" unique_id=216920373]
+visible = false
+z_index = 1850
+
+[node name="WoodFragment" type="Sprite2D" parent="World/Blocks/BlockB/Visuals/PitFallDebris" unique_id=216920374]
+position = Vector2(6230, 3790)
+rotation = 0.32
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("27_wood_splinter")
+
+[node name="Rubble" type="Sprite2D" parent="World/Blocks/BlockB/Visuals/PitFallDebris" unique_id=216920375]
+position = Vector2(5825, 3820)
+scale = Vector2(0.11, 0.11)
+texture = ExtResource("15_debris_3")
+
+[node name="SpatialPhysics" type="Node3D" parent="World/Blocks/BlockB" unique_id=1699487689]
+
+[node name="B_North" type="StaticBody3D" parent="World/Blocks/BlockB/SpatialPhysics" unique_id=2066383390]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 78, 1.2, 2)
+
+[node name="_CollisionShape3D_132" type="CollisionShape3D" parent="World/Blocks/BlockB/SpatialPhysics/B_North" unique_id=1448002354]
+shape = SubResource("BoxShape3D_1r4ex")
+
+[node name="B_South" type="StaticBody3D" parent="World/Blocks/BlockB/SpatialPhysics" unique_id=1858045664]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 78, 1.2, 20)
+
+[node name="_CollisionShape3D_133" type="CollisionShape3D" parent="World/Blocks/BlockB/SpatialPhysics/B_South" unique_id=713239772]
+shape = SubResource("BoxShape3D_8nmv2")
+
+[node name="B_GapNorth" type="StaticBody3D" parent="World/Blocks/BlockB/SpatialPhysics" unique_id=803381383]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 82, 1.2, 6.325)
+
+[node name="_CollisionShape3D_134" type="CollisionShape3D" parent="World/Blocks/BlockB/SpatialPhysics/B_GapNorth" unique_id=1507705978]
+shape = SubResource("BoxShape3D_wr4hs")
+
+[node name="B_GapSouth" type="StaticBody3D" parent="World/Blocks/BlockB/SpatialPhysics" unique_id=900579472]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 82, 1.2, 15.675)
+
+[node name="_CollisionShape3D_135" type="CollisionShape3D" parent="World/Blocks/BlockB/SpatialPhysics/B_GapSouth" unique_id=35278450]
+shape = SubResource("BoxShape3D_1piev")
+
+[node name="B_PitWallNorth" type="StaticBody3D" parent="World/Blocks/BlockB/SpatialPhysics" unique_id=803381401]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 94.3, -2.7, 10.4)
+
+[node name="_CollisionShape3D_140" type="CollisionShape3D" parent="World/Blocks/BlockB/SpatialPhysics/B_PitWallNorth" unique_id=1507705991]
+shape = SubResource("BoxShape3D_pitwn")
+
+[node name="B_PitWallWest" type="StaticBody3D" parent="World/Blocks/BlockB/SpatialPhysics" unique_id=803381402]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 87.2, -2.7, 15.8)
+
+[node name="_CollisionShape3D_141" type="CollisionShape3D" parent="World/Blocks/BlockB/SpatialPhysics/B_PitWallWest" unique_id=1507705992]
+shape = SubResource("BoxShape3D_pitww")
+
+[node name="BlockC" type="Node2D" parent="World/Blocks" unique_id=1385415273]
+
+[node name="Visuals" type="Node2D" parent="World/Blocks/BlockC" unique_id=42442921]
+
+[node name="BlockC_Road" type="Polygon2D" parent="World/Blocks/BlockC/Visuals" unique_id=1566915911]
+z_index = -1700
+texture_repeat = 2
+position = Vector2(46, -337.2002)
+texture = ExtResource("18_ground")
+polygon = PackedVector2Array(10266, 4778, 13338, 6314, 11546, 7210, 8474, 5674)
+uv = PackedVector2Array(0, 0, 4108, 0, 4108, 2048, 0, 2048)
+
+[node name="C_NorthWallVisual" type="Node2D" parent="World/Blocks/BlockC/Visuals" unique_id=1617183697]
+z_index = 1900
+
+[node name="_Polygon2D_36" type="Polygon2D" parent="World/Blocks/BlockC/Visuals/C_NorthWallVisual" unique_id=1095163199]
+texture_repeat = 2
+position = Vector2(46, -337.2002)
+color = Color(0.55, 0.57, 0.58, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(13187.6, 6325.2, 13142.8, 6347.6, 13142.8, 6091.6, 13187.6, 6069.2)
+
+[node name="_Polygon2D_37" type="Polygon2D" parent="World/Blocks/BlockC/Visuals/C_NorthWallVisual" unique_id=569887863]
+texture_repeat = 2
+position = Vector2(46, -337.2002)
+color = Color(0.74, 0.76, 0.77, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(10198.8, 4875.6, 13142.8, 6347.6, 13142.8, 6091.6, 10198.8, 4619.6)
+
+[node name="_Polygon2D_38" type="Polygon2D" parent="World/Blocks/BlockC/Visuals/C_NorthWallVisual" unique_id=260898158]
+texture_repeat = 2
+position = Vector2(46, -337.2002)
+color = Color(0.9, 0.91, 0.92, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.28, 0.28)
+polygon = PackedVector2Array(10243.6, 4597.2, 13187.6, 6069.2, 13142.8, 6091.6, 10198.8, 4619.6)
+
+[node name="C_SouthWallVisual" type="Node2D" parent="World/Blocks/BlockC/Visuals" unique_id=1816637383]
+z_index = 1900
+
+[node name="_Polygon2D_39" type="Polygon2D" parent="World/Blocks/BlockC/Visuals/C_SouthWallVisual" unique_id=2003884144]
+texture_repeat = 2
+position = Vector2(46, -337.2002)
+color = Color(0.52, 0.54, 0.55, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(11613.2, 7112.4, 11568.4, 7134.8, 11568.4, 6917.1997, 11613.2, 6894.8)
+
+[node name="_Polygon2D_40" type="Polygon2D" parent="World/Blocks/BlockC/Visuals/C_SouthWallVisual" unique_id=677395657]
+texture_repeat = 2
+position = Vector2(46, -337.2002)
+color = Color(0.7, 0.72, 0.73, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.32, 0.32)
+polygon = PackedVector2Array(8624.4, 5662.8, 11568.4, 7134.8, 11568.4, 6917.1997, 8624.4, 5445.1997)
+
+[node name="_Polygon2D_41" type="Polygon2D" parent="World/Blocks/BlockC/Visuals/C_SouthWallVisual" unique_id=1080138744]
+texture_repeat = 2
+position = Vector2(46, -337.2002)
+color = Color(0.88, 0.89, 0.9, 1)
+texture = ExtResource("12_concrete")
+texture_scale = Vector2(0.28, 0.28)
+polygon = PackedVector2Array(8669.2, 5422.8, 11613.2, 6894.8, 11568.4, 6917.1997, 8624.4, 5445.1997)
+
+[node name="GreenIronLamppost" type="Node2D" parent="World/Blocks/BlockC/Visuals" unique_id=799036052]
+z_index = 1200
+position = Vector2(10888, 5560.8)
+
+[node name="Art" type="Sprite2D" parent="World/Blocks/BlockC/Visuals/GreenIronLamppost" unique_id=536658178]
+position = Vector2(0, -116)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("22_streetlight")
+
+[node name="_Line2D_89" type="Line2D" parent="World/Blocks/BlockC/Visuals/GreenIronLamppost" unique_id=130019357]
+visible = false
+points = PackedVector2Array(0, 0, 0, -190, 48, -190)
+width = 11.0
+default_color = Color(0.08, 0.25, 0.18, 1)
+
+[node name="_Polygon2D_90" type="Polygon2D" parent="World/Blocks/BlockC/Visuals/GreenIronLamppost" unique_id=1846828829]
+visible = false
+color = Color(1, 0.7, 0.22, 1)
+polygon = PackedVector2Array(68, -174, 67.11902, -168.4377, 64.56231, -163.41986, 60.580135, -159.4377, 55.562305, -156.88098, 50, -156, 44.437695, -156.88098, 39.419865, -159.4377, 35.437695, -163.41986, 32.88098, -168.4377, 32, -174, 32.88098, -179.5623, 35.437695, -184.58014, 39.419865, -188.5623, 44.437695, -191.11902, 50, -192, 55.562305, -191.11902, 60.580135, -188.5623, 64.56231, -184.58014, 67.11902, -179.5623)
+
+[node name="SchoolGate" type="Node2D" parent="World/Blocks/BlockC/Visuals" unique_id=1941821469]
+z_index = 1980
+
+[node name="Art" type="Sprite2D" parent="World/Blocks/BlockC/Visuals/SchoolGate" unique_id=869381843]
+position = Vector2(12247, 6181.0005)
+rotation = 6.2013893
+scale = Vector2(0.61790556, 0.6797851)
+texture = ExtResource("20_tb0am")
+flip_h = true
+
+[node name="Art" type="Sprite2D" parent="World/Blocks/BlockC/Visuals/SchoolGate/Art" unique_id=533376101]
+position = Vector2(12264, 6151)
+rotation = 6.2013893
+scale = Vector2(0.61790556, 0.6797851)
+texture = ExtResource("20_tb0am")
+flip_h = true
+
+[node name="Art2" type="Sprite2D" parent="World/Blocks/BlockC/Visuals/SchoolGate/Art" unique_id=1027255033]
+position = Vector2(12264, 6151)
+rotation = 6.2013893
+scale = Vector2(0.61790556, 0.6797851)
+texture = ExtResource("20_tb0am")
+flip_h = true
+
+[node name="Art" type="Sprite2D" parent="World/Blocks/BlockC/Visuals/SchoolGate/Art/Art2" unique_id=1812848015]
+position = Vector2(12264, 6151)
+rotation = 6.2013893
+scale = Vector2(0.61790556, 0.6797851)
+texture = ExtResource("20_tb0am")
+flip_h = true
+
+[node name="_GateSideX" type="Polygon2D" parent="World/Blocks/BlockC/Visuals/SchoolGate" unique_id=271268926]
+visible = false
+color = Color(0.16800001, 0.23520002, 0.16800001, 1)
+polygon = PackedVector2Array(12538, 5990.8, 12102.8, 6208.4, 12102.8, 6451.6, 12538, 6234)
+
+[node name="_GateSideZ" type="Polygon2D" parent="World/Blocks/BlockC/Visuals/SchoolGate" unique_id=733647140]
+visible = false
+color = Color(0.14400001, 0.20160002, 0.14400001, 1)
+polygon = PackedVector2Array(12051.6, 6182.8, 12102.8, 6208.4, 12102.8, 6451.6, 12051.6, 6426)
+
+[node name="_GateTop" type="Polygon2D" parent="World/Blocks/BlockC/Visuals/SchoolGate" unique_id=1708317593]
+visible = false
+color = Color(0.312, 0.3808, 0.312, 1)
+polygon = PackedVector2Array(12486.8, 5965.2, 12538, 5990.8, 12102.8, 6208.4, 12051.6, 6182.8)
+
+[node name="C_WetGroundDetail" type="Sprite2D" parent="World/Blocks/BlockC/Visuals" unique_id=156102616]
+modulate = Color(0.76, 0.84, 0.9, 0.68)
+z_index = -1300
+position = Vector2(11330, 6070)
+scale = Vector2(0.32, 0.32)
+texture = ExtResource("19_water_stain")
+
+[node name="C_ManholeCover" type="Sprite2D" parent="World/Blocks/BlockC/Visuals" unique_id=156102617]
+modulate = Color(0.82, 0.86, 0.9, 1)
+z_index = -1290
+position = Vector2(10266, 5478)
+scale = Vector2(0.1633, 0.1633)
+texture = ExtResource("37_jinggai")
+
+[node name="C_ParkedCar" type="Sprite2D" parent="World/Blocks/BlockC/Visuals" unique_id=156102618]
+modulate = Color(0.88, 0.9, 0.92, 1)
+z_index = 1250
+position = Vector2(10723.999, 4935)
+scale = Vector2(0.5739501, 0.5739501)
+texture = ExtResource("38_car")
+
+[node name="SpatialPhysics" type="Node3D" parent="World/Blocks/BlockC" unique_id=2076410895]
+
+[node name="C_North" type="StaticBody3D" parent="World/Blocks/BlockC/SpatialPhysics" unique_id=1036089947]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 163.1, 1.2, -3.628)
+
+[node name="_CollisionShape3D_136" type="CollisionShape3D" parent="World/Blocks/BlockC/SpatialPhysics/C_North" unique_id=1300490561]
+shape = SubResource("BoxShape3D_l21df")
+
+[node name="C_South" type="StaticBody3D" parent="World/Blocks/BlockC/SpatialPhysics" unique_id=356306513]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 163.1, 1.2, 20.372)
+
+[node name="_CollisionShape3D_137" type="CollisionShape3D" parent="World/Blocks/BlockC/SpatialPhysics/C_South" unique_id=954956124]
+shape = SubResource("BoxShape3D_bj5yf")
 
 [node name="Characters" type="Node2D" parent="." unique_id=552470917]
 
@@ -64,35 +884,36 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.575, 0)
 shape = SubResource("CapsuleShape_child")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Characters/Child" unique_id=1204523581]
-self_modulate = Color(1, 0.76, 0.28, 1)
-position = Vector2(0, -43)
-scale = Vector2(0.52, 0.52)
-sprite_frames = SubResource("SpriteFrames_child")
-animation = &"idle"
-
-[node name="GroundShadow" type="Polygon2D" parent="Characters/Child" unique_id=1068321777]
-z_index = -1
-position = Vector2(13, 7)
-color = Color(0.005, 0.012, 0.011, 0.32)
-polygon = PackedVector2Array(-15, -4, 0, -8, 25, 3, 8, 10)
+position = Vector2(0, -84)
+scale = Vector2(0.45, 0.45)
+sprite_frames = ExtResource("4_daughter2")
+animation = &"idle_down"
 
 [node name="Umbrella" type="Node2D" parent="Characters/Child" unique_id=438048082]
 position = Vector2(8, -40)
 
+[node name="Art" type="Sprite2D" parent="Characters/Child/Umbrella" unique_id=1732096317]
+scale = Vector2(0.075, 0.075)
+texture = ExtResource("28_umbrella")
+
 [node name="Canopy" type="Polygon2D" parent="Characters/Child/Umbrella" unique_id=2049544474]
+visible = false
 color = Color(0.98, 0.76, 0.18, 1)
 polygon = PackedVector2Array(-18, 2, -12, -8, 0, -13, 12, -8, 18, 2, 9, -1, 0, 3, -9, -1)
 
 [node name="Handle" type="Line2D" parent="Characters/Child/Umbrella" unique_id=1356827528]
+visible = false
 points = PackedVector2Array(0, 0, 0, 27, 7, 31)
 width = 2.5
 default_color = Color(0.32, 0.22, 0.13, 1)
 
 [node name="CatEarLeft" type="Polygon2D" parent="Characters/Child/Umbrella" unique_id=16558500]
+visible = false
 color = Color(0.98, 0.76, 0.18, 1)
 polygon = PackedVector2Array(-11, -7, -8, -18, -2, -10)
 
 [node name="CatEarRight" type="Polygon2D" parent="Characters/Child/Umbrella" unique_id=2096246062]
+visible = false
 color = Color(0.98, 0.76, 0.18, 1)
 polygon = PackedVector2Array(2, -10, 8, -18, 11, -7)
 
@@ -107,9 +928,6 @@ reveal_distance = 0.0
 tension_distance = 4.5
 max_distance = 7.5
 visual_width = 5.0
-normal_color = Color(0.66, 0.16, 0.13, 0.78)
-tension_color = Color(0.94, 0.24, 0.15, 0.96)
-pull_back_color = Color(1, 0.31, 0.18, 1)
 distance_weight = 0.82
 critical_tension = 0.98
 critical_distance_ratio = 0.98
@@ -143,63 +961,71 @@ layer = 20
 [node name="ChapterTitle" type="Label" parent="UI" unique_id=1944300634]
 offset_left = 24.0
 offset_top = 16.0
-offset_right = 520.0
-offset_bottom = 54.0
-theme_override_colors/font_color = Color(0.98, 0.86, 0.64, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
-theme_override_constants/shadow_offset_x = 2
+offset_right = 374.0
+offset_bottom = 62.0
+theme_override_colors/font_color = Color(0.42, 0.2, 0.12, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.94, 0.78, 0.55)
+theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("32_font_print")
 theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("Style_c2_capsule")
 text = "第二章 · 第一次放手"
+vertical_alignment = 1
 
 [node name="ProgressLabel" type="Label" parent="UI" unique_id=855237172]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -292.0
-offset_top = 18.0
-offset_right = -28.0
-offset_bottom = 54.0
+offset_left = -212.0
+offset_top = 16.0
+offset_right = -24.0
+offset_bottom = 62.0
 grow_horizontal = 0
-theme_override_colors/font_color = Color(0.98, 0.79, 0.38, 1)
+theme_override_colors/font_color = Color(0.42, 0.24, 0.13, 1)
+theme_override_fonts/font = ExtResource("32_font_print")
+theme_override_font_sizes/font_size = 21
+theme_override_styles/normal = SubResource("Style_c2_plaque")
+text = "教学 1 / 6"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ObjectiveLabel" type="Label" parent="UI" unique_id=1797441618]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -190.0
+offset_right = 424.0
+offset_bottom = -28.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 21
-text = "教学 1 / 6"
-horizontal_alignment = 2
-
-[node name="ObjectiveLabel" type="Label" parent="UI" unique_id=1797441618]
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 170.0
-offset_top = 62.0
-offset_right = -170.0
-offset_bottom = 104.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(0.96, 0.94, 0.84, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 21
-horizontal_alignment = 1
+theme_override_fonts/font = ExtResource("32_font_print")
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("Style_c2_hint")
+autowrap_mode = 2
 
 [node name="HintLabel" type="Label" parent="UI" unique_id=764069717]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 170.0
-offset_top = -58.0
-offset_right = -170.0
-offset_bottom = -18.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -410.0
+offset_top = 74.0
+offset_right = 410.0
+offset_bottom = 130.0
 grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_color = Color(0.88, 0.96, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
+theme_override_colors/font_color = Color(0.96, 0.93, 0.83, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 18
+theme_override_fonts/font = ExtResource("31_font_bold")
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("Style_c2_hint")
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="TransitionOverlay" type="ColorRect" parent="UI" unique_id=1237106999]
 anchors_preset = 15

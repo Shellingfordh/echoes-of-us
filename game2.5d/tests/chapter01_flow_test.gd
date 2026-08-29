@@ -23,12 +23,18 @@ func _run() -> void:
 	var room := main.get_node("World/Chapter01Room01")
 	var mother := room.get_node("Characters/Mother") as Mother
 	var suitcase := room.get_node("Interactables/Suitcase") as Interactable
+	var suitcase_closed_visual := suitcase.get_node("Visual") as Sprite2D
+	var suitcase_open_visual := suitcase.get_node("OpenVisual") as Sprite2D
+	var suitcase_closed_collision := suitcase.get_node("MathBody/CollisionShape3D") as CollisionShape3D
+	var suitcase_open_collision := suitcase.get_node("MathBody/OpenCollisionShape3D") as CollisionShape3D
 	var umbrella := room.get_node("Interactables/Umbrella") as Interactable
 	var thread_clue := room.get_node("Interactables/ThreadClue") as Interactable
 	var photo := room.get_node("Interactables/PhotoFrame") as Interactable
 	var packing_box := room.get_node("Interactables/PackingBox") as Interactable
 	var stool := room.get_node("Interactables/Stool") as PushableStool
 	var bed_trigger := room.get_node("Interactables/BedCrouchTrigger") as Interactable
+	var wardrobe_closed_visual := room.get_node("Midground/Wardrobe/Visual") as Sprite2D
+	var wardrobe_open_visual := room.get_node("Midground/Wardrobe/OpenVisual") as Sprite2D
 
 	dialogue.characters_per_second = 0.0
 	dialogue.monologue_hold_seconds = 0.0
@@ -41,6 +47,9 @@ func _run() -> void:
 	assert(not umbrella.interaction_enabled)
 	assert(not photo.interaction_enabled)
 	assert(not thread_clue.interaction_enabled)
+	assert(suitcase_closed_visual.visible and not suitcase_open_visual.visible)
+	assert(wardrobe_closed_visual.visible and not wardrobe_open_visual.visible)
+	assert(not suitcase_closed_collision.disabled and suitcase_open_collision.disabled)
 	assert(room.get_node_or_null("Interactables/Headphones") == null)
 	assert(room.get_node_or_null("Interactables/BeadBracelet") == null)
 
@@ -67,6 +76,7 @@ func _run() -> void:
 		"O043",
 		"D043"
 	)
+	assert(not wardrobe_closed_visual.visible and wardrobe_open_visual.visible)
 	assert(act.get_investigated_key_count() == 0)
 
 	# 相框需要箱子同时满足“推到柜前目标区”和“玩家站上箱顶”。
@@ -83,6 +93,9 @@ func _run() -> void:
 	for node_name in ["PackingBox", "Suitcase", "Desk"]:
 		var target := room.get_node("Interactables/%s" % node_name) as Interactable
 		await _inspect_object(target, observation, dialogue, target.observation_id, target.dialogue_id)
+	assert(not suitcase_closed_visual.visible and suitcase_open_visual.visible)
+	await physics_frame
+	assert(suitcase_closed_collision.disabled and not suitcase_open_collision.disabled)
 
 	await _crouch_and_inspect_bed(
 		player,
@@ -97,13 +110,13 @@ func _run() -> void:
 	await process_frame
 	assert(act.get_investigated_key_count() == 5)
 	assert(act.current_beat == Act01Sequence.Beat.UMBRELLA_DIALOGUE)
-	assert(mother.get_logical_position().is_equal_approx(Vector3(9.0, 0.0, 7.0)))
+	assert(mother.get_logical_position().is_equal_approx(act.mother_dialogue_position))
 	_finish_dialogue(dialogue)
 	for _index in range(3):
 		await process_frame
 	var mother_mid_walk := mother.get_logical_position()
-	assert(mother_mid_walk.distance_to(Vector3(9.0, 0.0, 7.0)) > 0.01)
-	assert(mother_mid_walk.distance_to(Vector3(4.35, 0.0, 7.8)) > 0.01)
+	assert(mother_mid_walk.distance_to(act.mother_dialogue_position) > 0.01)
+	assert(mother_mid_walk.distance_to(act.mother_after_dialogue_position) > 0.01)
 	for _index in range(120):
 		await process_frame
 		if act.current_beat == Act01Sequence.Beat.P2_LEAVE:
@@ -115,7 +128,7 @@ func _run() -> void:
 	assert(not umbrella.investigated)
 	assert(suitcase.observation_id == "O045" and not suitcase.investigated)
 	assert(mother.visible)
-	assert(mother.get_logical_position().is_equal_approx(Vector3(4.35, 0.0, 7.8)))
+	assert(mother.get_logical_position().is_equal_approx(act.mother_after_dialogue_position))
 	assert(mother.is_facing_away())
 	assert(tie_line.get_target_anchor().is_equal_approx(mother.get_anchor_position()))
 	await _inspect_object(suitcase, observation, dialogue, "O045", "D045")
@@ -186,6 +199,9 @@ func _inspect_object(
 	assert(target.observation_id == expected_observation_id)
 	target.interact(get_first_node_in_group(&"player") as PlayerController)
 	assert(observation.is_open() and observation.current_object_id == target.name)
+	if expected_observation_id == "O043":
+		assert(observation._item_image.visible and observation._item_image.texture != null)
+		assert(observation._item_image.get_parent() == observation._body_label.get_parent())
 	assert(not "余念·独白" in observation._body_label.text)
 	observation.close_observation()
 	assert(dialogue.is_playing() and dialogue._root_id == expected_dialogue_id)

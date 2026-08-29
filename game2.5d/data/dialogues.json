@@ -1,107 +1,204 @@
 {
-  "_comment": "第一章屋内对白 Source of Truth。依据 docs/narrative/03_剧情对白表.md；剧情同学可改 speaker、portrait、lines、next。",
+  "_comment": "根据立绘对白匹配表生成；对白、说话人、阻塞状态与立绘路径均以表格为准。",
   "_schema": "mode = monologue/dialogue；blocking = 是否暂停探索；speaker = 说话人；portrait = res:// 立绘路径；lines = 当前节点的句子；next = 下一节点 ID 或 END。",
-
   "D001": {
     "mode": "dialogue",
     "blocking": false,
-    "speaker": "余念",
+    "speaker": "余念·独白",
     "portrait": "res://art/portraits/chapter1/余念（23）：强忍悲戚.png",
-    "lines": ["终于封上了……累死了。", "三箱。衣服一箱，书一箱，剩下乱七八糟的塞一箱。", "二十三年，收拾到最后也就这么点。"],
+    "lines": [
+      "“终于收完了！我还以为真要收出十箱八箱呢。……也好，东西少，走起来省事。”"
+    ],
     "next": "END"
   },
   "D002": {
     "mode": "dialogue",
     "blocking": false,
-    "speaker": "余念",
+    "speaker": "余念·独白",
     "portrait": "res://art/portraits/chapter1/余念（23）：烦躁郁闷.png",
-    "lines": ["保温杯、苹果、胃药……", "我什么时候装的？", "……行。知道是谁了。"],
+    "lines": [
+      "“我就知道，她到底什么时候进来的……每次都这样，也不先问我一声。算了，药先放着吧。”"
+    ],
     "next": "END"
   },
   "D003": {
     "mode": "dialogue",
     "blocking": false,
-    "speaker": "余念",
+    "speaker": "余念·独白",
     "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
-    "lines": ["票，通知……都在。", "两点零五。明早六点四十到。还挺久。", "……这印子怎么擦不掉。", "算了。"],
+    "lines": [
+      "“总算等到这一天了。……怎么还真有点紧张……没事，到了再说！”"
+    ],
     "next": "END"
   },
   "D004": {
     "mode": "dialogue",
     "blocking": false,
-    "speaker": "余念",
+    "speaker": "余念·独白",
     "portrait": "res://art/portraits/chapter1/余念（23）：欣然愉悦.png",
-    "lines": ["还行。看着挺像那么回事。"],
+    "lines": [
+      "“看着还行嘛。至少不像第一次出远门的人。”"
+    ],
+    "next": "END"
+  },
+  "D041": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念·独白",
+    "portrait": "res://art/portraits/chapter1/余念（23）：欣然愉悦.png",
+    "lines": [
+      "“我就说没丢嘛。妈前两天还让我别找了，再买一副。幸好没听她的。……这种地方也就我进得来，要换成她，腰肯定不行。”"
+    ],
+    "next": "END"
+  },
+  "D042": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念·独白",
+    "portrait": "res://art/portraits/chapter1/余念（23）：欣然愉悦.png",
+    "lines": [
+      "“妈以前头发这么长啊。……她现在拍照还老说自己不上镜，明明这张倒笑得挺开心的。”"
+    ],
+    "next": "END"
+  },
+  "D043": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念·独白",
+    "portrait": "res://art/portraits/chapter1/余念（23）：强忍悲戚.png",
+    "lines": [
+      "“爸爸的衣服……还留着。每次收拾都说‘下回再弄’，下回又原样挂回去。……算了，她想留就留吧。”"
+    ],
+    "next": "END"
+  },
+  "D044": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念·独白",
+    "portrait": "res://art/portraits/chapter1/余念（23）：欣然愉悦.png",
+    "lines": [
+      "“这东西居然还没散架。不过，换根线，应该也还能戴。”"
+    ],
     "next": "END"
   },
   "D005": {
     "mode": "dialogue",
+    "blocking": true,
     "speaker": "余秀兰",
     "portrait": "res://art/portraits/chapter1/余秀兰（48）：欣然愉悦.png",
-    "lines": ["雨伞没拿，来，给你装上。你这拉链怎么又卡了？"],
-    "next": "D006"
+    "lines": [
+      "“雨伞没拿，来，给你装上。你这拉链怎么又卡了？”"
+    ],
+    "next": "END"
   },
   "D006": {
     "mode": "dialogue",
+    "blocking": true,
     "speaker": "余秀兰",
     "portrait": "res://art/portraits/chapter1/余秀兰（48）：满眼宠溺.png",
-    "lines": ["那边这两天有雨。塞着吧，省得到地方现买。"],
-    "next": "D007"
+    "lines": [
+      "“那边这两天有雨。塞着吧，省得到地方现买。”"
+    ],
+    "next": "END"
   },
   "D007": {
     "mode": "dialogue",
+    "blocking": true,
     "speaker": "余念",
     "portrait": "res://art/portraits/chapter1/余念（23）：烦躁郁闷.png",
-    "lines": ["妈，真塞不下了，你别硬塞啊。"],
-    "next": "D008"
+    "lines": [
+      "“妈，真塞不下了，你别硬塞啊。”"
+    ],
+    "next": "END"
   },
   "D008": {
     "mode": "dialogue",
+    "blocking": true,
     "speaker": "余念",
     "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
-    "lines": ["到那儿再买就行，便利店多的是。"],
-    "next": "D009"
+    "lines": [
+      "“到那儿再买就行，便利店多的是。”"
+    ],
+    "next": "END"
   },
   "D009": {
     "mode": "dialogue",
+    "blocking": true,
     "speaker": "余秀兰",
     "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
-    "lines": ["十几二十块不是钱啊？家里有，还买。"],
-    "next": "D010"
+    "lines": [
+      "“十几二十块不是钱啊？家里有，还买。”"
+    ],
+    "next": "END"
   },
   "D010": {
     "mode": "dialogue",
+    "blocking": true,
     "speaker": "余秀兰",
     "portrait": "res://art/portraits/chapter1/余秀兰（48）：满眼宠溺.png",
-    "lines": ["还有这两盒药你别给我拿出来，啊，你一忙起来，饭都不按点吃。"],
-    "next": "D011"
+    "lines": [
+      "“还有这两盒药你别给我拿出来，啊，你一忙起来，饭都不按点吃。”"
+    ],
+    "next": "END"
   },
   "D011": {
     "mode": "dialogue",
+    "blocking": true,
     "speaker": "余秀兰",
     "portrait": "res://art/portraits/chapter1/余秀兰（48）：强忍悲戚.png",
-    "lines": ["你说你……非得跑那么远干什么。省城不是也有工作吗？"],
-    "next": "D012"
+    "lines": [
+      "“你说你……非得跑那么远干什么。省城不是也有工作吗？”"
+    ],
+    "next": "END"
   },
   "D012": {
     "mode": "dialogue",
+    "blocking": true,
     "speaker": "余念",
     "portrait": "res://art/portraits/chapter1/余念（23）：烦躁郁闷.png",
-    "lines": ["妈，你说，这伞都多少年了，骨架都松了，我带它干什么。"],
-    "next": "D013"
+    "lines": [
+      "“妈，你说，这伞都多少年了，骨架都松了，我带它干什么。”"
+    ],
+    "next": "END"
   },
   "D013": {
     "mode": "dialogue",
+    "blocking": true,
     "speaker": "余秀兰",
     "portrait": "res://art/portraits/chapter1/余秀兰（48）：强忍悲戚.png",
-    "lines": ["行。你不要就不要。"],
-    "next": "D014"
+    "lines": [
+      "“行。你不要就不要。”"
+    ],
+    "next": "END"
   },
   "D014": {
     "mode": "dialogue",
+    "blocking": true,
     "speaker": "余秀兰",
-    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
-    "lines": ["放这儿了。爱拿不拿。"],
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：阴…….png",
+    "lines": [
+      "“放这儿了。爱拿不拿。”"
+    ],
+    "next": "END"
+  },
+  "D045": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念·独白",
+    "portrait": "res://art/portraits/chapter1/余念（23）：烦躁郁闷.png",
+    "lines": [
+      "“又塞。她是不是觉得我一出这个门就能立刻病倒啊。……算了，也不沉。”"
+    ],
+    "next": "END"
+  },
+  "D046": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念·独白",
+    "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
+    "lines": [
+      "“她还真把它留下了。……刚才跟一把伞较什么劲。先放这儿吧。”"
+    ],
     "next": "END"
   },
   "D015": {
@@ -109,15 +206,19 @@
     "blocking": false,
     "speaker": "余念",
     "portrait": "res://art/portraits/chapter1/余念（23）：难以置信.png",
-    "lines": ["怎么又回来了？"],
-    "next": "D016"
+    "lines": [
+      "“怎么又回来了？”"
+    ],
+    "next": "END"
   },
   "D016": {
     "mode": "dialogue",
     "blocking": false,
     "speaker": "余念",
     "portrait": "res://art/portraits/chapter1/余念（23）：难以置信.png",
-    "lines": ["……线？"],
+    "lines": [
+      "“……线？”"
+    ],
     "next": "END"
   },
   "D017": {
@@ -125,169 +226,559 @@
     "blocking": false,
     "speaker": "余念",
     "portrait": "res://art/portraits/chapter1/余念（23）：难以置信.png",
-    "lines": ["不是幻觉？这是怎么回事？"],
-    "next": "D018"
+    "lines": [
+      "“不是幻觉？这是怎么回事？”"
+    ],
+    "next": "END"
   },
   "D018": {
     "mode": "dialogue",
+    "blocking": true,
     "speaker": "余念",
     "portrait": "res://art/portraits/chapter1/余念（23）：强忍悲戚.png",
-    "lines": ["……妈妈不想让我走？"],
-    "next": "END"
-  },
-  "D041": {
-    "mode": "dialogue",
-    "blocking": false,
-    "speaker": "余念",
-    "portrait": "res://art/portraits/chapter1/余念（23）：欣然愉悦.png",
-    "lines": ["真是的，我的耳机，找了一星期，原来在这儿。", "……这种地方也就我进得来。"],
-    "next": "END"
-  },
-  "D042": {
-    "mode": "dialogue",
-    "blocking": false,
-    "speaker": "余念",
-    "portrait": "res://art/portraits/chapter1/余念（23）：欣然愉悦.png",
-    "lines": ["小学春游……我站哪儿呢。", "哦，这儿，妈还站最后一排，她那时候头发这么长啊。", "这张怎么搁这么高。"],
-    "next": "END"
-  },
-  "D043": {
-    "mode": "dialogue",
-    "blocking": false,
-    "speaker": "余念",
-    "portrait": "res://art/portraits/chapter1/余念（23）：强忍悲戚.png",
-    "lines": ["这件衣服还在啊。领口都硬了。", "我都说多少次了，留着也没人穿。", "……算了。她爱留就留着吧。"],
-    "next": "END"
-  },
-  "D044": {
-    "mode": "dialogue",
-    "blocking": false,
-    "speaker": "余念",
-    "portrait": "res://art/portraits/chapter1/余念（23）：欣然愉悦.png",
-    "lines": ["这线，都戴得起毛了。", "……回头换一根。"],
-    "next": "END"
-  },
-  "D045": {
-    "mode": "dialogue",
-    "blocking": false,
-    "speaker": "余念",
-    "portrait": "res://art/portraits/chapter1/余念（23）：烦躁郁闷.png",
-    "lines": ["……又多两盒。", "她什么时候塞的。"],
-    "next": "END"
-  },
-  "D046": {
-    "mode": "dialogue",
-    "blocking": false,
-    "speaker": "余念",
-    "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
-    "lines": ["这伞，我小时候买的，现在猫脸都要掉没了，伞骨也松了。", "……她怎么什么都要留着。"],
+    "lines": [
+      "“……妈妈不想让我走？”"
+    ],
     "next": "END"
   },
   "D047": {
     "mode": "dialogue",
     "blocking": false,
-    "speaker": "余念",
+    "speaker": "余念·独白",
     "portrait": "res://art/portraits/chapter1/余念（23）：烦躁郁闷.png",
-    "lines": ["线？好多的线，它们一直都在这儿，我以前，好像从没注意到……"],
+    "lines": [
+      ""
+    ],
     "next": "END"
   },
-
   "D019": {
     "mode": "dialogue",
+    "blocking": false,
     "speaker": "七岁余念",
     "portrait": "res://art/portraits/chapter2/余念（7）：欣然愉悦.png",
-    "lines": ["妈妈你快点！我先走啦！"],
+    "lines": [
+      "“妈妈你快点！我先走啦！”"
+    ],
     "next": "END"
   },
   "D020": {
     "mode": "dialogue",
+    "blocking": false,
     "speaker": "年轻余秀兰",
     "portrait": "res://art/portraits/chapter2/余秀兰（33）：正常状态.png",
-    "lines": ["慢点儿。看路。"],
+    "lines": [
+      "“慢点儿。看路。”"
+    ],
     "next": "END"
   },
   "D021": {
     "mode": "dialogue",
+    "blocking": false,
     "speaker": "年轻余秀兰",
     "portrait": "res://art/portraits/chapter2/余秀兰（33）：心脏骤停.png",
-    "lines": ["余念，停！"],
+    "lines": [
+      "“余念，停！”"
+    ],
     "next": "END"
   },
   "D022": {
     "mode": "dialogue",
+    "blocking": false,
     "speaker": "七岁余念",
     "portrait": "res://art/portraits/chapter2/余念（7）：积郁憋闷.png",
-    "lines": ["你干嘛呀，我都没碰到水！"],
+    "lines": [
+      "“你干嘛呀，我都没碰到水！”"
+    ],
     "next": "END"
   },
   "D023": {
     "mode": "dialogue",
+    "blocking": false,
     "speaker": "七岁余念",
-    "portrait": "res://art/portraits/chapter2/余念（7）：正常状态.png",
-    "lines": ["这个我能钻！你别过来，我自己来。"],
-    "next": "END"
-  },
-  "D024": {
-    "mode": "dialogue",
-    "speaker": "年轻余秀兰",
-    "portrait": "res://art/portraits/chapter2/余秀兰（33）：心脏骤停.png",
-    "lines": ["余念！抓紧！别往下看——对，往上爬。妈妈在这儿。"],
-    "next": "END"
-  },
-  "D025": {
-    "mode": "dialogue",
-    "speaker": "年轻余秀兰",
-    "portrait": "res://art/portraits/chapter2/余秀兰（33）：含情凝望.png",
-    "lines": ["去吧。别跑。……到那边回头让我看一眼。"],
+    "portrait": "res://art/portraits/chapter2/余念（7）：淡然自若.png",
+    "lines": [
+      "“这个我能钻！你别过来，我自己来。”"
+    ],
     "next": "END"
   },
   "D048": {
     "mode": "dialogue",
+    "blocking": false,
     "speaker": "七岁余念",
     "portrait": "res://art/portraits/chapter2/余念（7）：积郁憋闷.png",
-    "lines": ["我搬得动——……搬不动。"],
+    "lines": [
+      "“我搬得动——……搬不动。”"
+    ],
     "next": "END"
   },
   "D049": {
     "mode": "dialogue",
+    "blocking": false,
     "speaker": "年轻余秀兰",
     "portrait": "res://art/portraits/chapter2/余秀兰（33）：含情凝望.png",
-    "lines": ["让开点，别砸着脚。"],
+    "lines": [
+      "“让开点，别砸着脚。”"
+    ],
     "next": "END"
   },
   "D050": {
     "mode": "dialogue",
+    "blocking": false,
     "speaker": "七岁余念",
-    "portrait": "res://art/portraits/chapter2/余念（7）：正常状态.png",
-    "lines": ["这点水我肯定能过去！"],
+    "portrait": "res://art/portraits/chapter2/余念（7）：欣然愉悦.png",
+    "lines": [
+      "“这点水我肯定能过去！”"
+    ],
     "next": "END"
   },
   "D051": {
     "mode": "dialogue",
+    "blocking": false,
     "speaker": "年轻余秀兰",
     "portrait": "res://art/portraits/chapter2/余秀兰（33）：正常状态.png",
-    "lines": ["行行行，你慢点儿，我跟在后面哦。"],
+    "lines": [
+      "“行行行，你慢点儿，我跟在后面哦。”"
+    ],
+    "next": "END"
+  },
+  "D024": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "年轻余秀兰",
+    "portrait": "res://art/portraits/chapter2/余秀兰（33）：心脏骤停.png",
+    "lines": [
+      "“余念！抓紧！别往下看——对，往上爬。妈妈在这儿。”"
+    ],
     "next": "END"
   },
   "D052": {
     "mode": "dialogue",
+    "blocking": false,
     "speaker": "七岁余念",
-    "portrait": "res://art/portraits/chapter2/余念（7）：淡然自若.png",
-    "lines": ["你看，妈妈，我自己上来的！"],
+    "portrait": "res://art/portraits/chapter2/余念（7）：欣然愉悦.png",
+    "lines": [
+      "“你看，妈妈，我自己上来的！”"
+    ],
     "next": "END"
   },
   "D053": {
     "mode": "dialogue",
+    "blocking": false,
     "speaker": "年轻余秀兰",
     "portrait": "res://art/portraits/chapter2/余秀兰（33）：含情凝望.png",
-    "lines": ["嗯，妈妈看见了。宝宝，真棒！膝盖呢，疼不疼？"],
+    "lines": [
+      "“嗯，妈妈看见了。宝宝，真棒！膝盖呢，疼不疼？”"
+    ],
+    "next": "END"
+  },
+  "D025": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "年轻余秀兰",
+    "portrait": "res://art/portraits/chapter2/余秀兰（33）：含情凝望.png",
+    "lines": [
+      "“去吧。别跑。……到那边回头让我看一眼。”"
+    ],
     "next": "END"
   },
   "D054": {
     "mode": "dialogue",
+    "blocking": false,
     "speaker": "七岁余念",
     "portrait": "res://art/portraits/chapter2/余念（7）：欣然愉悦.png",
-    "lines": ["知道啦——！"],
+    "lines": [
+      "“知道啦——！”"
+    ],
+    "next": "END"
+  },
+  "D026": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：满眼宠溺.png",
+    "lines": [
+      "“念念？哎，念念？想什么呢。”"
+    ],
+    "next": "END"
+  },
+  "D027": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：欣然愉悦.png",
+    "lines": [
+      "“没事。这个我拿吧，你拿那个，别一趟全扛上了。”"
+    ],
+    "next": "END"
+  },
+  "D055": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
+    "lines": [
+      "“前头走不了了。咱们走后边吧，穿过仓库，能上天台。”"
+    ],
+    "next": "END"
+  },
+  "D056": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
+    "lines": [
+      "“天台那头能下去吗？”"
+    ],
+    "next": "END"
+  },
+  "D057": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：积郁烦闷.png",
+    "lines": [
+      "“可以。我天天在这片走，我能不知道吗？”"
+    ],
+    "next": "END"
+  },
+  "D028": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：欣然愉悦.png",
+    "lines": [
+      "“我站这儿，你先过去吧。”"
+    ],
+    "next": "END"
+  },
+  "D029": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：欣然愉悦.png",
+    "lines": [
+      "“你别动啊，妈，这回我拉你！”"
+    ],
+    "next": "END"
+  },
+  "D058": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：积郁烦闷.png",
+    "lines": [
+      "“不用，我自己上得去。”"
+    ],
+    "next": "END"
+  },
+  "D059": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：满眼宠溺.png",
+    "lines": [
+      "“……你站稳点。”"
+    ],
+    "next": "END"
+  },
+  "D060": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
+    "lines": [
+      "“嗯。来吧。”"
+    ],
+    "next": "END"
+  },
+  "D030": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
+    "lines": [
+      "“你把这个往外挪点，我从那边钻过去。”"
+    ],
+    "next": "END"
+  },
+  "D031": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
+    "lines": [
+      "“行。慢点，里面黑。”"
+    ],
+    "next": "END"
+  },
+  "D061": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "高中姑娘",
+    "portrait": null,
+    "lines": [
+      "“姨，我来我来。”"
+    ],
+    "next": "END"
+  },
+  "D062": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：满眼宠溺.png",
+    "lines": [
+      "“你拿这个。那个沉，别逞能。”"
+    ],
+    "next": "END"
+  },
+  "D032": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：满眼宠溺.png",
+    "lines": [
+      "“你先上。上去站稳再说。”"
+    ],
+    "next": "END"
+  },
+  "D033": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：欣然愉悦.png",
+    "lines": [
+      "“好了。你上来吧。”"
+    ],
+    "next": "END"
+  },
+  "D063": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：欣然愉悦.png",
+    "lines": [
+      "“别松啊。”"
+    ],
+    "next": "END"
+  },
+  "D064": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
+    "lines": [
+      "“没松。”"
+    ],
+    "next": "END"
+  },
+  "D034": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
+    "lines": [
+      "“这袋路上吃，这袋到了再开。别都塞一块儿，一会儿又找不着。”"
+    ],
+    "next": "END"
+  },
+  "D035": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
+    "lines": [
+      "“行，我知道。你给我吧。”"
+    ],
+    "next": "END"
+  },
+  "D036": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
+    "lines": [
+      "“到地方给我打个电话。还有那个房子，我越想越不放心。”"
+    ],
+    "next": "END"
+  },
+  "D037": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
+    "lines": [
+      "“要不我跟你过去一趟？也不住多久，帮你把东西弄好我就回来。”"
+    ],
+    "next": "END"
+  },
+  "D038": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：隐忍愠怒.png",
+    "lines": [
+      "“不用。我自己能弄。”"
+    ],
+    "next": "END"
+  },
+  "D039": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
+    "lines": [
+      "“我知道你能，我就是——”"
+    ],
+    "next": "END"
+  },
+  "D040": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：强忍悲戚.png",
+    "lines": [
+      "“行了，行了，你是不是就是不想让我走！”"
+    ],
+    "next": "END"
+  },
+  "D065": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：强忍悲戚.png",
+    "lines": [
+      "“……………………那我不管了。”"
+    ],
+    "next": "END"
+  },
+  "D066": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
+    "lines": [
+      "“我出来玩两天。”"
+    ],
+    "next": "END"
+  },
+  "D067": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
+    "lines": [
+      "“妈，你一个人啊？”"
+    ],
+    "next": "END"
+  },
+  "D068": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
+    "lines": [
+      "“嗯，我一个人。”"
+    ],
+    "next": "END"
+  },
+  "D069": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：难以置信.png",
+    "lines": [
+      "“票……你自己买的？”"
+    ],
+    "next": "END"
+  },
+  "D070": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
+    "lines": [
+      "“对，买的硬座。”"
+    ],
+    "next": "END"
+  },
+  "D071": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
+    "lines": [
+      "“到了给我发个消息。手机别没电。晚上也别往太偏的地方走啊。”"
+    ],
+    "next": "END"
+  },
+  "D072": {
+    "mode": "dialogue",
+    "blocking": true,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
+    "lines": [
+      "“嗯。知道了。挂了啊。”"
+    ],
+    "next": "END"
+  },
+  "D073": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
+    "lines": [
+      "“我今晚不过去吃了，加班。”"
+    ],
+    "next": "END"
+  },
+  "D074": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：满眼宠溺.png",
+    "lines": [
+      "“哦。几点下班？”"
+    ],
+    "next": "END"
+  },
+  "D075": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
+    "lines": [
+      "“不知道。你那边下雨没？”"
+    ],
+    "next": "END"
+  },
+  "D076": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
+    "lines": [
+      "“没下。你晚饭吃了？”"
+    ],
+    "next": "END"
+  },
+  "D077": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余念",
+    "portrait": "res://art/portraits/chapter1/余念（23）：正常状态.png",
+    "lines": [
+      "“吃了，楼下那个。难吃死了。”"
+    ],
+    "next": "END"
+  },
+  "D078": {
+    "mode": "dialogue",
+    "blocking": false,
+    "speaker": "余秀兰",
+    "portrait": "res://art/portraits/chapter1/余秀兰（48）：正常状态.png",
+    "lines": [
+      "“那你明天别吃那家。”"
+    ],
     "next": "END"
   }
 }

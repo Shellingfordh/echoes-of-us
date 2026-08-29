@@ -3,6 +3,10 @@
 [ext_resource type="Script" uid="uid://d0o6ekypmrx88" path="res://scripts/ui/dialogue_ui.gd" id="1_dialogue"]
 [ext_resource type="Texture2D" path="res://art/portraits/chapter1/余念（23）：正常状态.png" id="2_portrait_yunian"]
 [ext_resource type="Texture2D" path="res://art/portraits/chapter1/余秀兰（48）：正常状态.png" id="3_portrait_yuxiulan"]
+[ext_resource type="Texture2D" path="res://art/ui/dialogue_panel.png" id="4_panel_dialogue"]
+[ext_resource type="Texture2D" path="res://art/ui/monologue_panel.png" id="5_panel_monologue"]
+[ext_resource type="FontFile" path="res://art/fonts/simkai.ttf" id="6_font_hand"]
+[ext_resource type="FontFile" path="res://art/fonts/NotoSansCJKsc-Regular.otf" id="7_font_print"]
 
 [sub_resource type="AtlasTexture" id="Atlas_yunian"]
 atlas = ExtResource("2_portrait_yunian")
@@ -10,35 +14,21 @@ region = Rect2(234, 170, 885, 1400)
 
 [sub_resource type="AtlasTexture" id="Atlas_yuxiulan"]
 atlas = ExtResource("3_portrait_yuxiulan")
-region = Rect2(250, 120, 885, 1400)
+region = Rect2(293, 205, 758, 1200)
 
-[sub_resource type="StyleBoxFlat" id="Style_dialogue"]
-bg_color = Color(0.035, 0.075, 0.07, 0.97)
-border_width_left = 2
-border_width_top = 1
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.32, 0.69, 0.57, 0.72)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.52)
-shadow_size = 12
+[sub_resource type="StyleBoxTexture" id="Style_dialogue"]
+texture = ExtResource("4_panel_dialogue")
+texture_margin_left = 24.0
+texture_margin_top = 24.0
+texture_margin_right = 24.0
+texture_margin_bottom = 24.0
 
-[sub_resource type="StyleBoxFlat" id="Style_monologue"]
-bg_color = Color(0.025, 0.045, 0.043, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.55, 0.67, 0.62, 0.34)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-shadow_color = Color(0, 0, 0, 0.45)
-shadow_size = 9
+[sub_resource type="StyleBoxTexture" id="Style_monologue"]
+texture = ExtResource("5_panel_monologue")
+texture_margin_left = 20.0
+texture_margin_top = 20.0
+texture_margin_right = 20.0
+texture_margin_bottom = 20.0
 
 [node name="DialogueUI" type="Control" unique_id=158875552]
 visible = false
@@ -63,7 +53,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.008, 0.018, 0.017, 0.42)
+color = Color(0.055, 0.035, 0.02, 0.42)
 
 [node name="DialogueFrame" type="MarginContainer" parent="." unique_id=812201258]
 layout_mode = 1
@@ -101,12 +91,13 @@ theme_override_constants/separation = 12
 custom_minimum_size = Vector2(5, 28)
 layout_mode = 2
 mouse_filter = 2
-color = Color(0.89, 0.7, 0.3, 1)
+color = Color(0.72, 0.4, 0.16, 1)
 
 [node name="SpeakerName" type="Label" parent="DialogueFrame/Panel/Margin/VBox/Header" unique_id=29888283]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.96, 0.8, 0.43, 1)
-theme_override_font_sizes/font_size = 25
+theme_override_colors/font_color = Color(0.42, 0.2, 0.12, 1)
+theme_override_fonts/font = ExtResource("7_font_print")
+theme_override_font_sizes/font_size = 29
 text = "人物名字"
 
 [node name="Body" type="HBoxContainer" parent="DialogueFrame/Panel/Margin/VBox" unique_id=922070525]
@@ -122,11 +113,9 @@ theme_override_constants/separation = 8
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/default_color = Color(0.94, 0.95, 0.91, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.55)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/normal_font_size = 24
+theme_override_colors/default_color = Color(0.16, 0.14, 0.11, 1)
+theme_override_fonts/normal_font = ExtResource("6_font_hand")
+theme_override_font_sizes/normal_font_size = 29
 bbcode_enabled = true
 text = "对白内容"
 fit_content = true
@@ -137,20 +126,20 @@ layout_mode = 2
 
 [node name="LineStatus" type="Label" parent="DialogueFrame/Panel/Margin/VBox/Body/TextColumn/Footer" unique_id=1907951263]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.48, 0.62, 0.56, 1)
+theme_override_colors/font_color = Color(0.46, 0.4, 0.31, 1)
 theme_override_font_sizes/font_size = 15
 text = "1 / 1"
 
 [node name="ContinueHint" type="Label" parent="DialogueFrame/Panel/Margin/VBox/Body/TextColumn/Footer" unique_id=431515317]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.66, 0.75, 0.7, 1)
+theme_override_colors/font_color = Color(0.38, 0.33, 0.26, 1)
 theme_override_font_sizes/font_size = 16
 text = "Enter / 空格 继续"
 
 [node name="NextIndicator" type="Label" parent="DialogueFrame/Panel/Margin/VBox/Body/TextColumn/Footer" unique_id=374505688]
 custom_minimum_size = Vector2(24, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.96, 0.78, 0.38, 1)
+theme_override_colors/font_color = Color(0.72, 0.4, 0.16, 1)
 theme_override_font_sizes/font_size = 18
 text = "▼"
 horizontal_alignment = 1
@@ -208,19 +197,18 @@ theme_override_constants/separation = 5
 
 [node name="SpeakerName" type="Label" parent="MonologueFrame/Panel/Margin/VBox" unique_id=1064938006]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.78, 0.72, 0.58, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.5, 0.36, 0.22, 1)
+theme_override_fonts/font = ExtResource("7_font_print")
+theme_override_font_sizes/font_size = 19
 text = "说话人"
 horizontal_alignment = 1
 
 [node name="DialogueText" type="RichTextLabel" parent="MonologueFrame/Panel/Margin/VBox" unique_id=1880576612]
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
-theme_override_colors/default_color = Color(0.88, 0.91, 0.88, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.45)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/normal_font_size = 21
+theme_override_colors/default_color = Color(0.2, 0.17, 0.13, 1)
+theme_override_fonts/normal_font = ExtResource("6_font_hand")
+theme_override_font_sizes/normal_font_size = 25
 bbcode_enabled = true
 text = "内心独白"
 fit_content = true

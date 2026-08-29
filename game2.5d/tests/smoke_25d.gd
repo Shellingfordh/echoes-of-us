@@ -140,7 +140,8 @@ func _run() -> void:
 	assert(photo.interaction_enabled)
 	assert(player.get_logical_position().y > 0.0)
 	assert(player._current_interactable == photo)
-	assert("空格" in interaction_hint.text and "下来" in interaction_hint.text)
+	var hint_text := (interaction_hint.get_node("Label") as Label).text
+	assert("空格" in hint_text and "下来" in hint_text)
 	assert(photo.z_index > wardrobe.z_index)
 	player.dismount_stool()
 	await physics_frame

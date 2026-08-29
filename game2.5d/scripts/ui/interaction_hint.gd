@@ -1,5 +1,9 @@
 class_name InteractionHint
-extends Label
+extends PanelContainer
+
+## 交互提示。放在画面上方，带半透明灰底，避免被底部对话框遮住。
+
+@onready var _label: Label = $Label
 
 
 func _ready() -> void:
@@ -8,7 +12,7 @@ func _ready() -> void:
 
 
 func show_hint(message: String) -> void:
-	text = message
+	_label.text = message
 	show()
 
 

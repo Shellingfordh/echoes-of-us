@@ -1,0 +1,8 @@
+[gd_resource type="FontVariation" format=3 uid="uid://dfvqmgpx0jyi7"]
+
+[ext_resource type="FontFile" uid="uid://brwnr85he4vsk" path="res://art/fonts/simhei.ttf" id="1_simhei"]
+
+[resource]
+base_font = ExtResource("1_simhei")
+variation_embolden = 0.72
+variation_transform = Transform2D(1.03, 0, -0.08, 1, 0, 0)

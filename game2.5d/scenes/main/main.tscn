@@ -15,6 +15,14 @@
 [ext_resource type="Script" uid="uid://dphl7dm2iqx1h" path="res://scripts/ui/objective_label.gd" id="14_objective"]
 [ext_resource type="Script" path="res://scripts/ui/fixed_observation_ui.gd" id="15_observation"]
 [ext_resource type="Script" path="res://scripts/core/observation_database.gd" id="16_observation_db"]
+[ext_resource type="Texture2D" path="res://art/ui/hint_panel.png" id="17_panel_hint"]
+[ext_resource type="Texture2D" path="res://art/ui/plaque_panel.png" id="18_panel_plaque"]
+[ext_resource type="FontVariation" path="res://ui/font_hint.tres" id="19_font_bold"]
+[ext_resource type="FontFile" path="res://art/fonts/NotoSansCJKsc-Regular.otf" id="20_font_print"]
+
+[sub_resource type="StyleBoxEmpty" id="Style_hint"]
+
+[sub_resource type="StyleBoxEmpty" id="Style_objective"]
 
 [node name="Main" type="Node2D" unique_id=624362405]
 script = ExtResource("1_main")
@@ -73,37 +81,69 @@ layer = 10
 [node name="UI" type="CanvasLayer" parent="." unique_id=1209082936]
 layer = 20
 
-[node name="InteractionHint" type="Label" parent="UI" unique_id=977522465]
-offset_left = 390.0
-offset_top = 638.0
-offset_right = 890.0
-offset_bottom = 686.0
-theme_override_colors/font_color = Color(0.82, 0.95, 0.88, 1)
+[node name="InteractionHint" type="PanelContainer" parent="UI" unique_id=977522465]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -300.0
+offset_top = 22.0
+offset_right = 300.0
+offset_bottom = 78.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Style_hint")
+script = ExtResource("8_hint")
+
+[node name="Label" type="Label" parent="UI/InteractionHint" unique_id=1977522466]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.98, 0.96, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 20
+theme_override_fonts/font = ExtResource("19_font_bold")
+theme_override_font_sizes/font_size = 26
 text = "按 Enter / 空格调查"
 horizontal_alignment = 1
 vertical_alignment = 1
-script = ExtResource("8_hint")
 
-[node name="ObjectiveLabel" type="Label" parent="UI" unique_id=1662468928]
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -300.0
-offset_top = 34.0
-offset_right = 300.0
-offset_bottom = 70.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(0.9, 0.94, 0.92, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 22
-horizontal_alignment = 1
+[node name="ObjectiveLabel" type="PanelContainer" parent="UI" unique_id=1662468928]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -190.0
+offset_right = 424.0
+offset_bottom = -28.0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Style_objective")
 script = ExtResource("14_objective")
+
+[node name="VBox" type="VBoxContainer" parent="UI/ObjectiveLabel" unique_id=1662468930]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="UI/ObjectiveLabel/VBox" unique_id=1662468931]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("20_font_print")
+theme_override_font_sizes/font_size = 20
+autowrap_mode = 2
+
+[node name="Description" type="Label" parent="UI/ObjectiveLabel/VBox" unique_id=1662468932]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("20_font_print")
+theme_override_font_sizes/font_size = 17
+autowrap_mode = 2
 
 [node name="DebugPanel" type="Label" parent="UI" unique_id=1138176796]
 offset_left = 18.0

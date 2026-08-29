@@ -1,4 +1,4 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://c7dts60711ybq"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_476hs"]
 size = Vector3(48, 2.4, 0.4)
@@ -165,21 +165,6 @@ polygon = PackedVector2Array(3578, 1978, 5114, 2746, 5114, 2515.6, 3578, 1747.6)
 [node name="_Polygon2D_44" type="Polygon2D" parent="BlockA/Visuals/AB_CorridorNorthVisual" unique_id=1594310134]
 color = Color(0.4066, 0.3378, 0.2948, 1)
 polygon = PackedVector2Array(3622.8, 1725.2, 5158.8, 2493.2002, 5114, 2515.6, 3578, 1747.6)
-
-[node name="AB_CorridorSouthVisual" type="Node2D" parent="BlockA/Visuals" unique_id=622155946]
-z_index = 1900
-
-[node name="_Polygon2D_45" type="Polygon2D" parent="BlockA/Visuals/AB_CorridorSouthVisual" unique_id=270580923]
-color = Color(0.20160002, 0.1512, 0.12240001, 1)
-polygon = PackedVector2Array(4794, 2906, 4749.2, 2928.4, 4749.2, 2723.6, 4794, 2701.2)
-
-[node name="_Polygon2D_46" type="Polygon2D" parent="BlockA/Visuals/AB_CorridorSouthVisual" unique_id=1700127294]
-color = Color(0.23520002, 0.1764, 0.1428, 1)
-polygon = PackedVector2Array(3213.2, 2160.4, 4749.2, 2928.4, 4749.2, 2723.6, 3213.2, 1955.6)
-
-[node name="_Polygon2D_47" type="Polygon2D" parent="BlockA/Visuals/AB_CorridorSouthVisual" unique_id=1916077880]
-color = Color(0.3808, 0.3206, 0.2862, 1)
-polygon = PackedVector2Array(3258, 1933.2, 4794, 2701.2, 4749.2, 2723.6, 3213.2, 1955.6)
 
 [node name="CorridorLightPatch" type="Polygon2D" parent="BlockA/Visuals" unique_id=1399447706]
 z_index = -1100
@@ -398,21 +383,6 @@ polygon = PackedVector2Array(6166.8, 2987.6, 7062.8, 3435.6, 7062.8, 3390.8, 616
 [node name="_Polygon2D_62" type="Polygon2D" parent="BlockB/Visuals/PitNorthRim" unique_id=1029873139]
 color = Color(0.35500002, 0.2862, 0.2432, 1)
 polygon = PackedVector2Array(6198.8, 2926.8, 7094.8, 3374.8, 7062.8, 3390.8, 6166.8, 2942.8)
-
-[node name="PitSouthRim" type="Node2D" parent="BlockB/Visuals" unique_id=1348631058]
-z_index = 1900
-
-[node name="_Polygon2D_63" type="Polygon2D" parent="BlockB/Visuals/PitSouthRim" unique_id=744258240]
-color = Color(0.18, 0.12240001, 0.0864, 1)
-polygon = PackedVector2Array(6173.2, 3880.4, 6141.2, 3896.4, 6141.2, 3851.6, 6173.2, 3835.6)
-
-[node name="_Polygon2D_64" type="Polygon2D" parent="BlockB/Visuals/PitSouthRim" unique_id=1379179650]
-color = Color(0.21000001, 0.1428, 0.1008, 1)
-polygon = PackedVector2Array(5245.2, 3448.4, 6141.2, 3896.4, 6141.2, 3851.6, 5245.2, 3403.6)
-
-[node name="_Polygon2D_65" type="Polygon2D" parent="BlockB/Visuals/PitSouthRim" unique_id=2099289641]
-color = Color(0.35500002, 0.2862, 0.2432, 1)
-polygon = PackedVector2Array(5277.2, 3387.6, 6173.2, 3835.6, 6141.2, 3851.6, 5245.2, 3403.6)
 
 [node name="PitWestRim" type="Node2D" parent="BlockB/Visuals" unique_id=1648686260]
 z_index = 1900

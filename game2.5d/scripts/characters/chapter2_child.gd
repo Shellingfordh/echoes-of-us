@@ -9,16 +9,24 @@ extends Node2D
 @export var anchor_height := 0.72
 @export var movement_min := Vector2(0.0, 0.0)
 @export var movement_max := Vector2(192.0, 28.0)
+## 行走所在的地面高度。地面阶段是 0，掉进坑底后是坑底面的 y（负值）。
+## 有了它，同一套 WASD 逻辑就能在坑底那张横面上走，不必再另开一个模式。
+@export var floor_height := 0.0
 
 @onready var math_body: CharacterBody3D = $MathBody
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
-@onready var ground_shadow: Polygon2D = $GroundShadow
+@onready var ground_shadow: Polygon2D = get_node_or_null("GroundShadow") as Polygon2D
 @onready var umbrella: Node2D = $Umbrella
 
 var _control_enabled := false
 var _climbing := false
 var _game_flow: GameFlow
 var _climb_target := Vector3.ZERO
+## 当前朝向：down / up / left / right。停下后保留，idle 不会自己转回正面。
+var _facing := StringName("down")
+var _moving := false
+## 姿态覆盖：空表示走正常四向贴图；climb / bounce 时锁定成单张特写。
+var _pose := StringName("")
 
 
 func _ready() -> void:
@@ -28,7 +36,14 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_game_flow = _get_game_flow()
-	if not _control_enabled or (_game_flow != null and not _game_flow.is_player_control_enabled()):
+	if not _control_enabled:
+		# 没有操作权时，位置由剧本用 set_logical_position 推动（跟随母亲、绕水坑等），
+		# 行走动画也由剧本用 set_moving 指定。这里只清速度，绝不覆盖动画状态，
+		# 否则每个物理帧都会把剧本设的 walk 打回 idle，跟随时看着像在平移。
+		math_body.velocity = Vector3.ZERO
+		return
+	if _game_flow != null and not _game_flow.is_player_control_enabled():
+		# 有操作权但被对话/过场冻结：这是真的该站定。
 		math_body.velocity = Vector3.ZERO
 		set_moving(false)
 		return
@@ -43,12 +58,12 @@ func _physics_process(delta: float) -> void:
 	math_body.move_and_slide()
 	var logical := math_body.position
 	logical.x = clampf(logical.x, movement_min.x, movement_max.x)
-	logical.y = 0.0
+	logical.y = floor_height
 	logical.z = clampf(logical.z, movement_min.y, movement_max.y)
 	math_body.position = logical
 	set_moving(not direction.is_zero_approx())
 	if not direction.is_zero_approx():
-		face_screen_direction(Projection25D.project_direction(direction).x)
+		face_screen_vector(Projection25D.project_direction(direction))
 	_sync_projection()
 
 
@@ -68,10 +83,23 @@ func set_ground_bounds(minimum: Vector2, maximum: Vector2) -> void:
 	movement_max = maximum
 
 
+## 换一张可行走的横面：坑底给 -4.8，地面给 0。
+## 同时把角色贴到新高度上，避免下一物理帧才被 clamp 拉过去造成一帧的抖动。
+func set_floor_height(value: float) -> void:
+	floor_height = value
+	if is_instance_valid(math_body):
+		var logical := math_body.position
+		logical.y = value
+		math_body.position = logical
+		_sync_projection()
+
+
 func begin_climb(target: Vector3) -> void:
 	_climbing = true
 	_climb_target = target
 	set_control_enabled(true)
+	# 按 W 沿线往上爬这一整段换成攀爬特写，爬上去后由 end_climb 收回。
+	set_pose(&"climb")
 	if is_instance_valid(ground_shadow):
 		ground_shadow.hide()
 
@@ -79,6 +107,7 @@ func begin_climb(target: Vector3) -> void:
 func end_climb() -> void:
 	_climbing = false
 	set_control_enabled(false)
+	set_pose(&"")
 	if is_instance_valid(ground_shadow):
 		ground_shadow.show()
 
@@ -109,14 +138,61 @@ func get_anchor_position() -> Vector2:
 
 
 func set_moving(value: bool) -> void:
+	_moving = value
+	_play()
+
+
+## 攀爬 / 弹跳这类整段动作用单张特写顶掉四向贴图。
+## 传空字符串就回到正常的 idle / walk。
+func set_pose(pose: StringName) -> void:
+	_pose = pose
+	_play()
+
+
+func get_pose() -> StringName:
+	return _pose
+
+
+## 只拿到屏幕水平分量时的兼容入口：仍按左右解析，纵向朝向保持不变。
+func face_screen_direction(direction: float) -> void:
+	if is_zero_approx(direction):
+		return
+	_facing = &"right" if direction > 0.0 else &"left"
+	_play()
+
+
+## 有完整屏幕向量时按四向解析：横向压过纵向就走左右，否则走上下。
+## 判据用投影后的屏幕向量而不是逻辑 XZ，因为等距投影把两条轴各转了 45°。
+func face_screen_vector(screen_direction: Vector2) -> void:
+	if screen_direction.is_zero_approx():
+		return
+	if absf(screen_direction.x) >= absf(screen_direction.y):
+		_facing = &"right" if screen_direction.x > 0.0 else &"left"
+	else:
+		_facing = &"down" if screen_direction.y > 0.0 else &"up"
+	_play()
+
+
+## 有四向贴图就用四向，没有就退回 idle / walk 加 flip_h。
+func _play() -> void:
 	if not is_instance_valid(animated_sprite):
 		return
-	animated_sprite.play(&"walk" if value else &"idle")
-
-
-func face_screen_direction(direction: float) -> void:
-	if is_instance_valid(animated_sprite) and not is_zero_approx(direction):
-		animated_sprite.flip_h = direction < 0.0
+	var frames := animated_sprite.sprite_frames
+	if frames == null:
+		return
+	if _pose != &"" and frames.has_animation(_pose):
+		animated_sprite.flip_h = false
+		animated_sprite.play(_pose)
+		return
+	var base := &"walk" if _moving else &"idle"
+	var directional := StringName("%s_%s" % [base, _facing])
+	if frames.has_animation(directional):
+		animated_sprite.flip_h = false
+		animated_sprite.play(directional)
+		return
+	if frames.has_animation(base):
+		animated_sprite.flip_h = _facing == &"left"
+		animated_sprite.play(base)
 
 
 func set_umbrella_raised(value: bool) -> void:
@@ -150,7 +226,9 @@ func _sync_projection() -> void:
 	global_position = Projection25D.project(math_body.position)
 	z_index = Projection25D.depth_index(math_body.position) + 7
 	if is_instance_valid(ground_shadow):
-		ground_shadow.visible = not _climbing and math_body.position.y >= -0.05
+		# 影子跟着"当前脚下那张面"，所以判据是相对 floor_height 而不是绝对 0。
+		# 在坑底走路时脚是踩实的，影子该在；坠落 / 攀线时离地，影子该消失。
+		ground_shadow.visible = not _climbing and math_body.position.y >= floor_height - 0.05
 
 
 func _get_game_flow() -> GameFlow:

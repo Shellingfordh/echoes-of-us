@@ -1,19 +1,13 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/characters/mother.gd" id="1_mother"]
-[ext_resource type="Texture2D" path="res://art/playerGrey_up1.png" id="2_mother_tex"]
+[ext_resource type="SpriteFrames" path="res://resources/mother1_frames.tres" id="2_mother_frames"]
 
 [node name="Mother" type="Node2D"]
 script = ExtResource("1_mother")
 
-[node name="GroundShadow" type="Polygon2D" parent="."]
-z_index = -1
-position = Vector2(18, 8)
-color = Color(0.005, 0.012, 0.011, 0.34)
-polygon = PackedVector2Array(-21, -5, 0, -11, 35, 5, 12, 14)
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(0, -54)
-scale = Vector2(0.72, 0.72)
-self_modulate = Color(0.78, 0.92, 0.88, 1)
-texture = ExtResource("2_mother_tex")
+[node name="Sprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -127)
+scale = Vector2(0.925, 0.925)
+sprite_frames = ExtResource("2_mother_frames")
+animation = &"idle_down"

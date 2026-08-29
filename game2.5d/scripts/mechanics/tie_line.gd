@@ -14,9 +14,11 @@ enum State { HIDDEN, NORMAL, TENSION, PULL_BACK }
 @export var fiber_width := 1.15
 @export_range(2.0, 12.0, 0.5) var yarn_twists := 7.0
 @export var extend_multiplier := 2.5
-@export var normal_color := Color(0.35, 0.95, 0.75, 0.55)
-@export var tension_color := Color(0.98, 0.83, 0.45, 0.85)
-@export var pull_back_color := Color(0.95, 0.35, 0.42, 0.95)
+## 线只有一种颜色：红。三个状态之间只改深浅与不透明度，不换色相。
+## 越绷紧越深，回拉是最深的那一档。
+@export var normal_color := Color(0.86, 0.24, 0.21, 0.78)
+@export var tension_color := Color(0.6, 0.1, 0.09, 0.92)
+@export var pull_back_color := Color(0.4, 0.04, 0.05, 1.0)
 @export var source_path: NodePath
 @export var target_path: NodePath
 @export_range(0.0, 1.0, 0.01) var distance_weight := 0.64
@@ -316,10 +318,11 @@ func _update_yarn_layers(curve: PackedVector2Array, yarn_color: Color, width_sca
 
 	_fiber_light.points = light_points
 	_fiber_light.width = fiber_width * width_scale
+	# 高光只提红色通道。三个通道一起加会把线冲淡成粉白，红色就丢了。
 	_fiber_light.default_color = Color(
-		minf(yarn_color.r + 0.28, 1.0),
-		minf(yarn_color.g + 0.28, 1.0),
-		minf(yarn_color.b + 0.28, 1.0),
+		minf(yarn_color.r + 0.3, 1.0),
+		minf(yarn_color.g + 0.06, 1.0),
+		minf(yarn_color.b + 0.06, 1.0),
 		0.72
 	)
 	_fiber_shadow.points = shadow_points
