@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Measured - 牵挂线</title>
+  
+  <!-- 1. Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  
+  <!-- 2. Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 3. React & ReactDOM & Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* 全局字体设定 */
+    * { 
+      font-family: 'Inter', sans-serif; 
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    @font-face {
+      font-family: 'Helvetica Neue Roman';
+      src: local('Helvetica Neue'), local('Helvetica');
+    }
+    .font-helvetica-neue {
+      font-family: 'Helvetica Neue Roman', 'Inter', sans-serif;
+    }
+
+    /* 样式需求：Liquid Glass CSS Effect */
+    .liquid-glass {
+      background: rgba(255, 255, 255, 0.01);
+      background-blend-mode: luminosity;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: none;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .liquid-glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1.4px;
+      background: linear-gradient(180deg,
+        rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%,
+        rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+        rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* 文案无缝滚动动画 */
+    @keyframes marquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    .animate-marquee {
+      display: flex;
+      width: max-content;
+      animation: marquee 28s linear infinite;
+    }
+    .animate-marquee:hover {
+      animation-play-state: paused;
+    }
+
+    /* 移动端菜单菜单项渐入动画 */
+    @keyframes slideUpFade {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-slide-up {
+      animation: slideUpFade 0.6s cubic-bezier(0.77, 0, 0.18, 1) forwards;
+    }
+
+    /* Canvas Mask CSS */
+    .spotlight-mask {
+      clip-path: inset(40% 0 0 0);
+    }
+  </style>
+</head>
+<body class="bg-black text-white overflow-hidden select-none">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // 静态资源声明
+    const BG_IMAGE_1 = "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260713_140344_79e1296a-86d7-43fd-9b5f-63ffe560f291.png&w=1280&q=85";
+    const FRONT_VIDEO = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260713_162101_0d7498c5-29bb-47bf-a99f-2773c0a880a9.mp4";
+    const OVERLAY_IMAGE = "https://soft-zoom-63098134.figma.site/_assets/v11/3f10f1876e118f72a396e05a6c2d099569478272.png";
+
+    // 故事短句文案
+    const STORY_QUOTES = [
+      "离开小城那天，我看见了连接我们之间的线。",
+      "以为是阻碍前行的束缚，原来是在坠落时托住我的力量。",
+      "距离拉得越远，那根看不见的线就绷得越紧。",
+      "从束缚到支撑，我们都在重新理解牵挂的含义。",
+      "站在线的另一端，她一直都在。"
+    ];
+
+    function App() {
+      const [isMenuOpen, setIsMenuOpen] = useState(false);
+      const [maskDataUrl, setMaskDataUrl] = useState('');
+      
+      // 交互体验：双角色（余念/母亲）与牵挂线物理模拟状态
+      const [activeChar, setActiveChar] = useState('yunia'); // 'yunia' | 'mother'
+      const [charPos, setCharPos] = useState({ 
+        yunia: { x: 35, y: 68 }, 
+        mother: { x: 65, y: 68 } 
+      });
+      const [isAnchored, setIsAnchored] = useState(false);
+
+      // 坐标与视口监听
+      const mousePos = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+      const smoothPos = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+      const gridOffset = useRef({ x: 0, y: 0 });
+      const [gridTransform, setGridTransform] = useState('translate(0px, 0px)');
+
+      const canvasRef = useRef(document.createElement('canvas'));
+
+      // 锁定/解除 Body 滚动
+      useEffect(() => {
+        if (isMenuOpen) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = '';
+        }
+      }, [isMenuOpen]);
+
+      // Layer 5 聚光灯 Reveal & Parallax Mesh Loop
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d');
+
+        let animationFrameId;
+
+        const handleMouseMove = (e) => {
+          mousePos.current = { x: e.clientX, y: e.clientY };
+        };
+
+        const handleTouchMove = (e) => {
+          if (e.touches.length > 0) {
+            mousePos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          }
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('touchmove', handleTouchMove);
+
+        const render = () => {
+          // Smooth Lerp ( factor 0.1 )
+          smoothPos.current.x += (mousePos.current.x - smoothPos.current.x) * 0.1;
+          smoothPos.current.y += (mousePos.current.y - smoothPos.current.y) * 0.1;
+
+          // Background Grid Parallax ( factor 0.06 )
+          const centerX = window.innerWidth / 2;
+          const centerY = window.innerHeight / 2;
+          const targetGridX = ((mousePos.current.x - centerX) / centerX) * 16;
+          const targetGridY = ((mousePos.current.y - centerY) / centerY) * 16;
+          
+          gridOffset.current.x += (targetGridX - gridOffset.current.x) * 0.06;
+          gridOffset.current.y += (targetGridY - gridOffset.current.y) * 0.06;
+          setGridTransform(`translate(${gridOffset.current.x}px, ${gridOffset.current.y}px)`);
+
+          // Draw Canvas Radial Gradient Spotlight
+          if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+          }
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          const radius = 260;
+          const gradient = ctx.createRadialGradient(
+            smoothPos.current.x, smoothPos.current.y, 0,
+            smoothPos.current.x, smoothPos.current.y, radius
+          );
+
+          gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+          gradient.addColorStop(0.4, 'rgba(255, 255, 255, 1)');
+          gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.75)');
+          gradient.addColorStop(0.75, 'rgba(255, 255, 255, 0.4)');
+          gradient.addColorStop(0.88, 'rgba(255, 255, 255, 0.12)');
+          gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(smoothPos.current.x, smoothPos.current.y, radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          setMaskDataUrl(canvas.toDataURL());
+          animationFrameId = requestAnimationFrame(render);
+        };
+
+        render();
+
+        return () => {
+          window.removeEventListener('mousemove', handleMouseMove);
+          window.removeEventListener('touchmove', handleTouchMove);
+          cancelAnimationFrame(animationFrameId);
+        };
+      }, []);
+
+      // 两点距离计算（牵挂线拉力计算）
+      const distance = Math.hypot(
+        charPos.yunia.x - charPos.mother.x, 
+        charPos.yunia.y - charPos.mother.y
+      );
+
+      // 拖拽/操控机制
+      const handleMoveCharacter = (direction) => {
+        const step = 4;
+        const current = charPos[activeChar];
+        let newX = current.x;
+
+        if (direction === 'left') newX = Math.max(10, current.x - step);
+        if (direction === 'right') newX = Math.min(90, current.x + step);
+
+        // 如果开启锚定或者距离过远（比如超过 45% 幅度），牵挂线产生拉扯反弹效果
+        const otherCharKey = activeChar === 'yunia' ? 'mother' : 'yunia';
+        const otherChar = charPos[otherCharKey];
+        const nextDist = Math.abs(newX - otherChar.x);
+
+        if (nextDist > 42 && !isAnchored) {
+          // 牵挂线拉回逻辑
+          setCharPos(prev => ({
+            ...prev,
+            [activeChar]: { ...prev[activeChar], x: newX },
+            [otherCharKey]: { ...prev[otherCharKey], x: prev[otherCharKey].x + (direction === 'right' ? 3 : -3) }
+          }));
+        } else {
+          setCharPos(prev => ({
+            ...prev,
+            [activeChar]: { ...prev[activeChar], x: newX }
+          }));
+        }
+      };
+
+      return (
+        <div className="relative w-screen h-screen overflow-hidden bg-white font-helvetica-neue">
+          
+          {/* ================= NAVBAR (z-50) ================= */}
+          <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center justify-between pointer-events-auto">
+            {/* Logo */}
+            <div className="flex items-center space-x-3 cursor-pointer">
+              <svg className="w-7 h-7 fill-white" viewBox="0 0 256 256">
+                <path d="M 256 64 L 256 128 L 192.5 128 L 160 95 L 128 64 L 96 95 L 63.5 128 L 64 128 L 128 192 L 128 256 L 64.5 256 L 32 223 L 0 192 L 0 64 L 64 0 L 192 0 Z M 256 192 L 256 256 L 192.5 256 L 160 223 L 128 192 L 128 128 L 192 128 Z" />
+              </svg>
+              <span className="text-white tracking-widest text-xs font-semibold uppercase opacity-80">MEASURED</span>
+            </div>
+
+            {/* Center Pill Nav (Desktop) */}
+            <div className="hidden md:flex items-center space-x-1 px-3 py-1.5 rounded-full liquid-glass">
+              {["Device", "Real Stories", "Science", "Plans", "Reach Us"].map((item, idx) => (
+                <button 
+                  key={idx}
+                  className="px-4 py-1.5 text-sm text-white/70 font-medium rounded-full hover:text-white transition-colors duration-200"
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+
+            {/* Right CTA (Desktop) */}
+            <div className="hidden md:block">
+              <button className="liquid-glass px-5 py-2 rounded-full flex items-center space-x-2.5 text-white text-sm font-medium hover:bg-white/10 transition-all duration-300">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                <span>Reserve Yours</span>
+              </button>
+            </div>
+
+            {/* Mobile Hamburger Button */}
+            <button 
+              onClick={() => setIsMenuOpen(true)}
+              className="md:hidden liquid-glass w-11 h-11 rounded-full flex flex-col justify-center items-center gap-1.5"
+            >
+              <span className="w-5 h-[1.5px] bg-white block"></span>
+              <span className="w-3.5 h-[1.5px] bg-white block"></span>
+            </button>
+          </nav>
+
+          {/* ================= MOBILE FULLSCREEN MENU (z-55) ================= */}
+          {isMenuOpen && (
+            <div className="fixed inset-0 z-[55] bg-[#0a0a0a] flex flex-col justify-between p-8">
+              {/* Close Button */}
+              <div className="flex justify-end">
+                <button 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="liquid-glass w-12 h-12 rounded-full relative flex items-center justify-center transform transition-transform duration-300 hover:rotate-90"
+                >
+                  <span className="absolute w-5 h-[1.5px] bg-white rotate-45"></span>
+                  <span className="absolute w-5 h-[1.5px] bg-white -rotate-45"></span>
+                </button>
+              </div>
+
+              {/* Stacked Nav Items */}
+              <div className="flex flex-col items-center space-y-6 text-center">
+                {["Device", "Real Stories", "Science", "Plans", "Reach Us"].map((item, idx) => (
+                  <a
+                    key={idx}
+                    href="#"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-3xl sm:text-4xl text-white/90 font-medium tracking-wide hover:text-white transition-colors animate-slide-up"
+                    style={{ animationDelay: `${100 + idx * 60}ms` }}
+                  >
+                    {item}
+                  </a>
+                ))}
+              </div>
+
+              {/* Bottom CTA */}
+              <div className="flex justify-center pb-6">
+                <button className="liquid-glass px-8 py-3.5 rounded-full flex items-center space-x-3 text-white text-base font-medium">
+                  <span className="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                  <span>Reserve Yours</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ================= HERO SECTION (100vh) ================= */}
+          <main className="relative w-full h-full overflow-hidden bg-black">
+            
+            {/* Layer 1 — Grid Background (z-0, opacity 0.1) */}
+            <div 
+              className="absolute inset-0 z-0 opacity-10 pointer-events-none transition-transform duration-75 ease-out"
+              style={{ transform: gridTransform }}
+            >
+              <svg className="w-full h-full" width="100%" height="100%">
+                <defs>
+                  <pattern id="grid-pattern" width="48" height="48" patternUnits="userSpaceOnUse">
+                    <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#64748b" strokeWidth="0.6" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid-pattern)" />
+              </svg>
+            </div>
+
+            {/* Layer 2 — Background Image (z-10) */}
+            <div 
+              className="absolute inset-0 z-10 bg-center bg-cover bg-no-repeat"
+              style={{ backgroundImage: `url(${BG_IMAGE_1})` }}
+            />
+
+            {/* Layer 3 — Hero Text (z-20) */}
+            <div className="absolute inset-x-0 top-20 sm:top-28 md:top-32 z-20 flex justify-center pointer-events-none">
+              <h1 className="font-['Instrument_Serif'] text-[4.5rem] xs:text-[5.5rem] sm:text-[10rem] md:text-[13rem] lg:text-[16rem] leading-[0.9] text-white uppercase tracking-tight font-normal text-center select-none">
+                Measured
+              </h1>
+            </div>
+
+            {/* Layer 4 — Overlay Image (z-25) */}
+            <img 
+              src={OVERLAY_IMAGE} 
+              alt="Overlay Depth" 
+              className="absolute inset-0 z-25 w-full h-full object-cover pointer-events-none select-none opacity-90"
+            />
+
+            {/* Layer 5 — Spotlight Reveal (z-30) */}
+            <div 
+              className="absolute inset-0 z-30 spotlight-mask pointer-events-none"
+              style={{
+                WebkitMaskImage: maskDataUrl ? `url(${maskDataUrl})` : 'none',
+                maskImage: maskDataUrl ? `url(${maskDataUrl})` : 'none',
+              }}
+            >
+              <video 
+                src={FRONT_VIDEO} 
+                autoPlay 
+                loop 
+                muted 
+                playsInline 
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* ================= 业务融合层：滚动故事文案 & 双人牵挂线交互 (z-40) ================= */}
+            <div className="absolute inset-0 z-40 flex flex-col justify-between pointer-events-none pb-8 pt-36">
+              
+              {/* 跑马灯无缝滚动文案区 */}
+              <div className="w-full overflow-hidden backdrop-blur-md bg-black/30 border-y border-white/10 py-3.5 pointer-events-auto">
+                <div className="animate-marquee whitespace-nowrap flex items-center gap-12">
+                  {[...STORY_QUOTES, ...STORY_QUOTES].map((text, i) => (
+                    <div key={i} className="flex items-center space-x-4">
+                      <span className="text-white/90 text-sm sm:text-base font-light tracking-wider">{text}</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-white/40 block"></span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 牵挂线互动体验区 */}
+              <div className="w-full max-w-4xl mx-auto px-6 pointer-events-auto flex flex-col items-center">
+                
+                {/* 物理牵挂画布与角色 */}
+                <div className="relative w-full h-32 my-2 rounded-2xl liquid-glass backdrop-blur-lg flex items-center px-8 border border-white/10">
+                  {/* SVG 动态牵挂线 */}
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                    <line 
+                      x1={`${charPos.yunia.x}%`} 
+                      y1={`${charPos.yunia.y}%`} 
+                      x2={`${charPos.mother.x}%`} 
+                      y2={`${charPos.mother.y}%`} 
+                      stroke={distance > 38 ? '#ef4444' : '#60a5fa'} 
+                      strokeWidth={Math.max(1, 4 - distance * 0.06)}
+                      strokeDasharray={isAnchored ? "6 3" : "none"}
+                      className="transition-all duration-150"
+                    />
+                  </svg>
+
+                  {/* 角色：余念 */}
+                  <div 
+                    onClick={() => setActiveChar('yunia')}
+                    className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 cursor-pointer transition-transform duration-200 ${activeChar === 'yunia' ? 'scale-110 z-10' : 'scale-90 opacity-70'}`}
+                    style={{ left: `${charPos.yunia.x}%` }}
+                  >
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xs font-bold ${activeChar === 'yunia' ? 'bg-blue-500/80 text-white shadow-[0_0_15px_rgba(59,130,246,0.6)]' : 'bg-white/20 text-white'}`}>
+                      余念
+                    </div>
+                  </div>
+
+                  {/* 角色：母亲 */}
+                  <div 
+                    onClick={() => setActiveChar('mother')}
+                    className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 cursor-pointer transition-transform duration-200 ${activeChar === 'mother' ? 'scale-110 z-10' : 'scale-90 opacity-70'}`}
+                    style={{ left: `${charPos.mother.x}%` }}
+                  >
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xs font-bold ${activeChar === 'mother' ? 'bg-amber-500/80 text-white shadow-[0_0_15px_rgba(245,158,11,0.6)]' : 'bg-white/20 text-white'}`}>
+                      母亲
+                    </div>
+                  </div>
+                </div>
+
+                {/* 交互控制台 & 透明玻璃预约下载按钮 */}
+                <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
+                  
+                  {/* 控制组件 */}
+                  <div className="flex items-center gap-2 liquid-glass px-4 py-2 rounded-full">
+                    <span className="text-xs text-white/70 mr-1">控制 [{activeChar === 'yunia' ? '余念' : '母亲'}]:</span>
+                    <button 
+                      onClick={() => handleMoveCharacter('left')}
+                      className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-full text-xs text-white"
+                    >
+                      ← 向左
+                    </button>
+                    <button 
+                      onClick={() => handleMoveCharacter('right')}
+                      className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-full text-xs text-white"
+                    >
+                      向右 →
+                    </button>
+                    <button 
+                      onClick={() => setIsAnchored(!isAnchored)}
+                      className={`ml-2 px-3 py-1 rounded-full text-xs transition-colors ${isAnchored ? 'bg-indigo-600 text-white' : 'bg-white/10 text-white/70'}`}
+                    >
+                      {isAnchored ? '已锚定支点' : '锚定支撑'}
+                    </button>
+                  </div>
+
+                  {/* 业务要求：透明玻璃下载按钮 */}
+                  <button className="liquid-glass group relative px-8 py-3 rounded-full flex items-center space-x-3 hover:bg-white/10 transition-all duration-300">
+                    <span className="text-white font-medium text-sm tracking-wide">下载“牵挂线”Demo</span>
+                    <svg className="w-4 h-4 fill-white transform group-hover:translate-y-0.5 transition-transform" viewBox="0 0 24 24">
+                      <path d="M12 16l-5-5h3V4h4v7h3l-5 5zm9 4H3v-2h18v2z"/>
+                    </svg>
+                  </button>
+
+                </div>
+              </div>
+
+            </div>
+
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
