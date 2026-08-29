@@ -6,8 +6,8 @@ extends Node2D
 
 enum GameState { TITLE, PLAY, LEVEL_DONE, END }
 
-const VIEW_W := 960.0
-const VIEW_H := 540.0
+const VIEW_W := 1280.0
+const VIEW_H := 720.0
 const GRAVITY := 1500.0
 const REST_DISTANCE := 260.0
 const MAX_DISTANCE := 380.0
@@ -1248,34 +1248,34 @@ func _draw_toasts() -> void:
 
 func _draw_title() -> void:
 	draw_rect(Rect2(0, 0, VIEW_W, VIEW_H), Color(0.02, 0.06, 0.075, 0.82))
-	draw_texture_rect(yellow_umbrella_texture, Rect2(334, 76, 72, 72), false, Color.WHITE)
-	draw_texture_rect(suitcase_texture, Rect2(548, 84, 62, 62), false, Color(0.82, 0.88, 0.90))
-	_draw_text("余响：牵挂", Vector2(VIEW_W * 0.5, 126), 34, Color("f2f5f3"), HORIZONTAL_ALIGNMENT_CENTER, 600.0)
-	_draw_text("第三章 · 一起走一段", Vector2(VIEW_W * 0.5, 168), 22, Color("f0c471"), HORIZONTAL_ALIGNMENT_CENTER, 650.0)
-	_draw_text("第二章的余响结束，余念在黄伞旁醒来。", Vector2(VIEW_W * 0.5, 215), 16, Color("d2dddc"), HORIZONTAL_ALIGNMENT_CENTER, 780.0)
-	_draw_text("主街封路。14:05 的列车将近，她们只能穿过老楼和仓库。", Vector2(VIEW_W * 0.5, 244), 16, Color("d2dddc"), HORIZONTAL_ALIGNMENT_CENTER, 820.0)
-	_draw_text("楼道 → 仓库 → 天台", Vector2(VIEW_W * 0.5, 294), 17, Color("b9c8c9"), HORIZONTAL_ALIGNMENT_CENTER, 760.0)
-	_draw_text("Tab 换人 · E 锚定 · W/↑ 爬线 · R 回检查点", Vector2(VIEW_W * 0.5, 340), 15, Color("b9c8c9"), HORIZONTAL_ALIGNMENT_CENTER, 760.0)
-	_draw_text("—— 按任意键开始 ——", Vector2(VIEW_W * 0.5, 400), 17, Color("f2f5f3"), HORIZONTAL_ALIGNMENT_CENTER, 500.0)
+	draw_texture_rect(yellow_umbrella_texture, Rect2(VIEW_W * 0.5 - 146.0, VIEW_H * 0.5 - 194.0, 72, 72), false, Color.WHITE)
+	draw_texture_rect(suitcase_texture, Rect2(VIEW_W * 0.5 + 68.0, VIEW_H * 0.5 - 186.0, 62, 62), false, Color(0.82, 0.88, 0.90))
+	_draw_text("余响：牵挂", Vector2(VIEW_W * 0.5, VIEW_H * 0.5 - 144.0), 34, Color("f2f5f3"), HORIZONTAL_ALIGNMENT_CENTER, 600.0)
+	_draw_text("第三章 · 一起走一段", Vector2(VIEW_W * 0.5, VIEW_H * 0.5 - 102.0), 22, Color("f0c471"), HORIZONTAL_ALIGNMENT_CENTER, 650.0)
+	_draw_text("第二章的余响结束，余念在黄伞旁醒来。", Vector2(VIEW_W * 0.5, VIEW_H * 0.5 - 55.0), 16, Color("d2dddc"), HORIZONTAL_ALIGNMENT_CENTER, 780.0)
+	_draw_text("主街封路。14:05 的列车将近，她们只能穿过老楼和仓库。", Vector2(VIEW_W * 0.5, VIEW_H * 0.5 - 26.0), 16, Color("d2dddc"), HORIZONTAL_ALIGNMENT_CENTER, 820.0)
+	_draw_text("楼道 → 仓库 → 天台", Vector2(VIEW_W * 0.5, VIEW_H * 0.5 + 24.0), 17, Color("b9c8c9"), HORIZONTAL_ALIGNMENT_CENTER, 760.0)
+	_draw_text("Tab 换人 · E 锚定 · W/↑ 爬线 · R 回检查点", Vector2(VIEW_W * 0.5, VIEW_H * 0.5 + 70.0), 15, Color("b9c8c9"), HORIZONTAL_ALIGNMENT_CENTER, 760.0)
+	_draw_text("—— 按任意键开始 ——", Vector2(VIEW_W * 0.5, VIEW_H * 0.5 + 130.0), 17, Color("f2f5f3"), HORIZONTAL_ALIGNMENT_CENTER, 500.0)
 
 
 func _draw_level_done() -> void:
 	var alpha := minf(1.0, level_done_timer / 0.6)
 	draw_rect(Rect2(0, 0, VIEW_W, VIEW_H), Color(0.02, 0.06, 0.075, 0.78 * alpha))
-	_draw_text("第 %d 关 · %s · 完成" % [level_index + 1, level["name"]], Vector2(VIEW_W * 0.5, 230), 30, Color("eef3f2", alpha), HORIZONTAL_ALIGNMENT_CENTER, 700.0)
-	_draw_text(level["quote"], Vector2(VIEW_W * 0.5, 278), 18, Color("f0c471", alpha), HORIZONTAL_ALIGNMENT_CENTER, 700.0)
+	_draw_text("第 %d 关 · %s · 完成" % [level_index + 1, level["name"]], Vector2(VIEW_W * 0.5, VIEW_H * 0.5 - 40.0), 30, Color("eef3f2", alpha), HORIZONTAL_ALIGNMENT_CENTER, 700.0)
+	_draw_text(level["quote"], Vector2(VIEW_W * 0.5, VIEW_H * 0.5 + 8.0), 18, Color("f0c471", alpha), HORIZONTAL_ALIGNMENT_CENTER, 700.0)
 
 
 func _draw_ending() -> void:
 	draw_rect(Rect2(0, 0, VIEW_W, VIEW_H), Color(0.02, 0.06, 0.075, 0.84))
 	_draw_text("第三章 · 一起走一段", Vector2(VIEW_W * 0.5, 78), 28, Color("eef3f2"), HORIZONTAL_ALIGNMENT_CENTER, 700.0)
 	# 先画黄伞，再以箱子遮住，只留下未合严箱盖旁的一角黄色。
-	draw_texture_rect(yellow_umbrella_texture, Rect2(416, 118, 92, 92), false, Color.WHITE)
-	draw_texture_rect(wooden_box_texture, Rect2(452, 105, 126, 126), false, Color.WHITE)
+	draw_texture_rect(yellow_umbrella_texture, Rect2(VIEW_W * 0.5 - 64.0, 118, 92, 92), false, Color.WHITE)
+	draw_texture_rect(wooden_box_texture, Rect2(VIEW_W * 0.5 - 28.0, 105, 126, 126), false, Color.WHITE)
 	for index in range(mini(end_index + 1, END_SCRIPT.size())):
 		var color := Color("eef3f2") if index == end_index else Color(0.76, 0.83, 0.82, 0.45)
 		_draw_text(END_SCRIPT[index], Vector2(VIEW_W * 0.5, 270 + index * 31), 18 if index < 4 else 16, color, HORIZONTAL_ALIGNMENT_CENTER, 880.0)
-	_draw_text("按 R 重新开始", Vector2(VIEW_W * 0.5, 505), 13, Color("b8c5c5"), HORIZONTAL_ALIGNMENT_CENTER, 300.0)
+	_draw_text("按 R 重新开始", Vector2(VIEW_W * 0.5, VIEW_H - 35.0), 13, Color("b8c5c5"), HORIZONTAL_ALIGNMENT_CENTER, 300.0)
 
 
 func _draw_debug() -> void:
