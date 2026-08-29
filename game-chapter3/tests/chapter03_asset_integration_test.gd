@@ -13,6 +13,7 @@ const ASSET_PATHS: Array[String] = [
 	"res://assets/props/chapter3/prop_ch03_warehouse_shelf_narrow.png",
 	"res://assets/props/chapter3/prop_ch03_warehouse_heavy_crate.png",
 	"res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_sky.png",
+	"res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_full_scene.png",
 	"res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_entrance.png",
 	"res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_hanging_clothes.png",
 	"res://assets/props/chapter3/prop_ch03_rooftop_water_tank_low.png",
@@ -40,6 +41,9 @@ const RUNTIME_REJECTED_ASSETS: Array[String] = [
 	"prop_ch03_warehouse_pattern_qipao.png",
 	"prop_ch03_warehouse_pattern_shirt.png",
 	"prop_ch03_warehouse_pattern_skirt.png",
+	"environment_ch03_rooftop_sky.png",
+	"environment_ch03_rooftop_entrance.png",
+	"prop_ch03_rooftop_water_tank_low.png",
 	"environment_ch03_stairwell_broken_stairs.png",
 	"environment_ch03_stairwell_stairs.png",
 	"environment_ch03_stairwell_stairs_landing.png",
@@ -71,6 +75,7 @@ func _run() -> void:
 	assert(chapter_script.contains("res://assets/environments/chapter3/warehouse/"))
 	assert(chapter_script.contains("environment_ch03_warehouse_full_scene.png"))
 	assert(chapter_script.contains("res://assets/environments/chapter3/rooftop/"))
+	assert(chapter_script.contains("environment_ch03_rooftop_full_scene.png"))
 	assert(chapter_script.contains("res://assets/props/chapter3/prop_ch03_warehouse_heavy_crate.png"))
 	assert(layout_item_script.contains("prop_ch03_wood_floor_repeat.png"))
 	assert(layout_item_script.contains("prop_ch03_wood_platform_long.png"))
@@ -87,5 +92,5 @@ func _run() -> void:
 	await process_frame
 	assert(chapter != null and chapter.levels.size() == 3)
 
-	print("[CHAPTER03_ASSETS] PASS 27 project-local textures load, 12 scene-matched textures remain active")
+	print("[CHAPTER03_ASSETS] PASS 28 project-local textures load, 10 scene-matched textures remain active")
 	quit(0)

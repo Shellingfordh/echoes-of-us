@@ -54,9 +54,7 @@ var wooden_box_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch
 var yellow_umbrella_texture: Texture2D = preload("res://art/cute-umbrella.png")
 var stairwell_full_scene_texture: Texture2D = preload("res://assets/environments/chapter3/stairwell/environment_ch03_stairwell_full_scene.png")
 var warehouse_full_scene_texture: Texture2D = preload("res://assets/environments/chapter3/warehouse/environment_ch03_warehouse_full_scene.png")
-var rooftop_sky_texture: Texture2D = preload("res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_sky.png")
-var rooftop_entrance_texture: Texture2D = preload("res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_entrance.png")
-var rooftop_tank_low_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_rooftop_water_tank_low.png")
+var rooftop_full_scene_texture: Texture2D = preload("res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_full_scene.png")
 var rooftop_gate_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_rooftop_exit_gate.png")
 var level_scene_resources: Array[PackedScene] = [
 	preload("res://scenes/chapter3/levels/chapter3_stairwell.tscn"),
@@ -1071,8 +1069,6 @@ func _draw() -> void:
 func _draw_background() -> void:
 	# 背景保持原始素材观感，不再叠加渐变网格、竖缝或统一灰蓝蒙层。
 	draw_rect(Rect2(0, 0, VIEW_W, VIEW_H), Color("161b1d"))
-	if level_index == 2:
-		draw_texture_rect(rooftop_sky_texture, Rect2(0, 62, VIEW_W, 444), false, Color.WHITE)
 
 
 func _draw_world() -> void:
@@ -1142,23 +1138,9 @@ func _draw_warehouse_dressing() -> void:
 
 
 func _draw_rooftop_dressing() -> void:
-	# 只保留与碰撞位置一致的落地水箱；晾晒物使用低干扰程序层，避免遮挡牵挂线。
-	_draw_world_texture(rooftop_entrance_texture, Rect2(70.0, 185.0, 275.0, 275.0), Color(0.60, 0.69, 0.72, 0.76))
-	_draw_world_texture(rooftop_tank_low_texture, Rect2(525.0, 300.0, 185.0, 160.0), Color(0.57, 0.67, 0.69, 0.80))
+	_draw_repeating_world_background(rooftop_full_scene_texture, -76.0)
 	# 大铁门按现有窄碰撞门的中心缩小显示，不扩大可阻挡范围。
 	_draw_world_texture(rooftop_gate_texture, Rect2(2863.0, -30.0, 100.0, 160.0), Color(0.57, 0.66, 0.68, 0.76))
-	for line_y in [245.0, 285.0]:
-		var start := Vector2(120.0, line_y) - camera_position
-		var finish := Vector2(3200.0, line_y + 45.0) - camera_position
-		draw_line(start, finish, Color("a8b4b5"), 2.0)
-	for sheet_x in [820.0, 1180.0, 1540.0, 2500.0]:
-		var sheet := Rect2(Vector2(sheet_x, 260.0) - camera_position, Vector2(105, 92))
-		draw_colored_polygon(PackedVector2Array([sheet.position, sheet.position + Vector2(sheet.size.x, 5), sheet.end, sheet.position + Vector2(8, sheet.size.y)]), Color(0.78, 0.82, 0.80, 0.66))
-	if level.get("flags", {}).has("top"):
-		for index in range(5):
-			var x := 2120.0 + index * 190.0 - camera_position.x
-			var y := 5.0 + float((index * 31) % 70) - camera_position.y
-			draw_line(Vector2(x, y), Vector2(x + 90.0, y - 28.0), Color(0.95, 0.25, 0.25, 0.52), 1.8)
 
 
 func _draw_world_texture(texture: Texture2D, world_rect: Rect2, tint: Color) -> void:
