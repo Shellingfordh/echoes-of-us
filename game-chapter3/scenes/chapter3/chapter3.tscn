@@ -16,7 +16,8 @@ size = Vector2(32, 48)
 script = ExtResource("1_chapter3")
 
 [node name="World" type="Node2D" parent="."]
-[node name="LevelSourcePreview" parent="World" instance=ExtResource("2_stairwell")]
+[node name="LevelMount" type="Node2D" parent="World"]
+[node name="EditorPreview" parent="World" instance=ExtResource("2_stairwell")]
 [node name="TieLine" type="Line2D" parent="World"]
 z_index = 4
 width = 3.0

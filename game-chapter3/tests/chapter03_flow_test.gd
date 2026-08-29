@@ -89,6 +89,7 @@ func _run() -> void:
 	assert(chapter.level["checkpoints"].size() == 2)
 	assert(chapter.level["doors"][0]["plates"].size() == 2)
 	assert(chapter.get_progress_snapshot()["level_name"] == "天台")
+	chapter.level["doors"][0]["open"] = true
 	chapter.daughter["x"] = chapter.level["exit_x"] + 20.0
 	chapter.mother["x"] = chapter.level["exit_x"] + 20.0
 	chapter._check_level_complete()

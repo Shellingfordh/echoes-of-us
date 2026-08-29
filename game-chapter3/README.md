@@ -24,7 +24,7 @@
 - `scenes/chapter3/levels/chapter3_warehouse.tscn`
 - `scenes/chapter3/levels/chapter3_rooftop.tscn`
 
-平台使用 `StaticBody2D`，箱子使用 `CharacterBody2D`，踏板使用 `Area2D`，出生点、检查点和出口使用 `Marker2D`。运行时玩法数据直接从这些场景节点读取，因此可以在 Godot 编辑器中调整布局。
+平台和门使用 `StaticBody2D`，箱子使用 `CharacterBody2D`，踏板与出口触发区使用 `Area2D`，出生点、检查点和出口坐标使用 `Marker2D`。运行时不仅从这些场景节点读取玩法数据，还会挂载当前关卡并同步箱子、木板、踏板和门的状态，因此可以在 Godot 编辑器中直接调整布局并看到一致的运行结果。
 
 ## 运行
 
@@ -40,6 +40,8 @@ godot --path game-chapter3
 godot --headless --path game-chapter3 --script res://tests/chapter03_flow_test.gd
 godot --headless --path game-chapter3 --script res://tests/chapter03_input_test.gd
 godot --headless --path game-chapter3 --script res://tests/chapter03_scene_structure_test.gd
+godot --headless --path game-chapter3 --script res://tests/chapter03_door_rules_test.gd
+godot --headless --path game-chapter3 --script res://tests/chapter03_playability_test.gd
 ```
 
 需要生成四张白盒检查图时，可运行：

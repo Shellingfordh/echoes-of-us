@@ -13,6 +13,8 @@ const REST_DISTANCE := 260.0
 const MAX_DISTANCE := 380.0
 const HARD_DISTANCE := 495.0
 const BOOST_VX := 200.0
+const CLIMB_SPEED := 420.0
+const CLIMB_TRAVERSE_SPEED := 260.0
 const FALL_LIMIT := 1100.0
 
 const END_SCRIPT := [
@@ -56,7 +58,8 @@ var level_scene_resources: Array[PackedScene] = [
 	preload("res://scenes/chapter3/levels/chapter3_rooftop.tscn"),
 ]
 
-@onready var level_source_preview: Node2D = get_node_or_null("World/LevelSourcePreview") as Node2D
+@onready var level_mount: Node2D = get_node_or_null("World/LevelMount") as Node2D
+@onready var editor_preview: Node2D = get_node_or_null("World/EditorPreview") as Node2D
 @onready var daughter_body: CharacterBody2D = get_node_or_null("World/Actors/Daughter") as CharacterBody2D
 @onready var mother_body: CharacterBody2D = get_node_or_null("World/Actors/Mother") as CharacterBody2D
 @onready var tie_line_node: Line2D = get_node_or_null("World/TieLine") as Line2D
@@ -68,6 +71,8 @@ var level_scene_resources: Array[PackedScene] = [
 @onready var hud_controls: Label = get_node_or_null("HUD/BottomBar/Controls") as Label
 @onready var title_overlay: Control = get_node_or_null("HUD/TitleOverlay") as Control
 
+var current_level_layout: Node2D
+
 
 func _ready() -> void:
 	daughter = _make_character("余念", 26.0, 38.0, 285.0, 560.0, Color("d5c4ba"), Color("d6a894"), false)
@@ -75,8 +80,8 @@ func _ready() -> void:
 	characters = [daughter, mother]
 	levels = _create_levels()
 	_load_level(0)
-	if level_source_preview != null:
-		level_source_preview.visible = false
+	if editor_preview != null:
+		editor_preview.visible = false
 	_sync_scene_nodes()
 	queue_redraw()
 
@@ -236,6 +241,28 @@ func _load_level(index: int) -> void:
 	switch_queued = false
 	anchor_queued = false
 	reset_queued = false
+	_mount_level_scene(level_index)
+
+
+func _mount_level_scene(index: int) -> void:
+	current_level_layout = null
+	if level_mount == null or index < 0 or index >= level_scene_resources.size():
+		return
+	for child in level_mount.get_children():
+		level_mount.remove_child(child)
+		child.queue_free()
+	var instance := level_scene_resources[index].instantiate() as Node2D
+	if instance == null:
+		push_error("无法挂载第三章第 %d 关场景" % (index + 1))
+		return
+	instance.name = "CurrentLevel"
+	level_mount.add_child(instance)
+	current_level_layout = instance
+	var story_props := current_level_layout.get_node_or_null("StoryProps") as CanvasItem
+	if story_props != null:
+		# 叙事摆件仍由主场景按镜头绘制，避免和关卡编辑预览重复。
+		story_props.visible = false
+	_sync_level_scene()
 
 
 func _place_at(daughter_feet: Vector2, mother_feet: Vector2) -> void:
@@ -261,6 +288,8 @@ func _update_play(delta: float) -> void:
 	if anchor_queued:
 		anchor_queued = false
 		_toggle_anchor()
+	for character in characters:
+		character["frame_start_x"] = character["x"]
 
 	var active: Dictionary = characters[active_character]
 	var other: Dictionary = characters[1 - active_character]
@@ -307,6 +336,7 @@ func _update_play(delta: float) -> void:
 	_tether_constrain(daughter, mother, delta, active_character == 0)
 	_tether_constrain(mother, daughter, delta, active_character == 1)
 	_apply_ground_tether(delta)
+	_resolve_solid_crossings()
 	_capture_landings()
 	_update_boxes(delta)
 	_check_falls()
@@ -365,6 +395,10 @@ func _move_collide(character: Dictionary, delta: float, direction: float) -> voi
 		if character["can_push"] and character["on_ground"] and not is_zero_approx(direction_to_box) and signf(character["vx"] if not is_zero_approx(character["vx"]) else direction) == direction_to_box:
 			box["push_dir"] = direction_to_box
 			box["x"] = character["x"] + character["w"] if direction_to_box > 0.0 else character["x"] - box["w"]
+			if _resolve_box_wall_overlap(box, direction_to_box, box["x"]):
+				character["x"] = box["x"] - character["w"] if direction_to_box > 0.0 else box["x"] + box["w"]
+				character["vx"] = 0.0
+				box["push_dir"] = 0.0
 		else:
 			if character["vx"] > 0.0:
 				character["x"] = box["x"] - character["w"]
@@ -385,7 +419,7 @@ func _move_collide(character: Dictionary, delta: float, direction: float) -> voi
 			character["vy"] = 0.0
 	if character["vy"] >= 0.0:
 		for platform in _oneway_list(false):
-			if character["x"] + character["w"] > platform["x"] and character["x"] < platform["x"] + platform["w"] and previous_feet <= platform["y"] + 1.0 and character["y"] + character["h"] >= platform["y"] and character["y"] + character["h"] <= platform["y"] + 40.0:
+			if character["x"] + character["w"] > platform["x"] and character["x"] < platform["x"] + platform["w"] and previous_feet <= platform["y"] + 1.0 and character["y"] + character["h"] >= platform["y"]:
 				character["y"] = platform["y"] - character["h"]
 				character["vy"] = 0.0
 				character["on_ground"] = true
@@ -394,19 +428,19 @@ func _move_collide(character: Dictionary, delta: float, direction: float) -> voi
 func _update_boxes(delta: float) -> void:
 	for index in range(level["boxes"].size()):
 		var box: Dictionary = level["boxes"][index]
-		if not is_zero_approx(box["push_dir"]):
-			box["x"] += box["push_dir"] * 110.0 * delta
+		var previous_x: float = box["x"]
+		var push_direction: float = box["push_dir"]
+		if not is_zero_approx(push_direction):
+			box["x"] += push_direction * 110.0 * delta
 			box["push_dir"] = 0.0
 		box["x"] = clampf(box["x"], 0.0, level["world_w"] - box["w"])
-		for wall in _wall_list():
-			if _overlap(box, wall):
-				box["x"] = wall["x"] - box["w"] if _center(box).x < _center(wall).x else wall["x"] + wall["w"]
+		_resolve_box_wall_overlap(box, push_direction, previous_x)
 		var previous_feet: float = box["y"] + box["h"]
 		box["vy"] = minf(box["vy"] + GRAVITY * delta, 1400.0)
 		box["y"] += box["vy"] * delta
 		if box["vy"] >= 0.0:
 			for platform in _oneway_list(true):
-				if box["x"] + box["w"] > platform["x"] and box["x"] < platform["x"] + platform["w"] and previous_feet <= platform["y"] + 1.0 and box["y"] + box["h"] >= platform["y"] and box["y"] + box["h"] <= platform["y"] + 40.0:
+				if box["x"] + box["w"] > platform["x"] and box["x"] < platform["x"] + platform["w"] and previous_feet <= platform["y"] + 1.0 and box["y"] + box["h"] >= platform["y"]:
 					box["y"] = platform["y"] - box["h"]
 					box["vy"] = 0.0
 		if box["y"] > FALL_LIMIT:
@@ -414,6 +448,25 @@ func _update_boxes(delta: float) -> void:
 			box["x"] = source_box["x"]
 			box["y"] = source_box["y"]
 			box["vy"] = 0.0
+
+
+func _resolve_box_wall_overlap(box: Dictionary, travel_direction: float, previous_x: float) -> bool:
+	var blocked := false
+	for wall in _wall_list():
+		if not _overlap(box, wall):
+			continue
+		blocked = true
+		var resolve_left: bool = travel_direction > 0.0 or (is_zero_approx(travel_direction) and previous_x + box["w"] <= wall["x"] + 0.01)
+		var resolve_right: bool = travel_direction < 0.0 or (is_zero_approx(travel_direction) and previous_x >= wall["x"] + wall["w"] - 0.01)
+		if resolve_left:
+			box["x"] = wall["x"] - box["w"]
+		elif resolve_right:
+			box["x"] = wall["x"] + wall["w"]
+		elif _center(box).x <= _center(wall).x:
+			box["x"] = wall["x"] - box["w"]
+		else:
+			box["x"] = wall["x"] + wall["w"]
+	return blocked
 
 
 func _tether_constrain(character: Dictionary, anchor: Dictionary, delta: float, is_active: bool) -> bool:
@@ -426,11 +479,32 @@ func _tether_constrain(character: Dictionary, anchor: Dictionary, delta: float, 
 			character["vx"] -= offset.x / distance * 3000.0 * delta
 			character["vy"] -= offset.y / distance * 3000.0 * delta
 			character["vx"] += (_center(anchor).x - _center(character).x) * 2.5 * delta
+			var horizontal_to_anchor: float = _center(anchor).x - _center(character).x
+			if absf(horizontal_to_anchor) > 48.0:
+				if horizontal_to_anchor > 0.0:
+					character["vx"] = maxf(character["vx"], CLIMB_TRAVERSE_SPEED)
+				else:
+					character["vx"] = minf(character["vx"], -CLIMB_TRAVERSE_SPEED)
+			# 仅靠沿线径向力时，较平的绳线分量小于重力，角色会先被拉进
+			# 台阶间的缺口再坠落。锚点确实位于上方时，攀爬键需要保证
+			# 一个最低上升速度，才能稳定完成“锚定—沿线登高”的核心玩法。
+			if _center(anchor).y < _center(character).y - 24.0:
+				character["vy"] = minf(character["vy"], -CLIMB_SPEED)
 		# W/↑ 同时也是地面跳跃键。两人并肩时不能立刻把刚起跳的人
 		# 吸回地面；只有确实从高低差沿线抵达支点时才完成攀线吸附。
-		elif anchor["on_ground"] and absf(_center(character).y - _center(anchor).y) > 24.0:
-			character["x"] = anchor["x"] - character["w"] - 2.0 if _center(character).x < _center(anchor).x else anchor["x"] + anchor["w"] + 2.0
-			character["y"] = anchor["y"] + anchor["h"] - character["h"]
+		elif anchor["on_ground"] and (absf(_center(character).y - _center(anchor).y) > 24.0 or character["vy"] >= 0.0):
+			var anchor_feet: float = anchor["y"] + anchor["h"]
+			var left_x: float = anchor["x"] - character["w"] - 2.0
+			var right_x: float = anchor["x"] + anchor["w"] + 2.0
+			var preferred_x: float = left_x if _center(character).x < _center(anchor).x else right_x
+			var alternate_x: float = right_x if is_equal_approx(preferred_x, left_x) else left_x
+			var landing_x: float = preferred_x
+			for candidate_x in [preferred_x, alternate_x, _center(anchor).x - character["w"] * 0.5]:
+				if _has_landing_support(float(candidate_x), character["w"], anchor_feet):
+					landing_x = float(candidate_x)
+					break
+			character["x"] = landing_x
+			character["y"] = anchor_feet - character["h"]
 			character["vx"] = 0.0
 			character["vy"] = 0.0
 	if distance <= MAX_DISTANCE + 8.0:
@@ -443,6 +517,13 @@ func _tether_constrain(character: Dictionary, anchor: Dictionary, delta: float, 
 		character["vx"] -= offset.x / distance * radial_velocity
 		character["vy"] -= offset.y / distance * radial_velocity
 	return true
+
+
+func _has_landing_support(body_x: float, body_width: float, feet_y: float) -> bool:
+	for surface in _oneway_list(false) + _wall_list():
+		if absf(feet_y - surface["y"]) < 4.0 and body_x + body_width > surface["x"] and body_x < surface["x"] + surface["w"]:
+			return true
+	return false
 
 
 func _apply_ground_tether(delta: float) -> void:
@@ -474,13 +555,39 @@ func _apply_ground_tether(delta: float) -> void:
 		level["flags"].erase("over")
 
 
+func _resolve_solid_crossings() -> void:
+	# 牵引绳会在常规移动碰撞之后修正角色位置；再次检查实体墙，避免被拉穿。
+	for character in characters:
+		var start_x: float = character.get("frame_start_x", character["x"])
+		for wall in _wall_list():
+			var vertically_overlapping: bool = character["y"] < wall["y"] + wall["h"] and character["y"] + character["h"] > wall["y"]
+			if not vertically_overlapping:
+				continue
+			var started_left: bool = start_x + character["w"] <= wall["x"]
+			var started_right: bool = start_x >= wall["x"] + wall["w"]
+			var crossed_from_left: bool = started_left and character["x"] + character["w"] > wall["x"]
+			var crossed_from_right: bool = started_right and character["x"] < wall["x"] + wall["w"]
+			if crossed_from_left:
+				character["x"] = wall["x"] - character["w"]
+				character["vx"] = minf(character["vx"], 0.0)
+			elif crossed_from_right:
+				character["x"] = wall["x"] + wall["w"]
+				character["vx"] = maxf(character["vx"], 0.0)
+			elif _overlap(character, wall):
+				if start_x + character["w"] * 0.5 <= wall["x"] + wall["w"] * 0.5:
+					character["x"] = wall["x"] - character["w"]
+				else:
+					character["x"] = wall["x"] + wall["w"]
+				character["vx"] = 0.0
+
+
 func _capture_landings() -> void:
 	for character in characters:
 		if character["anchored"] or character["on_ground"] or character["vy"] < 0.0:
 			continue
 		for platform in _oneway_list(false) + _wall_list():
 			var feet: float = character["y"] + character["h"]
-			if character["x"] + character["w"] > platform["x"] and character["x"] < platform["x"] + platform["w"] and feet >= platform["y"] and feet <= platform["y"] + 16.0:
+			if character["x"] + character["w"] > platform["x"] and character["x"] < platform["x"] + platform["w"] and character["y"] < platform["y"] and feet >= platform["y"]:
 				character["y"] = platform["y"] - character["h"]
 				character["vy"] = 0.0
 				character["on_ground"] = true
@@ -517,22 +624,31 @@ func _update_breakable_planks(delta: float) -> void:
 func _update_plates_and_doors() -> void:
 	for plate in level["plates"]:
 		plate["on"] = false
-		for character in characters:
-			if character["on_ground"] and _center(character).x > plate["x"] and _center(character).x < plate["x"] + plate["w"] and absf(character["y"] + character["h"] - plate["y"]) < 6.0:
-				plate["on"] = true
-		for box in level["boxes"]:
-			if _center(box).x > plate["x"] and _center(box).x < plate["x"] + plate["w"] and absf(box["y"] + box["h"] - plate["y"]) < 10.0:
-				plate["on"] = true
+		var activation := String(plate.get("activation", "any"))
+		if activation in ["any", "character", "daughter", "mother"]:
+			for character in characters:
+				if activation == "daughter" and character != daughter:
+					continue
+				if activation == "mother" and character != mother:
+					continue
+				if character["on_ground"] and _center(character).x > plate["x"] and _center(character).x < plate["x"] + plate["w"] and absf(character["y"] + character["h"] - plate["y"]) < 6.0:
+					plate["on"] = true
+		if activation in ["any", "box"]:
+			for box in level["boxes"]:
+				if _center(box).x > plate["x"] and _center(box).x < plate["x"] + plate["w"] and absf(box["y"] + box["h"] - plate["y"]) < 10.0:
+					plate["on"] = true
 	for door in level["doors"]:
-		if door["open"]:
+		if door["open"] and bool(door.get("latch", true)):
 			continue
 		var all_pressed := true
 		for plate_index in door["plates"]:
 			if not level["plates"][plate_index]["on"]:
 				all_pressed = false
 				break
-		if all_pressed:
-			door["open"] = true
+		if bool(door.get("latch", true)):
+			door["open"] = door["open"] or all_pressed
+		else:
+			door["open"] = all_pressed
 
 
 func _update_checkpoints() -> void:
@@ -617,7 +733,7 @@ func _update_level_two() -> void:
 	if not flags.has("door2") and level["doors"][1]["open"]:
 		flags["door2"] = true
 		level["objective"] = "第二个坑太宽——母亲把箱子推下去垫脚"
-		_toast("余念：这次我拉你。  余秀兰：不用，我自己行。", 4.0)
+		_toast("机关咔哒一声，低矮闸门升起。余秀兰终于能通过了。", 4.0)
 	if not flags.has("step") and level["boxes"][1]["y"] > 480.0:
 		flags["step"] = true
 		level["objective"] = "踩着箱子上对岸，一起走向出口 →"
@@ -639,6 +755,9 @@ func _update_level_three() -> void:
 
 
 func _check_level_complete() -> void:
+	for door in level["doors"]:
+		if not door["open"]:
+			return
 	if _center(daughter).x <= level["exit_x"] or _center(mother).x <= level["exit_x"]:
 		return
 	if level_index < levels.size() - 1:
@@ -683,7 +802,11 @@ func _supported(character: Dictionary) -> bool:
 
 
 func _wall_list() -> Array:
-	var walls: Array = level["walls"].duplicate(false)
+	var walls: Array = []
+	for wall in level["walls"]:
+		var unlock_door: int = int(wall.get("unlock_door", -1))
+		if unlock_door < 0 or unlock_door >= level["doors"].size() or not level["doors"][unlock_door]["open"]:
+			walls.append(wall)
 	for door in level["doors"]:
 		if not door["open"]:
 			walls.append(door)
@@ -745,11 +868,93 @@ func debug_update_plates_and_doors() -> void:
 func _sync_scene_nodes() -> void:
 	if characters.is_empty() or level.is_empty():
 		return
+	_sync_level_scene()
 	var actors_visible := game_state == GameState.PLAY or game_state == GameState.LEVEL_DONE
 	_sync_actor_node(daughter_body, daughter, active_character == 0, actors_visible)
 	_sync_actor_node(mother_body, mother, active_character == 1, actors_visible)
 	_sync_tie_line(actors_visible)
 	_sync_hud_nodes()
+
+
+func _sync_level_scene() -> void:
+	if level_mount == null or current_level_layout == null:
+		return
+	level_mount.position = -camera_position
+	_sync_level_boxes()
+	_sync_level_walls()
+	_sync_level_plates()
+	_sync_level_planks()
+	_sync_level_doors()
+
+
+func _sync_level_walls() -> void:
+	var container := current_level_layout.get_node_or_null("Walls")
+	if container == null:
+		return
+	var nodes := container.get_children()
+	for index in range(mini(nodes.size(), level["walls"].size())):
+		var wall_node := nodes[index] as CanvasItem
+		var wall: Dictionary = level["walls"][index]
+		var unlock_door: int = int(wall.get("unlock_door", -1))
+		var is_unlocked: bool = unlock_door >= 0 and unlock_door < level["doors"].size() and level["doors"][unlock_door]["open"]
+		wall_node.visible = not is_unlocked
+		var collision_shape := wall_node.get_node_or_null("CollisionShape2D") as CollisionShape2D
+		if collision_shape != null:
+			collision_shape.disabled = is_unlocked
+
+
+func _sync_level_boxes() -> void:
+	var container := current_level_layout.get_node_or_null("Boxes")
+	if container == null:
+		return
+	var nodes := container.get_children()
+	for index in range(mini(nodes.size(), level["boxes"].size())):
+		var box_node := nodes[index] as Node2D
+		var box: Dictionary = level["boxes"][index]
+		box_node.position = Vector2(box["x"], box["y"])
+
+
+func _sync_level_plates() -> void:
+	var container := current_level_layout.get_node_or_null("Plates")
+	if container == null:
+		return
+	var nodes := container.get_children()
+	for index in range(mini(nodes.size(), level["plates"].size())):
+		var plate_node := nodes[index] as Node2D
+		var is_on: bool = level["plates"][index]["on"]
+		if bool(plate_node.get_meta(&"runtime_on", false)) == is_on:
+			continue
+		plate_node.set_meta(&"runtime_on", is_on)
+		plate_node.set("fill_color", Color("f1c40f") if is_on else Color("c5a947"))
+		plate_node.set("edge_color", Color("fff0a0") if is_on else Color("f5ca59"))
+
+
+func _sync_level_planks() -> void:
+	var container := current_level_layout.get_node_or_null("Planks")
+	if container == null:
+		return
+	var nodes := container.get_children()
+	for index in range(mini(nodes.size(), level["planks"].size())):
+		var plank_node := nodes[index] as CanvasItem
+		var is_broken: bool = level["planks"][index]["broken"]
+		plank_node.visible = not is_broken
+		var collision_shape := plank_node.get_node_or_null("CollisionShape2D") as CollisionShape2D
+		if collision_shape != null:
+			collision_shape.disabled = is_broken
+
+
+func _sync_level_doors() -> void:
+	var container := current_level_layout.get_node_or_null("Doors")
+	if container == null:
+		return
+	var nodes := container.get_children()
+	for index in range(mini(nodes.size(), level["doors"].size())):
+		var door_node := nodes[index] as CanvasItem
+		var is_open: bool = level["doors"][index]["open"]
+		door_node.visible = not is_open
+		var collision_shape := door_node.get_node_or_null("CollisionShape2D") as CollisionShape2D
+		if collision_shape != null:
+			collision_shape.disabled = is_open
 
 
 func _sync_actor_node(body: CharacterBody2D, character: Dictionary, is_active: bool, should_show: bool) -> void:
@@ -854,6 +1059,8 @@ func _draw_background() -> void:
 
 func _draw_world() -> void:
 	_draw_scene_dressing()
+	if current_level_layout != null:
+		return
 	var floor_color := Color("53666d")
 	var edge_color := Color("91a1a5")
 	var wall_color := Color("43575e")

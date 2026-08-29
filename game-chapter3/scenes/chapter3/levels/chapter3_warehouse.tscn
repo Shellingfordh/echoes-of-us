@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/chapter3/chapter3_level_layout.gd" id="1_layout"]
 [ext_resource type="Script" path="res://scripts/chapter3/chapter3_layout_item.gd" id="2_item"]
@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" path="res://art/playerGrey_up1.png" id="4_helper"]
 
 [sub_resource type="RectangleShape2D" id="Shape_floor_start"]
-size = Vector2(1100, 60)
+size = Vector2(1160, 60)
 [sub_resource type="RectangleShape2D" id="Shape_floor_middle"]
 size = Vector2(1200, 60)
 [sub_resource type="RectangleShape2D" id="Shape_lower"]
@@ -21,6 +21,8 @@ size = Vector2(56, 56)
 size = Vector2(70, 12)
 [sub_resource type="RectangleShape2D" id="Shape_door"]
 size = Vector2(26, 160)
+[sub_resource type="RectangleShape2D" id="Shape_exit"]
+size = Vector2(100, 180)
 
 [node name="Warehouse" type="Node2D"]
 script = ExtResource("1_layout")
@@ -34,10 +36,10 @@ background_color = Color(0.08, 0.15, 0.18, 1)
 [node name="FloorStart" type="StaticBody2D" parent="Platforms"]
 position = Vector2(0, 460)
 script = ExtResource("2_item")
-size = Vector2(1100, 60)
+size = Vector2(1160, 60)
 label_text = "仓库地面"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/FloorStart"]
-position = Vector2(550, 30)
+position = Vector2(580, 30)
 shape = SubResource("Shape_floor_start")
 [node name="FloorMiddle" type="StaticBody2D" parent="Platforms"]
 position = Vector2(1400, 460)
@@ -68,7 +70,8 @@ script = ExtResource("2_item")
 size = Vector2(330, 118)
 fill_color = Color(0.18, 0.28, 0.31, 1)
 edge_color = Color(0.48, 0.58, 0.6, 1)
-label_text = "女儿可通过的低通道"
+label_text = "女儿先行的升降闸门"
+metadata/unlock_door = 1
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/LowTunnel"]
 position = Vector2(165, 59)
 shape = SubResource("Shape_tunnel")
@@ -113,6 +116,7 @@ fill_color = Color(0.77, 0.62, 0.27, 1)
 edge_color = Color(0.96, 0.79, 0.35, 1)
 label_text = "踏板 1"
 metadata/y = 460.0
+metadata/activation = "box"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Plates/EntrancePlate"]
 position = Vector2(35, 6)
 shape = SubResource("Shape_plate")
@@ -124,6 +128,7 @@ fill_color = Color(0.77, 0.62, 0.27, 1)
 edge_color = Color(0.96, 0.79, 0.35, 1)
 label_text = "踏板 2"
 metadata/y = 460.0
+metadata/activation = "daughter"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Plates/TunnelPlate"]
 position = Vector2(35, 6)
 shape = SubResource("Shape_plate")
@@ -159,6 +164,13 @@ position = Vector2(200, 460)
 position = Vector2(120, 460)
 [node name="Exit" type="Marker2D" parent="Markers"]
 position = Vector2(3450, 460)
+[node name="ExitTrigger" type="Area2D" parent="Markers"]
+position = Vector2(3450, 280)
+collision_layer = 0
+collision_mask = 0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Markers/ExitTrigger"]
+position = Vector2(50, 90)
+shape = SubResource("Shape_exit")
 [node name="Checkpoints" type="Node2D" parent="Markers"]
 [node name="Checkpoint1" type="Marker2D" parent="Markers/Checkpoints"]
 position = Vector2(1450, 460)

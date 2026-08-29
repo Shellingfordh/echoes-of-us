@@ -16,6 +16,8 @@ extends Node2D
 
 
 func _draw() -> void:
+	if not Engine.is_editor_hint():
+		return
 	draw_rect(Rect2(0, 80, world_width, 440), background_color)
 	draw_string(ThemeDB.fallback_font, Vector2(24, 112), "第三章 · %s" % level_name, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 20, Color(0.88, 0.93, 0.93, 0.72))
 

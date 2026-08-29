@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/chapter3/chapter3_level_layout.gd" id="1_layout"]
 [ext_resource type="Script" path="res://scripts/chapter3/chapter3_layout_item.gd" id="2_item"]
@@ -29,6 +29,8 @@ size = Vector2(60, 12)
 size = Vector2(26, 160)
 [sub_resource type="RectangleShape2D" id="Shape_floor_end"]
 size = Vector2(440, 60)
+[sub_resource type="RectangleShape2D" id="Shape_exit"]
+size = Vector2(100, 180)
 
 [node name="Stairwell" type="Node2D"]
 script = ExtResource("1_layout")
@@ -201,6 +203,13 @@ position = Vector2(220, 460)
 position = Vector2(130, 460)
 [node name="Exit" type="Marker2D" parent="Markers"]
 position = Vector2(4140, 460)
+[node name="ExitTrigger" type="Area2D" parent="Markers"]
+position = Vector2(4140, 280)
+collision_layer = 0
+collision_mask = 0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Markers/ExitTrigger"]
+position = Vector2(50, 90)
+shape = SubResource("Shape_exit")
 [node name="Checkpoints" type="Node2D" parent="Markers"]
 [node name="Checkpoint1" type="Marker2D" parent="Markers/Checkpoints"]
 position = Vector2(1100, 460)

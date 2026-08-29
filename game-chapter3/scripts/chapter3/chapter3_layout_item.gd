@@ -31,7 +31,7 @@ extends Node2D
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), fill_color)
 	draw_rect(Rect2(Vector2.ZERO, size), edge_color, false, edge_width)
-	if label_text.is_empty():
+	if label_text.is_empty() or not Engine.is_editor_hint():
 		return
 	var font := ThemeDB.fallback_font
 	draw_string(font, Vector2(4.0, -6.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13, edge_color)

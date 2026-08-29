@@ -17,7 +17,8 @@ func _run() -> void:
 	assert(chapter.get_node("World/TieLine") is Line2D)
 	assert(chapter.get_node("HUD") is CanvasLayer)
 	assert(chapter.get_node("HUD/TopBar/Objective") is Label)
-	assert(chapter.get_node("World/LevelSourcePreview/Platforms/FloorStart") is StaticBody2D)
+	assert(chapter.get_node("World/EditorPreview/Platforms/FloorStart") is StaticBody2D)
+	assert(chapter.get_node("World/LevelMount/CurrentLevel/Platforms/FloorStart") is StaticBody2D)
 
 	var scene_paths := [
 		"res://scenes/chapter3/levels/chapter3_stairwell.tscn",
@@ -34,6 +35,8 @@ func _run() -> void:
 		assert(level_packed != null)
 		var layout := level_packed.instantiate()
 		assert(layout.has_method("to_level_definition"))
+		assert(layout.get_node("Markers/ExitTrigger") is Area2D)
+		assert(layout.get_node("Markers/ExitTrigger/CollisionShape2D") is CollisionShape2D)
 		var definition: Dictionary = layout.to_level_definition()
 		for key in expected_counts[index]:
 			assert(definition[key].size() == expected_counts[index][key])
