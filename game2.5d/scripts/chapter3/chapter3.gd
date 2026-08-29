@@ -59,7 +59,6 @@ var yellow_umbrella_texture: Texture2D = preload("res://art/cute-umbrella.png")
 var stairwell_full_scene_texture: Texture2D = preload("res://assets/environments/chapter3/stairwell/environment_ch03_stairwell_full_scene.png")
 var warehouse_full_scene_texture: Texture2D = preload("res://assets/environments/chapter3/warehouse/environment_ch03_warehouse_full_scene.png")
 var rooftop_full_scene_texture: Texture2D = preload("res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_full_scene.png")
-var rooftop_gate_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_rooftop_exit_gate.png")
 var level_scene_resources: Array[PackedScene] = [
 	preload("res://scenes/chapter3/levels/chapter3_stairwell.tscn"),
 	preload("res://scenes/chapter3/levels/chapter3_warehouse.tscn"),
@@ -1222,8 +1221,6 @@ func _draw_warehouse_dressing() -> void:
 
 func _draw_rooftop_dressing() -> void:
 	_draw_repeating_world_background(rooftop_full_scene_texture, -76.0)
-	# 大铁门按现有窄碰撞门的中心缩小显示，不扩大可阻挡范围。
-	_draw_world_texture(rooftop_gate_texture, Rect2(2863.0, -30.0, 100.0, 160.0), Color(0.57, 0.66, 0.68, 0.76))
 
 
 func _draw_world_texture(texture: Texture2D, world_rect: Rect2, tint: Color) -> void:

@@ -50,8 +50,7 @@ func _draw() -> void:
 	if _is_pressure_plate():
 		_draw_pressure_plate()
 	elif _is_door():
-		if not bool(get_meta(&"external_visual", false)):
-			_draw_mechanism_door()
+		_draw_mechanism_door()
 	elif _is_wood_gate():
 		_draw_wood_gate()
 	elif _uses_wood_surface():
