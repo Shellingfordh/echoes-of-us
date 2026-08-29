@@ -1,0 +1,257 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3600" height="1400" viewBox="0 0 3600 1400">
+  <defs>
+    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#31404a" stroke-width="1" opacity="0.52"/>
+    </pattern>
+    <pattern id="oneway" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="9" height="18" fill="#697984"/>
+      <rect x="9" width="9" height="18" fill="#4c5b65"/>
+    </pattern>
+    <filter id="redGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrowMain" markerWidth="16" markerHeight="16" refX="12" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#f4b84b"/>
+    </marker>
+    <marker id="arrowDaughter" markerWidth="14" markerHeight="14" refX="11" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L11,5 L0,10 Z" fill="#49c7ff"/>
+    </marker>
+    <marker id="arrowMother" markerWidth="14" markerHeight="14" refX="11" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L11,5 L0,10 Z" fill="#ff8093"/>
+    </marker>
+    <style>
+      text { font-family: "Microsoft YaHei", "Noto Sans SC", sans-serif; fill: #eef4f6; }
+      .title { font-size: 50px; font-weight: 800; }
+      .subtitle { font-size: 24px; fill: #b9c7cd; }
+      .block-title { font-size: 34px; font-weight: 800; letter-spacing: 1px; }
+      .block-sub { font-size: 21px; fill: #c8d4d9; }
+      .label { font-size: 20px; font-weight: 700; }
+      .small { font-size: 17px; fill: #c2cdd2; }
+      .tiny { font-size: 15px; fill: #aebbc1; }
+      .panel { fill: #111a21; stroke: #86949b; stroke-width: 3; }
+      .ground { fill: #4d5b64; stroke: #a2b0b7; stroke-width: 3; }
+      .prop { fill: #6b777e; stroke: #c0c9cd; stroke-width: 3; }
+      .prop-dark { fill: #3e4a52; stroke: #93a1a8; stroke-width: 3; }
+      .wood { fill: #866841; stroke: #d7ad68; stroke-width: 3; }
+      .hazard { fill: #482f35; stroke: #ff6379; stroke-width: 4; }
+      .daughter-only { fill: #173f50; stroke: #49c7ff; stroke-width: 4; }
+      .anchor { fill: #113e31; stroke: #54e0a2; stroke-width: 4; }
+      .route-main { fill: none; stroke: #f4b84b; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrowMain); }
+      .route-daughter { fill: none; stroke: #49c7ff; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrowDaughter); }
+      .route-mother { fill: none; stroke: #ff8093; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrowMother); }
+      .tie { fill: none; stroke: #ff3d58; stroke-width: 5; stroke-linecap: round; filter: url(#redGlow); }
+      .leader { fill: none; stroke: #d9e3e7; stroke-width: 2.5; }
+      .callout { fill: #12202a; stroke: #d9e3e7; stroke-width: 2; }
+      .note-yellow { fill: #231e12; stroke: #f4b84b; stroke-width: 3; }
+      .num { font-size: 22px; font-weight: 900; text-anchor: middle; dominant-baseline: central; }
+    </style>
+
+    <g id="mother">
+      <circle cx="0" cy="-38" r="15" fill="#ff8093" stroke="#ffe2e7" stroke-width="3"/>
+      <rect x="-14" y="-22" width="28" height="45" rx="8" fill="#b84e65" stroke="#ffe2e7" stroke-width="3"/>
+      <path d="M-9 23 L-15 48 M9 23 L15 48" stroke="#ffe2e7" stroke-width="6" stroke-linecap="round"/>
+      <path d="M-14 -8 L-30 9 M14 -8 L30 9" stroke="#ffe2e7" stroke-width="6" stroke-linecap="round"/>
+    </g>
+    <g id="daughter">
+      <circle cx="0" cy="-38" r="14" fill="#49c7ff" stroke="#e2f7ff" stroke-width="3"/>
+      <rect x="-13" y="-22" width="26" height="43" rx="8" fill="#267fa7" stroke="#e2f7ff" stroke-width="3"/>
+      <path d="M-8 21 L-14 46 M8 21 L14 46" stroke="#e2f7ff" stroke-width="6" stroke-linecap="round"/>
+      <path d="M-13 -8 L-28 8 M13 -8 L28 8" stroke="#e2f7ff" stroke-width="6" stroke-linecap="round"/>
+    </g>
+    <g id="student">
+      <circle cx="0" cy="-28" r="11" fill="#b7aaef" stroke="#eeeaff" stroke-width="2"/>
+      <rect x="-10" y="-16" width="20" height="34" rx="6" fill="#7064a5" stroke="#eeeaff" stroke-width="2"/>
+      <rect x="12" y="-5" width="20" height="22" fill="#93754d" stroke="#d4b986" stroke-width="2"/>
+    </g>
+  </defs>
+
+  <rect width="3600" height="1400" fill="#0b1116"/>
+  <rect x="0" y="0" width="3600" height="155" fill="#15232c"/>
+  <text x="65" y="66" class="title">第三章《一起走一段》｜纯 2D 横版白盒标注长图 v0.2</text>
+  <text x="68" y="112" class="subtitle">用途：美术搭建主要框架与物件占位　｜　坐标：X 向右、Y 向上、无 Z 轴　｜　灰色为白盒，不代表最终造型</text>
+
+  <g transform="translate(2260 37)">
+    <line x1="0" y1="19" x2="105" y2="19" class="route-main"/>
+    <text x="128" y="27" class="small">章节主引导</text>
+    <line x1="300" y1="19" x2="395" y2="19" class="route-daughter"/>
+    <text x="418" y="27" class="small">女儿移动</text>
+    <line x1="575" y1="19" x2="670" y2="19" class="route-mother"/>
+    <text x="693" y="27" class="small">母亲移动</text>
+    <line x1="850" y1="19" x2="945" y2="19" class="tie"/>
+    <text x="968" y="27" class="small">牵挂线</text>
+    <circle cx="1115" cy="19" r="14" class="anchor"/>
+    <text x="1142" y="27" class="small">锚定点</text>
+  </g>
+
+  <!-- BLOCK A -->
+  <rect x="55" y="185" width="1050" height="1125" rx="24" class="panel"/>
+  <rect x="75" y="205" width="1010" height="105" rx="16" fill="#172b36"/>
+  <text x="100" y="256" class="block-title">BLOCK A　老楼楼道</text>
+  <text x="100" y="291" class="block-sub">声控灯 → 杂物 → 缺损楼梯 → 首次交换支点</text>
+  <rect x="75" y="330" width="1010" height="945" fill="url(#grid)"/>
+
+  <rect x="90" y="1160" width="995" height="95" class="ground"/>
+  <rect x="115" y="1010" width="260" height="150" class="ground"/>
+  <rect x="375" y="1080" width="100" height="80" class="ground"/>
+  <rect x="475" y="1010" width="100" height="150" class="ground"/>
+  <rect x="575" y="930" width="100" height="230" class="ground"/>
+  <rect x="675" y="850" width="100" height="310" class="ground"/>
+  <rect x="855" y="790" width="230" height="370" class="ground"/>
+  <rect x="775" y="850" width="80" height="30" class="hazard"/>
+  <path d="M775 850 l15 -38 l15 38 l18 -50 l18 50" fill="none" stroke="#ff6379" stroke-width="5"/>
+  <rect x="185" y="935" width="80" height="75" class="prop-dark"/>
+  <line x1="205" y1="935" x2="205" y2="1010" stroke="#9ba8ae" stroke-width="3"/>
+  <line x1="235" y1="935" x2="235" y2="1010" stroke="#9ba8ae" stroke-width="3"/>
+  <rect x="285" y="1080" width="68" height="54" class="wood"/>
+  <rect x="115" y="645" width="65" height="130" class="prop-dark"/>
+  <line x1="130" y1="680" x2="165" y2="680" stroke="#c4cdd1" stroke-width="2"/>
+  <line x1="130" y1="720" x2="165" y2="720" stroke="#c4cdd1" stroke-width="2"/>
+  <line x1="395" y1="1065" x2="745" y2="815" stroke="#a9b5ba" stroke-width="10"/>
+  <line x1="430" y1="1035" x2="430" y2="1085" stroke="#a9b5ba" stroke-width="6"/>
+  <line x1="520" y1="970" x2="520" y2="1025" stroke="#a9b5ba" stroke-width="6"/>
+  <line x1="610" y1="905" x2="610" y2="950" stroke="#a9b5ba" stroke-width="6"/>
+  <g fill="#f4c66e" stroke="#fff0bd" stroke-width="2">
+    <circle cx="270" cy="520" r="18"/><circle cx="600" cy="520" r="18"/><circle cx="950" cy="520" r="18"/>
+  </g>
+  <g opacity="0.28" fill="#f4c66e"><circle cx="270" cy="520" r="62"/><circle cx="600" cy="520" r="62"/><circle cx="950" cy="520" r="62"/></g>
+
+  <path d="M135 1090 C310 1040 500 980 700 820 C770 765 850 745 1035 740" class="route-main"/>
+  <path d="M710 810 C760 740 825 725 900 735" class="route-daughter"/>
+  <path d="M885 740 C825 690 760 700 705 805" class="route-mother"/>
+  <circle cx="710" cy="805" r="22" class="anchor"/><circle cx="890" cy="740" r="22" class="anchor"/>
+  <use href="#mother" x="700" y="790"/><use href="#daughter" x="895" y="725"/>
+  <path d="M730 782 Q810 735 868 702" class="tie"/>
+
+  <g><circle cx="140" cy="1090" r="24" fill="#f4b84b"/><text x="140" y="1090" class="num">1</text></g>
+  <g><circle cx="550" cy="940" r="24" fill="#f4b84b"/><text x="550" y="940" class="num">2</text></g>
+  <g><circle cx="710" cy="805" r="24" fill="#54e0a2"/><text x="710" y="805" class="num">3</text></g>
+  <g><circle cx="890" cy="740" r="24" fill="#49c7ff"/><text x="890" y="740" class="num">4</text></g>
+  <g><circle cx="1025" cy="740" r="24" fill="#f4b84b"/><text x="1025" y="740" class="num">5</text></g>
+
+  <rect x="105" y="350" width="245" height="70" rx="10" class="callout"/><text x="125" y="393" class="label">A01 声控灯 ×3</text>
+  <path d="M280 420 L270 500" class="leader"/>
+  <rect x="105" y="450" width="270" height="92" rx="10" class="callout"/><text x="125" y="487" class="label">A02 报箱 / 杂物</text><text x="125" y="520" class="small">生活化遮挡，不做机关</text>
+  <path d="M210 542 L205 935" class="leader"/>
+  <rect x="390" y="350" width="280" height="70" rx="10" class="callout"/><text x="410" y="393" class="label">A03 楼梯扶手</text>
+  <path d="M530 420 L540 945" class="leader"/>
+  <rect x="700" y="350" width="340" height="100" rx="10" class="callout"/><text x="720" y="388" class="label">A04 缺损水泥楼梯</text><text x="720" y="422" class="small">断口清楚，露出钢筋</text>
+  <path d="M860 450 L810 820" class="leader"/>
+  <rect x="585" y="600" width="440" height="90" rx="10" class="note-yellow"/><text x="605" y="638" class="label">流程 3→4：母亲先锚定，女儿越过</text><text x="605" y="671" class="small">女儿到达后反向成为支点，母亲再过</text>
+
+  <!-- BLOCK B -->
+  <rect x="1135" y="185" width="1215" height="1125" rx="24" class="panel"/>
+  <rect x="1155" y="205" width="1175" height="105" rx="16" fill="#2a251d"/>
+  <text x="1180" y="256" class="block-title">BLOCK B　旧仓库</text>
+  <text x="1180" y="291" class="block-sub">母亲推重箱 → 女儿钻低洞 → 母亲失败 → 接受女儿支撑</text>
+  <rect x="1155" y="330" width="1175" height="945" fill="url(#grid)"/>
+  <rect x="1165" y="1160" width="1155" height="95" class="ground"/>
+  <rect x="1195" y="610" width="280" height="550" class="prop-dark"/>
+  <g fill="#6f6260" stroke="#b8aaa7" stroke-width="2">
+    <circle cx="1240" cy="660" r="22"/><circle cx="1310" cy="660" r="22"/><circle cx="1380" cy="660" r="22"/>
+    <circle cx="1240" cy="735" r="22"/><circle cx="1310" cy="735" r="22"/><circle cx="1380" cy="735" r="22"/>
+    <circle cx="1240" cy="810" r="22"/><circle cx="1310" cy="810" r="22"/><circle cx="1380" cy="810" r="22"/>
+  </g>
+  <rect x="1485" y="1000" width="190" height="160" class="wood"/>
+  <path d="M1510 1030 L1650 1135 M1650 1030 L1510 1135" stroke="#d7ad68" stroke-width="8"/>
+  <rect x="1780" y="840" width="315" height="320" class="prop-dark"/>
+  <rect x="1810" y="1000" width="250" height="160" rx="12" class="daughter-only"/>
+  <rect x="2095" y="710" width="225" height="450" class="ground"/>
+  <rect x="1995" y="1035" width="100" height="125" class="hazard"/>
+  <rect x="1850" y="650" width="210" height="120" fill="url(#oneway)" stroke="#aab6bc" stroke-width="3"/>
+  <rect x="2215" y="615" width="95" height="95" class="prop"/>
+  <line x1="2170" y1="710" x2="2170" y2="870" stroke="#d7ad68" stroke-width="9"/>
+  <line x1="2140" y1="745" x2="2200" y2="745" stroke="#d7ad68" stroke-width="6"/>
+  <line x1="2140" y1="795" x2="2200" y2="795" stroke="#d7ad68" stroke-width="6"/>
+  <line x1="2140" y1="845" x2="2200" y2="845" stroke="#d7ad68" stroke-width="6"/>
+  <use href="#student" x="1730" y="1110"/>
+
+  <path d="M1185 1100 C1370 1090 1510 1090 1690 1090 C1830 1090 1950 1080 2040 1080 C2130 1060 2190 880 2280 680" class="route-main"/>
+  <path d="M1460 1095 L1710 1095" class="route-mother"/>
+  <path d="M1760 1090 C1820 1090 1920 1080 2050 1080 C2120 1000 2140 860 2215 685" class="route-daughter"/>
+  <path d="M2045 1080 C2055 920 2130 770 2220 680" class="route-mother"/>
+  <circle cx="2220" cy="680" r="24" class="anchor"/>
+  <use href="#daughter" x="2220" y="665"/><use href="#mother" x="2050" y="1070"/>
+  <path d="M2078 1035 Q2120 850 2194 630" class="tie"/>
+
+  <g><circle cx="1195" cy="1095" r="24" fill="#f4b84b"/><text x="1195" y="1095" class="num">6</text></g>
+  <g><circle cx="1490" cy="1095" r="24" fill="#ff8093"/><text x="1490" y="1095" class="num">7</text></g>
+  <g><circle cx="1825" cy="1080" r="24" fill="#49c7ff"/><text x="1825" y="1080" class="num">8</text></g>
+  <g><circle cx="2040" cy="1080" r="24" fill="#ff6379"/><text x="2040" y="1080" class="num">9</text></g>
+  <g><circle cx="2220" cy="680" r="24" fill="#54e0a2"/><text x="2220" y="680" class="num">10</text></g>
+
+  <rect x="1175" y="350" width="320" height="95" rx="10" class="callout"/><text x="1195" y="390" class="label">B01 货架 / 布卷</text><text x="1195" y="422" class="small">旧纺织厂职业痕迹</text>
+  <path d="M1320 445 L1320 610" class="leader"/>
+  <rect x="1515" y="350" width="300" height="95" rx="10" class="callout"/><text x="1535" y="390" class="label">B02 重木箱</text><text x="1535" y="422" class="small">仅母亲可以推动</text>
+  <path d="M1650 445 L1580 990" class="leader"/>
+  <rect x="1835" y="350" width="290" height="95" rx="10" class="callout"/><text x="1855" y="390" class="label">B03 低矮通道</text><text x="1855" y="422" class="small">仅女儿可以通过</text>
+  <path d="M1950 445 L1930 995" class="leader"/>
+  <rect x="2140" y="350" width="170" height="95" rx="10" class="callout"/><text x="2160" y="390" class="label">B04 高台</text><text x="2160" y="422" class="small">支撑交换点</text>
+  <path d="M2230 445 L2230 610" class="leader"/>
+  <rect x="1455" y="605" width="335" height="80" rx="10" class="callout"/><text x="1475" y="638" class="label">高中姑娘：背景短暂出现</text><text x="1475" y="668" class="tiny">搬轻物，不参与机关或支线</text>
+  <path d="M1690 685 L1730 1065" class="leader"/>
+  <rect x="1770" y="500" width="535" height="90" rx="10" class="note-yellow"/><text x="1790" y="538" class="label">流程 9→10：母亲先拒绝并尝试，失败后停顿</text><text x="1790" y="570" class="small">女儿在高台锚定，母亲真正把重量交出去</text>
+
+  <!-- BLOCK C -->
+  <rect x="2380" y="185" width="1165" height="1125" rx="24" class="panel"/>
+  <rect x="2400" y="205" width="1125" height="105" rx="16" fill="#1f2b35"/>
+  <text x="2425" y="256" class="block-title">BLOCK C　天台接力</text>
+  <text x="2425" y="291" class="block-sub">三级高度 → 交替锚定 / 承重 → 一起到顶 → 黄伞入箱</text>
+  <rect x="2400" y="330" width="1125" height="945" fill="url(#grid)"/>
+
+  <rect x="2410" y="1160" width="1115" height="95" class="ground"/>
+  <rect x="2450" y="1040" width="285" height="120" class="ground"/>
+  <rect x="2735" y="890" width="270" height="270" class="ground"/>
+  <rect x="3005" y="710" width="270" height="450" class="ground"/>
+  <rect x="3275" y="520" width="250" height="640" class="ground"/>
+  <rect x="2470" y="900" width="100" height="140" class="prop-dark"/>
+  <rect x="2510" y="955" width="50" height="85" fill="#26343d"/>
+  <rect x="3035" y="540" width="145" height="170" rx="22" class="prop"/>
+  <rect x="3380" y="330" width="110" height="190" class="prop-dark"/>
+  <rect x="3395" y="370" width="80" height="150" fill="#26343d" stroke="#a8b4ba" stroke-width="3"/>
+  <rect x="3300" y="990" width="180" height="150" class="wood"/>
+  <path d="M3320 1015 L3460 1120 M3460 1015 L3320 1120" stroke="#d7ad68" stroke-width="7"/>
+  <path d="M3410 975 q20 -30 40 0" fill="#f2cf34" stroke="#fff2a6" stroke-width="4"/>
+  <line x1="2470" y1="650" x2="3480" y2="440" stroke="#8d969b" stroke-width="5"/>
+  <line x1="2480" y1="760" x2="3480" y2="600" stroke="#8d969b" stroke-width="5"/>
+  <g fill="#d8d6ce" stroke="#9ea7aa" stroke-width="2" opacity="0.92">
+    <path d="M2600 625 L2740 595 L2760 720 L2620 742 Z"/>
+    <path d="M2840 575 L2990 545 L3010 660 L2860 690 Z"/>
+    <path d="M3090 525 L3235 495 L3250 610 L3110 635 Z"/>
+    <path d="M2650 730 L2810 705 L2825 815 L2670 840 Z"/>
+  </g>
+
+  <path d="M2440 1100 C2570 1080 2660 1020 2815 860 C2910 770 3020 690 3115 655 C3220 610 3330 490 3445 470" class="route-main"/>
+  <path d="M2580 1010 C2670 970 2740 900 2825 850" class="route-daughter"/>
+  <path d="M2825 850 C2910 820 2990 740 3090 675" class="route-mother"/>
+  <path d="M3090 675 C3200 640 3320 520 3425 470" class="route-daughter"/>
+  <circle cx="2580" cy="1010" r="23" class="anchor"/><circle cx="2825" cy="850" r="23" class="anchor"/><circle cx="3090" cy="675" r="23" class="anchor"/>
+  <use href="#mother" x="2580" y="995"/><use href="#daughter" x="2825" y="835"/>
+  <path d="M2608 962 Q2700 880 2798 800" class="tie"/>
+  <use href="#daughter" x="2825" y="835"/><use href="#mother" x="3090" y="660"/>
+  <path d="M2852 802 Q2960 750 3062 627" class="tie"/>
+  <use href="#mother" x="3090" y="660"/><use href="#daughter" x="3425" y="455"/>
+  <path d="M3117 628 Q3270 570 3398 420" class="tie"/>
+
+  <g><circle cx="2445" cy="1095" r="24" fill="#f4b84b"/><text x="2445" y="1095" class="num">11</text></g>
+  <g><circle cx="2580" cy="1010" r="24" fill="#54e0a2"/><text x="2580" y="1010" class="num">12</text></g>
+  <g><circle cx="2825" cy="850" r="24" fill="#54e0a2"/><text x="2825" y="850" class="num">13</text></g>
+  <g><circle cx="3090" cy="675" r="24" fill="#54e0a2"/><text x="3090" y="675" class="num">14</text></g>
+  <g><circle cx="3425" cy="470" r="24" fill="#f4b84b"/><text x="3425" y="470" class="num">15</text></g>
+
+  <rect x="2420" y="350" width="310" height="95" rx="10" class="callout"/><text x="2440" y="390" class="label">C01 屋顶入口 / 女儿墙</text><text x="2440" y="422" class="small">从仓库出口连续进入</text>
+  <path d="M2570 445 L2520 900" class="leader"/>
+  <rect x="2750" y="350" width="310" height="95" rx="10" class="callout"/><text x="2770" y="390" class="label">C02 晾衣绳阵 / 床单</text><text x="2770" y="422" class="small">普通线，不做魔法发光</text>
+  <path d="M2890 445 L2880 570" class="leader"/>
+  <rect x="3080" y="350" width="225" height="95" rx="10" class="callout"/><text x="3100" y="390" class="label">C03 水箱</text><text x="3100" y="422" class="small">静态碰撞块</text>
+  <path d="M3180 445 L3120 535" class="leader"/>
+  <rect x="3315" y="600" width="200" height="105" rx="10" class="callout"/><text x="3335" y="642" class="label">C04 出口铁门</text><text x="3335" y="674" class="small">章节终点方向</text>
+  <path d="M3415 600 L3435 520" class="leader"/>
+  <rect x="3080" y="860" width="425" height="95" rx="10" class="note-yellow"/><text x="3100" y="900" class="label">C05 最后一个箱子</text><text x="3100" y="932" class="small">黄伞只露一角，不给镜头强调</text>
+  <path d="M3370 955 L3385 990" class="leader"/>
+  <rect x="2450" y="500" width="500" height="95" rx="10" class="note-yellow"/><text x="2470" y="540" class="label">流程 12→14：母亲锚定 → 女儿锚定 → 母亲锚定</text><text x="2470" y="572" class="small">每次都由到达高处的人接替成为稳定端</text>
+
+  <!-- Footer -->
+  <rect x="55" y="1325" width="3490" height="55" rx="12" fill="#142029" stroke="#53636b" stroke-width="2"/>
+  <text x="80" y="1361" class="small">镜头规则：A/B 段横向跟随；C 段随高度平滑上移；不锁定单一房间、不旋转、不使用 2.5D 透视。比例为白盒讨论稿，后续再写入正式碰撞与坐标表。</text>
+</svg>
