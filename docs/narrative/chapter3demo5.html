@@ -500,6 +500,8 @@ function handleJump() {
   }
   if (phase === PHASE.B_CRATE_DONE && c === daughter && near(c, 37.8, 2.4)) {
     beginRide(daughter, 39.25, 2.0, .48, () => {
+      // 秀兰在箱外守住洞口；这段必须允许余念独自穿完整条低洞。
+      setPosition(mother, 37.25, 0);
       setPhase(PHASE.B_TUNNEL);
       notice("按住 S / ↓，再向右移动", 3.2);
     });
@@ -618,7 +620,9 @@ function updateTether(dt) {
   const dx = centerX(daughter) - centerX(mother);
   const dy = (daughter.y + daughter.h * .42) - (mother.y + mother.h * .42);
   const d = Math.hypot(dx, dy) || 1;
-  const limit = daughter.anchored || mother.anchored ? ANCHORED_HARD : HARD;
+  // 低洞是预设的单人通行段，洞口等待中的同伴提供与站稳相同的协作距离。
+  const supported = daughter.anchored || mother.anchored || phase === PHASE.B_TUNNEL;
+  const limit = supported ? ANCHORED_HARD : HARD;
   if (d <= limit || characters.some(c => c.ride)) return;
   const moving = me();
   const stable = other();
@@ -900,7 +904,8 @@ function drawTether() {
   const y2 = mother.y + mother.h * .42 - cameraY;
   const d = Math.hypot(x2 - x1, y2 - y1);
   const anchored = daughter.anchored || mother.anchored;
-  const max = anchored ? ANCHORED_HARD : HARD;
+  const supported = anchored || phase === PHASE.B_TUNNEL;
+  const max = supported ? ANCHORED_HARD : HARD;
   const ratio = d / max;
   const sag = Math.max(0, (1 - d / REST) * 54);
   ctx.save();
@@ -1174,7 +1179,8 @@ window.__chapter3Demo = {
     const presets = {
       A: [PHASE.A_APPROACH, [13.8, 2], [14.4, 2], 1],
       PUSH: [PHASE.B_ENTER, [33.0, 0], [33.6, 0], 1],
-      TUNNEL: [PHASE.B_CRATE_DONE, [37.4, 0], [36.4, 0], 0],
+      TUNNEL: [PHASE.B_CRATE_DONE, [37.4, 0], [37.25, 0], 0],
+      TUNNEL_EXIT: [PHASE.B_TUNNEL, [47.65, 2], [37.25, 0], 0],
       B: [PHASE.B_DAUGHTER_TOP, [50.2, 3.4], [37.25, 0], 1],
       C: [PHASE.C_ENTER, [61.1, 0], [62.0, 0], 1],
       C1: [PHASE.C_DAUGHTER_1, [70.5, 2.6], [62.2, 0], 0],
