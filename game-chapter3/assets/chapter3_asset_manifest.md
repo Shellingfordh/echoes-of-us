@@ -1,6 +1,6 @@
 # 第三章现有素材接入清单
 
-第三章的 28 张候选 PNG 已复制或处理后保存到 `game-chapter3/assets/`，并使用英文资源名。Godot 通过当前工程内的 `res://assets/...` 直接访问，不依赖个人 Downloads 路径、仓库根素材目录或外部软链接。当前 10 张用于游戏画面，18 张仅保留为候选参考。原有 3 张楼梯/断梯图片因透视、比例和现有关卡结构不匹配，已从工程整体移除。
+第三章的 29 张候选 PNG 已复制或处理后保存到 `game-chapter3/assets/`，并使用英文资源名。Godot 通过当前工程内的 `res://assets/...` 直接访问，不依赖个人 Downloads 路径、仓库根素材目录或外部软链接。当前 11 张用于游戏画面，18 张仅保留为候选参考。原有 3 张楼梯/断梯图片因透视、比例和现有关卡结构不匹配，已从工程整体移除。
 
 ## 当前使用范围
 
@@ -15,6 +15,7 @@
 | `w.png` | `props/chapter3/platforms/prop_ch03_wood_platform_bracket.png` | 窄平台与台阶的木质斜撑结构 |
 | 用户提供的抬起踏板图 | `props/chapter3/plates/prop_ch03_pressure_plate_raised.png` | 未触发踏板状态；透明背景游戏贴图 |
 | 用户提供的压下踏板图 | `props/chapter3/plates/prop_ch03_pressure_plate_pressed.png` | 已触发踏板状态；透明背景游戏贴图 |
+| `door2.png` | `props/chapter3/doors/prop_ch03_mechanism_door_closed.png` | 第一、二关机关门关闭状态；踏板触发后节点与碰撞同时消失 |
 | `window.png` | `props/chapter3/prop_ch03_stairwell_window.png` | 候选参考；暖夕照与当前冷灰蓝楼道冲突，运行时停用 |
 | 用户提供的纺织仓库整景图 | `environments/chapter3/warehouse/environment_ch03_warehouse_full_scene.png` | 第二关完整背景；以原始尺寸沿世界横向重复，保持随镜头滚动 |
 | `factory-background.png` | `environments/chapter3/warehouse/environment_ch03_warehouse_background.png` | 候选参考；已由纺织仓库整景图替换 |

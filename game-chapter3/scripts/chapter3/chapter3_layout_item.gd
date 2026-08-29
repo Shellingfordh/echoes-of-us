@@ -11,11 +11,13 @@ const WOOD_LONG_PLATFORM_TEXTURE: Texture2D = preload("res://assets/props/chapte
 const WOOD_BRACKET_PLATFORM_TEXTURE: Texture2D = preload("res://assets/props/chapter3/platforms/prop_ch03_wood_platform_bracket.png")
 const PRESSURE_PLATE_RAISED_TEXTURE: Texture2D = preload("res://assets/props/chapter3/plates/prop_ch03_pressure_plate_raised.png")
 const PRESSURE_PLATE_PRESSED_TEXTURE: Texture2D = preload("res://assets/props/chapter3/plates/prop_ch03_pressure_plate_pressed.png")
+const MECHANISM_DOOR_CLOSED_TEXTURE: Texture2D = preload("res://assets/props/chapter3/doors/prop_ch03_mechanism_door_closed.png")
 const WOOD_FLOOR_REGION := Rect2(0.0, 202.0, 2048.0, 348.0)
 const WOOD_LONG_PLATFORM_REGION := Rect2(122.0, 224.0, 1809.0, 356.0)
 const WOOD_BRACKET_PLATFORM_REGION := Rect2(136.0, 71.0, 572.0, 564.0)
 const PRESSURE_PLATE_RAISED_REGION := Rect2(0.0, 9.0, 1660.0, 908.0)
 const PRESSURE_PLATE_PRESSED_REGION := Rect2(45.0, 37.0, 1933.0, 716.0)
+const MECHANISM_DOOR_CLOSED_REGION := Rect2(600.0, 67.0, 846.0, 1402.0)
 
 @export var size := Vector2(100.0, 40.0):
 	set(value):
@@ -46,6 +48,9 @@ const PRESSURE_PLATE_PRESSED_REGION := Rect2(45.0, 37.0, 1933.0, 716.0)
 func _draw() -> void:
 	if _is_pressure_plate():
 		_draw_pressure_plate()
+	elif _is_door():
+		if not bool(get_meta(&"external_visual", false)):
+			_draw_mechanism_door()
 	elif _uses_wood_surface():
 		_draw_wood_surface()
 	else:
@@ -68,6 +73,11 @@ func _is_pressure_plate() -> bool:
 	return parent != null and parent.name == &"Plates"
 
 
+func _is_door() -> bool:
+	var parent := get_parent()
+	return parent != null and parent.name == &"Doors"
+
+
 func _draw_pressure_plate() -> void:
 	var texture := PRESSURE_PLATE_PRESSED_TEXTURE if plate_pressed else PRESSURE_PLATE_RAISED_TEXTURE
 	var source_region := PRESSURE_PLATE_PRESSED_REGION if plate_pressed else PRESSURE_PLATE_RAISED_REGION
@@ -80,6 +90,24 @@ func _draw_pressure_plate() -> void:
 		visual_height
 	)
 	draw_texture_rect_region(texture, destination, source_region, Color.WHITE)
+
+
+func _draw_mechanism_door() -> void:
+	# 门节点隐藏时贴图与碰撞会同时消失，因此这里只需要关闭状态。
+	var visual_height := size.y + 8.0
+	var visual_width := maxf(size.x + 40.0, visual_height * 0.49)
+	var destination := Rect2(
+		(size.x - visual_width) * 0.5,
+		size.y - visual_height,
+		visual_width,
+		visual_height
+	)
+	draw_texture_rect_region(
+		MECHANISM_DOOR_CLOSED_TEXTURE,
+		destination,
+		MECHANISM_DOOR_CLOSED_REGION,
+		Color.WHITE
+	)
 
 
 func _draw_wood_surface() -> void:

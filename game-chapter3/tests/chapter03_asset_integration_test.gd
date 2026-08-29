@@ -29,6 +29,7 @@ const ASSET_PATHS: Array[String] = [
 	"res://assets/props/chapter3/platforms/prop_ch03_wood_platform_bracket.png",
 	"res://assets/props/chapter3/plates/prop_ch03_pressure_plate_raised.png",
 	"res://assets/props/chapter3/plates/prop_ch03_pressure_plate_pressed.png",
+	"res://assets/props/chapter3/doors/prop_ch03_mechanism_door_closed.png",
 ]
 
 const RUNTIME_REJECTED_ASSETS: Array[String] = [
@@ -82,6 +83,8 @@ func _run() -> void:
 	assert(layout_item_script.contains("prop_ch03_wood_platform_bracket.png"))
 	assert(layout_item_script.contains("prop_ch03_pressure_plate_raised.png"))
 	assert(layout_item_script.contains("prop_ch03_pressure_plate_pressed.png"))
+	assert(layout_item_script.contains("prop_ch03_mechanism_door_closed.png"))
+	assert(layout_item_script.contains("external_visual"), "第三关外部终门素材必须能跳过窄门贴图")
 	for rejected_asset in RUNTIME_REJECTED_ASSETS:
 		assert(not chapter_script.contains(rejected_asset) and not layout_item_script.contains(rejected_asset), "不匹配当前场景的候选素材不能被运行时加载：%s" % rejected_asset)
 
@@ -92,5 +95,5 @@ func _run() -> void:
 	await process_frame
 	assert(chapter != null and chapter.levels.size() == 3)
 
-	print("[CHAPTER03_ASSETS] PASS 28 project-local textures load, 10 scene-matched textures remain active")
+	print("[CHAPTER03_ASSETS] PASS 29 project-local textures load, 11 scene-matched textures remain active")
 	quit(0)

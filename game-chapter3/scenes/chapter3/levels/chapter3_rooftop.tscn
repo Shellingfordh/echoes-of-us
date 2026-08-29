@@ -104,6 +104,7 @@ fill_color = Color(0.15, 0.25, 0.28, 1)
 edge_color = Color(0.55, 0.68, 0.7, 1)
 label_text = "最终门"
 metadata/plates = [0, 1]
+metadata/external_visual = true
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Doors/FinalDoor"]
 position = Vector2(13, 80)
 shape = SubResource("Shape_door")
