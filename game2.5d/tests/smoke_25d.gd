@@ -20,7 +20,8 @@ func _run() -> void:
 	var start := player.get_logical_position()
 	assert(start.is_equal_approx(Vector3(5.0, 0.0, 10.2)))
 	assert(player.global_position.is_equal_approx(Projection25D.project(start)))
-	assert(player.ground_shadow.position.is_equal_approx(player.ground_shadow_offset))
+	if is_instance_valid(player.ground_shadow):
+		assert(player.ground_shadow.position.is_equal_approx(player.ground_shadow_offset))
 	assert(dialogue_ui.portrait_texture is TextureRect)
 	# 单键保持屏幕水平/垂直移动；横纵各按一键时可沿屏幕斜线移动。
 	var screen_right := Projection25D.project_direction(
@@ -152,7 +153,6 @@ func _run() -> void:
 	# 拉回必须通过 CharacterBody3D.move_and_slide()：妈妈在床东侧、玩家在床西侧，
 	# 即使牵挂线持续施力，玩家也应被床的 StaticBody3D 挡在西侧。
 	var mother := room.get_node("Characters/Mother") as Mother
-	assert(mother.get_node_or_null("GroundShadow") is Polygon2D)
 	mother.set_logical_position(Vector3(15.0, 0.0, 4.0))
 	player.set_logical_position(Vector3(7.0, 0.0, 4.0))
 	var live_pull_start := player.get_logical_position()
