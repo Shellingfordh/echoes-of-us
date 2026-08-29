@@ -1,6 +1,6 @@
 # 第三章现有素材接入清单
 
-第三章的 29 张候选 PNG 已复制或处理后保存到 `game-chapter3/assets/`，并使用英文资源名。Godot 通过当前工程内的 `res://assets/...` 直接访问，不依赖个人 Downloads 路径、仓库根素材目录或外部软链接。当前 11 张用于游戏画面，18 张仅保留为候选参考。原有 3 张楼梯/断梯图片因透视、比例和现有关卡结构不匹配，已从工程整体移除。
+第三章的 28 张候选 PNG 已复制或处理后保存到 `game-chapter3/assets/`，并使用英文资源名。Godot 通过当前工程内的 `res://assets/...` 直接访问，不依赖个人 Downloads 路径、仓库根素材目录或外部软链接。当前 11 张用于游戏画面，17 张仅保留为候选参考。原有 3 张楼梯/断梯图片因透视、比例和现有关卡结构不匹配，已从工程整体移除。
 
 ## 当前使用范围
 
@@ -26,7 +26,6 @@
 | 用户提供的天台整景图 | `environments/chapter3/rooftop/environment_ch03_rooftop_full_scene.png` | 第三关完整背景；以原始尺寸沿世界横向重复，保持随镜头滚动 |
 | `sky.png` | `environments/chapter3/rooftop/environment_ch03_rooftop_sky.png` | 候选参考；已由天台整景图替换 |
 | `rooftop-entrance.png` | `environments/chapter3/rooftop/environment_ch03_rooftop_entrance.png` | 候选参考；整景图已包含入口和水箱 |
-| `hanging-clothes.png` | `environments/chapter3/rooftop/environment_ch03_rooftop_hanging_clothes.png` | 候选参考；整张构图遮挡人物与牵挂线，拆件前停用 |
 | `water-tank-1.png` | `props/chapter3/prop_ch03_rooftop_water_tank_low.png` | 候选参考；整景图已包含水箱 |
 | `water-tank-2.png` | `props/chapter3/prop_ch03_rooftop_water_tank_high.png` | 候选参考；会误导为可攀爬平台，运行时停用 |
 | `big-iron-gate.png` | `props/chapter3/prop_ch03_rooftop_exit_gate.png` | 天台终门视觉层 |

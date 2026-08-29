@@ -15,7 +15,6 @@ const ASSET_PATHS: Array[String] = [
 	"res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_sky.png",
 	"res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_full_scene.png",
 	"res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_entrance.png",
-	"res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_hanging_clothes.png",
 	"res://assets/props/chapter3/prop_ch03_rooftop_water_tank_low.png",
 	"res://assets/props/chapter3/prop_ch03_rooftop_water_tank_high.png",
 	"res://assets/props/chapter3/prop_ch03_rooftop_exit_gate.png",
@@ -50,7 +49,6 @@ const RUNTIME_REJECTED_ASSETS: Array[String] = [
 	"environment_ch03_stairwell_stairs_landing.png",
 	"prop_ch03_stairwell_window.png",
 	"environment_ch03_warehouse_low_tunnel.png",
-	"environment_ch03_rooftop_hanging_clothes.png",
 	"prop_ch03_rooftop_water_tank_high.png",
 	"prop_ch03_warehouse_shelf_wide.png",
 	"prop_ch03_warehouse_shelf_narrow.png",
@@ -95,5 +93,5 @@ func _run() -> void:
 	await process_frame
 	assert(chapter != null and chapter.levels.size() == 3)
 
-	print("[CHAPTER03_ASSETS] PASS 29 project-local textures load, 11 scene-matched textures remain active")
+	print("[CHAPTER03_ASSETS] PASS 28 project-local textures load, 11 scene-matched textures remain active")
 	quit(0)
