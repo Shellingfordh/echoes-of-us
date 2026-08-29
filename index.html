@@ -1,36 +1,44 @@
+```html
 <!DOCTYPE html>
-
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
   >
 
   <title>Echoes of Us — 牵挂线</title>
 
-<meta
-name="description"
-content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的叙事互动游戏。"
+  <meta
+    name="description"
+    content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的叙事互动游戏。"
+  >
 
->
+  <meta name="theme-color" content="#050505">
 
-  <!-- Fonts -->
+  <!-- =========================================
+       Fonts
+  ========================================== -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;500;600&family=Instrument+Serif:ital@0;1&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap"
     rel="stylesheet"
   >
 
-  <!-- Tailwind CSS -->
+  <!-- =========================================
+       Tailwind
+  ========================================== -->
 
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- React -->
+  <!-- =========================================
+       React
+  ========================================== -->
 
   <script
     src="https://unpkg.com/react@18/umd/react.production.min.js"
@@ -38,13 +46,18 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
   ></script>
 
   <script
-    src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    src="https://unpkg.com/react-dom@18/umd/react.production.min.js"
     crossorigin
   ></script>
 
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+
   <style>
+
+    /* =========================================
+       Global
+    ========================================== */
 
     * {
       box-sizing: border-box;
@@ -52,42 +65,74 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
       -webkit-tap-highlight-color: transparent;
     }
 
-    html,
-    body,
-    #root {
+    html {
       width: 100%;
       min-height: 100%;
-      margin: 0;
-    }
-
-    html {
       scroll-behavior: smooth;
+      background: #050505;
     }
 
     body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
       background: #050505;
       color: white;
       overflow-x: hidden;
+      overscroll-behavior-x: none;
+    }
+
+    #root {
+      width: 100%;
+      min-height: 100%;
     }
 
     button,
     a {
       -webkit-user-select: none;
       user-select: none;
+      touch-action: manipulation;
     }
 
-    /* --------------------------------
+    img,
+    video {
+      max-width: 100%;
+    }
+
+
+    /* =========================================
+       Safe Area
+    ========================================== */
+
+    .safe-top {
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+
+    /* =========================================
        Glass
-    -------------------------------- */
+    ========================================== */
 
     .glass {
       background: rgba(255, 255, 255, 0.055);
+
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
+
       border: 1px solid rgba(255, 255, 255, 0.12);
+
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.08),
         0 12px 40px rgba(0, 0, 0, 0.18);
+
+      transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease;
     }
 
     .glass:hover {
@@ -95,31 +140,10 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
       border-color: rgba(255, 255, 255, 0.18);
     }
 
-    /* --------------------------------
-       Trailer
-    -------------------------------- */
 
-    .trailer-frame {
-      background:
-        radial-gradient(
-          circle at center,
-          rgba(255, 255, 255, 0.06),
-          rgba(255, 255, 255, 0.015) 45%,
-          rgba(0, 0, 0, 0.4) 100%
-        );
-    }
-
-    .trailer-video {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background: #000;
-    }
-
-    /* --------------------------------
+    /* =========================================
        Marquee
-    -------------------------------- */
+    ========================================== */
 
     @keyframes marquee {
 
@@ -138,9 +162,10 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
       animation: marquee 32s linear infinite;
     }
 
-    /* --------------------------------
-       Fade animations
-    -------------------------------- */
+
+    /* =========================================
+       Fade
+    ========================================== */
 
     @keyframes fadeUp {
 
@@ -158,9 +183,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
     .fade-up {
       animation:
-        fadeUp
-        0.9s
-        cubic-bezier(0.22, 1, 0.36, 1)
+        fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1)
         forwards;
     }
 
@@ -179,9 +202,10 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
       opacity: 0;
     }
 
-    /* --------------------------------
-       Floating line
-    -------------------------------- */
+
+    /* =========================================
+       Pulse
+    ========================================== */
 
     @keyframes pulseLine {
 
@@ -197,28 +221,161 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
     }
 
     .pulse-line {
-      animation: pulseLine 3s ease-in-out infinite;
+      animation:
+        pulseLine 3s ease-in-out infinite;
     }
 
-    /* --------------------------------
+
+    /* =========================================
+       Scrollbar
+    ========================================== */
+
+    .scroll-area {
+      scrollbar-width: none;
+    }
+
+    .scroll-area::-webkit-scrollbar {
+      display: none;
+    }
+
+
+    /* =========================================
+       Trailer
+    ========================================== */
+
+    .trailer-video {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+      background: #000;
+    }
+
+
+    /* =========================================
        Mobile
-    -------------------------------- */
+    ========================================== */
 
     @media (max-width: 640px) {
 
-      .hero-title {
-        font-size: 4.5rem !important;
+      html {
+        scroll-padding-top: 80px;
       }
 
-      .trailer-video {
-        object-fit: contain;
+      .hero-section {
+        min-height: 100svh;
+        min-height: 100dvh;
+        height: auto;
+      }
+
+      .hero-title {
+        font-size: clamp(
+          4.2rem,
+          20vw,
+          7rem
+        ) !important;
+
+        line-height: 0.76 !important;
+
+        letter-spacing: -0.05em !important;
+      }
+
+      .hero-content {
+        padding-top: 110px;
+        padding-bottom: 34px;
+      }
+
+      .hero-description {
+        max-width: 100%;
+        font-size: 13px;
+        line-height: 1.8;
+      }
+
+      .hero-background {
+        background-position: 54% center !important;
+      }
+
+      .story-section {
+        padding-top: 90px;
+        padding-bottom: 90px;
+      }
+
+      .story-title {
+        font-size: 3.2rem !important;
+        line-height: 1.05 !important;
+      }
+
+      .interaction-board {
+        height: 190px !important;
+      }
+
+      .character-button {
+        width: 58px !important;
+        height: 58px !important;
+        font-size: 12px !important;
+      }
+
+      .control-button {
+        min-width: 92px;
+        min-height: 44px;
+      }
+
+      .download-section {
+        padding-top: 100px;
+        padding-bottom: 100px;
+      }
+
+      .download-title {
+        font-size: 3.8rem !important;
+        line-height: 0.95 !important;
+      }
+
+      .download-button {
+        width: 100%;
+        min-height: 54px;
+      }
+
+      .mobile-menu {
+        padding-top:
+          calc(32px + env(safe-area-inset-top));
+
+        padding-bottom:
+          calc(32px + env(safe-area-inset-bottom));
       }
 
     }
 
-    /* --------------------------------
-       Reduced motion
-    -------------------------------- */
+
+    /* =========================================
+       Very small phones
+    ========================================== */
+
+    @media (max-width: 380px) {
+
+      .hero-title {
+        font-size: 3.8rem !important;
+      }
+
+      .character-button {
+        width: 52px !important;
+        height: 52px !important;
+      }
+
+      .interaction-board {
+        height: 175px !important;
+      }
+
+      .download-title {
+        font-size: 3.25rem !important;
+      }
+
+    }
+
+
+    /* =========================================
+       Reduce Motion
+    ========================================== */
 
     @media (prefers-reduced-motion: reduce) {
 
@@ -229,20 +386,19 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
       .marquee,
       .fade-up,
       .pulse-line {
-        animation: none;
-        opacity: 1;
-        transform: none;
+        animation: none !important;
       }
 
     }
 
   </style>
-
 </head>
+
 
 <body>
 
   <div id="root"></div>
+
 
   <script type="text/babel">
 
@@ -253,54 +409,46 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
     } = React;
 
 
-    /*
-     * ==========================================
-     * Game resources
-     * ==========================================
-     */
+    /* =====================================================
+       GAME RESOURCES
+    ===================================================== */
 
     const BG_IMAGE =
       "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260713_140344_79e1296a-86d7-43fd-9b5f-63ffe560f291.png&w=1600&q=90";
 
 
-    /*
-     * Echoes of Us Trailer
-     *
-     * Cloudflare R2
-     */
+    const FRONT_VIDEO =
+      "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260713_162101_0d7498c5-29bb-47bf-a99f-2773c0a880a9.mp4";
+
+
+    /* Trailer */
 
     const TRAILER_VIDEO =
       "https://pub-2ebd6dec12794e68bb1e67df08102466.r2.dev/echoes_of_us.MP4";
 
 
-    /*
-     * GitHub repository
-     */
+    /* GitHub */
 
     const GITHUB_REPO =
       "https://github.com/Shellingfordh/echoes-of-us";
 
 
     /*
-     * GitHub Releases
+     * 当前下载入口。
      *
-     * 目前先指向 Releases 页面。
+     * 如果 Release 还没有正式上传，
+     * 可以暂时保持 GitHub Releases。
      *
-     * 以后如果你们有明确的 Demo 下载文件，
-     * 可以直接把这里换成：
-     *
-     * https://github.com/Shellingfordh/echoes-of-us/releases/download/v0.1.0/EchoesOfUs-Demo.zip
+     * 后续只需要替换这里。
      */
 
     const DOWNLOAD_URL =
       "https://github.com/Shellingfordh/echoes-of-us/releases";
 
 
-    /*
-     * ==========================================
-     * Story text
-     * ==========================================
-     */
+    /* =====================================================
+       STORY
+    ===================================================== */
 
     const STORY_QUOTES = [
 
@@ -316,6 +464,10 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
     ];
 
+
+    /* =====================================================
+       APP
+    ===================================================== */
 
     function App() {
 
@@ -347,12 +499,22 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
         useState(false);
 
 
+      const [maskDataUrl, setMaskDataUrl] =
+        useState("");
+
+
       const mousePos =
         useRef({
 
-          x: window.innerWidth / 2,
+          x:
+            typeof window !== "undefined"
+              ? window.innerWidth / 2
+              : 0,
 
-          y: window.innerHeight / 2
+          y:
+            typeof window !== "undefined"
+              ? window.innerHeight / 2
+              : 0
 
         });
 
@@ -360,33 +522,39 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
       const smoothPos =
         useRef({
 
-          x: window.innerWidth / 2,
+          x:
+            typeof window !== "undefined"
+              ? window.innerWidth / 2
+              : 0,
 
-          y: window.innerHeight / 2
+          y:
+            typeof window !== "undefined"
+              ? window.innerHeight / 2
+              : 0
 
         });
 
 
-      const canvasRef =
-        useRef(null);
-
-
-      const [maskDataUrl, setMaskDataUrl] =
-        useState("");
-
-
       /*
-       * ------------------------------------------
-       * Body scroll lock
-       * ------------------------------------------
+       * ==========================================
+       * Body lock
+       * ==========================================
        */
 
       useEffect(() => {
 
-        document.body.style.overflow =
-          isMenuOpen
-            ? "hidden"
-            : "";
+        if (isMenuOpen) {
+
+          document.body.style.overflow =
+            "hidden";
+
+        } else {
+
+          document.body.style.overflow =
+            "";
+
+        }
+
 
         return () => {
 
@@ -399,9 +567,12 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
 
       /*
-       * ------------------------------------------
-       * Mouse / spotlight
-       * ------------------------------------------
+       * ==========================================
+       * Spotlight
+       *
+       * 桌面端启用。
+       * 移动端降低计算量。
+       * ==========================================
        */
 
       useEffect(() => {
@@ -409,25 +580,39 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
         const canvas =
           document.createElement("canvas");
 
-
-        canvasRef.current =
-          canvas;
-
-
         const ctx =
           canvas.getContext("2d");
+
+        if (!ctx) return;
 
 
         let animationFrame;
 
 
+        const isMobile =
+          window.matchMedia(
+            "(max-width: 768px)"
+          ).matches;
+
+
         const resize = () => {
 
+          const scale =
+            isMobile
+              ? 0.5
+              : 1;
+
+
           canvas.width =
-            window.innerWidth;
+            Math.floor(
+              window.innerWidth * scale
+            );
+
 
           canvas.height =
-            window.innerHeight;
+            Math.floor(
+              window.innerHeight * scale
+            );
 
         };
 
@@ -452,7 +637,10 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
         const handleTouchMove =
           (event) => {
 
-            if (!event.touches.length) {
+            if (
+              !event.touches ||
+              !event.touches.length
+            ) {
               return;
             }
 
@@ -476,11 +664,22 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
         );
 
 
-        window.addEventListener(
-          "touchmove",
-          handleTouchMove,
-          { passive: true }
-        );
+        /*
+         * 手机上不要持续监听 touchmove
+         * 避免影响页面滚动。
+         */
+
+        if (!isMobile) {
+
+          window.addEventListener(
+            "touchmove",
+            handleTouchMove,
+            {
+              passive: true
+            }
+          );
+
+        }
 
 
         window.addEventListener(
@@ -489,101 +688,134 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
         );
 
 
+        let frameCounter = 0;
+
+
         const render = () => {
 
-          smoothPos.current.x +=
-            (
-              mousePos.current.x -
-              smoothPos.current.x
-            ) * 0.08;
+          frameCounter++;
 
 
-          smoothPos.current.y +=
-            (
-              mousePos.current.y -
-              smoothPos.current.y
-            ) * 0.08;
+          /*
+           * 手机端每 2 帧更新一次，
+           * 降低 Canvas + React 状态更新。
+           */
+
+          if (
+            !isMobile ||
+            frameCounter % 2 === 0
+          ) {
+
+            smoothPos.current.x +=
+              (
+                mousePos.current.x -
+                smoothPos.current.x
+              ) * 0.08;
 
 
-          ctx.clearRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-          );
+            smoothPos.current.y +=
+              (
+                mousePos.current.y -
+                smoothPos.current.y
+              ) * 0.08;
 
 
-          const radius = 280;
-
-
-          const gradient =
-            ctx.createRadialGradient(
-
-              smoothPos.current.x,
-              smoothPos.current.y,
+            ctx.clearRect(
               0,
-
-              smoothPos.current.x,
-              smoothPos.current.y,
-              radius
-
+              0,
+              canvas.width,
+              canvas.height
             );
 
 
-          gradient.addColorStop(
-            0,
-            "rgba(255,255,255,0.85)"
-          );
+            const scale =
+              isMobile
+                ? 0.5
+                : 1;
 
 
-          gradient.addColorStop(
-            0.35,
-            "rgba(255,255,255,0.5)"
-          );
+            const x =
+              smoothPos.current.x *
+              scale;
 
 
-          gradient.addColorStop(
-            0.7,
-            "rgba(255,255,255,0.12)"
-          );
+            const y =
+              smoothPos.current.y *
+              scale;
 
 
-          gradient.addColorStop(
-            1,
-            "rgba(255,255,255,0)"
-          );
+            const radius =
+              280 * scale;
 
 
-          ctx.fillStyle =
-            gradient;
+            const gradient =
+              ctx.createRadialGradient(
+
+                x,
+                y,
+                0,
+
+                x,
+                y,
+                radius
+
+              );
 
 
-          ctx.beginPath();
-
-
-          ctx.arc(
-
-            smoothPos.current.x,
-            smoothPos.current.y,
-            radius,
-            0,
-            Math.PI * 2
-
-          );
-
-
-          ctx.fill();
-
-
-          try {
-
-            setMaskDataUrl(
-              canvas.toDataURL()
+            gradient.addColorStop(
+              0,
+              "rgba(255,255,255,0.85)"
             );
 
-          } catch (error) {
 
-            // Ignore canvas errors.
+            gradient.addColorStop(
+              0.35,
+              "rgba(255,255,255,0.5)"
+            );
+
+
+            gradient.addColorStop(
+              0.7,
+              "rgba(255,255,255,0.12)"
+            );
+
+
+            gradient.addColorStop(
+              1,
+              "rgba(255,255,255,0)"
+            );
+
+
+            ctx.fillStyle =
+              gradient;
+
+
+            ctx.beginPath();
+
+
+            ctx.arc(
+              x,
+              y,
+              radius,
+              0,
+              Math.PI * 2
+            );
+
+
+            ctx.fill();
+
+
+            try {
+
+              setMaskDataUrl(
+                canvas.toDataURL()
+              );
+
+            } catch (error) {
+
+              /* ignore */
+
+            }
 
           }
 
@@ -612,10 +844,14 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
           );
 
 
-          window.removeEventListener(
-            "touchmove",
-            handleTouchMove
-          );
+          if (!isMobile) {
+
+            window.removeEventListener(
+              "touchmove",
+              handleTouchMove
+            );
+
+          }
 
 
           window.removeEventListener(
@@ -629,24 +865,22 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
 
       /*
-       * ------------------------------------------
-       * Tether calculation
-       * ------------------------------------------
+       * ==========================================
+       * Tether
+       * ==========================================
        */
 
       const distance =
         Math.abs(
-
           charPos.yunia.x -
           charPos.mother.x
-
         );
 
 
       /*
-       * ------------------------------------------
-       * Move character
-       * ------------------------------------------
+       * ==========================================
+       * Character movement
+       * ==========================================
        */
 
       const handleMoveCharacter =
@@ -696,7 +930,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
 
           const other =
-            charPos[otherCharKey];
+            charPos[
+              otherCharKey
+            ];
 
 
           const nextDistance =
@@ -706,62 +942,55 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
             );
 
 
-          /*
-           * Tether reaction
-           */
-
           if (
             nextDistance > 42 &&
             !isAnchored
           ) {
 
-            setCharPos(
-              prev => ({
+            setCharPos(prev => ({
 
-                ...prev,
+              ...prev,
 
-                [activeChar]: {
+              [activeChar]: {
 
-                  ...prev[activeChar],
+                ...prev[activeChar],
 
-                  x: newX
+                x: newX
 
-                },
+              },
 
-                [otherCharKey]: {
 
-                  ...prev[otherCharKey],
+              [otherCharKey]: {
 
-                  x:
-                    prev[otherCharKey].x +
-                    (
-                      direction === "right"
-                        ? 2
-                        : -2
-                    )
+                ...prev[otherCharKey],
 
-                }
+                x:
+                  prev[otherCharKey].x +
+                  (
+                    direction === "right"
+                      ? 2
+                      : -2
+                  )
 
-              })
-            );
+              }
+
+            }));
 
           } else {
 
-            setCharPos(
-              prev => ({
+            setCharPos(prev => ({
 
-                ...prev,
+              ...prev,
 
-                [activeChar]: {
+              [activeChar]: {
 
-                  ...prev[activeChar],
+                ...prev[activeChar],
 
-                  x: newX
+                x: newX
 
-                }
+              }
 
-              })
-            );
+            }));
 
           }
 
@@ -769,9 +998,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
 
       /*
-       * ------------------------------------------
+       * ==========================================
        * Navigation
-       * ------------------------------------------
+       * ==========================================
        */
 
       const scrollTo =
@@ -788,7 +1017,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
             element.scrollIntoView({
 
-              behavior: "smooth"
+              behavior: "smooth",
+
+              block: "start"
 
             });
 
@@ -796,6 +1027,12 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
         };
 
+
+      /*
+       * ==========================================
+       * Render
+       * ==========================================
+       */
 
       return (
 
@@ -805,13 +1042,14 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
             min-h-screen
             bg-[#050505]
             text-white
+            overflow-x-hidden
           "
         >
 
 
-          {/* ======================================
-              Navigation
-          ====================================== */}
+          {/* =================================================
+              NAVIGATION
+          ================================================= */}
 
           <nav
             className="
@@ -823,9 +1061,11 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
               flex
               items-center
               justify-between
-              px-6
+              px-5
+              sm:px-6
               md:px-10
-              py-5
+              pt-[calc(16px+env(safe-area-inset-top))]
+              pb-4
             "
           >
 
@@ -836,11 +1076,11 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
               onClick={() =>
                 scrollTo("top")
               }
+
               className="
                 flex
                 items-center
                 gap-3
-                group
               "
             >
 
@@ -854,8 +1094,6 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                   flex
                   items-center
                   justify-center
-                  group-hover:border-white/70
-                  transition
                 "
               >
 
@@ -986,6 +1224,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
               href={GITHUB_REPO}
               target="_blank"
               rel="noopener noreferrer"
+
               className="
                 hidden
                 sm:flex
@@ -1008,33 +1247,75 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                 fill="currentColor"
               >
 
-                <path
-                  d="
-                    M12 .5
-                    C5.65 .5 .5 5.65 .5 12
-                    c0 5.08 3.29 9.39 7.86 10.91
-                    .58.11.79-.25.79-.56v-2.15
-                    c-3.2.7-3.87-1.54-3.87-1.54
-                    -.53-1.33-1.28-1.68-1.28-1.68
-                    -1.04-.71.08-.7.08-.7
-                    1.15.08 1.76 1.18 1.76 1.18
-                    1.02 1.75 2.67 1.25 3.32.96
-                    .1-.74.4-1.25.73-1.54
-                    -2.55-.29-5.23-1.27-5.23-5.66
-                    0-1.25.45-2.27 1.18-3.07
-                    -.12-.29-.51-1.46.11-3.04
-                    0 0 .96-.31 3.15 1.17
-                    a10.94 10.94 0 0 1 5.74 0
-                    c2.19-1.48 3.15-1.17 3.15-1.17
-                    .62 1.58.23 2.75.11 3.04
-                    .73.8 1.18 1.82 1.18 3.07
-                    0 4.4-2.69 5.36-5.25 5.64
-                    .41.36.78 1.08.78 2.18v3.23
-                    c0 .31.21.67.8.56
-                    A11.5 11.5 0 0 0 23.5 12
-                    C23.5 5.65 18.35.5 12 .5Z
-                  "
-                />
+                <path d="
+                  M12 .5
+                  C5.65 .5
+                  .5 5.65
+                  .5 12
+                  c0 5.08
+                  3.29 9.39
+                  7.86 10.91
+                  .58 .11
+                  .79-.25
+                  .79-.56
+                  v-2.15
+                  c-3.2 .7
+                  -3.87-1.54
+                  -3.87-1.54
+                  -.53-1.33
+                  -1.28-1.68
+                  -1.28-1.68
+                  -1.04-.71
+                  .08-.7
+                  .08-.7
+                  1.15 .08
+                  1.76 1.18
+                  1.76 1.18
+                  1.02 1.75
+                  2.67 1.25
+                  3.32 .96
+                  .1-.74
+                  .4-1.25
+                  .73-1.54
+                  -2.55-.29
+                  -5.23-1.27
+                  -5.23-5.66
+                  0-1.25
+                  .45-2.27
+                  1.18-3.07
+                  -.12-.29
+                  -.51-1.46
+                  .11-3.04
+                  0 0
+                  .96-.31
+                  3.15 1.17
+                  a10.94 10.94 0 0 1
+                  5.74 0
+                  c2.19-1.48
+                  3.15-1.17
+                  3.15-1.17
+                  .62 1.58
+                  .23 2.75
+                  .11 3.04
+                  .73 .8
+                  1.18 1.82
+                  1.18 3.07
+                  0 4.4
+                  -2.69 5.36
+                  -5.25 5.64
+                  .41 .36
+                  .78 1.08
+                  .78 2.18
+                  v3.23
+                  c0 .31
+                  .21 .67
+                  .8 .56
+                  A11.5 11.5 0 0 0
+                  23.5 12
+                  C23.5 5.65
+                  18.35 .5
+                  12 .5Z
+                "/>
 
               </svg>
 
@@ -1049,6 +1330,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
               onClick={() =>
                 setIsMenuOpen(true)
               }
+
+              aria-label="打开菜单"
+
               className="
                 md:hidden
                 glass
@@ -1084,14 +1368,15 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
           </nav>
 
 
-          {/* ======================================
-              Mobile menu
-          ====================================== */}
+          {/* =================================================
+              MOBILE MENU
+          ================================================= */}
 
           {isMenuOpen && (
 
             <div
               className="
+                mobile-menu
                 fixed
                 inset-0
                 z-[60]
@@ -1099,7 +1384,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                 flex
                 flex-col
                 justify-between
-                p-8
+                px-8
               "
             >
 
@@ -1109,6 +1394,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                   onClick={() =>
                     setIsMenuOpen(false)
                   }
+
+                  aria-label="关闭菜单"
+
                   className="
                     glass
                     w-11
@@ -1209,22 +1497,19 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
               </div>
 
 
-              <div
-                className="
-                  flex
-                  justify-center
-                "
-              >
+              <div className="flex justify-center">
 
                 <a
                   href={GITHUB_REPO}
                   target="_blank"
                   rel="noopener noreferrer"
+
                   className="
                     glass
                     px-7
                     py-3
                     rounded-full
+                    text-sm
                   "
                 >
                   GitHub
@@ -1237,19 +1522,21 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
           )}
 
 
-          {/* ======================================
+          {/* =================================================
               HERO
-          ====================================== */}
+          ================================================= */}
 
           <main id="top">
 
 
             <section
               id="game"
+
               className="
+                hero-section
                 relative
-                h-screen
-                min-h-[700px]
+                min-h-screen
+                min-h-[100svh]
                 overflow-hidden
                 flex
                 items-end
@@ -1261,11 +1548,13 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
               <div
                 className="
+                  hero-background
                   absolute
                   inset-0
                   bg-cover
                   bg-center
                 "
+
                 style={{
                   backgroundImage:
                     `url(${BG_IMAGE})`
@@ -1273,7 +1562,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
               />
 
 
-              {/* Dark overlay */}
+              {/* Dark */}
 
               <div
                 className="
@@ -1309,6 +1598,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                     pointer-events-none
                     opacity-70
                   "
+
                   style={{
                     WebkitMaskImage:
                       `url(${maskDataUrl})`,
@@ -1318,14 +1608,18 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                   }}
                 >
 
-                  <img
-                    src={BG_IMAGE}
-                    alt=""
+                  <video
+                    src={FRONT_VIDEO}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="metadata"
+
                     className="
                       w-full
                       h-full
                       object-cover
-                      opacity-30
                     "
                   />
 
@@ -1338,6 +1632,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
               <div
                 className="
+                  hero-content
                   relative
                   z-10
                   w-full
@@ -1354,6 +1649,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                     mx-auto
                   "
                 >
+
 
                   <div
                     className="
@@ -1401,6 +1697,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                       font-normal
                       mb-8
                     "
+
                     style={{
                       fontFamily:
                         "'Instrument Serif', serif"
@@ -1440,6 +1737,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
                       <p
                         className="
+                          hero-description
                           max-w-xl
                           text-sm
                           md:text-base
@@ -1458,6 +1756,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
                     <a
                       href="#trailer"
+
                       className="
                         glass
                         shrink-0
@@ -1474,7 +1773,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                       "
                     >
 
-                      观看 Trailer
+                      查看 Trailer
 
                       <svg
                         className="w-4 h-4"
@@ -1501,17 +1800,17 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
             </section>
 
 
-            {/* ======================================
+            {/* =================================================
                 TRAILER
-            ====================================== */}
+            ================================================= */}
 
             <section
               id="trailer"
               className="
                 relative
-                py-24
-                md:py-36
-                overflow-hidden
+                py-20
+                md:py-32
+                bg-[#050505]
               "
             >
 
@@ -1519,13 +1818,12 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                 className="
                   max-w-6xl
                   mx-auto
-                  px-6
+                  px-5
+                  sm:px-6
                   md:px-12
                 "
               >
 
-
-                {/* Trailer heading */}
 
                 <div
                   className="
@@ -1533,9 +1831,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                     flex-col
                     md:flex-row
                     md:items-end
-                    md:justify-between
-                    gap-6
-                    mb-10
+                    justify-between
+                    gap-5
+                    mb-8
                   "
                 >
 
@@ -1556,7 +1854,8 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                     <h2
                       className="
                         mt-4
-                        text-5xl
+                        text-4xl
+                        sm:text-5xl
                         md:text-7xl
                         font-light
                         tracking-tight
@@ -1572,85 +1871,57 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                     className="
                       max-w-md
                       text-sm
-                      md:text-base
                       leading-7
                       text-white/45
                       font-light
                     "
                   >
-                    一段关于距离、记忆与牵挂的旅程。
+                    这是一段关于距离、连接与牵挂的旅程。
+                    <br className="hidden sm:block" />
                     观看 Trailer，了解《牵挂线》的世界。
                   </p>
 
                 </div>
 
 
-                {/* Trailer player */}
+                {/* Video */}
 
                 <div
                   className="
-                    trailer-frame
-                    glass
                     relative
-                    w-full
-                    aspect-video
-                    rounded-3xl
+                    rounded-2xl
+                    md:rounded-3xl
                     overflow-hidden
+                    bg-black
+                    border
+                    border-white/10
+                    shadow-2xl
                   "
                 >
 
                   <video
                     className="trailer-video"
-                    src={TRAILER_VIDEO}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
                     controls
+                    playsInline
                     preload="metadata"
-                    controlsList="nodownload"
+                    poster={BG_IMAGE}
                   >
 
-                    您的浏览器不支持 HTML5 视频播放。
+                    <source
+                      src={TRAILER_VIDEO}
+                      type="video/mp4"
+                    />
+
+                    您的浏览器不支持视频播放。
 
                   </video>
-
-
-                  {/* Trailer label */}
-
-                  <div
-                    className="
-                      absolute
-                      top-5
-                      left-5
-                      z-10
-                      pointer-events-none
-                    "
-                  >
-
-                    <div
-                      className="
-                        glass
-                        rounded-full
-                        px-4
-                        py-2
-                        text-[11px]
-                        tracking-[0.2em]
-                        uppercase
-                        text-white/80
-                      "
-                    >
-                      Trailer
-                    </div>
-
-                  </div>
 
                 </div>
 
 
                 <div
                   className="
-                    mt-5
+                    mt-4
                     flex
                     items-center
                     justify-between
@@ -1660,11 +1931,11 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                 >
 
                   <span>
-                    Echoes of Us · 牵挂线
+                    Echoes of Us · Trailer
                   </span>
 
                   <span>
-                    Play Trailer
+                    MP4
                   </span>
 
                 </div>
@@ -1674,13 +1945,14 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
             </section>
 
 
-            {/* ======================================
+            {/* =================================================
                 STORY
-            ====================================== */}
+            ================================================= */}
 
             <section
               id="story"
               className="
+                story-section
                 relative
                 py-24
                 md:py-36
@@ -1707,6 +1979,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                   "
                 >
 
+
                   <div>
 
                     <span
@@ -1723,6 +1996,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
                     <h2
                       className="
+                        story-title
                         mt-5
                         text-5xl
                         md:text-7xl
@@ -1797,9 +2071,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
             </section>
 
 
-            {/* ======================================
+            {/* =================================================
                 MARQUEE
-            ====================================== */}
+            ================================================= */}
 
             <section
               className="
@@ -1810,61 +2084,57 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
               "
             >
 
-              <div
-                className="
-                  marquee
-                  flex
-                "
-              >
+              <div className="marquee flex">
 
-                {[...STORY_QUOTES, ...STORY_QUOTES].map(
-                  (text, index) => (
+                {[...STORY_QUOTES, ...STORY_QUOTES]
+                  .map(
+                    (quote, index) => (
 
-                    <div
-                      key={index}
-                      className="
-                        flex
-                        items-center
-                        gap-8
-                        px-8
-                        whitespace-nowrap
-                      "
-                    >
-
-                      <span
+                      <div
+                        key={index}
                         className="
-                          text-sm
-                          md:text-base
-                          text-white/55
-                          font-light
+                          flex
+                          items-center
+                          gap-8
+                          px-8
+                          whitespace-nowrap
                         "
                       >
-                        {text}
-                      </span>
+
+                        <span
+                          className="
+                            text-sm
+                            md:text-base
+                            text-white/55
+                            font-light
+                          "
+                        >
+                          {quote}
+                        </span>
 
 
-                      <span
-                        className="
-                          w-1
-                          h-1
-                          rounded-full
-                          bg-white/30
-                        "
-                      />
+                        <span
+                          className="
+                            w-1
+                            h-1
+                            rounded-full
+                            bg-white/30
+                          "
+                        />
 
-                    </div>
+                      </div>
 
-                  )
-                )}
+                    )
+                  )}
 
               </div>
 
             </section>
 
 
-            {/* ======================================
+            {/* =================================================
                 INTERACTION
-            ====================================== */}
+            ================================================= */}
 
             <section
               className="
@@ -1877,7 +2147,8 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                 className="
                   max-w-5xl
                   mx-auto
-                  px-6
+                  px-5
+                  sm:px-6
                 "
               >
 
@@ -1920,16 +2191,18 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                       text-white/45
                     "
                   >
-                    点击角色并尝试移动，感受两人之间的距离。
+                    点击角色并尝试移动，
+                    感受两人之间的距离。
                   </p>
 
                 </div>
 
 
-                {/* Interaction board */}
+                {/* Board */}
 
                 <div
                   className="
+                    interaction-board
                     glass
                     relative
                     h-48
@@ -1948,9 +2221,22 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                       inset-0
                       opacity-10
                     "
+
                     style={{
                       backgroundImage:
-                        "linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)",
+                        `
+                        linear-gradient(
+                          rgba(255,255,255,.5)
+                          1px,
+                          transparent 1px
+                        ),
+                        linear-gradient(
+                          90deg,
+                          rgba(255,255,255,.5)
+                          1px,
+                          transparent 1px
+                        )
+                        `,
 
                       backgroundSize:
                         "40px 40px"
@@ -1967,21 +2253,33 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                       w-full
                       h-full
                     "
+
                     preserveAspectRatio="none"
                   >
 
                     <line
-                      x1={`${charPos.yunia.x}%`}
+                      x1={
+                        `${charPos.yunia.x}%`
+                      }
+
                       y1="50%"
-                      x2={`${charPos.mother.x}%`}
+
+                      x2={
+                        `${charPos.mother.x}%`
+                      }
+
                       y2="50%"
+
                       stroke={
                         distance > 38
                           ? "#ef4444"
                           : "#ffffff"
                       }
+
                       strokeOpacity="0.8"
+
                       strokeWidth="2"
+
                       strokeDasharray={
                         isAnchored
                           ? "6 5"
@@ -1998,7 +2296,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                     onClick={() =>
                       setActiveChar("yunia")
                     }
+
                     className="
+                      character-button
                       absolute
                       top-1/2
                       -translate-x-1/2
@@ -2006,6 +2306,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                       transition-all
                       duration-200
                     "
+
                     style={{
                       left:
                         `${charPos.yunia.x}%`
@@ -2021,12 +2322,10 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                         items-center
                         justify-center
                         border
-
+                        text-xs
                         ${
                           activeChar === "yunia"
-
-                            ? "bg-white text-black border-white"
-
+                            ? "bg-white text-black border-white scale-105"
                             : "bg-black/40 text-white/70 border-white/30"
                         }
                       `}
@@ -2043,7 +2342,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                     onClick={() =>
                       setActiveChar("mother")
                     }
+
                     className="
+                      character-button
                       absolute
                       top-1/2
                       -translate-x-1/2
@@ -2051,6 +2352,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                       transition-all
                       duration-200
                     "
+
                     style={{
                       left:
                         `${charPos.mother.x}%`
@@ -2066,12 +2368,10 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                         items-center
                         justify-center
                         border
-
+                        text-xs
                         ${
                           activeChar === "mother"
-
-                            ? "bg-white text-black border-white"
-
+                            ? "bg-white text-black border-white scale-105"
                             : "bg-black/40 text-white/70 border-white/30"
                         }
                       `}
@@ -2099,11 +2399,11 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
                   <button
                     onClick={() =>
-                      handleMoveCharacter(
-                        "left"
-                      )
+                      handleMoveCharacter("left")
                     }
+
                     className="
+                      control-button
                       glass
                       rounded-full
                       px-5
@@ -2120,11 +2420,11 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
                   <button
                     onClick={() =>
-                      handleMoveCharacter(
-                        "right"
-                      )
+                      handleMoveCharacter("right")
                     }
+
                     className="
+                      control-button
                       glass
                       rounded-full
                       px-5
@@ -2145,18 +2445,17 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                         !isAnchored
                       )
                     }
+
                     className={`
+                      control-button
                       rounded-full
                       px-5
                       py-2.5
                       text-sm
                       transition
-
                       ${
                         isAnchored
-
                           ? "bg-white text-black"
-
                           : "glass text-white/70"
                       }
                     `}
@@ -2172,18 +2471,44 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
                 </div>
 
+
+                <div
+                  className="
+                    mt-5
+                    text-center
+                    text-xs
+                    text-white/30
+                  "
+                >
+                  当前角色：
+                  {
+                    activeChar === "yunia"
+                      ? "余念"
+                      : "母亲"
+                  }
+
+                  <span className="mx-2">
+                    ·
+                  </span>
+
+                  距离：
+                  {Math.round(distance)}
+                </div>
+
               </div>
 
             </section>
 
 
-            {/* ======================================
+            {/* =================================================
                 DOWNLOAD
-            ====================================== */}
+            ================================================= */}
 
             <section
               id="download"
+
               className="
+                download-section
                 relative
                 py-28
                 md:py-40
@@ -2215,6 +2540,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
 
                 <h2
                   className="
+                    download-title
                     mt-5
                     text-5xl
                     md:text-8xl
@@ -2242,7 +2568,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                 </p>
 
 
-                {/* Download buttons */}
+                {/* Download */}
 
                 <div
                   className="
@@ -2260,7 +2586,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                     href={DOWNLOAD_URL}
                     target="_blank"
                     rel="noopener noreferrer"
+
                     className="
+                      download-button
                       w-full
                       sm:w-auto
                       min-w-52
@@ -2281,7 +2609,6 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                   >
 
                     下载 Demo
-
 
                     <svg
                       className="w-4 h-4"
@@ -2312,7 +2639,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                     href={GITHUB_REPO}
                     target="_blank"
                     rel="noopener noreferrer"
+
                     className="
+                      download-button
                       w-full
                       sm:w-auto
                       min-w-52
@@ -2324,6 +2653,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                       text-white/80
                       hover:text-white
                       transition
+                      flex
+                      items-center
+                      justify-center
                     "
                   >
                     查看 GitHub
@@ -2347,9 +2679,9 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
             </section>
 
 
-            {/* ======================================
+            {/* =================================================
                 FOOTER
-            ====================================== */}
+            ================================================= */}
 
             <footer
               className="
@@ -2358,6 +2690,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                 px-6
                 md:px-12
                 py-8
+                pb-[calc(32px+env(safe-area-inset-bottom))]
               "
             >
 
@@ -2380,6 +2713,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                     tracking-[0.2em]
                     uppercase
                     text-white/40
+                    text-center
                   "
                 >
                   Echoes of Us · 牵挂线
@@ -2390,6 +2724,7 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
                   href={GITHUB_REPO}
                   target="_blank"
                   rel="noopener noreferrer"
+
                   className="
                     text-xs
                     text-white/40
@@ -2414,13 +2749,20 @@ content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的�
     }
 
 
+    /* =====================================================
+       Mount
+    ===================================================== */
+
     ReactDOM
       .createRoot(
         document.getElementById("root")
       )
-      .render(<App />);
+      .render(
+        <App />
+      );
 
   </script>
 
 </body>
 </html>
+```
