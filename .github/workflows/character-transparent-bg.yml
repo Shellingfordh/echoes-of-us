@@ -1,0 +1,101 @@
+name: Character art transparent background
+
+# Strips flat white backgrounds off any image whose file name starts with
+# "character" and normalises it to PNG.
+#
+# On a push to the default branch the result is committed back. On a pull
+# request nothing is written: the job only reports which files still need
+# converting, so a PR from a fork can't be used to push commits.
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "**/character*.png"
+      - "**/character*.jpg"
+      - "**/character*.jpeg"
+      - "**/character*.webp"
+      - "**/character*.bmp"
+      - "**/character*.PNG"
+      - "**/character*.JPG"
+      - tools/make_transparent.py
+      - .github/workflows/character-transparent-bg.yml
+  pull_request:
+    paths:
+      - "**/character*.png"
+      - "**/character*.jpg"
+      - "**/character*.jpeg"
+      - "**/character*.webp"
+      - "**/character*.bmp"
+      - "**/character*.PNG"
+      - "**/character*.JPG"
+      - tools/make_transparent.py
+  workflow_dispatch:
+    inputs:
+      prefix:
+        description: File-name prefix to match
+        default: character
+      white_at:
+        description: Min channel value treated as pure background white (0-255)
+        default: "244"
+      soft_at:
+        description: Min channel value treated as anti-aliased edge (0-255)
+        default: "200"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: character-bg-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  strip-white-background:
+    name: Strip white background
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          # A real token so the follow-up commit is attributable and so
+          # branch protection sees a normal push.
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install image libraries
+        run: python -m pip install --disable-pip-version-check "pillow==11.3.0" "numpy==2.3.3" "scipy==1.16.2"
+
+      - name: Report pending conversions (pull request)
+        if: github.event_name == 'pull_request'
+        run: |
+          python tools/make_transparent.py . \
+            --prefix "character" \
+            --check
+
+      - name: Convert white backgrounds to transparent
+        if: github.event_name != 'pull_request'
+        run: |
+          python tools/make_transparent.py . \
+            --prefix "${{ github.event.inputs.prefix || 'character' }}" \
+            --white-at "${{ github.event.inputs.white_at || '244' }}" \
+            --soft-at "${{ github.event.inputs.soft_at || '200' }}"
+
+      - name: Commit converted art
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No image changed - nothing to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "chore(art): strip white background from character images"
+          git push
