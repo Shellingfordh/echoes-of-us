@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="余响：牵挂 · 第二章试玩版"
+config/name="余响：牵挂"
 run/main_scene="uid://b7rb68tyh0wsk"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"

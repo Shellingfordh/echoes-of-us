@@ -1,25 +1,30 @@
-# 《不断线》2.5D 游戏主工程
+# 《余响：牵挂》Godot 游戏主工程
 
-`game2.5d/` 是仓库当前正式 Godot 主工程目录，负责承载最新剧情、玩法与关卡实现。第一章主体流程已经可玩，第二章框架与教学流程也在本工程内继续开发。
+`game2.5d/` 是仓库当前正式 Godot 主工程目录，统一承载第一、二、三章的剧情、玩法、关卡和运行素材。工程使用 Godot 4.7；第一、二章采用 2.5D 等距表现，第三章按设计采用独立的 2D 横版关卡。
 
-## 已实现
+游戏默认从 `scenes/main/main.tscn` 的第一章开始，完成后依次进入第二章和第三章。`GameSession` 自动加载节点负责在场景切换时保存当前章节、已完成章节和跨章剧情标记。
 
-- 等距 2D 画面与隐藏 3D `CharacterBody3D` / `StaticBody3D` 碰撞；
-- 五件主调查、P1/P2/P3 阶段切换与 D001-D018、D041-D047 对话数据；
-- 打包纸箱保持固定；附近木椅可在隐藏 3D 碰撞平面中推动，推到衣柜正前方后按空格跳上，才可调查柜顶相框；
-- 接近床边会提示按 S 蹲下；床底剧情由床的不可见触发区处理，不生成独立耳机物件，再按 S 起身；
-- `data/observations.json` 管理 10 条 O-ID 物件信息，信息卡关闭后再播放独立 D-ID；
-- 第一章房间已接入墙面、地板、床、衣柜、窗户、门及主要可交互物件的场景美术；
-- 对话框已接入余念与余秀兰的角色立绘，并按说话人自动切换；仍可用 `DialogueUI.register_portrait()` 在运行时覆盖贴图；
-- 五件主调查、衣柜、窗玻璃、行李箱二次、黄伞与普通线状物信息；木珠回忆改为路过窗边直接播放 D044；
-- 黄伞冲突、行李箱二次调查与普通线状物显色；
-- 黄色旧雨伞开场即可看见，P1 冲突结束后才开放 P2 的 O046/D046 二次交互；
-- 黄伞对白时母亲站在行李箱后方；对白后沿地面平移至纸箱后方并背对女儿，不再瞬移；
-- 距离、情绪压力、离开意图共同决定的牵挂线张力；
-- 第一次强制回弹；
-- 拉回从玩家触发瞬间的实时位置连续发生，经过 `move_and_slide()`，不会传送且会被家具阻挡；
-- 第二次试探确认牵挂线具有真实阻力；第一章不出现承重、悬挂或摆动；
-- D018 形成第一次错误理解后越过余响阈值，完成第一章。
+## 章节状态
+
+### 第一章 · 离家
+
+- 五件主调查与 P1/P2/P3 顺序流程；
+- 家具实体碰撞、推动木凳、站上木凳调查相框；
+- 黄伞冲突、牵挂线显形、两次离门回弹和余响转场；
+- 完成后自动进入第二章。
+
+### 第二章 · 2009 年秋
+
+- 三个大型 Block、六段顺序教学；
+- 自行车、水坑、窄缝切换、断板承重、沿线爬回、路灯锚定与学校终点；
+- 完成后显示“按 Enter / Space 继续第三章”，由玩家确认进入第三章。
+
+### 第三章 · 双人牵挂
+
+- 三个独立 2D 关卡：楼道、仓库、天台；
+- 双角色切换、锚定、借力跳跃、沿线攀爬、推动箱子与双踏板机关；
+- 门和闸门具有真实阻挡与解锁条件；
+- 使用项目内三张完整场景背景和 11 个实际运行素材，不依赖 `game-chapter3/` 或个人下载目录。
 
 ## 运行
 
@@ -27,7 +32,7 @@
 godot --path game2.5d
 ```
 
-移动使用 WASD / 方向键，Enter 或空格调查，Esc 退出固定观察，F3 显示调试信息。
+第一、二章使用 WASD / 方向键移动，Enter 或空格调查，F3 显示调试信息。第三章使用 A/D 或左右键移动、Space 跳跃、W/上键在空中沿线攀爬、Tab 切换角色、E 锚定、R 返回检查点、F3 显示调试信息。
 
 ## 验证
 
@@ -36,21 +41,20 @@ godot --headless --path game2.5d --script res://tests/smoke_25d.gd
 godot --headless --path game2.5d --script res://tests/chapter01_flow_test.gd
 godot --headless --path game2.5d --script res://tests/chapter01_portrait_test.gd
 godot --headless --path game2.5d --script res://tests/chapter02_flow_test.gd
+godot --headless --path game2.5d --script res://tests/chapter03_scene_structure_test.gd
+godot --headless --path game2.5d --script res://tests/chapter03_asset_integration_test.gd
+godot --headless --path game2.5d --script res://tests/chapter03_input_test.gd
+godot --headless --path game2.5d --script res://tests/chapter03_door_rules_test.gd
+godot --headless --path game2.5d --script res://tests/chapter03_playability_test.gd
+godot --headless --path game2.5d --script res://tests/chapter03_flow_test.gd
+godot --headless --path game2.5d --script res://tests/game_session_test.gd
+godot --headless --path game2.5d --script res://tests/chapter_progression_test.gd
 ```
 
-## 素材状态
+## 素材目录
 
-`art/` 已加入并接入第一章的场景美术，以及余念、余秀兰在对话中的立绘。正式发行、演示交付或对外分发前，仍需确认所有素材的来源与授权信息。
+- `art/`：三章共享人物、立绘、字体、UI 和第一、二章场景素材；
+- `assets/environments/chapter3/`：第三章三张完整场景背景；
+- `assets/props/chapter3/`：第三章机关门、踏板、木质平台、箱子和出口素材。
 
-## 后续工作
-
-- 调整对话立绘的显示大小与构图，使其更好地适配当前对话框；
-- 为独白模式增加立绘显示，并处理独白与普通对话之间的立绘布局切换。
-
-## 第二章框架
-
-第一章完成后会进入 `scenes/chapter2/chapter2.tscn`。第二章采用三个大型 Block、六段顺序教学：自行车、水坑、窄缝切换、断板承重、按 W 沿线爬回、路灯锚定与学校终点。场景画面使用简化 2D 白盒，道路与角色碰撞仍位于隐藏的 XYZ 世界。
-
-```bash
-godot --headless --path game2.5d --script res://tests/chapter02_flow_test.gd
-```
+正式发行、演示交付或对外分发前，仍需确认所有素材的来源与授权信息。
