@@ -1,0 +1,562 @@
+[gd_scene format=3 uid="uid://b4tu23nqgvb3v"]
+
+[ext_resource type="Script" uid="uid://dlfl704y62xe6" path="res://scripts/rooms/room_base.gd" id="1_room"]
+[ext_resource type="Script" uid="uid://bbphf4til8kwv" path="res://scripts/interactions/interactable.gd" id="2_interactable"]
+[ext_resource type="Script" uid="uid://b3nmwcpwi8d77" path="res://scripts/spatial/spatial_prop_25d.gd" id="3_spatial"]
+[ext_resource type="PackedScene" path="res://scenes/characters/mother.tscn" id="4_mother"]
+[ext_resource type="Script" uid="uid://dhrrgnvnobwag" path="res://scripts/interactions/pushable_stool.gd" id="5_pushable_stool"]
+[ext_resource type="Texture2D" uid="uid://c28e5rxg4u33x" path="res://art/wall.png" id="6_wall"]
+[ext_resource type="Texture2D" uid="uid://c4xr3e2dddohu" path="res://art/floor.png" id="7_floor"]
+[ext_resource type="Texture2D" uid="uid://c4wubpsgbalbl" path="res://art/wardrobe.png" id="8_wardrobe"]
+[ext_resource type="Texture2D" uid="uid://de4opryw2u3rl" path="res://art/bed.png" id="9_bed"]
+[ext_resource type="Texture2D" uid="uid://dgs6bps1cx8jv" path="res://art/wooden-box.png" id="10_wooden_box"]
+[ext_resource type="Texture2D" uid="uid://ppqxh4jgfqqn" path="res://art/window.png" id="11_window"]
+[ext_resource type="Texture2D" uid="uid://tk3nc2fs1rv7" path="res://art/door.png" id="12_door"]
+[ext_resource type="Texture2D" uid="uid://ovsb1xtwo675" path="res://art/cardboard-box-1.png" id="13_cardboard_box"]
+[ext_resource type="PackedScene" uid="uid://ch3x3qkb35lup" path="res://scenes/characters/player.tscn" id="14_player"]
+[ext_resource type="Texture2D" uid="uid://r6eb71yamkj8" path="res://art/bookshelf.png" id="15_bookshelf"]
+[ext_resource type="Texture2D" uid="uid://bm3ngy1rv4g3y" path="res://art/suitcase.png" id="16_suitcase"]
+[ext_resource type="Texture2D" uid="uid://bq6n6dw0uj8xd" path="res://art/photo-frame.png" id="17_photo_frame"]
+[ext_resource type="Texture2D" uid="uid://bnimvu6lnvogn" path="res://art/chair.png" id="18_chair"]
+[ext_resource type="Texture2D" uid="uid://cwivrhj74avym" path="res://art/cute-umbrella.png" id="19_umbrella"]
+
+[sub_resource type="BoxShape3D" id="Shape3D_wardrobe"]
+size = Vector3(2.1, 3.2, 1.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_oqpq0"]
+size = Vector3(2.82, 1.4, 3.4)
+
+[sub_resource type="BoxShape3D" id="Shape3D_cabinet"]
+size = Vector3(2, 1, 1)
+
+[sub_resource type="RectangleShape2D" id="Shape_interact_medium"]
+size = Vector2(110, 100)
+
+[sub_resource type="BoxShape3D" id="Shape3D_box"]
+size = Vector3(1.6, 1.2, 1.4)
+
+[sub_resource type="RectangleShape2D" id="Shape_interact_wide"]
+size = Vector2(240, 160)
+
+[sub_resource type="BoxShape3D" id="Shape3D_desk"]
+size = Vector3(2, 1.6, 2)
+
+[sub_resource type="BoxShape3D" id="Shape3D_suitcase"]
+size = Vector3(1.8, 1.1, 1)
+
+[sub_resource type="BoxShape3D" id="Shape3D_stool"]
+size = Vector3(1.05, 0.8, 0.9)
+
+[sub_resource type="RectangleShape2D" id="Shape_interact_tall"]
+size = Vector2(75, 150)
+
+[node name="Chapter01Room01" type="Node2D" unique_id=1882105612]
+script = ExtResource("1_room")
+room_id = &"chapter_01_room_01"
+
+[node name="Background" type="Node2D" parent="." unique_id=555897396]
+z_index = -4000
+
+[node name="Void" type="Polygon2D" parent="Background" unique_id=1395953283]
+color = Color(0.012, 0.028, 0.027, 1)
+polygon = PackedVector2Array(-500, -500, 2700, -500, 2700, 1600, -500, 1600)
+
+[node name="BackWallX" type="Sprite2D" parent="Background" unique_id=352464935]
+position = Vector2(1626, 314)
+rotation = 0.46364832
+scale = Vector2(1.2541103, 0.28125)
+skew = -0.46364832
+texture = ExtResource("6_wall")
+
+[node name="BackWallZ" type="Sprite2D" parent="Background" unique_id=1251762666]
+position = Vector2(666, 218)
+rotation = 2.6779456
+scale = Vector2(0.83607566, -0.28125)
+skew = 0.463647
+texture = ExtResource("6_wall")
+
+[node name="Floor" type="Sprite2D" parent="Background" unique_id=305756995]
+position = Vector2(1242, 650)
+rotation = 0.46364832
+scale = Vector2(1.2541103, 0.8385255)
+skew = 0.6435002
+texture = ExtResource("7_floor")
+
+[node name="HallwayLight" type="Polygon2D" parent="Background" unique_id=1183232174]
+visible = false
+color = Color(0.34, 0.285, 0.13, 1)
+polygon = PackedVector2Array(2058, 386, 2202, 458, 2202, 746, 2058, 674)
+
+[node name="WindowGlow" type="Polygon2D" parent="Background" unique_id=718639673]
+visible = false
+color = Color(0.04, 0.15, 0.17, 0.9)
+polygon = PackedVector2Array(1320, 88, 1580, 218, 1580, 420, 1320, 290)
+
+[node name="Midground" type="Node2D" parent="." unique_id=499883571]
+
+[node name="Wardrobe" type="Node2D" parent="Midground" unique_id=1414043959]
+script = ExtResource("3_spatial")
+logical_position = Vector3(2.4, 0, 2)
+
+[node name="MathBody" type="StaticBody3D" parent="Midground/Wardrobe" unique_id=656289760]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Midground/Wardrobe/MathBody" unique_id=139483647]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+shape = SubResource("Shape3D_wardrobe")
+
+[node name="Shadow" type="Polygon2D" parent="Midground/Wardrobe" unique_id=1002359123]
+z_index = -2
+position = Vector2(24, 13)
+color = Color(0.005, 0.012, 0.011, 0.3)
+polygon = PackedVector2Array(-84, -31, 0, 9, 84, -31, 0, -73)
+
+[node name="Visual" type="Sprite2D" parent="Midground/Wardrobe" unique_id=193425604]
+scale = Vector2(0.315, 0.315)
+texture = ExtResource("8_wardrobe")
+offset = Vector2(11.5, -479)
+
+[node name="Bed" type="Node2D" parent="Midground" unique_id=388992331]
+script = ExtResource("3_spatial")
+logical_position = Vector3(11, 0, 5)
+
+[node name="MathBody" type="StaticBody3D" parent="Midground/Bed" unique_id=564392148]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Midground/Bed/MathBody" unique_id=1365752900]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.41, 0.7, -1.7)
+shape = SubResource("BoxShape3D_oqpq0")
+
+[node name="Shadow" type="Polygon2D" parent="Midground/Bed" unique_id=1193286907]
+z_index = -2
+position = Vector2(24, 13)
+color = Color(0.005, 0.012, 0.011, 0.28)
+polygon = PackedVector2Array(-119, -78, -6, -49, 204, -147, 98, -171)
+
+[node name="Visual" type="Sprite2D" parent="Midground/Bed" unique_id=783207115]
+scale = Vector2(0.435, 0.435)
+texture = ExtResource("9_bed")
+offset = Vector2(20.5, -455)
+
+[node name="ShoeCabinet" type="Node2D" parent="Midground" unique_id=1181353861]
+script = ExtResource("3_spatial")
+logical_position = Vector3(14.5, 0, 7.5)
+
+[node name="MathBody" type="StaticBody3D" parent="Midground/ShoeCabinet" unique_id=1668004643]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Midground/ShoeCabinet/MathBody" unique_id=1485768919]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("Shape3D_cabinet")
+
+[node name="Shadow" type="Polygon2D" parent="Midground/ShoeCabinet" unique_id=1289991827]
+z_index = -2
+position = Vector2(20, 11)
+color = Color(0.005, 0.012, 0.011, 0.27)
+polygon = PackedVector2Array(-66, -20, -20.5, 1, 62.5, -38.5, 16, -61)
+
+[node name="Visual" type="Sprite2D" parent="Midground/ShoeCabinet" unique_id=396592834]
+scale = Vector2(0.255, 0.255)
+texture = ExtResource("10_wooden_box")
+offset = Vector2(-0.5, -362)
+
+[node name="Window" type="Node2D" parent="Midground" unique_id=801115124]
+script = ExtResource("3_spatial")
+logical_position = Vector3(7, 2.8, 0)
+depth_offset = -2000
+
+[node name="Visual" type="Sprite2D" parent="Midground/Window" unique_id=1538701415]
+position = Vector2(0, 35)
+rotation = 0.4636476
+scale = Vector2(0.26832816, 0.24)
+skew = -0.4636476
+texture = ExtResource("11_window")
+
+[node name="DoorFrame" type="Node2D" parent="Midground" unique_id=214409458]
+script = ExtResource("3_spatial")
+logical_position = Vector3(17, 0, 0)
+depth_offset = -2000
+
+[node name="Visual" type="Sprite2D" parent="Midground/DoorFrame" unique_id=930024100]
+rotation = 0.4636476
+scale = Vector2(0.25714782, 0.23)
+skew = -0.4636476
+texture = ExtResource("12_door")
+offset = Vector2(-18.5, -500)
+
+[node name="Interactables" type="Node2D" parent="." unique_id=1725370141]
+
+[node name="StoolTargetMarker" type="Node2D" parent="Interactables" unique_id=1632806057]
+script = ExtResource("3_spatial")
+logical_position = Vector3(1.5, 0.01, 3.1)
+depth_offset = -1
+
+[node name="Outline" type="Line2D" parent="Interactables/StoolTargetMarker" unique_id=1526246875]
+points = PackedVector2Array(-34, 0, 0, -17, 34, 0, 0, 17, -34, 0)
+width = 3.0
+default_color = Color(0.88, 0.72, 0.35, 0.42)
+
+[node name="PackingBox" type="Area2D" parent="Interactables" unique_id=273224494]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_interactable")
+display_name = "打包纸箱"
+dialogue_id = "D001"
+observation_id = "O001"
+is_key_object = true
+logical_position = Vector3(5, 0, 8.8)
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/PackingBox" unique_id=99392357]
+position = Vector2(0, -45)
+shape = SubResource("Shape_interact_medium")
+
+[node name="MathBody" type="StaticBody3D" parent="Interactables/PackingBox" unique_id=997284504]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interactables/PackingBox/MathBody" unique_id=285161478]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("Shape3D_box")
+
+[node name="Shadow" type="Polygon2D" parent="Interactables/PackingBox" unique_id=1200421826]
+z_index = -2
+position = Vector2(20, 11)
+color = Color(0.005, 0.012, 0.011, 0.29)
+polygon = PackedVector2Array(-54, -18, 0, 9, 70, -26, 16, -53)
+
+[node name="Visual" type="Sprite2D" parent="Interactables/PackingBox" unique_id=726664853]
+scale = Vector2(0.225, 0.225)
+texture = ExtResource("13_cardboard_box")
+offset = Vector2(-1.5, -409)
+
+[node name="StackedBoxLeft" type="Sprite2D" parent="Interactables/PackingBox" unique_id=997808099]
+position = Vector2(-88, -38)
+scale = Vector2(-0.18, 0.18)
+texture = ExtResource("13_cardboard_box")
+offset = Vector2(-1.5, -409)
+
+[node name="StackedBoxRight" type="Sprite2D" parent="Interactables/PackingBox" unique_id=60399148]
+position = Vector2(92, -18)
+scale = Vector2(0.165, 0.165)
+texture = ExtResource("13_cardboard_box")
+offset = Vector2(-1.5, -409)
+
+[node name="TapeLine" type="Line2D" parent="Interactables/PackingBox" unique_id=972617003 groups=["ordinary_line"]]
+points = PackedVector2Array(-48, -80, 0, -55, 48, -80)
+width = 3.0
+default_color = Color(0.63, 0.55, 0.39, 0.85)
+
+[node name="Glow" type="Polygon2D" parent="Interactables/PackingBox" unique_id=312530433]
+color = Color(1, 1, 1, 0.12)
+polygon = PackedVector2Array(-61, -113, 0, -145, 61, -113, 61, -14, 0, 18, -61, -14)
+
+[node name="Desk" type="Area2D" parent="Interactables" unique_id=1326920950]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_interactable")
+display_name = "书桌"
+dialogue_id = "D003"
+observation_id = "O003"
+is_key_object = true
+logical_position = Vector3(5.65, 0, 1.59)
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/Desk" unique_id=1319576482]
+position = Vector2(0, -40)
+shape = SubResource("Shape_interact_wide")
+
+[node name="MathBody" type="StaticBody3D" parent="Interactables/Desk" unique_id=682313871]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interactables/Desk/MathBody" unique_id=483330350]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("Shape3D_desk")
+
+[node name="Shadow" type="Polygon2D" parent="Interactables/Desk" unique_id=689389270]
+z_index = -2
+position = Vector2(0, 6)
+color = Color(0.005, 0.012, 0.011, 0.27)
+polygon = PackedVector2Array(-115, 0, 0, -58, 115, 0, 0, 58)
+
+[node name="Visual" type="Sprite2D" parent="Interactables/Desk" unique_id=421402159]
+position = Vector2(-3.44, 52.92)
+scale = Vector2(0.345, 0.345)
+texture = ExtResource("15_bookshelf")
+offset = Vector2(-14.5, -373)
+
+[node name="SewingThread" type="Line2D" parent="Interactables/Desk" unique_id=1298489071 groups=["ordinary_line"]]
+position = Vector2(98.56, 113.92)
+points = PackedVector2Array(68, -89, 72, -61, 66, -34, 73, -10)
+width = 2.0
+default_color = Color(0.52, 0.55, 0.5, 0.75)
+
+[node name="Glow" type="Polygon2D" parent="Interactables/Desk" unique_id=378416870]
+position = Vector2(98.56, 113.92)
+color = Color(1, 1, 1, 0.12)
+polygon = PackedVector2Array(-102, -94, 0, -148, 102, -94, 0, -38)
+
+[node name="Suitcase" type="Area2D" parent="Interactables" unique_id=643844776]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_interactable")
+display_name = "行李箱"
+dialogue_id = "D002"
+observation_id = "O002"
+is_key_object = true
+logical_position = Vector3(11.5, 0, 8.8)
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/Suitcase" unique_id=389852143]
+position = Vector2(0, -42)
+shape = SubResource("Shape_interact_medium")
+
+[node name="MathBody" type="StaticBody3D" parent="Interactables/Suitcase" unique_id=1065937450]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interactables/Suitcase/MathBody" unique_id=1384849275]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("Shape3D_suitcase")
+
+[node name="Shadow" type="Polygon2D" parent="Interactables/Suitcase" unique_id=2048004398]
+z_index = -2
+position = Vector2(18, 10)
+color = Color(0.005, 0.012, 0.011, 0.28)
+polygon = PackedVector2Array(-60, -22, 0, 8, 76, -30, 16, -60)
+
+[node name="Visual" type="Sprite2D" parent="Interactables/Suitcase" unique_id=252701451]
+scale = Vector2(-0.225, 0.225)
+texture = ExtResource("16_suitcase")
+offset = Vector2(-3.5, -345)
+
+[node name="Glow" type="Polygon2D" parent="Interactables/Suitcase" unique_id=436689531]
+color = Color(1, 1, 1, 0.14)
+polygon = PackedVector2Array(-70, -93, 0, -129, 70, -93, 70, -17, 0, 18, -70, -17)
+
+[node name="PhotoFrame" type="Area2D" parent="Interactables" unique_id=1006281268]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_interactable")
+display_name = "柜顶相框"
+dialogue_id = "D042"
+observation_id = "O042"
+is_key_object = true
+logical_position = Vector3(3, 0, 2.9)
+depth_offset = 2
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/PhotoFrame" unique_id=1279859034]
+position = Vector2(0, -45)
+shape = SubResource("Shape_interact_medium")
+
+[node name="Visual" type="Sprite2D" parent="Interactables/PhotoFrame" unique_id=1879546591]
+position = Vector2(17.000002, -301)
+scale = Vector2(0.1275, 0.1275)
+texture = ExtResource("17_photo_frame")
+offset = Vector2(16, -427)
+
+[node name="Glow" type="Polygon2D" parent="Interactables/PhotoFrame" unique_id=1330530951]
+position = Vector2(25.6, -236.8)
+color = Color(1, 1, 1, 0.13)
+polygon = PackedVector2Array(-38, -49, 38, -11, 38, 43, -38, 5)
+
+[node name="BedCrouchTrigger" type="Area2D" parent="Interactables" unique_id=215673139]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_interactable")
+display_name = "床底"
+dialogue_id = "D041"
+observation_id = "O041"
+is_key_object = true
+logical_position = Vector3(11.6, 0, 4.6)
+requires_crouch = true
+
+[node name="Stool" type="Area2D" parent="Interactables" unique_id=472278357]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("5_pushable_stool")
+target_marker_path = NodePath("../StoolTargetMarker")
+display_name = "木椅"
+once_only = false
+logical_position = Vector3(2, 0, 8)
+auto_play_dialogue = false
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/Stool" unique_id=1022637935]
+position = Vector2(0, -30)
+shape = SubResource("Shape_interact_medium")
+
+[node name="MathBody" type="CharacterBody3D" parent="Interactables/Stool" unique_id=1945165140]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interactables/Stool/MathBody" unique_id=162105747]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("Shape3D_stool")
+
+[node name="Shadow" type="Polygon2D" parent="Interactables/Stool" unique_id=1752970035]
+z_index = -2
+position = Vector2(16, 9)
+color = Color(0.005, 0.012, 0.011, 0.28)
+polygon = PackedVector2Array(-34, -12, 0, 5, 48, -19, 14, -36)
+
+[node name="Visual" type="Sprite2D" parent="Interactables/Stool" unique_id=506840791]
+scale = Vector2(0.225, 0.225)
+texture = ExtResource("18_chair")
+offset = Vector2(17, -427)
+
+[node name="Glow" type="Polygon2D" parent="Interactables/Stool" unique_id=888837881]
+color = Color(1, 1, 1, 0.1)
+polygon = PackedVector2Array(-48, -60, 0, -86, 48, -60, 48, -4, 0, 20, -48, -4)
+
+[node name="Umbrella" type="Area2D" parent="Interactables" unique_id=385713340]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_interactable")
+display_name = "黄色猫咪雨伞"
+dialogue_id = "D046"
+observation_id = "O046"
+interaction_enabled = false
+logical_position = Vector3(14.4, 0, 6.2)
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/Umbrella" unique_id=1095558978]
+position = Vector2(0, -52)
+shape = SubResource("Shape_interact_tall")
+
+[node name="Shadow" type="Polygon2D" parent="Interactables/Umbrella" unique_id=1941345313]
+z_index = -2
+position = Vector2(57, -5)
+color = Color(0.005, 0.012, 0.011, 0.24)
+polygon = PackedVector2Array(-17, -7, 0, -12, 42, 7, 23, 15)
+
+[node name="Visual" type="Sprite2D" parent="Interactables/Umbrella" unique_id=430639831]
+position = Vector2(41, -20)
+scale = Vector2(-0.225, 0.225)
+texture = ExtResource("19_umbrella")
+offset = Vector2(5, -464)
+
+[node name="Glow" type="Polygon2D" parent="Interactables/Umbrella" unique_id=159839580]
+color = Color(1, 0.9, 0.45, 0.22)
+polygon = PackedVector2Array(-74, -105, 0, -151, 74, -105, 40, -53, 0, -70, -40, -53)
+
+[node name="WardrobeInspect" type="Area2D" parent="Interactables" unique_id=1385204993]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_interactable")
+display_name = "衣柜里的男式外套"
+dialogue_id = "D043"
+observation_id = "O043"
+logical_position = Vector3(3.7, 0, 2.9)
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/WardrobeInspect" unique_id=1962955912]
+position = Vector2(0, -48)
+shape = SubResource("Shape_interact_medium")
+
+[node name="Glow" type="Polygon2D" parent="Interactables/WardrobeInspect" unique_id=1387771044]
+color = Color(1, 1, 1, 0.07)
+polygon = PackedVector2Array(-50, -112, 0, -137, 50, -112, 50, -20, 0, 5, -50, -20)
+
+[node name="WindowInspect" type="Area2D" parent="Interactables" unique_id=1910072253]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_interactable")
+display_name = "窗玻璃和旧串珠"
+dialogue_id = "D004"
+observation_id = "O004"
+logical_position = Vector3(7, 0, 1.1)
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/WindowInspect" unique_id=577255677]
+position = Vector2(0, -48)
+shape = SubResource("Shape_interact_medium")
+
+[node name="Glow" type="Polygon2D" parent="Interactables/WindowInspect" unique_id=1446619252]
+position = Vector2(0, -82)
+color = Color(1, 1, 1, 0.07)
+polygon = PackedVector2Array(-45, -55, 45, -10, 45, 48, -45, 3)
+
+[node name="ThreadClue" type="Area2D" parent="Interactables" unique_id=1885857095]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("2_interactable")
+display_name = "墙上的旧电线"
+dialogue_id = "D047"
+observation_id = "O047"
+interaction_enabled = false
+logical_position = Vector3(9.3, 0, 1.25)
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/ThreadClue" unique_id=1237300061]
+position = Vector2(0, -48)
+shape = SubResource("Shape_interact_medium")
+
+[node name="Wire" type="Line2D" parent="Interactables/ThreadClue" unique_id=472506305 groups=["ordinary_line"]]
+points = PackedVector2Array(-8, -142, -6, -105, 4, -72, 0, -38)
+width = 4.0
+default_color = Color(0.22, 0.3, 0.28, 0.9)
+
+[node name="Glow" type="Line2D" parent="Interactables/ThreadClue" unique_id=168223870]
+visible = false
+points = PackedVector2Array(-8, -142, -6, -105, 4, -72, 0, -38)
+width = 14.0
+default_color = Color(0.95, 0.18, 0.22, 0.28)
+
+[node name="Characters" type="Node2D" parent="." unique_id=1784250300]
+
+[node name="Mother" parent="Characters" unique_id=1737417525 instance=ExtResource("4_mother")]
+visible = false
+logical_position = Vector3(10, 0, 7.5)
+
+[node name="Player" parent="Characters" unique_id=738127892 instance=ExtResource("14_player")]
+
+[node name="StandaloneCamera" type="Camera2D" parent="Characters/Player" unique_id=456572993]
+enabled = false
+limit_left = 180
+limit_top = -180
+limit_right = 2290
+limit_bottom = 1210
+position_smoothing_enabled = true
+position_smoothing_speed = 7.0
+
+[node name="SpatialPhysics" type="Node3D" parent="." unique_id=874235621]
+
+[node name="BoundaryXMin" type="StaticBody3D" parent="SpatialPhysics" unique_id=1747126015]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 6)
+
+[node name="Shape" type="CollisionShape3D" parent="SpatialPhysics/BoundaryXMin" unique_id=108042610]
+transform = Transform3D(0.2, 0, 0, 0, 1, 0, 0, 0, 11, 0, 0, 0)
+shape = SubResource("Shape3D_wardrobe")
+
+[node name="BoundaryXMax" type="StaticBody3D" parent="SpatialPhysics" unique_id=1490082229]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 1, 6)
+
+[node name="Shape" type="CollisionShape3D" parent="SpatialPhysics/BoundaryXMax" unique_id=43467513]
+transform = Transform3D(0.2, 0, 0, 0, 1, 0, 0, 0, 11, 0, 0, 0)
+shape = SubResource("Shape3D_wardrobe")
+
+[node name="BoundaryZMin" type="StaticBody3D" parent="SpatialPhysics" unique_id=1644057779]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="SpatialPhysics/BoundaryZMin" unique_id=2024462254]
+transform = Transform3D(8.6, 0, 0, 0, 1, 0, 0, 0, 0.25, 0, 0, 0)
+shape = SubResource("Shape3D_wardrobe")
+
+[node name="BoundaryZMax" type="StaticBody3D" parent="SpatialPhysics" unique_id=709614052]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1, 12)
+
+[node name="Shape" type="CollisionShape3D" parent="SpatialPhysics/BoundaryZMax" unique_id=115613236]
+transform = Transform3D(8.6, 0, 0, 0, 1, 0, 0, 0, 0.25, 0, 0, 0)
+shape = SubResource("Shape3D_wardrobe")
+
+[node name="Puzzles" type="Node2D" parent="." unique_id=67360108]
+
+[node name="Triggers" type="Node2D" parent="." unique_id=1405976710]
+
+[node name="CameraPoints" type="Node2D" parent="." unique_id=1174646425]
+
+[node name="RoomView" type="Marker2D" parent="CameraPoints" unique_id=908945995]
+position = Vector2(930, 610)
+
+[node name="CloseUpView" type="Marker2D" parent="CameraPoints" unique_id=1411889889]
+position = Vector2(1338, 570)
+
+[node name="DoorView" type="Marker2D" parent="CameraPoints" unique_id=769551377]
+position = Vector2(2010, 660)
+
+[node name="Lighting" type="Node2D" parent="." unique_id=584839010]
+
+[node name="CanvasModulate" type="CanvasModulate" parent="Lighting" unique_id=1943717040]
+color = Color(0.9, 0.82, 0.72, 1)
+
+[node name="Foreground" type="Node2D" parent="." unique_id=1337493260]
+z_index = 3000
+
+[node name="NearEdge" type="Line2D" parent="Foreground" unique_id=1824551784]
+points = PackedVector2Array(282, 554, 1434, 1130, 2202, 746)
+default_color = Color(0.018, 0.04, 0.035, 0.8)
+
+[node name="Exits" type="Node2D" parent="." unique_id=1407049958]

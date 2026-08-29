@@ -1,0 +1,228 @@
+[gd_scene format=3 uid="uid://ypnlkw4chkig"]
+
+[ext_resource type="Script" uid="uid://d0o6ekypmrx88" path="res://scripts/ui/dialogue_ui.gd" id="1_dialogue"]
+[ext_resource type="Texture2D" path="res://art/portraits/chapter1/余念（23）：正常状态.png" id="2_portrait_yunian"]
+[ext_resource type="Texture2D" path="res://art/portraits/chapter1/余秀兰（48）：正常状态.png" id="3_portrait_yuxiulan"]
+
+[sub_resource type="AtlasTexture" id="Atlas_yunian"]
+atlas = ExtResource("2_portrait_yunian")
+region = Rect2(234, 170, 885, 1400)
+
+[sub_resource type="AtlasTexture" id="Atlas_yuxiulan"]
+atlas = ExtResource("3_portrait_yuxiulan")
+region = Rect2(250, 120, 885, 1400)
+
+[sub_resource type="StyleBoxFlat" id="Style_dialogue"]
+bg_color = Color(0.035, 0.075, 0.07, 0.97)
+border_width_left = 2
+border_width_top = 1
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.32, 0.69, 0.57, 0.72)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.52)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="Style_monologue"]
+bg_color = Color(0.025, 0.045, 0.043, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.55, 0.67, 0.62, 0.34)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 9
+
+[node name="DialogueUI" type="Control" unique_id=158875552]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_dialogue")
+speaker_portraits = {
+"余念": SubResource("Atlas_yunian"),
+"余秀兰": SubResource("Atlas_yuxiulan")
+}
+
+[node name="Dimmer" type="ColorRect" parent="." unique_id=1202554159]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.008, 0.018, 0.017, 0.42)
+
+[node name="DialogueFrame" type="MarginContainer" parent="." unique_id=812201258]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = -266.0
+offset_right = -64.0
+offset_bottom = -34.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Panel" type="PanelContainer" parent="DialogueFrame" unique_id=363512491]
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_dialogue")
+
+[node name="Margin" type="MarginContainer" parent="DialogueFrame/Panel" unique_id=1504921152]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 310
+theme_override_constants/margin_bottom = 22
+
+[node name="VBox" type="VBoxContainer" parent="DialogueFrame/Panel/Margin" unique_id=2094380612]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="DialogueFrame/Panel/Margin/VBox" unique_id=2060453349]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Accent" type="ColorRect" parent="DialogueFrame/Panel/Margin/VBox/Header" unique_id=1748806743]
+custom_minimum_size = Vector2(5, 28)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.89, 0.7, 0.3, 1)
+
+[node name="SpeakerName" type="Label" parent="DialogueFrame/Panel/Margin/VBox/Header" unique_id=29888283]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.8, 0.43, 1)
+theme_override_font_sizes/font_size = 25
+text = "人物名字"
+
+[node name="Body" type="HBoxContainer" parent="DialogueFrame/Panel/Margin/VBox" unique_id=922070525]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="TextColumn" type="VBoxContainer" parent="DialogueFrame/Panel/Margin/VBox/Body" unique_id=636389281]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="DialogueText" type="RichTextLabel" parent="DialogueFrame/Panel/Margin/VBox/Body/TextColumn" unique_id=1790666121]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.94, 0.95, 0.91, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.55)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/normal_font_size = 24
+bbcode_enabled = true
+text = "对白内容"
+fit_content = true
+scroll_active = false
+
+[node name="Footer" type="HBoxContainer" parent="DialogueFrame/Panel/Margin/VBox/Body/TextColumn" unique_id=1332653106]
+layout_mode = 2
+
+[node name="LineStatus" type="Label" parent="DialogueFrame/Panel/Margin/VBox/Body/TextColumn/Footer" unique_id=1907951263]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.48, 0.62, 0.56, 1)
+theme_override_font_sizes/font_size = 15
+text = "1 / 1"
+
+[node name="ContinueHint" type="Label" parent="DialogueFrame/Panel/Margin/VBox/Body/TextColumn/Footer" unique_id=431515317]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.66, 0.75, 0.7, 1)
+theme_override_font_sizes/font_size = 16
+text = "Enter / 空格 继续"
+
+[node name="NextIndicator" type="Label" parent="DialogueFrame/Panel/Margin/VBox/Body/TextColumn/Footer" unique_id=374505688]
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.78, 0.38, 1)
+theme_override_font_sizes/font_size = 18
+text = "▼"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="DialogueFrame/Panel/Margin/VBox/Body/TextColumn/Footer" unique_id=623378332]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="PortraitTexture" type="TextureRect" parent="." unique_id=1865040839]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -362.0
+offset_top = -480.0
+offset_right = -80.0
+offset_bottom = -34.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MonologueFrame" type="MarginContainer" parent="." unique_id=362730621]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 190.0
+offset_top = -166.0
+offset_right = -190.0
+offset_bottom = -42.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="MonologueFrame" unique_id=768768290]
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_monologue")
+
+[node name="Margin" type="MarginContainer" parent="MonologueFrame/Panel" unique_id=1700093573]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 18
+
+[node name="VBox" type="VBoxContainer" parent="MonologueFrame/Panel/Margin" unique_id=2033503165]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="SpeakerName" type="Label" parent="MonologueFrame/Panel/Margin/VBox" unique_id=1064938006]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.72, 0.58, 1)
+theme_override_font_sizes/font_size = 17
+text = "说话人"
+horizontal_alignment = 1
+
+[node name="DialogueText" type="RichTextLabel" parent="MonologueFrame/Panel/Margin/VBox" unique_id=1880576612]
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+theme_override_colors/default_color = Color(0.88, 0.91, 0.88, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.45)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/normal_font_size = 21
+bbcode_enabled = true
+text = "内心独白"
+fit_content = true
+scroll_active = false
+horizontal_alignment = 1
