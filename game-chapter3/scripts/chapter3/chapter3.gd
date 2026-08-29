@@ -53,14 +53,7 @@ var suitcase_texture: Texture2D = preload("res://art/suitcase.png")
 var wooden_box_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_warehouse_heavy_crate.png")
 var yellow_umbrella_texture: Texture2D = preload("res://art/cute-umbrella.png")
 var stairwell_full_scene_texture: Texture2D = preload("res://assets/environments/chapter3/stairwell/environment_ch03_stairwell_full_scene.png")
-var warehouse_background_texture: Texture2D = preload("res://assets/environments/chapter3/warehouse/environment_ch03_warehouse_background.png")
-var warehouse_fabric_rack_texture: Texture2D = preload("res://assets/props/chapter3/warehouse/prop_ch03_warehouse_fabric_rack.png")
-var warehouse_pattern_textures: Array[Texture2D] = [
-	preload("res://assets/props/chapter3/warehouse/prop_ch03_warehouse_pattern_changshan.png"),
-	preload("res://assets/props/chapter3/warehouse/prop_ch03_warehouse_pattern_qipao.png"),
-	preload("res://assets/props/chapter3/warehouse/prop_ch03_warehouse_pattern_shirt.png"),
-	preload("res://assets/props/chapter3/warehouse/prop_ch03_warehouse_pattern_skirt.png"),
-]
+var warehouse_full_scene_texture: Texture2D = preload("res://assets/environments/chapter3/warehouse/environment_ch03_warehouse_full_scene.png")
 var rooftop_sky_texture: Texture2D = preload("res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_sky.png")
 var rooftop_entrance_texture: Texture2D = preload("res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_entrance.png")
 var rooftop_tank_low_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_rooftop_water_tank_low.png")
@@ -1078,9 +1071,7 @@ func _draw() -> void:
 func _draw_background() -> void:
 	# 背景保持原始素材观感，不再叠加渐变网格、竖缝或统一灰蓝蒙层。
 	draw_rect(Rect2(0, 0, VIEW_W, VIEW_H), Color("161b1d"))
-	if level_index == 1:
-		draw_texture_rect(warehouse_background_texture, Rect2(0, 62, VIEW_W, 444), false, Color.WHITE)
-	elif level_index == 2:
+	if level_index == 2:
 		draw_texture_rect(rooftop_sky_texture, Rect2(0, 62, VIEW_W, 444), false, Color.WHITE)
 
 
@@ -1147,28 +1138,7 @@ func _draw_stairwell_dressing() -> void:
 
 
 func _draw_warehouse_dressing() -> void:
-	# 布料架与设计稿强化余秀兰的纺织职业史，并置于玩法机关之后。
-	_draw_world_texture(warehouse_fabric_rack_texture, Rect2(3000.0, 250.0, 280.0, 210.0), Color(0.58, 0.66, 0.68, 0.60))
-	var pattern_positions := [
-		Vector2(545.0, 178.0),
-		Vector2(725.0, 178.0),
-		Vector2(2630.0, 178.0),
-		Vector2(2810.0, 178.0),
-	]
-	for index in range(warehouse_pattern_textures.size()):
-		_draw_world_texture(warehouse_pattern_textures[index], Rect2(pattern_positions[index], Vector2(132.0, 150.0)), Color(0.52, 0.60, 0.61, 0.58))
-	# 中段保留低对比程序货架，避免重复同一张布料架并保持通道轮廓。
-	for shelf_x in [1160.0, 2140.0]:
-		var left: float = float(shelf_x) - camera_position.x
-		for shelf_y in [190.0, 300.0, 410.0]:
-			var y: float = float(shelf_y) - camera_position.y
-			draw_line(Vector2(left, y), Vector2(left + 250.0, y), Color("74858a"), 7.0)
-		for post_x in [0.0, 250.0]:
-			draw_line(Vector2(left + post_x, 150.0 - camera_position.y), Vector2(left + post_x, 458.0 - camera_position.y), Color("4d6066"), 8.0)
-		for roll_index in range(4):
-			var roll_center := Vector2(left + 34.0 + roll_index * 55.0, 284.0 - camera_position.y)
-			var roll_colors := [Color("a1877b"), Color("738b8f"), Color("84788e"), Color("a69a7d")]
-			draw_circle(roll_center, 18.0, roll_colors[roll_index])
+	_draw_repeating_world_background(warehouse_full_scene_texture, -72.0)
 
 
 func _draw_rooftop_dressing() -> void:

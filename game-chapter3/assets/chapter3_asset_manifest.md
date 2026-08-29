@@ -1,6 +1,6 @@
 # 第三章现有素材接入清单
 
-第三章的 26 张候选 PNG 已复制或处理后保存到 `game-chapter3/assets/`，并使用英文资源名。Godot 通过当前工程内的 `res://assets/...` 直接访问，不依赖个人 Downloads 路径、仓库根素材目录或外部软链接。当前 17 张用于游戏画面，9 张仅保留为候选参考。原有 3 张楼梯/断梯图片因透视、比例和现有关卡结构不匹配，已从工程整体移除。
+第三章的 27 张候选 PNG 已复制或处理后保存到 `game-chapter3/assets/`，并使用英文资源名。Godot 通过当前工程内的 `res://assets/...` 直接访问，不依赖个人 Downloads 路径、仓库根素材目录或外部软链接。当前 12 张用于游戏画面，15 张仅保留为候选参考。原有 3 张楼梯/断梯图片因透视、比例和现有关卡结构不匹配，已从工程整体移除。
 
 ## 当前使用范围
 
@@ -16,7 +16,8 @@
 | 用户提供的抬起踏板图 | `props/chapter3/plates/prop_ch03_pressure_plate_raised.png` | 未触发踏板状态；透明背景游戏贴图 |
 | 用户提供的压下踏板图 | `props/chapter3/plates/prop_ch03_pressure_plate_pressed.png` | 已触发踏板状态；透明背景游戏贴图 |
 | `window.png` | `props/chapter3/prop_ch03_stairwell_window.png` | 候选参考；暖夕照与当前冷灰蓝楼道冲突，运行时停用 |
-| `factory-background.png` | `environments/chapter3/warehouse/environment_ch03_warehouse_background.png` | 仓库远景 |
+| 用户提供的纺织仓库整景图 | `environments/chapter3/warehouse/environment_ch03_warehouse_full_scene.png` | 第二关完整背景；以原始尺寸沿世界横向重复，保持随镜头滚动 |
+| `factory-background.png` | `environments/chapter3/warehouse/environment_ch03_warehouse_background.png` | 候选参考；已由纺织仓库整景图替换 |
 | `daughter-pipe.png` | `environments/chapter3/warehouse/environment_ch03_warehouse_low_tunnel.png` | 候选参考；圆管剖面不能替代仓库梁下低洞，运行时停用 |
 | `shelf.png` | `props/chapter3/prop_ch03_warehouse_shelf_wide.png` | 候选参考；细节过密且重复感明显，已由布料架替换 |
 | `shelf-2.png` | `props/chapter3/prop_ch03_warehouse_shelf_narrow.png` | 候选参考；细节过密且重复感明显，已由布料架替换 |
@@ -27,11 +28,11 @@
 | `water-tank-1.png` | `props/chapter3/prop_ch03_rooftop_water_tank_low.png` | 近景落地水箱 |
 | `water-tank-2.png` | `props/chapter3/prop_ch03_rooftop_water_tank_high.png` | 候选参考；会误导为可攀爬平台，运行时停用 |
 | `big-iron-gate.png` | `props/chapter3/prop_ch03_rooftop_exit_gate.png` | 天台终门视觉层 |
-| `1.png` | `props/chapter3/warehouse/prop_ch03_warehouse_pattern_changshan.png` | 仓库长衫设计稿，表现纺织职业史 |
-| `3.png` | `props/chapter3/warehouse/prop_ch03_warehouse_pattern_qipao.png` | 仓库旗袍设计稿，表现纺织职业史 |
-| `5.png` | `props/chapter3/warehouse/prop_ch03_warehouse_pattern_shirt.png` | 仓库衬衫设计稿，表现纺织职业史 |
-| `7.png` | `props/chapter3/warehouse/prop_ch03_warehouse_pattern_skirt.png` | 仓库裙装设计稿，表现纺织职业史 |
-| `架子.png` | `props/chapter3/warehouse/prop_ch03_warehouse_fabric_rack.png` | 仓库布料架；只作背景，不承担碰撞 |
+| `1.png` | `props/chapter3/warehouse/prop_ch03_warehouse_pattern_changshan.png` | 候选参考；整景图已包含服装设计语义 |
+| `3.png` | `props/chapter3/warehouse/prop_ch03_warehouse_pattern_qipao.png` | 候选参考；整景图已包含服装设计语义 |
+| `5.png` | `props/chapter3/warehouse/prop_ch03_warehouse_pattern_shirt.png` | 候选参考；整景图已包含服装设计语义 |
+| `7.png` | `props/chapter3/warehouse/prop_ch03_warehouse_pattern_skirt.png` | 候选参考；整景图已包含服装设计语义 |
+| `架子.png` | `props/chapter3/warehouse/prop_ch03_warehouse_fabric_rack.png` | 候选参考；整景图已包含布料架与布卷 |
 
 ## 使用限制
 
