@@ -1,70 +1,138 @@
+```html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
+  >
 
   <title>Echoes of Us — 牵挂线</title>
+
   <meta
     name="description"
     content="Echoes of Us（牵挂线）是一款关于距离、牵挂与连接的叙事互动游戏。"
   >
 
-  <!-- Fonts -->
+  <meta name="theme-color" content="#050505">
+
+  <!-- =========================================
+       Fonts
+  ========================================== -->
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;500;600&family=Instrument+Serif:ital@0;1&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap"
     rel="stylesheet"
   >
 
-  <!-- Tailwind -->
+  <!-- =========================================
+       Tailwind
+  ========================================== -->
+
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- React -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- =========================================
+       React
+  ========================================== -->
+
+  <script
+    src="https://unpkg.com/react@18/umd/react.production.min.js"
+    crossorigin
+  ></script>
+
+  <script
+    src="https://unpkg.com/react-dom@18/umd/react.production.min.js"
+    crossorigin
+  ></script>
+
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+
   <style>
+
+    /* =========================================
+       Global
+    ========================================== */
+
     * {
       box-sizing: border-box;
       font-family: 'Inter', sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
-    html,
-    body,
-    #root {
+    html {
       width: 100%;
-      height: 100%;
-      margin: 0;
+      min-height: 100%;
+      scroll-behavior: smooth;
+      background: #050505;
     }
 
     body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
       background: #050505;
       color: white;
       overflow-x: hidden;
+      overscroll-behavior-x: none;
+    }
+
+    #root {
+      width: 100%;
+      min-height: 100%;
     }
 
     button,
     a {
       -webkit-user-select: none;
       user-select: none;
+      touch-action: manipulation;
     }
 
-    /* --------------------------------
+    img,
+    video {
+      max-width: 100%;
+    }
+
+
+    /* =========================================
+       Safe Area
+    ========================================== */
+
+    .safe-top {
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+
+    /* =========================================
        Glass
-    -------------------------------- */
+    ========================================== */
 
     .glass {
       background: rgba(255, 255, 255, 0.055);
+
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
+
       border: 1px solid rgba(255, 255, 255, 0.12);
+
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.08),
         0 12px 40px rgba(0, 0, 0, 0.18);
+
+      transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease;
     }
 
     .glass:hover {
@@ -72,11 +140,13 @@
       border-color: rgba(255, 255, 255, 0.18);
     }
 
-    /* --------------------------------
+
+    /* =========================================
        Marquee
-    -------------------------------- */
+    ========================================== */
 
     @keyframes marquee {
+
       from {
         transform: translateX(0);
       }
@@ -84,6 +154,7 @@
       to {
         transform: translateX(-50%);
       }
+
     }
 
     .marquee {
@@ -91,11 +162,13 @@
       animation: marquee 32s linear infinite;
     }
 
-    /* --------------------------------
-       Fade animations
-    -------------------------------- */
+
+    /* =========================================
+       Fade
+    ========================================== */
 
     @keyframes fadeUp {
+
       from {
         opacity: 0;
         transform: translateY(24px);
@@ -105,10 +178,13 @@
         opacity: 1;
         transform: translateY(0);
       }
+
     }
 
     .fade-up {
-      animation: fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation:
+        fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1)
+        forwards;
     }
 
     .delay-1 {
@@ -126,11 +202,13 @@
       opacity: 0;
     }
 
-    /* --------------------------------
-       Floating line
-    -------------------------------- */
+
+    /* =========================================
+       Pulse
+    ========================================== */
 
     @keyframes pulseLine {
+
       0%,
       100% {
         opacity: 0.25;
@@ -139,15 +217,18 @@
       50% {
         opacity: 0.7;
       }
+
     }
 
     .pulse-line {
-      animation: pulseLine 3s ease-in-out infinite;
+      animation:
+        pulseLine 3s ease-in-out infinite;
     }
 
-    /* --------------------------------
-       Scroll
-    -------------------------------- */
+
+    /* =========================================
+       Scrollbar
+    ========================================== */
 
     .scroll-area {
       scrollbar-width: none;
@@ -157,177 +238,449 @@
       display: none;
     }
 
-    /* --------------------------------
+
+    /* =========================================
+       Trailer
+    ========================================== */
+
+    .trailer-video {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+      background: #000;
+    }
+
+
+    /* =========================================
        Mobile
-    -------------------------------- */
+    ========================================== */
 
     @media (max-width: 640px) {
-      .hero-title {
-        font-size: 4.5rem !important;
+
+      html {
+        scroll-padding-top: 80px;
       }
+
+      .hero-section {
+        min-height: 100svh;
+        min-height: 100dvh;
+        height: auto;
+      }
+
+      .hero-title {
+        font-size: clamp(
+          4.2rem,
+          20vw,
+          7rem
+        ) !important;
+
+        line-height: 0.76 !important;
+
+        letter-spacing: -0.05em !important;
+      }
+
+      .hero-content {
+        padding-top: 110px;
+        padding-bottom: 34px;
+      }
+
+      .hero-description {
+        max-width: 100%;
+        font-size: 13px;
+        line-height: 1.8;
+      }
+
+      .hero-background {
+        background-position: 54% center !important;
+      }
+
+      .story-section {
+        padding-top: 90px;
+        padding-bottom: 90px;
+      }
+
+      .story-title {
+        font-size: 3.2rem !important;
+        line-height: 1.05 !important;
+      }
+
+      .interaction-board {
+        height: 190px !important;
+      }
+
+      .character-button {
+        width: 58px !important;
+        height: 58px !important;
+        font-size: 12px !important;
+      }
+
+      .control-button {
+        min-width: 92px;
+        min-height: 44px;
+      }
+
+      .download-section {
+        padding-top: 100px;
+        padding-bottom: 100px;
+      }
+
+      .download-title {
+        font-size: 3.8rem !important;
+        line-height: 0.95 !important;
+      }
+
+      .download-button {
+        width: 100%;
+        min-height: 54px;
+      }
+
+      .mobile-menu {
+        padding-top:
+          calc(32px + env(safe-area-inset-top));
+
+        padding-bottom:
+          calc(32px + env(safe-area-inset-bottom));
+      }
+
     }
+
+
+    /* =========================================
+       Very small phones
+    ========================================== */
+
+    @media (max-width: 380px) {
+
+      .hero-title {
+        font-size: 3.8rem !important;
+      }
+
+      .character-button {
+        width: 52px !important;
+        height: 52px !important;
+      }
+
+      .interaction-board {
+        height: 175px !important;
+      }
+
+      .download-title {
+        font-size: 3.25rem !important;
+      }
+
+    }
+
+
+    /* =========================================
+       Reduce Motion
+    ========================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+
+      html {
+        scroll-behavior: auto;
+      }
+
+      .marquee,
+      .fade-up,
+      .pulse-line {
+        animation: none !important;
+      }
+
+    }
+
   </style>
 </head>
 
+
 <body>
+
   <div id="root"></div>
+
 
   <script type="text/babel">
 
-    const { useState, useEffect, useRef } = React;
+    const {
+      useState,
+      useEffect,
+      useRef
+    } = React;
 
-    /*
-     * ==========================================
-     * Game resources
-     * ==========================================
-     *
-     * 你可以把这些 URL 换成 GitHub 仓库里的实际资源。
-     */
+
+    /* =====================================================
+       GAME RESOURCES
+    ===================================================== */
 
     const BG_IMAGE =
       "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260713_140344_79e1296a-86d7-43fd-9b5f-63ffe560f291.png&w=1600&q=90";
 
+
     const FRONT_VIDEO =
       "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260713_162101_0d7498c5-29bb-47bf-a99f-2773c0a880a9.mp4";
 
-    /*
-     * GitHub
-     */
+
+    /* Trailer */
+
+    const TRAILER_VIDEO =
+      "https://pub-2ebd6dec12794e68bb1e67df08102466.r2.dev/echoes_of_us.MP4";
+
+
+    /* GitHub */
+
     const GITHUB_REPO =
       "https://github.com/Shellingfordh/echoes-of-us";
 
+
     /*
-     * 如果你以后创建 Release：
+     * 当前下载入口。
      *
-     * https://github.com/Shellingfordh/echoes-of-us/releases
+     * 如果 Release 还没有正式上传，
+     * 可以暂时保持 GitHub Releases。
      *
-     * 可以把下面的 DOWNLOAD_URL 改成具体 Release。
+     * 后续只需要替换这里。
      */
+
     const DOWNLOAD_URL =
       "https://github.com/Shellingfordh/echoes-of-us/releases";
 
-    /*
-     * ==========================================
-     * Story text
-     * ==========================================
-     */
+
+    /* =====================================================
+       STORY
+    ===================================================== */
 
     const STORY_QUOTES = [
+
       "有些距离，并不会让人真正分开。",
+
       "我们之间，总有一根看不见的线。",
+
       "它曾经像束缚，也曾经成为支撑。",
+
       "当距离越来越远，牵挂反而越来越清晰。",
+
       "站在线的另一端，她一直都在。"
+
     ];
 
 
+    /* =====================================================
+       APP
+    ===================================================== */
+
     function App() {
 
-      const [isMenuOpen, setIsMenuOpen] = useState(false);
+      const [isMenuOpen, setIsMenuOpen] =
+        useState(false);
 
-      const [activeChar, setActiveChar] = useState("yunia");
 
-      const [charPos, setCharPos] = useState({
-        yunia: {
-          x: 35,
-          y: 50
-        },
+      const [activeChar, setActiveChar] =
+        useState("yunia");
 
-        mother: {
-          x: 65,
-          y: 50
-        }
-      });
 
-      const [isAnchored, setIsAnchored] = useState(false);
+      const [charPos, setCharPos] =
+        useState({
 
-      const mousePos = useRef({
-        x: window.innerWidth / 2,
-        y: window.innerHeight / 2
-      });
+          yunia: {
+            x: 35,
+            y: 50
+          },
 
-      const smoothPos = useRef({
-        x: window.innerWidth / 2,
-        y: window.innerHeight / 2
-      });
+          mother: {
+            x: 65,
+            y: 50
+          }
 
-      const canvasRef = useRef(null);
+        });
 
-      const [maskDataUrl, setMaskDataUrl] = useState("");
+
+      const [isAnchored, setIsAnchored] =
+        useState(false);
+
+
+      const [maskDataUrl, setMaskDataUrl] =
+        useState("");
+
+
+      const mousePos =
+        useRef({
+
+          x:
+            typeof window !== "undefined"
+              ? window.innerWidth / 2
+              : 0,
+
+          y:
+            typeof window !== "undefined"
+              ? window.innerHeight / 2
+              : 0
+
+        });
+
+
+      const smoothPos =
+        useRef({
+
+          x:
+            typeof window !== "undefined"
+              ? window.innerWidth / 2
+              : 0,
+
+          y:
+            typeof window !== "undefined"
+              ? window.innerHeight / 2
+              : 0
+
+        });
+
 
       /*
-       * ------------------------------------------
-       * Body scroll lock
-       * ------------------------------------------
+       * ==========================================
+       * Body lock
+       * ==========================================
        */
 
       useEffect(() => {
 
-        document.body.style.overflow =
-          isMenuOpen ? "hidden" : "";
+        if (isMenuOpen) {
+
+          document.body.style.overflow =
+            "hidden";
+
+        } else {
+
+          document.body.style.overflow =
+            "";
+
+        }
+
 
         return () => {
-          document.body.style.overflow = "";
+
+          document.body.style.overflow =
+            "";
+
         };
 
       }, [isMenuOpen]);
 
 
       /*
-       * ------------------------------------------
-       * Mouse / spotlight
-       * ------------------------------------------
+       * ==========================================
+       * Spotlight
+       *
+       * 桌面端启用。
+       * 移动端降低计算量。
+       * ==========================================
        */
 
       useEffect(() => {
 
-        const canvas = document.createElement("canvas");
+        const canvas =
+          document.createElement("canvas");
 
-        canvasRef.current = canvas;
+        const ctx =
+          canvas.getContext("2d");
 
-        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
 
         let animationFrame;
 
+
+        const isMobile =
+          window.matchMedia(
+            "(max-width: 768px)"
+          ).matches;
+
+
         const resize = () => {
 
-          canvas.width = window.innerWidth;
-          canvas.height = window.innerHeight;
+          const scale =
+            isMobile
+              ? 0.5
+              : 1;
+
+
+          canvas.width =
+            Math.floor(
+              window.innerWidth * scale
+            );
+
+
+          canvas.height =
+            Math.floor(
+              window.innerHeight * scale
+            );
 
         };
+
 
         resize();
 
-        const handleMouseMove = (event) => {
 
-          mousePos.current = {
-            x: event.clientX,
-            y: event.clientY
+        const handleMouseMove =
+          (event) => {
+
+            mousePos.current = {
+
+              x: event.clientX,
+
+              y: event.clientY
+
+            };
+
           };
 
-        };
 
-        const handleTouchMove = (event) => {
+        const handleTouchMove =
+          (event) => {
 
-          if (!event.touches.length) return;
+            if (
+              !event.touches ||
+              !event.touches.length
+            ) {
+              return;
+            }
 
-          mousePos.current = {
-            x: event.touches[0].clientX,
-            y: event.touches[0].clientY
+
+            mousePos.current = {
+
+              x:
+                event.touches[0].clientX,
+
+              y:
+                event.touches[0].clientY
+
+            };
+
           };
 
-        };
 
         window.addEventListener(
           "mousemove",
           handleMouseMove
         );
 
-        window.addEventListener(
-          "touchmove",
-          handleTouchMove,
-          { passive: true }
-        );
+
+        /*
+         * 手机上不要持续监听 touchmove
+         * 避免影响页面滚动。
+         */
+
+        if (!isMobile) {
+
+          window.addEventListener(
+            "touchmove",
+            handleTouchMove,
+            {
+              passive: true
+            }
+          );
+
+        }
+
 
         window.addEventListener(
           "resize",
@@ -335,82 +688,142 @@
         );
 
 
+        let frameCounter = 0;
+
+
         const render = () => {
 
-          smoothPos.current.x +=
-            (mousePos.current.x - smoothPos.current.x) * 0.08;
-
-          smoothPos.current.y +=
-            (mousePos.current.y - smoothPos.current.y) * 0.08;
+          frameCounter++;
 
 
-          ctx.clearRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-          );
+          /*
+           * 手机端每 2 帧更新一次，
+           * 降低 Canvas + React 状态更新。
+           */
+
+          if (
+            !isMobile ||
+            frameCounter % 2 === 0
+          ) {
+
+            smoothPos.current.x +=
+              (
+                mousePos.current.x -
+                smoothPos.current.x
+              ) * 0.08;
 
 
-          const radius = 280;
+            smoothPos.current.y +=
+              (
+                mousePos.current.y -
+                smoothPos.current.y
+              ) * 0.08;
 
-          const gradient =
-            ctx.createRadialGradient(
-              smoothPos.current.x,
-              smoothPos.current.y,
+
+            ctx.clearRect(
               0,
-
-              smoothPos.current.x,
-              smoothPos.current.y,
-              radius
+              0,
+              canvas.width,
+              canvas.height
             );
 
 
-          gradient.addColorStop(
-            0,
-            "rgba(255,255,255,0.85)"
-          );
-
-          gradient.addColorStop(
-            0.35,
-            "rgba(255,255,255,0.5)"
-          );
-
-          gradient.addColorStop(
-            0.7,
-            "rgba(255,255,255,0.12)"
-          );
-
-          gradient.addColorStop(
-            1,
-            "rgba(255,255,255,0)"
-          );
+            const scale =
+              isMobile
+                ? 0.5
+                : 1;
 
 
-          ctx.fillStyle = gradient;
-
-          ctx.beginPath();
-
-          ctx.arc(
-            smoothPos.current.x,
-            smoothPos.current.y,
-            radius,
-            0,
-            Math.PI * 2
-          );
-
-          ctx.fill();
+            const x =
+              smoothPos.current.x *
+              scale;
 
 
-          try {
-            setMaskDataUrl(canvas.toDataURL());
-          } catch (error) {
-            // ignore
+            const y =
+              smoothPos.current.y *
+              scale;
+
+
+            const radius =
+              280 * scale;
+
+
+            const gradient =
+              ctx.createRadialGradient(
+
+                x,
+                y,
+                0,
+
+                x,
+                y,
+                radius
+
+              );
+
+
+            gradient.addColorStop(
+              0,
+              "rgba(255,255,255,0.85)"
+            );
+
+
+            gradient.addColorStop(
+              0.35,
+              "rgba(255,255,255,0.5)"
+            );
+
+
+            gradient.addColorStop(
+              0.7,
+              "rgba(255,255,255,0.12)"
+            );
+
+
+            gradient.addColorStop(
+              1,
+              "rgba(255,255,255,0)"
+            );
+
+
+            ctx.fillStyle =
+              gradient;
+
+
+            ctx.beginPath();
+
+
+            ctx.arc(
+              x,
+              y,
+              radius,
+              0,
+              Math.PI * 2
+            );
+
+
+            ctx.fill();
+
+
+            try {
+
+              setMaskDataUrl(
+                canvas.toDataURL()
+              );
+
+            } catch (error) {
+
+              /* ignore */
+
+            }
+
           }
 
 
           animationFrame =
-            requestAnimationFrame(render);
+            requestAnimationFrame(
+              render
+            );
 
         };
 
@@ -420,17 +833,26 @@
 
         return () => {
 
-          cancelAnimationFrame(animationFrame);
+          cancelAnimationFrame(
+            animationFrame
+          );
+
 
           window.removeEventListener(
             "mousemove",
             handleMouseMove
           );
 
-          window.removeEventListener(
-            "touchmove",
-            handleTouchMove
-          );
+
+          if (!isMobile) {
+
+            window.removeEventListener(
+              "touchmove",
+              handleTouchMove
+            );
+
+          }
+
 
           window.removeEventListener(
             "resize",
@@ -443,149 +865,191 @@
 
 
       /*
-       * ------------------------------------------
-       * Tether calculation
-       * ------------------------------------------
+       * ==========================================
+       * Tether
+       * ==========================================
        */
 
-      const distance = Math.abs(
-        charPos.yunia.x -
-        charPos.mother.x
-      );
+      const distance =
+        Math.abs(
+          charPos.yunia.x -
+          charPos.mother.x
+        );
 
 
       /*
-       * ------------------------------------------
-       * Move character
-       * ------------------------------------------
+       * ==========================================
+       * Character movement
+       * ==========================================
        */
 
-      const handleMoveCharacter = (direction) => {
+      const handleMoveCharacter =
+        (direction) => {
 
-        const step = 4;
-
-        const current =
-          charPos[activeChar];
-
-        let newX = current.x;
+          const step = 4;
 
 
-        if (direction === "left") {
-
-          newX = Math.max(
-            10,
-            current.x - step
-          );
-
-        }
-
-        if (direction === "right") {
-
-          newX = Math.min(
-            90,
-            current.x + step
-          );
-
-        }
+          const current =
+            charPos[activeChar];
 
 
-        const otherCharKey =
-          activeChar === "yunia"
-            ? "mother"
-            : "yunia";
-
-        const other =
-          charPos[otherCharKey];
+          let newX =
+            current.x;
 
 
-        const nextDistance =
-          Math.abs(
-            newX - other.x
-          );
+          if (
+            direction === "left"
+          ) {
+
+            newX =
+              Math.max(
+                10,
+                current.x - step
+              );
+
+          }
 
 
-        /*
-         * Tether reaction
-         */
+          if (
+            direction === "right"
+          ) {
 
-        if (
-          nextDistance > 42 &&
-          !isAnchored
-        ) {
+            newX =
+              Math.min(
+                90,
+                current.x + step
+              );
 
-          setCharPos(prev => ({
+          }
 
-            ...prev,
 
-            [activeChar]: {
-              ...prev[activeChar],
-              x: newX
-            },
+          const otherCharKey =
+            activeChar === "yunia"
+              ? "mother"
+              : "yunia";
 
-            [otherCharKey]: {
-              ...prev[otherCharKey],
 
-              x:
-                prev[otherCharKey].x +
-                (
-                  direction === "right"
-                    ? 2
-                    : -2
-                )
-            }
+          const other =
+            charPos[
+              otherCharKey
+            ];
 
-          }));
 
-        } else {
+          const nextDistance =
+            Math.abs(
+              newX -
+              other.x
+            );
 
-          setCharPos(prev => ({
 
-            ...prev,
+          if (
+            nextDistance > 42 &&
+            !isAnchored
+          ) {
 
-            [activeChar]: {
-              ...prev[activeChar],
-              x: newX
-            }
+            setCharPos(prev => ({
 
-          }));
+              ...prev,
 
-        }
+              [activeChar]: {
 
-      };
+                ...prev[activeChar],
+
+                x: newX
+
+              },
+
+
+              [otherCharKey]: {
+
+                ...prev[otherCharKey],
+
+                x:
+                  prev[otherCharKey].x +
+                  (
+                    direction === "right"
+                      ? 2
+                      : -2
+                  )
+
+              }
+
+            }));
+
+          } else {
+
+            setCharPos(prev => ({
+
+              ...prev,
+
+              [activeChar]: {
+
+                ...prev[activeChar],
+
+                x: newX
+
+              }
+
+            }));
+
+          }
+
+        };
 
 
       /*
-       * ------------------------------------------
+       * ==========================================
        * Navigation
-       * ------------------------------------------
+       * ==========================================
        */
 
-      const scrollTo = (id) => {
+      const scrollTo =
+        (id) => {
 
-        setIsMenuOpen(false);
+          setIsMenuOpen(false);
 
-        const element =
-          document.getElementById(id);
 
-        if (element) {
+          const element =
+            document.getElementById(id);
 
-          element.scrollIntoView({
-            behavior: "smooth"
-          });
 
-        }
+          if (element) {
 
-      };
+            element.scrollIntoView({
 
+              behavior: "smooth",
+
+              block: "start"
+
+            });
+
+          }
+
+        };
+
+
+      /*
+       * ==========================================
+       * Render
+       * ==========================================
+       */
 
       return (
 
-        <div className="relative min-h-screen bg-[#050505] text-white">
+        <div
+          className="
+            relative
+            min-h-screen
+            bg-[#050505]
+            text-white
+            overflow-x-hidden
+          "
+        >
 
 
-          {/* ======================================
-              Navigation
-          ====================================== */}
+          {/* =================================================
+              NAVIGATION
+          ================================================= */}
 
           <nav
             className="
@@ -597,21 +1061,26 @@
               flex
               items-center
               justify-between
-              px-6
+              px-5
+              sm:px-6
               md:px-10
-              py-5
+              pt-[calc(16px+env(safe-area-inset-top))]
+              pb-4
             "
           >
+
 
             {/* Logo */}
 
             <button
-              onClick={() => scrollTo("top")}
+              onClick={() =>
+                scrollTo("top")
+              }
+
               className="
                 flex
                 items-center
                 gap-3
-                group
               "
             >
 
@@ -625,8 +1094,6 @@
                   flex
                   items-center
                   justify-center
-                  group-hover:border-white/70
-                  transition
                 "
               >
 
@@ -640,6 +1107,7 @@
                 />
 
               </div>
+
 
               <span
                 className="
@@ -673,7 +1141,9 @@
             >
 
               <button
-                onClick={() => scrollTo("game")}
+                onClick={() =>
+                  scrollTo("game")
+                }
                 className="
                   px-4
                   py-2
@@ -690,7 +1160,28 @@
 
 
               <button
-                onClick={() => scrollTo("story")}
+                onClick={() =>
+                  scrollTo("trailer")
+                }
+                className="
+                  px-4
+                  py-2
+                  rounded-full
+                  text-sm
+                  text-white/70
+                  hover:text-white
+                  hover:bg-white/10
+                  transition
+                "
+              >
+                Trailer
+              </button>
+
+
+              <button
+                onClick={() =>
+                  scrollTo("story")
+                }
                 className="
                   px-4
                   py-2
@@ -707,7 +1198,9 @@
 
 
               <button
-                onClick={() => scrollTo("download")}
+                onClick={() =>
+                  scrollTo("download")
+                }
                 className="
                   px-4
                   py-2
@@ -731,6 +1224,7 @@
               href={GITHUB_REPO}
               target="_blank"
               rel="noopener noreferrer"
+
               className="
                 hidden
                 sm:flex
@@ -752,7 +1246,77 @@
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
-                <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.15c-3.2.7-3.87-1.54-3.87-1.54-.53-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.67 1.25 3.32.96.1-.74.4-1.25.73-1.54-2.55-.29-5.23-1.27-5.23-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.17a10.94 10.94 0 0 1 5.74 0c2.19-1.48 3.15-1.17 3.15-1.17.62 1.58.23 2.75.11 3.04.73.8 1.18 1.82 1.18 3.07 0 4.4-2.69 5.36-5.25 5.64.41.36.78 1.08.78 2.18v3.23c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/>
+
+                <path d="
+                  M12 .5
+                  C5.65 .5
+                  .5 5.65
+                  .5 12
+                  c0 5.08
+                  3.29 9.39
+                  7.86 10.91
+                  .58 .11
+                  .79-.25
+                  .79-.56
+                  v-2.15
+                  c-3.2 .7
+                  -3.87-1.54
+                  -3.87-1.54
+                  -.53-1.33
+                  -1.28-1.68
+                  -1.28-1.68
+                  -1.04-.71
+                  .08-.7
+                  .08-.7
+                  1.15 .08
+                  1.76 1.18
+                  1.76 1.18
+                  1.02 1.75
+                  2.67 1.25
+                  3.32 .96
+                  .1-.74
+                  .4-1.25
+                  .73-1.54
+                  -2.55-.29
+                  -5.23-1.27
+                  -5.23-5.66
+                  0-1.25
+                  .45-2.27
+                  1.18-3.07
+                  -.12-.29
+                  -.51-1.46
+                  .11-3.04
+                  0 0
+                  .96-.31
+                  3.15 1.17
+                  a10.94 10.94 0 0 1
+                  5.74 0
+                  c2.19-1.48
+                  3.15-1.17
+                  3.15-1.17
+                  .62 1.58
+                  .23 2.75
+                  .11 3.04
+                  .73 .8
+                  1.18 1.82
+                  1.18 3.07
+                  0 4.4
+                  -2.69 5.36
+                  -5.25 5.64
+                  .41 .36
+                  .78 1.08
+                  .78 2.18
+                  v3.23
+                  c0 .31
+                  .21 .67
+                  .8 .56
+                  A11.5 11.5 0 0 0
+                  23.5 12
+                  C23.5 5.65
+                  18.35 .5
+                  12 .5Z
+                "/>
+
               </svg>
 
               GitHub
@@ -763,7 +1327,12 @@
             {/* Mobile menu */}
 
             <button
-              onClick={() => setIsMenuOpen(true)}
+              onClick={() =>
+                setIsMenuOpen(true)
+              }
+
+              aria-label="打开菜单"
+
               className="
                 md:hidden
                 glass
@@ -799,14 +1368,15 @@
           </nav>
 
 
-          {/* ======================================
-              Mobile menu
-          ====================================== */}
+          {/* =================================================
+              MOBILE MENU
+          ================================================= */}
 
           {isMenuOpen && (
 
             <div
               className="
+                mobile-menu
                 fixed
                 inset-0
                 z-[60]
@@ -814,14 +1384,19 @@
                 flex
                 flex-col
                 justify-between
-                p-8
+                px-8
               "
             >
 
               <div className="flex justify-end">
 
                 <button
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() =>
+                    setIsMenuOpen(false)
+                  }
+
+                  aria-label="关闭菜单"
+
                   className="
                     glass
                     w-11
@@ -830,6 +1405,7 @@
                     flex
                     items-center
                     justify-center
+                    relative
                   "
                 >
 
@@ -868,7 +1444,9 @@
               >
 
                 <button
-                  onClick={() => scrollTo("game")}
+                  onClick={() =>
+                    scrollTo("game")
+                  }
                   className="
                     text-4xl
                     font-light
@@ -877,8 +1455,24 @@
                   游戏
                 </button>
 
+
                 <button
-                  onClick={() => scrollTo("story")}
+                  onClick={() =>
+                    scrollTo("trailer")
+                  }
+                  className="
+                    text-4xl
+                    font-light
+                  "
+                >
+                  Trailer
+                </button>
+
+
+                <button
+                  onClick={() =>
+                    scrollTo("story")
+                  }
                   className="
                     text-4xl
                     font-light
@@ -887,8 +1481,11 @@
                   故事
                 </button>
 
+
                 <button
-                  onClick={() => scrollTo("download")}
+                  onClick={() =>
+                    scrollTo("download")
+                  }
                   className="
                     text-4xl
                     font-light
@@ -906,11 +1503,13 @@
                   href={GITHUB_REPO}
                   target="_blank"
                   rel="noopener noreferrer"
+
                   className="
                     glass
                     px-7
                     py-3
                     rounded-full
+                    text-sm
                   "
                 >
                   GitHub
@@ -923,33 +1522,39 @@
           )}
 
 
-          {/* ======================================
+          {/* =================================================
               HERO
-          ====================================== */}
+          ================================================= */}
 
           <main id="top">
 
+
             <section
               id="game"
+
               className="
+                hero-section
                 relative
-                h-screen
-                min-h-[700px]
+                min-h-screen
+                min-h-[100svh]
                 overflow-hidden
                 flex
                 items-end
               "
             >
 
+
               {/* Background */}
 
               <div
                 className="
+                  hero-background
                   absolute
                   inset-0
                   bg-cover
                   bg-center
                 "
+
                 style={{
                   backgroundImage:
                     `url(${BG_IMAGE})`
@@ -957,7 +1562,7 @@
               />
 
 
-              {/* Dark overlay */}
+              {/* Dark */}
 
               <div
                 className="
@@ -993,6 +1598,7 @@
                     pointer-events-none
                     opacity-70
                   "
+
                   style={{
                     WebkitMaskImage:
                       `url(${maskDataUrl})`,
@@ -1008,6 +1614,8 @@
                     loop
                     muted
                     playsInline
+                    preload="metadata"
+
                     className="
                       w-full
                       h-full
@@ -1024,6 +1632,7 @@
 
               <div
                 className="
+                  hero-content
                   relative
                   z-10
                   w-full
@@ -1040,6 +1649,7 @@
                     mx-auto
                   "
                 >
+
 
                   <div
                     className="
@@ -1087,6 +1697,7 @@
                       font-normal
                       mb-8
                     "
+
                     style={{
                       fontFamily:
                         "'Instrument Serif', serif"
@@ -1123,8 +1734,10 @@
                         牵挂线
                       </div>
 
+
                       <p
                         className="
+                          hero-description
                           max-w-xl
                           text-sm
                           md:text-base
@@ -1142,7 +1755,8 @@
 
 
                     <a
-                      href="#download"
+                      href="#trailer"
+
                       className="
                         glass
                         shrink-0
@@ -1159,7 +1773,7 @@
                       "
                     >
 
-                      开始游戏
+                      查看 Trailer
 
                       <svg
                         className="w-4 h-4"
@@ -1168,9 +1782,11 @@
                         stroke="currentColor"
                         strokeWidth="1.5"
                       >
+
                         <path
                           d="M5 12h14M13 6l6 6-6 6"
                         />
+
                       </svg>
 
                     </a>
@@ -1184,13 +1800,159 @@
             </section>
 
 
-            {/* ======================================
+            {/* =================================================
+                TRAILER
+            ================================================= */}
+
+            <section
+              id="trailer"
+              className="
+                relative
+                py-20
+                md:py-32
+                bg-[#050505]
+              "
+            >
+
+              <div
+                className="
+                  max-w-6xl
+                  mx-auto
+                  px-5
+                  sm:px-6
+                  md:px-12
+                "
+              >
+
+
+                <div
+                  className="
+                    flex
+                    flex-col
+                    md:flex-row
+                    md:items-end
+                    justify-between
+                    gap-5
+                    mb-8
+                  "
+                >
+
+                  <div>
+
+                    <span
+                      className="
+                        text-xs
+                        tracking-[0.3em]
+                        uppercase
+                        text-white/40
+                      "
+                    >
+                      Official Trailer
+                    </span>
+
+
+                    <h2
+                      className="
+                        mt-4
+                        text-4xl
+                        sm:text-5xl
+                        md:text-7xl
+                        font-light
+                        tracking-tight
+                      "
+                    >
+                      Echoes of Us
+                    </h2>
+
+                  </div>
+
+
+                  <p
+                    className="
+                      max-w-md
+                      text-sm
+                      leading-7
+                      text-white/45
+                      font-light
+                    "
+                  >
+                    这是一段关于距离、连接与牵挂的旅程。
+                    <br className="hidden sm:block" />
+                    观看 Trailer，了解《牵挂线》的世界。
+                  </p>
+
+                </div>
+
+
+                {/* Video */}
+
+                <div
+                  className="
+                    relative
+                    rounded-2xl
+                    md:rounded-3xl
+                    overflow-hidden
+                    bg-black
+                    border
+                    border-white/10
+                    shadow-2xl
+                  "
+                >
+
+                  <video
+                    className="trailer-video"
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster={BG_IMAGE}
+                  >
+
+                    <source
+                      src={TRAILER_VIDEO}
+                      type="video/mp4"
+                    />
+
+                    您的浏览器不支持视频播放。
+
+                  </video>
+
+                </div>
+
+
+                <div
+                  className="
+                    mt-4
+                    flex
+                    items-center
+                    justify-between
+                    text-xs
+                    text-white/30
+                  "
+                >
+
+                  <span>
+                    Echoes of Us · Trailer
+                  </span>
+
+                  <span>
+                    MP4
+                  </span>
+
+                </div>
+
+              </div>
+
+            </section>
+
+
+            {/* =================================================
                 STORY
-            ====================================== */}
+            ================================================= */}
 
             <section
               id="story"
               className="
+                story-section
                 relative
                 py-24
                 md:py-36
@@ -1217,6 +1979,7 @@
                   "
                 >
 
+
                   <div>
 
                     <span
@@ -1230,8 +1993,10 @@
                       The connection
                     </span>
 
+
                     <h2
                       className="
+                        story-title
                         mt-5
                         text-5xl
                         md:text-7xl
@@ -1241,6 +2006,7 @@
                     >
                       有些线，
                       <br />
+
                       <span
                         className="
                           text-white/45
@@ -1248,6 +2014,7 @@
                       >
                         看不见。
                       </span>
+
                     </h2>
 
                   </div>
@@ -1267,16 +2034,19 @@
                       开始独自面对一段新的旅程。
                     </p>
 
+
                     <p>
                       她很快发现，
                       自己与母亲之间始终存在着一条特殊的连接。
                       它无法被看见，却会随着距离发生变化。
                     </p>
 
+
                     <p>
                       玩家需要在两个角色之间切换，
                       感受这条线带来的束缚、拉扯与支撑。
                     </p>
+
 
                     <p
                       className="
@@ -1286,7 +2056,9 @@
                     >
                       你越想走远，
                       它就越提醒你——
+
                       <br />
+
                       有些关系从来没有真正离开。
                     </p>
 
@@ -1299,9 +2071,9 @@
             </section>
 
 
-            {/* ======================================
+            {/* =================================================
                 MARQUEE
-            ====================================== */}
+            ================================================= */}
 
             <section
               className="
@@ -1314,53 +2086,55 @@
 
               <div className="marquee flex">
 
-                {[...STORY_QUOTES, ...STORY_QUOTES].map(
-                  (text, index) => (
+                {[...STORY_QUOTES, ...STORY_QUOTES]
+                  .map(
+                    (quote, index) => (
 
-                    <div
-                      key={index}
-                      className="
-                        flex
-                        items-center
-                        gap-8
-                        px-8
-                        whitespace-nowrap
-                      "
-                    >
-
-                      <span
+                      <div
+                        key={index}
                         className="
-                          text-sm
-                          md:text-base
-                          text-white/55
-                          font-light
+                          flex
+                          items-center
+                          gap-8
+                          px-8
+                          whitespace-nowrap
                         "
                       >
-                        {text}
-                      </span>
 
-                      <span
-                        className="
-                          w-1
-                          h-1
-                          rounded-full
-                          bg-white/30
-                        "
-                      />
+                        <span
+                          className="
+                            text-sm
+                            md:text-base
+                            text-white/55
+                            font-light
+                          "
+                        >
+                          {quote}
+                        </span>
 
-                    </div>
 
-                  )
-                )}
+                        <span
+                          className="
+                            w-1
+                            h-1
+                            rounded-full
+                            bg-white/30
+                          "
+                        />
+
+                      </div>
+
+                    )
+                  )}
 
               </div>
 
             </section>
 
 
-            {/* ======================================
+            {/* =================================================
                 INTERACTION
-            ====================================== */}
+            ================================================= */}
 
             <section
               className="
@@ -1373,11 +2147,18 @@
                 className="
                   max-w-5xl
                   mx-auto
-                  px-6
+                  px-5
+                  sm:px-6
                 "
               >
 
-                <div className="text-center mb-12">
+
+                <div
+                  className="
+                    text-center
+                    mb-12
+                  "
+                >
 
                   <span
                     className="
@@ -1390,6 +2171,7 @@
                     The tether
                   </span>
 
+
                   <h2
                     className="
                       mt-4
@@ -1401,6 +2183,7 @@
                     牵挂，是束缚还是支撑？
                   </h2>
 
+
                   <p
                     className="
                       mt-5
@@ -1408,16 +2191,18 @@
                       text-white/45
                     "
                   >
-                    点击角色并尝试移动，感受两人之间的距离。
+                    点击角色并尝试移动，
+                    感受两人之间的距离。
                   </p>
 
                 </div>
 
 
-                {/* Interaction board */}
+                {/* Board */}
 
                 <div
                   className="
+                    interaction-board
                     glass
                     relative
                     h-48
@@ -1427,6 +2212,7 @@
                   "
                 >
 
+
                   {/* Grid */}
 
                   <div
@@ -1435,10 +2221,25 @@
                       inset-0
                       opacity-10
                     "
+
                     style={{
                       backgroundImage:
-                        "linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)",
-                      backgroundSize: "40px 40px"
+                        `
+                        linear-gradient(
+                          rgba(255,255,255,.5)
+                          1px,
+                          transparent 1px
+                        ),
+                        linear-gradient(
+                          90deg,
+                          rgba(255,255,255,.5)
+                          1px,
+                          transparent 1px
+                        )
+                        `,
+
+                      backgroundSize:
+                        "40px 40px"
                     }}
                   />
 
@@ -1452,21 +2253,33 @@
                       w-full
                       h-full
                     "
+
                     preserveAspectRatio="none"
                   >
 
                     <line
-                      x1={`${charPos.yunia.x}%`}
+                      x1={
+                        `${charPos.yunia.x}%`
+                      }
+
                       y1="50%"
-                      x2={`${charPos.mother.x}%`}
+
+                      x2={
+                        `${charPos.mother.x}%`
+                      }
+
                       y2="50%"
+
                       stroke={
                         distance > 38
                           ? "#ef4444"
                           : "#ffffff"
                       }
+
                       strokeOpacity="0.8"
+
                       strokeWidth="2"
+
                       strokeDasharray={
                         isAnchored
                           ? "6 5"
@@ -1483,7 +2296,9 @@
                     onClick={() =>
                       setActiveChar("yunia")
                     }
+
                     className="
+                      character-button
                       absolute
                       top-1/2
                       -translate-x-1/2
@@ -1491,6 +2306,7 @@
                       transition-all
                       duration-200
                     "
+
                     style={{
                       left:
                         `${charPos.yunia.x}%`
@@ -1506,9 +2322,10 @@
                         items-center
                         justify-center
                         border
+                        text-xs
                         ${
                           activeChar === "yunia"
-                            ? "bg-white text-black border-white"
+                            ? "bg-white text-black border-white scale-105"
                             : "bg-black/40 text-white/70 border-white/30"
                         }
                       `}
@@ -1525,7 +2342,9 @@
                     onClick={() =>
                       setActiveChar("mother")
                     }
+
                     className="
+                      character-button
                       absolute
                       top-1/2
                       -translate-x-1/2
@@ -1533,6 +2352,7 @@
                       transition-all
                       duration-200
                     "
+
                     style={{
                       left:
                         `${charPos.mother.x}%`
@@ -1548,9 +2368,10 @@
                         items-center
                         justify-center
                         border
+                        text-xs
                         ${
                           activeChar === "mother"
-                            ? "bg-white text-black border-white"
+                            ? "bg-white text-black border-white scale-105"
                             : "bg-black/40 text-white/70 border-white/30"
                         }
                       `}
@@ -1580,7 +2401,9 @@
                     onClick={() =>
                       handleMoveCharacter("left")
                     }
+
                     className="
+                      control-button
                       glass
                       rounded-full
                       px-5
@@ -1599,7 +2422,9 @@
                     onClick={() =>
                       handleMoveCharacter("right")
                     }
+
                     className="
+                      control-button
                       glass
                       rounded-full
                       px-5
@@ -1620,7 +2445,9 @@
                         !isAnchored
                       )
                     }
+
                     className={`
+                      control-button
                       rounded-full
                       px-5
                       py-2.5
@@ -1633,11 +2460,39 @@
                       }
                     `}
                   >
-                    {isAnchored
-                      ? "已锚定"
-                      : "锚定支撑"}
+
+                    {
+                      isAnchored
+                        ? "已锚定"
+                        : "锚定支撑"
+                    }
+
                   </button>
 
+                </div>
+
+
+                <div
+                  className="
+                    mt-5
+                    text-center
+                    text-xs
+                    text-white/30
+                  "
+                >
+                  当前角色：
+                  {
+                    activeChar === "yunia"
+                      ? "余念"
+                      : "母亲"
+                  }
+
+                  <span className="mx-2">
+                    ·
+                  </span>
+
+                  距离：
+                  {Math.round(distance)}
                 </div>
 
               </div>
@@ -1645,13 +2500,15 @@
             </section>
 
 
-            {/* ======================================
+            {/* =================================================
                 DOWNLOAD
-            ====================================== */}
+            ================================================= */}
 
             <section
               id="download"
+
               className="
+                download-section
                 relative
                 py-28
                 md:py-40
@@ -1683,6 +2540,7 @@
 
                 <h2
                   className="
+                    download-title
                     mt-5
                     text-5xl
                     md:text-8xl
@@ -1710,7 +2568,7 @@
                 </p>
 
 
-                {/* Download buttons */}
+                {/* Download */}
 
                 <div
                   className="
@@ -1728,7 +2586,9 @@
                     href={DOWNLOAD_URL}
                     target="_blank"
                     rel="noopener noreferrer"
+
                     className="
+                      download-button
                       w-full
                       sm:w-auto
                       min-w-52
@@ -1757,9 +2617,19 @@
                       stroke="currentColor"
                       strokeWidth="1.8"
                     >
-                      <path d="M12 3v12" />
-                      <path d="m7 10 5 5 5-5" />
-                      <path d="M5 21h14" />
+
+                      <path
+                        d="M12 3v12"
+                      />
+
+                      <path
+                        d="m7 10 5 5 5-5"
+                      />
+
+                      <path
+                        d="M5 21h14"
+                      />
+
                     </svg>
 
                   </a>
@@ -1769,7 +2639,9 @@
                     href={GITHUB_REPO}
                     target="_blank"
                     rel="noopener noreferrer"
+
                     className="
+                      download-button
                       w-full
                       sm:w-auto
                       min-w-52
@@ -1781,6 +2653,9 @@
                       text-white/80
                       hover:text-white
                       transition
+                      flex
+                      items-center
+                      justify-center
                     "
                   >
                     查看 GitHub
@@ -1804,9 +2679,9 @@
             </section>
 
 
-            {/* ======================================
+            {/* =================================================
                 FOOTER
-            ====================================== */}
+            ================================================= */}
 
             <footer
               className="
@@ -1815,6 +2690,7 @@
                 px-6
                 md:px-12
                 py-8
+                pb-[calc(32px+env(safe-area-inset-bottom))]
               "
             >
 
@@ -1837,6 +2713,7 @@
                     tracking-[0.2em]
                     uppercase
                     text-white/40
+                    text-center
                   "
                 >
                   Echoes of Us · 牵挂线
@@ -1847,6 +2724,7 @@
                   href={GITHUB_REPO}
                   target="_blank"
                   rel="noopener noreferrer"
+
                   className="
                     text-xs
                     text-white/40
@@ -1861,19 +2739,30 @@
 
             </footer>
 
+
           </main>
 
         </div>
+
       );
+
     }
 
+
+    /* =====================================================
+       Mount
+    ===================================================== */
 
     ReactDOM
       .createRoot(
         document.getElementById("root")
       )
-      .render(<App />);
+      .render(
+        <App />
+      );
 
   </script>
+
 </body>
 </html>
+```
