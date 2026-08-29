@@ -20,8 +20,6 @@ func _run() -> void:
 		[&"move_right", KEY_D],
 		[&"move_right", KEY_RIGHT],
 		[&"jump", KEY_SPACE],
-		[&"jump", KEY_W],
-		[&"jump", KEY_UP],
 		[&"climb", KEY_W],
 		[&"climb", KEY_UP],
 		[&"switch_character", KEY_TAB],
@@ -36,6 +34,8 @@ func _run() -> void:
 		var event := _key_event(key, true)
 		_expect(event.is_action_pressed(action), "%s 没有映射到 %s" % [OS.get_keycode_string(key), action])
 	_expect(not _key_event(KEY_SPACE, true).is_action_pressed(&"climb"), "Space 不应映射到攀线动作")
+	_expect(not _key_event(KEY_W, true).is_action_pressed(&"jump"), "W 不应映射到跳跃动作")
+	_expect(not _key_event(KEY_UP, true).is_action_pressed(&"jump"), "↑ 不应映射到跳跃动作")
 
 	# 四个水平移动键：验证真实输入会驱动角色，而不只是配置表存在。
 	for check in [[KEY_D, 1.0], [KEY_RIGHT, 1.0], [KEY_A, -1.0], [KEY_LEFT, -1.0]]:
@@ -45,11 +45,16 @@ func _run() -> void:
 		var moved: float = chapter.daughter["x"] - start_x
 		_expect(moved * check[1] > 0.5, "%s 没有驱动当前角色移动" % OS.get_keycode_string(check[0]))
 
-	# 三个跳跃键：必须触发固定高度跳跃。
-	for key in [KEY_SPACE, KEY_W, KEY_UP]:
+	# Space 是唯一跳跃键，必须触发固定高度跳跃。
+	chapter.debug_load_level(0)
+	await _hold_key(KEY_SPACE, 1)
+	_expect(chapter.daughter["vy"] < -400.0, "Space 没有触发女儿跳跃")
+
+	# W/↑ 在地面不能触发跳跃，只在空中承担攀线。
+	for key in [KEY_W, KEY_UP]:
 		chapter.debug_load_level(0)
 		await _hold_key(key, 1)
-		_expect(chapter.daughter["vy"] < -400.0, "%s 没有触发女儿跳跃" % OS.get_keycode_string(key))
+		_expect(chapter.daughter["vy"] > -100.0, "%s 在地面错误触发了跳跃" % OS.get_keycode_string(key))
 
 	# W：人在空中且与支点有高低差时，必须真正沿线接近支点。
 	chapter.debug_load_level(0)
@@ -91,7 +96,7 @@ func _run() -> void:
 	_expect(chapter.game_state == 1, "Enter 没有从标题页开始游戏")
 
 	if failures.is_empty():
-		print("[CHAPTER03_INPUT] PASS A/D/arrows, Space/W/Up, Tab, E, R, F3, Enter")
+		print("[CHAPTER03_INPUT] PASS A/D/arrows, Space-only jump, W/Up climb, Tab, E, R, F3, Enter")
 		quit(0)
 	else:
 		for failure in failures:

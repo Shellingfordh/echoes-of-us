@@ -13,8 +13,11 @@
 - 母亲推动重箱、女儿通过低矮通道；
 - 断裂木板、高低平台、箱子垫脚、双踏板闩锁门；
 - 分段检查点、坠落恢复、关卡完成横幅与第三章寄语结尾；
-- 复用前两章的人物、黄伞、行李和木箱素材，并补齐楼道声控灯、信箱、仓库货架、天台水箱与晾晒物等场景表现；
-- 不依赖新生成素材。
+- 复用前两章的人物、黄伞、行李和木箱素材，并补齐楼道声控灯、信箱、仓库货架、天台水箱与低干扰晾晒物等场景表现；
+- 22 张第三章候选素材已归档到工程自己的 `game-chapter3/assets/`，其中 16 张用于运行时画面；不依赖工程目录之外的素材或软链接；
+- 仓库新增四张服装设计稿和一组布料架，强化余秀兰的纺织职业经历；原有高噪声货架已停止渲染；
+- 暖色楼道窗、圆管低洞、整张晾衣物合成图、第二个高架水箱和两张旧货架因不符合当前场景或会误导玩法而停用，原文件只保留作候选参考；
+- 不依赖新生成素材，现有候选图仍需在正式发行前补齐来源与授权。
 
 ## 场景结构
 
@@ -32,9 +35,17 @@
 godot --path game-chapter3
 ```
 
-操作：`A/D` 或左右方向键移动，`Space/W/↑` 跳跃，空中按住 `W/↑` 爬线（空格不会误触攀线），`Tab` 切换角色，`E` 锚定/松开，`R` 返回最近检查点，`F3` 显示调试信息。
+操作：`A/D` 或左右方向键移动，`Space` 跳跃，空中按住 `W/↑` 爬线，`Tab` 切换角色，`E` 锚定/松开，`R` 返回最近检查点，`F3` 显示调试信息。
 
 ## 验证
+
+新检出工程或新增/移动素材后，先让 Godot 生成资源导入缓存：
+
+```bash
+godot --headless --editor --path game-chapter3 --quit
+```
+
+然后执行回归：
 
 ```bash
 godot --headless --path game-chapter3 --script res://tests/chapter03_flow_test.gd
@@ -42,6 +53,7 @@ godot --headless --path game-chapter3 --script res://tests/chapter03_input_test.
 godot --headless --path game-chapter3 --script res://tests/chapter03_scene_structure_test.gd
 godot --headless --path game-chapter3 --script res://tests/chapter03_door_rules_test.gd
 godot --headless --path game-chapter3 --script res://tests/chapter03_playability_test.gd
+godot --headless --path game-chapter3 --script res://tests/chapter03_asset_integration_test.gd
 ```
 
 需要生成四张白盒检查图时，可运行：

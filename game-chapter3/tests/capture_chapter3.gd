@@ -18,10 +18,12 @@ func _run() -> void:
 	await _physics_frames(3)
 	await _save("%s-level1.png" % PREFIX)
 
+	chapter.toasts.clear()
 	chapter.debug_load_level(1)
 	await _physics_frames(3)
 	await _save("%s-level2.png" % PREFIX)
 
+	chapter.toasts.clear()
 	chapter.debug_load_level(2)
 	await _physics_frames(3)
 	await _save("%s-level3.png" % PREFIX)

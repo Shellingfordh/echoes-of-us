@@ -50,8 +50,22 @@ var player_walk_one: Texture2D = preload("res://art/playerGrey_walk1.png")
 var player_walk_two: Texture2D = preload("res://art/playerGrey_walk2.png")
 var player_anchor_pose: Texture2D = preload("res://art/playerGrey_up1.png")
 var suitcase_texture: Texture2D = preload("res://art/suitcase.png")
-var wooden_box_texture: Texture2D = preload("res://art/wooden-box.png")
+var wooden_box_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_warehouse_heavy_crate.png")
 var yellow_umbrella_texture: Texture2D = preload("res://art/cute-umbrella.png")
+var stairwell_wall_texture: Texture2D = preload("res://assets/environments/chapter3/stairwell/environment_ch03_stairwell_wall.png")
+var stairwell_lamp_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_stairwell_lamp.png")
+var warehouse_background_texture: Texture2D = preload("res://assets/environments/chapter3/warehouse/environment_ch03_warehouse_background.png")
+var warehouse_fabric_rack_texture: Texture2D = preload("res://assets/props/chapter3/warehouse/prop_ch03_warehouse_fabric_rack.png")
+var warehouse_pattern_textures: Array[Texture2D] = [
+	preload("res://assets/props/chapter3/warehouse/prop_ch03_warehouse_pattern_changshan.png"),
+	preload("res://assets/props/chapter3/warehouse/prop_ch03_warehouse_pattern_qipao.png"),
+	preload("res://assets/props/chapter3/warehouse/prop_ch03_warehouse_pattern_shirt.png"),
+	preload("res://assets/props/chapter3/warehouse/prop_ch03_warehouse_pattern_skirt.png"),
+]
+var rooftop_sky_texture: Texture2D = preload("res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_sky.png")
+var rooftop_entrance_texture: Texture2D = preload("res://assets/environments/chapter3/rooftop/environment_ch03_rooftop_entrance.png")
+var rooftop_tank_low_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_rooftop_water_tank_low.png")
+var rooftop_gate_texture: Texture2D = preload("res://assets/props/chapter3/prop_ch03_rooftop_exit_gate.png")
 var level_scene_resources: Array[PackedScene] = [
 	preload("res://scenes/chapter3/levels/chapter3_stairwell.tscn"),
 	preload("res://scenes/chapter3/levels/chapter3_warehouse.tscn"),
@@ -69,6 +83,7 @@ var level_scene_resources: Array[PackedScene] = [
 @onready var hud_status: Label = get_node_or_null("HUD/TopBar/Status") as Label
 @onready var hud_bottom_bar: Control = get_node_or_null("HUD/BottomBar") as Control
 @onready var hud_controls: Label = get_node_or_null("HUD/BottomBar/Controls") as Label
+@onready var toast_container: Control = get_node_or_null("HUD/Toasts") as Control
 @onready var title_overlay: Control = get_node_or_null("HUD/TitleOverlay") as Control
 
 var current_level_layout: Node2D
@@ -490,8 +505,8 @@ func _tether_constrain(character: Dictionary, anchor: Dictionary, delta: float, 
 			# 一个最低上升速度，才能稳定完成“锚定—沿线登高”的核心玩法。
 			if _center(anchor).y < _center(character).y - 24.0:
 				character["vy"] = minf(character["vy"], -CLIMB_SPEED)
-		# W/↑ 同时也是地面跳跃键。两人并肩时不能立刻把刚起跳的人
-		# 吸回地面；只有确实从高低差沿线抵达支点时才完成攀线吸附。
+		# W/↑ 只负责空中攀线；只有确实从高低差沿线抵达支点时
+		# 才完成攀线吸附，避免角色在普通摆荡中被提前吸回地面。
 		elif anchor["on_ground"] and (absf(_center(character).y - _center(anchor).y) > 24.0 or character["vy"] >= 0.0):
 			var anchor_feet: float = anchor["y"] + anchor["h"]
 			var left_x: float = anchor["x"] - character["w"] - 2.0
@@ -729,7 +744,7 @@ func _update_level_two() -> void:
 	if not flags.has("gap") and daughter["x"] > 1400.0 and mother["x"] > 1400.0:
 		flags["gap"] = true
 		level["objective"] = "前面的通道太矮，只有女儿能过——去启动通道后的机关"
-		_toast("余念：这里只有我能过，等我一下。高中姑娘在另一侧扶住了货架。", 4.5)
+		_toast("余念：这里只有我能过，等我一下。", 4.0)
 	if not flags.has("door2") and level["doors"][1]["open"]:
 		flags["door2"] = true
 		level["objective"] = "第二个坑太宽——母亲把箱子推下去垫脚"
@@ -778,6 +793,10 @@ func _update_camera(delta: float) -> void:
 
 
 func _toast(text: String, duration: float = 4.0) -> void:
+	for index in range(toasts.size() - 1, -1, -1):
+		if toasts[index]["text"] == text:
+			toasts[index]["time"] = duration
+			return
 	toasts.append({"text": text, "time": duration})
 
 
@@ -1000,6 +1019,7 @@ func _sync_tie_line(should_show: bool) -> void:
 func _sync_hud_nodes() -> void:
 	if hud_layer == null:
 		return
+	_sync_toast_nodes()
 	var playing := game_state == GameState.PLAY
 	if hud_top_bar != null:
 		hud_top_bar.visible = playing
@@ -1016,7 +1036,32 @@ func _sync_hud_nodes() -> void:
 	if hud_status != null:
 		hud_status.text = "当前：%s（Tab 切换）  红线：%s  距离 %d / %d" % [characters[active_character]["name"], line_state, roundi(distance), int(MAX_DISTANCE)]
 	if hud_controls != null:
-		hud_controls.text = "A/D 或 ←/→ 移动 · Space/W/↑ 跳跃 · E 锚定 · 空中 W/↑ 爬线 · R 检查点"
+		hud_controls.text = "A/D 或 ←/→ 移动 · Space 跳跃 · E 锚定 · 空中 W/↑ 爬线 · R 检查点"
+
+
+func _sync_toast_nodes() -> void:
+	if toast_container == null:
+		return
+	var rows := toast_container.get_children()
+	for row_node in rows:
+		var row := row_node as Control
+		if row != null:
+			row.visible = false
+	var visible_toasts := toasts.slice(maxi(0, toasts.size() - 3), toasts.size())
+	toast_container.visible = not visible_toasts.is_empty()
+	for index in range(visible_toasts.size()):
+		var row_index := rows.size() - visible_toasts.size() + index
+		if row_index < 0 or row_index >= rows.size():
+			continue
+		var row := rows[row_index] as Control
+		if row == null:
+			continue
+		var toast: Dictionary = visible_toasts[index]
+		var label := row.get_node_or_null("Text") as Label
+		row.visible = true
+		row.modulate.a = clampf(toast["time"], 0.0, 0.88)
+		if label != null:
+			label.text = toast["text"]
 
 
 func _draw() -> void:
@@ -1043,6 +1088,10 @@ func _draw_background() -> void:
 	for band in range(8):
 		var color := top_color.lerp(bottom_color, float(band) / 7.0)
 		draw_rect(Rect2(0, band * VIEW_H / 8.0, VIEW_W, VIEW_H / 8.0 + 1.0), color)
+	if level_index == 1:
+		draw_texture_rect(warehouse_background_texture, Rect2(0, 74, VIEW_W, 410), false, Color(0.50, 0.62, 0.68, 0.30))
+	elif level_index == 2:
+		draw_texture_rect(rooftop_sky_texture, Rect2(0, 62, VIEW_W, 410), false, Color(0.36, 0.43, 0.47, 0.36))
 	if level_index == 2:
 		for index in range(11):
 			var building_x := fposmod(index * 180.0 - camera_position.x * 0.18, 2100.0) - 170.0
@@ -1061,16 +1110,12 @@ func _draw_world() -> void:
 	_draw_scene_dressing()
 	if current_level_layout != null:
 		return
-	var floor_color := Color("53666d")
-	var edge_color := Color("91a1a5")
+	var floor_color := Color("3b281b")
+	var edge_color := Color("b77b42")
 	var wall_color := Color("43575e")
 	if level_index == 1:
-		floor_color = Color("475a61")
-		edge_color = Color("819196")
 		wall_color = Color("34474e")
 	elif level_index == 2:
-		floor_color = Color("64767d")
-		edge_color = Color("aab6b9")
 		wall_color = Color("4e626a")
 	for platform in level["statics"]:
 		var rect := _screen_rect(platform)
@@ -1117,6 +1162,9 @@ func _draw_scene_dressing() -> void:
 
 
 func _draw_stairwell_dressing() -> void:
+	# 现有楼道素材以低对比背景层接入，玩法碰撞仍由关卡节点负责。
+	for panel_index in range(5):
+		_draw_world_texture(stairwell_wall_texture, Rect2(panel_index * 1020.0, 95.0, 1022.0, 365.0), Color(0.42, 0.55, 0.60, 0.32))
 	# 黄伞与行李延续前两章，并明确第三章从现实时间重新开始。
 	_draw_world_texture(yellow_umbrella_texture, Rect2(245, 396, 60, 60), Color.WHITE)
 	_draw_world_texture(suitcase_texture, Rect2(330, 404, 54, 54), Color(0.82, 0.88, 0.90))
@@ -1126,7 +1174,7 @@ func _draw_stairwell_dressing() -> void:
 		var lit := absf(midpoint_x - lamp_x) < 430.0
 		if lit:
 			draw_circle(lamp_position, 95.0, Color(0.96, 0.79, 0.44, 0.10))
-		draw_rect(Rect2(lamp_position - Vector2(30, 7), Vector2(60, 14)), Color("efd8a1") if lit else Color("6d7e82"))
+		_draw_world_texture(stairwell_lamp_texture, Rect2(lamp_x - 38.0, 82.0, 76.0, 76.0), Color(1.0, 0.92, 0.72, 0.90) if lit else Color(0.48, 0.57, 0.60, 0.62))
 	# 老楼道的栏杆、信箱与剥落墙皮。
 	for rail_x in [1450.0, 2470.0, 3070.0, 3670.0]:
 		var start := Vector2(rail_x, 350.0) - camera_position
@@ -1140,7 +1188,18 @@ func _draw_stairwell_dressing() -> void:
 
 
 func _draw_warehouse_dressing() -> void:
-	for shelf_x in [160.0, 1160.0, 2140.0, 3020.0]:
+	# 布料架与设计稿强化余秀兰的纺织职业史，并置于玩法机关之后。
+	_draw_world_texture(warehouse_fabric_rack_texture, Rect2(3000.0, 250.0, 280.0, 210.0), Color(0.58, 0.66, 0.68, 0.60))
+	var pattern_positions := [
+		Vector2(545.0, 178.0),
+		Vector2(725.0, 178.0),
+		Vector2(2630.0, 178.0),
+		Vector2(2810.0, 178.0),
+	]
+	for index in range(warehouse_pattern_textures.size()):
+		_draw_world_texture(warehouse_pattern_textures[index], Rect2(pattern_positions[index], Vector2(132.0, 150.0)), Color(0.52, 0.60, 0.61, 0.58))
+	# 中段保留低对比程序货架，避免重复同一张布料架并保持通道轮廓。
+	for shelf_x in [1160.0, 2140.0]:
 		var left: float = float(shelf_x) - camera_position.x
 		for shelf_y in [190.0, 300.0, 410.0]:
 			var y: float = float(shelf_y) - camera_position.y
@@ -1151,19 +1210,14 @@ func _draw_warehouse_dressing() -> void:
 			var roll_center := Vector2(left + 34.0 + roll_index * 55.0, 284.0 - camera_position.y)
 			var roll_colors := [Color("a1877b"), Color("738b8f"), Color("84788e"), Color("a69a7d")]
 			draw_circle(roll_center, 18.0, roll_colors[roll_index])
-	# 帮忙扶住货架的高中姑娘是剧情配角，不是新的可操作人物。
-	var helper_rect := Rect2(Vector2(1580.0, 398.0) - camera_position, Vector2(46, 62))
-	draw_texture_rect(player_anchor_pose, helper_rect, false, Color("aab8c8"))
-	_draw_text("帮忙的高中姑娘", Vector2(helper_rect.get_center().x, helper_rect.position.y - 8.0), 11, Color("d6e0e2"), HORIZONTAL_ALIGNMENT_CENTER, 120.0)
 
 
 func _draw_rooftop_dressing() -> void:
-	# 水箱与晾晒物来自第三章场景设定，色彩沿用当下时空的冷灰蓝。
-	var tank := Rect2(Vector2(540.0, 315.0) - camera_position, Vector2(155, 142))
-	draw_rect(tank, Color("455a61"))
-	draw_rect(Rect2(tank.position - Vector2(8, 8), Vector2(tank.size.x + 16, 12)), Color("718187"))
-	draw_line(tank.position + Vector2(24, tank.size.y), tank.position + Vector2(16, tank.size.y + 34), Color("3a4b50"), 8.0)
-	draw_line(tank.position + Vector2(tank.size.x - 24, tank.size.y), tank.position + Vector2(tank.size.x - 16, tank.size.y + 34), Color("3a4b50"), 8.0)
+	# 只保留与碰撞位置一致的落地水箱；晾晒物使用低干扰程序层，避免遮挡牵挂线。
+	_draw_world_texture(rooftop_entrance_texture, Rect2(70.0, 185.0, 275.0, 275.0), Color(0.60, 0.69, 0.72, 0.76))
+	_draw_world_texture(rooftop_tank_low_texture, Rect2(525.0, 300.0, 185.0, 160.0), Color(0.57, 0.67, 0.69, 0.80))
+	# 大铁门按现有窄碰撞门的中心缩小显示，不扩大可阻挡范围。
+	_draw_world_texture(rooftop_gate_texture, Rect2(2863.0, -30.0, 100.0, 160.0), Color(0.57, 0.66, 0.68, 0.76))
 	for line_y in [245.0, 285.0]:
 		var start := Vector2(120.0, line_y) - camera_position
 		var finish := Vector2(3200.0, line_y + 45.0) - camera_position
@@ -1246,8 +1300,9 @@ func _draw_hud() -> void:
 		var line_state := "松弛" if distance < REST_DISTANCE else ("张力" if distance < MAX_DISTANCE else "极限张力")
 		_draw_text("当前：%s（Tab 切换）  红线：%s  距离 %d / %d" % [characters[active_character]["name"], line_state, roundi(distance), int(MAX_DISTANCE)], Vector2(16, 49), 12, Color("b7c5c6"))
 		draw_rect(Rect2(0, VIEW_H - 34, VIEW_W, 34), Color(0.025, 0.065, 0.075, 0.90))
-		_draw_text("A/D 或 ←/→ 移动 · Space/W/↑ 跳跃 · E 锚定 · 空中 W/↑ 爬线 · R 检查点", Vector2(16, VIEW_H - 12), 12, Color("cad5d5"))
-	_draw_toasts()
+		_draw_text("A/D 或 ←/→ 移动 · Space 跳跃 · E 锚定 · 空中 W/↑ 爬线 · R 检查点", Vector2(16, VIEW_H - 12), 12, Color("cad5d5"))
+	if toast_container == null:
+		_draw_toasts()
 	if game_state == GameState.TITLE:
 		if title_overlay == null:
 			_draw_title()

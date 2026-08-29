@@ -2,8 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/chapter3/chapter3_level_layout.gd" id="1_layout"]
 [ext_resource type="Script" path="res://scripts/chapter3/chapter3_layout_item.gd" id="2_item"]
-[ext_resource type="Texture2D" path="res://art/wooden-box.png" id="3_box"]
-[ext_resource type="Texture2D" path="res://art/playerGrey_up1.png" id="4_helper"]
+[ext_resource type="Texture2D" path="res://assets/props/chapter3/prop_ch03_warehouse_heavy_crate.png" id="3_box"]
 
 [sub_resource type="RectangleShape2D" id="Shape_floor_start"]
 size = Vector2(1160, 60)
@@ -23,6 +22,9 @@ size = Vector2(70, 12)
 size = Vector2(26, 160)
 [sub_resource type="RectangleShape2D" id="Shape_exit"]
 size = Vector2(100, 180)
+[sub_resource type="AtlasTexture" id="Atlas_box"]
+atlas = ExtResource("3_box")
+region = Rect2(426, 153, 1201, 1790)
 
 [node name="Warehouse" type="Node2D"]
 script = ExtResource("1_layout")
@@ -82,30 +84,32 @@ shape = SubResource("Shape_tunnel")
 position = Vector2(640, 404)
 script = ExtResource("2_item")
 size = Vector2(56, 56)
-fill_color = Color(0.48, 0.31, 0.15, 1)
-edge_color = Color(0.82, 0.62, 0.37, 1)
+fill_color = Color(0, 0, 0, 0)
+edge_color = Color(0, 0, 0, 0)
+edge_width = 0.0
 label_text = "重箱 1"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Boxes/HeavyBox"]
 position = Vector2(28, 28)
 shape = SubResource("Shape_box")
 [node name="Sprite2D" type="Sprite2D" parent="Boxes/HeavyBox"]
 position = Vector2(28, 28)
-texture = ExtResource("3_box")
-scale = Vector2(0.06, 0.06)
+texture = SubResource("Atlas_box")
+scale = Vector2(0.045, 0.0302)
 [node name="StepBox" type="CharacterBody2D" parent="Boxes"]
 position = Vector2(2480, 404)
 script = ExtResource("2_item")
 size = Vector2(56, 56)
-fill_color = Color(0.48, 0.31, 0.15, 1)
-edge_color = Color(0.82, 0.62, 0.37, 1)
+fill_color = Color(0, 0, 0, 0)
+edge_color = Color(0, 0, 0, 0)
+edge_width = 0.0
 label_text = "垫脚箱"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Boxes/StepBox"]
 position = Vector2(28, 28)
 shape = SubResource("Shape_box")
 [node name="Sprite2D" type="Sprite2D" parent="Boxes/StepBox"]
 position = Vector2(28, 28)
-texture = ExtResource("3_box")
-scale = Vector2(0.06, 0.06)
+texture = SubResource("Atlas_box")
+scale = Vector2(0.045, 0.0302)
 
 [node name="Plates" type="Node2D" parent="."]
 [node name="EntrancePlate" type="Area2D" parent="Plates"]
@@ -184,17 +188,3 @@ metadata/mother_spawn = Vector2(2400, 460)
 position = Vector2(2900, 460)
 metadata/daughter_spawn = Vector2(2960, 460)
 metadata/mother_spawn = Vector2(2900, 460)
-
-[node name="StoryProps" type="Node2D" parent="."]
-[node name="Helper" type="Sprite2D" parent="StoryProps"]
-position = Vector2(1603, 429)
-texture = ExtResource("4_helper")
-modulate = Color(0.67, 0.72, 0.79, 1)
-scale = Vector2(0.43, 0.43)
-[node name="Label" type="Label" parent="StoryProps/Helper"]
-offset_left = -54.0
-offset_top = -89.0
-offset_right = 64.0
-offset_bottom = -63.0
-text = "帮忙的高中姑娘"
-horizontal_alignment = 1
