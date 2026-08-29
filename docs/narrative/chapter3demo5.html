@@ -50,12 +50,12 @@
   }
   #meta {
     display: flex;
-    justify-content: space-between;
-    gap: 16px;
+    justify-content: center;
     padding: 10px 4px 0;
     color: #746a5d;
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1.45;
+    letter-spacing: .02em;
   }
   #mobile-controls {
     display: none;
@@ -65,20 +65,24 @@
   }
   #mobile-controls button {
     min-height: 46px;
-    border: 1px solid rgba(23,38,48,.16);
+    border: 1px solid rgba(232,239,239,.12);
     border-radius: 10px;
-    background: rgba(255,255,255,.72);
-    color: var(--ink);
+    background: #1c2b34;
+    color: #eaf0f0;
     font: 700 13px/1 system-ui, sans-serif;
-    box-shadow: 0 4px 14px rgba(55,42,30,.1);
     touch-action: none;
   }
-  #mobile-controls button:active { background: #fff4dc; transform: translateY(1px); }
-  @media (max-width: 820px), (pointer: coarse) {
+  #mobile-controls button[data-press="KeyE"] { background: var(--gold); color: var(--ink); }
+  #mobile-controls button:active { filter: brightness(1.14); transform: translateY(1px); }
+  @media (pointer: coarse) {
     body { overflow: auto; padding: 12px 0; }
     #shell { width: min(100vw - 18px, 1000px); }
     #mobile-controls { display: grid; }
-    #meta { font-size: 10px; }
+    #meta { display: none; }
+  }
+  @media (max-width: 620px) {
+    #stage { border-radius: 11px; }
+    #mobile-controls { grid-template-columns: repeat(3, 1fr); }
   }
   @media (prefers-reduced-motion: reduce) {
     #mobile-controls button { transition: none; }
@@ -92,16 +96,15 @@
       aria-label="余响牵挂第三章纯2D横版互动白盒，操作母亲和女儿轮流锚定、推箱、钻低洞并攀上天台"></canvas>
   </div>
   <div id="mobile-controls" aria-label="触屏操作">
-    <button data-hold="ArrowLeft" aria-label="向左">←</button>
-    <button data-hold="ArrowRight" aria-label="向右">→</button>
+    <button data-hold="ArrowLeft" aria-label="向左">左</button>
+    <button data-hold="ArrowRight" aria-label="向右">右</button>
     <button data-press="Space" aria-label="跳跃">跳</button>
     <button data-hold="ArrowDown" aria-label="蹲行">蹲</button>
-    <button data-press="KeyE" aria-label="互动或锚定">互动</button>
+    <button data-press="KeyE" aria-label="行动">行动</button>
     <button data-press="Tab" aria-label="切换角色">换人</button>
   </div>
   <div id="meta">
-    <span>Prototype v0.5 · 纯 2D 滚屏白盒 · 15m 单屏</span>
-    <span>AD / ←→ 移动 · Space 跳跃 · S / ↓ 蹲行 · E 互动 · Tab 换人 · R 回安全点</span>
+    <span>移动 A D / ← →　跳跃 Space　蹲行 S / ↓　行动 E　换人 Tab　回安全点 R</span>
   </div>
 </main>
 <script>
@@ -156,13 +159,13 @@ const PHASE = Object.freeze({
 
 const phaseInfo = {
   [PHASE.A_APPROACH]: ["P1 · 老楼楼道", "从后边绕过去。先走到缺损楼梯前"],
-  [PHASE.A_MOTHER_ANCHORED]: ["P1 · 老楼楼道", "切换余念，借妈妈的支点越过断口"],
+  [PHASE.A_MOTHER_ANCHORED]: ["P1 · 老楼楼道", "切换余念，按 E 借妈妈的支点越过断口"],
   [PHASE.A_DAUGHTER_ACROSS]: ["P1 · 老楼楼道", "到达另一端后，换你站稳"],
-  [PHASE.A_DAUGHTER_ANCHORED]: ["P1 · 老楼楼道", "切换秀兰，借余念的支点越过断口"],
+  [PHASE.A_DAUGHTER_ANCHORED]: ["P1 · 老楼楼道", "切换秀兰，按 E 借余念的支点越过断口"],
   [PHASE.A_DONE]: ["P1 · 老楼楼道", "两个人都过来了。继续向仓库走"],
   [PHASE.B_ENTER]: ["P2 · 旧仓库", "重箱挡着路：切换秀兰，靠近后按 E 推动"],
   [PHASE.B_PUSHING]: ["P2 · 旧仓库", "按住右方向，把重箱推到地面的浅色标记"],
-  [PHASE.B_CRATE_DONE]: ["P2 · 旧仓库", "切换余念，踩上木箱；按住 S / ↓ 再向右移动"],
+  [PHASE.B_CRATE_DONE]: ["P2 · 旧仓库", "切换余念，靠近木箱后按 E 进入低洞"],
   [PHASE.B_TUNNEL]: ["P2 · 旧仓库", "保持蹲行，穿过低矮通道"],
   [PHASE.B_DAUGHTER_TOP]: ["P2 · 旧仓库", "切换秀兰，按 E 试着自己上去"],
   [PHASE.B_ATTEMPT]: ["P2 · 旧仓库", "……"],
@@ -170,13 +173,13 @@ const phaseInfo = {
   [PHASE.B_DAUGHTER_ANCHORED]: ["P2 · 旧仓库", "切换秀兰，按 E 接受余念的支撑"],
   [PHASE.B_DONE]: ["P2 · 旧仓库", "这次是女儿托住了母亲。一起去天台"],
   [PHASE.C_ENTER]: ["P3 · 天台接力", "秀兰先站稳，让余念到一级平台"],
-  [PHASE.C_MOTHER_ANCHORED_1]: ["P3 · 天台接力", "切换余念，借线跃上一级平台"],
+  [PHASE.C_MOTHER_ANCHORED_1]: ["P3 · 天台接力", "切换余念，按 E 借力到一级平台"],
   [PHASE.C_DAUGHTER_1]: ["P3 · 天台接力", "到达后换你站稳"],
-  [PHASE.C_DAUGHTER_ANCHORED_1]: ["P3 · 天台接力", "切换秀兰，把重量交给余念"],
+  [PHASE.C_DAUGHTER_ANCHORED_1]: ["P3 · 天台接力", "切换秀兰，按 E 把重量交给余念"],
   [PHASE.C_MOTHER_2]: ["P3 · 天台接力", "秀兰到达二级平台后，换她站稳"],
-  [PHASE.C_MOTHER_ANCHORED_2]: ["P3 · 天台接力", "切换余念，借线跃上顶层"],
+  [PHASE.C_MOTHER_ANCHORED_2]: ["P3 · 天台接力", "切换余念，按 E 借力到顶层"],
   [PHASE.C_DAUGHTER_3]: ["P3 · 天台接力", "最后一次：余念站稳，让妈妈上来"],
-  [PHASE.C_DAUGHTER_ANCHORED_2]: ["P3 · 天台接力", "切换秀兰，沿着这份支撑到顶"],
+  [PHASE.C_DAUGHTER_ANCHORED_2]: ["P3 · 天台接力", "切换秀兰，按 E 沿支撑到顶"],
   [PHASE.C_TOP]: ["P3 · 天台接力", "两个人都到了。切换秀兰，把黄伞放进箱子"],
   [PHASE.UMBRELLA_PACKED]: ["P3 · 天台接力", "黄伞只露出一角。一起走向出口"],
   [PHASE.END]: ["第三章 · 完", "牵挂，可以成为彼此的支点。"]
@@ -418,6 +421,74 @@ function anchorAt(c, xM, topM, next, message) {
 
 function handleInteract() {
   const c = me();
+  if (phase === PHASE.A_MOTHER_ANCHORED && c === daughter && near(c, 15.1, 2.5)) {
+    beginRide(daughter, 20.0, 2.0, .78, () => {
+      setPhase(PHASE.A_DAUGHTER_ACROSS);
+      writeCheckpoint(PHASE.A_DAUGHTER_ACROSS, [20, 2], [14.8, 2], 0);
+      notice("余念落在远端。现在轮到她成为支点", 2.8);
+    });
+    return;
+  }
+  if (phase === PHASE.A_DAUGHTER_ANCHORED && c === mother && near(c, 14.8, 2.5)) {
+    beginRide(mother, 20.0, 2.0, .86, () => {
+      setPhase(PHASE.A_DONE);
+      daughter.anchored = false;
+      writeCheckpoint(PHASE.A_DONE, [20.6, 2], [20, 2], 1);
+      notice("第一次责任交换完成", 2.6);
+    });
+    return;
+  }
+  if (phase === PHASE.B_CRATE_DONE && c === daughter && near(c, 37.8, 2.4)) {
+    beginRide(daughter, 39.25, 2.0, .48, () => {
+      setPosition(mother, 37.25, 0);
+      setPhase(PHASE.B_TUNNEL);
+      notice("按住 S / ↓，再向右移动", 3.2);
+    });
+    return;
+  }
+  if (phase === PHASE.B_TUNNEL && c === daughter && centerX(c) >= px(47.6)) {
+    beginRide(daughter, 50.2, 3.4, .62, () => {
+      setCrouch(daughter, false);
+      setPosition(mother, 37.25, 0);
+      setPhase(PHASE.B_DAUGHTER_TOP);
+      writeCheckpoint(PHASE.B_DAUGHTER_TOP, [50.2, 3.4], [37.25, 0], 0);
+      notice("余念先到了高处", 2.4);
+    });
+    return;
+  }
+  if (phase === PHASE.C_MOTHER_ANCHORED_1 && c === daughter) {
+    beginRide(daughter, 67.2, 2.6, .78, () => {
+      setPhase(PHASE.C_DAUGHTER_1);
+      writeCheckpoint(PHASE.C_DAUGHTER_1, [67.2, 2.6], [62.2, 0], 0);
+    });
+    return;
+  }
+  if (phase === PHASE.C_DAUGHTER_ANCHORED_1 && c === mother) {
+    say("秀兰", "别松啊。", 2.2);
+    beginRide(mother, 76.0, 5.2, .86, () => {
+      setPhase(PHASE.C_MOTHER_2);
+      daughter.anchored = false;
+      writeCheckpoint(PHASE.C_MOTHER_2, [70.5, 2.6], [76, 5.2], 1);
+      say("余念", "没松。", 2.4);
+    });
+    return;
+  }
+  if (phase === PHASE.C_MOTHER_ANCHORED_2 && c === daughter) {
+    beginRide(daughter, 85.0, 8.2, .86, () => {
+      setPhase(PHASE.C_DAUGHTER_3);
+      writeCheckpoint(PHASE.C_DAUGHTER_3, [85, 8.2], [79.5, 5.2], 0);
+    });
+    return;
+  }
+  if (phase === PHASE.C_DAUGHTER_ANCHORED_2 && c === mother) {
+    beginRide(mother, 85.2, 8.2, .72, () => {
+      setPhase(PHASE.C_TOP);
+      daughter.anchored = false;
+      writeCheckpoint(PHASE.C_TOP, [86, 8.2], [85.2, 8.2], 1);
+      notice("两个人一起到了顶层", 2.6);
+    });
+    return;
+  }
   if (phase === PHASE.A_APPROACH && c === mother && near(c, 14.8, 1.4)) {
     anchorAt(mother, 14.8, 2, PHASE.A_MOTHER_ANCHORED, "秀兰站稳了——她成为余念的支点");
     return;
@@ -480,78 +551,7 @@ function handleInteract() {
 
 function handleJump() {
   const c = me();
-  // 低洞出口的攀爬必须先于通用的“蹲伏不可跳跃”规则处理。
-  if (phase === PHASE.B_TUNNEL && c === daughter && centerX(c) >= px(47.6)) {
-    beginRide(daughter, 50.2, 3.4, .62, () => {
-      setCrouch(daughter, false);
-      // 纯 2D 白盒中让演出站位避开已锁定箱体的实体轮廓。
-      setPosition(mother, 37.25, 0);
-      setPhase(PHASE.B_DAUGHTER_TOP);
-      writeCheckpoint(PHASE.B_DAUGHTER_TOP, [50.2, 3.4], [37.25, 0], 0);
-      notice("余念先到了高处", 2.4);
-    });
-    return;
-  }
   if (c.crouching || c.anchored || c.ride) return;
-  if (phase === PHASE.A_MOTHER_ANCHORED && c === daughter && near(c, 15.1, 2.5)) {
-    beginRide(daughter, 20.0, 2.0, .78, () => {
-      setPhase(PHASE.A_DAUGHTER_ACROSS);
-      writeCheckpoint(PHASE.A_DAUGHTER_ACROSS, [20, 2], [14.8, 2], 0);
-      notice("余念落在远端。现在轮到她成为支点", 2.8);
-    });
-    return;
-  }
-  if (phase === PHASE.A_DAUGHTER_ANCHORED && c === mother && near(c, 14.8, 2.5)) {
-    beginRide(mother, 20.0, 2.0, .86, () => {
-      setPhase(PHASE.A_DONE);
-      daughter.anchored = false;
-      writeCheckpoint(PHASE.A_DONE, [20.6, 2], [20, 2], 1);
-      notice("第一次责任交换完成", 2.6);
-    });
-    return;
-  }
-  if (phase === PHASE.B_CRATE_DONE && c === daughter && near(c, 37.8, 2.4)) {
-    beginRide(daughter, 39.25, 2.0, .48, () => {
-      // 秀兰在箱外守住洞口；这段必须允许余念独自穿完整条低洞。
-      setPosition(mother, 37.25, 0);
-      setPhase(PHASE.B_TUNNEL);
-      notice("按住 S / ↓，再向右移动", 3.2);
-    });
-    return;
-  }
-  if (phase === PHASE.C_MOTHER_ANCHORED_1 && c === daughter) {
-    beginRide(daughter, 67.2, 2.6, .78, () => {
-      setPhase(PHASE.C_DAUGHTER_1);
-      writeCheckpoint(PHASE.C_DAUGHTER_1, [67.2, 2.6], [62.2, 0], 0);
-    });
-    return;
-  }
-  if (phase === PHASE.C_DAUGHTER_ANCHORED_1 && c === mother) {
-    say("秀兰", "别松啊。", 2.2);
-    beginRide(mother, 76.0, 5.2, .86, () => {
-      setPhase(PHASE.C_MOTHER_2);
-      daughter.anchored = false;
-      writeCheckpoint(PHASE.C_MOTHER_2, [70.5, 2.6], [76, 5.2], 1);
-      say("余念", "没松。", 2.4);
-    });
-    return;
-  }
-  if (phase === PHASE.C_MOTHER_ANCHORED_2 && c === daughter) {
-    beginRide(daughter, 85.0, 8.2, .86, () => {
-      setPhase(PHASE.C_DAUGHTER_3);
-      writeCheckpoint(PHASE.C_DAUGHTER_3, [85, 8.2], [79.5, 5.2], 0);
-    });
-    return;
-  }
-  if (phase === PHASE.C_DAUGHTER_ANCHORED_2 && c === mother) {
-    beginRide(mother, 85.2, 8.2, .72, () => {
-      setPhase(PHASE.C_TOP);
-      daughter.anchored = false;
-      writeCheckpoint(PHASE.C_TOP, [86, 8.2], [85.2, 8.2], 1);
-      notice("两个人一起到了顶层", 2.6);
-    });
-    return;
-  }
   if (c.onGround) c.vy = -c.jump;
 }
 
@@ -755,17 +755,11 @@ function drawBackground() {
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 
-  ctx.save();
-  ctx.translate(-cameraX * .12, -cameraY * .08);
-  ctx.strokeStyle = "rgba(192,210,219,.055)";
-  ctx.lineWidth = 1;
-  for (let x = -200; x < WORLD_W + 300; x += 50) {
-    ctx.beginPath(); ctx.moveTo(x, -100); ctx.lineTo(x, 680); ctx.stroke();
-  }
-  for (let y = -400; y < 700; y += 50) {
-    ctx.beginPath(); ctx.moveTo(-200, y); ctx.lineTo(WORLD_W + 300, y); ctx.stroke();
-  }
-  ctx.restore();
+  const vignette = ctx.createRadialGradient(W * .5, H * .36, 30, W * .5, H * .42, W * .72);
+  vignette.addColorStop(0, "rgba(255,255,255,.025)");
+  vignette.addColorStop(1, "rgba(3,9,12,.22)");
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, W, H);
 
   if (worldM >= 58) {
     ctx.save();
@@ -790,10 +784,8 @@ function drawSolids() {
     if (s.tone === "ceiling") fill = "#67747b";
     ctx.fillStyle = fill;
     ctx.fillRect(x, y, s.w, s.h);
-    ctx.fillStyle = "rgba(224,234,238,.32)";
-    ctx.fillRect(x, y, s.w, 4);
-    ctx.strokeStyle = "rgba(6,15,20,.34)";
-    ctx.strokeRect(x + .5, y + .5, s.w - 1, s.h - 1);
+    ctx.fillStyle = "rgba(224,234,238,.18)";
+    ctx.fillRect(x, y, s.w, 2);
   }
 }
 
@@ -846,17 +838,14 @@ function drawWorldProps() {
     ctx.globalAlpha = 1;
   }
 
-  // C：天台门框、水箱、晾衣绳、床单、终点箱
+  // C：天台门框、水箱、布面、终点箱。布面不再使用贯穿画面的装饰线。
   ctx.strokeStyle = "#9eabb1"; ctx.lineWidth = 5;
   ctx.strokeRect(px(58.6), footY(2.5), px(1.2), px(2.5));
   ctx.fillStyle = "#606c73"; ctx.fillRect(px(77.9), footY(7.7), px(2.2), px(2.5));
-  ctx.strokeStyle = "#aebac0"; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(px(63), footY(6.7)); ctx.lineTo(px(88), footY(9)); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(px(64), footY(5.7)); ctx.lineTo(px(91), footY(8.2)); ctx.stroke();
   const nearSheets = centerX(me()) > px(68) && centerX(me()) < px(80);
-  ctx.globalAlpha = nearSheets ? .45 : .9;
-  ctx.fillStyle = "#d8d7cf"; ctx.fillRect(px(69.1), footY(6.8), px(2.8), px(1.8));
-  ctx.fillStyle = "#c7c9c4"; ctx.fillRect(px(75.5), footY(7.95), px(3), px(1.9));
+  ctx.globalAlpha = nearSheets ? .32 : .68;
+  ctx.fillStyle = "#d8d7cf"; ctx.fillRect(px(69.1), footY(6.5), px(2.8), px(1.45));
+  ctx.fillStyle = "#c7c9c4"; ctx.fillRect(px(75.5), footY(7.65), px(3), px(1.55));
   ctx.globalAlpha = 1;
   ctx.strokeStyle = "#96a4ab"; ctx.lineWidth = 4;
   ctx.strokeRect(px(89.75), footY(10.7), px(1.5), px(2.5));
@@ -870,17 +859,12 @@ function drawWorldProps() {
 
   if (otherLinesTimer > 0) {
     ctx.save();
-    ctx.globalAlpha = clamp(otherLinesTimer * 2, 0, .6);
-    ctx.strokeStyle = "#ff6f86";
-    ctx.lineWidth = 2;
-    ctx.shadowColor = "#ff6f86";
-    ctx.shadowBlur = 8;
-    for (let i = 0; i < 3; i++) {
-      ctx.beginPath();
-      ctx.moveTo(710 + i * 70, 120 + i * 26);
-      ctx.quadraticCurveTo(748 + i * 70, 102 + i * 24, 782 + i * 70, 132 + i * 20);
-      ctx.stroke();
-    }
+    const alpha = clamp(otherLinesTimer * 1.6, 0, .34);
+    const echo = ctx.createRadialGradient(W * .77, H * .3, 8, W * .77, H * .3, 150);
+    echo.addColorStop(0, `rgba(255,111,134,${alpha})`);
+    echo.addColorStop(1, "rgba(255,111,134,0)");
+    ctx.fillStyle = echo;
+    ctx.fillRect(W * .58, H * .05, W * .38, H * .5);
     ctx.restore();
   }
 }
@@ -910,10 +894,11 @@ function drawTether() {
   const ratio = d / max;
   const sag = Math.max(0, (1 - d / REST) * 54);
   ctx.save();
-  ctx.strokeStyle = ratio < .62 ? "rgba(255,79,109,.55)" : ratio < .86 ? "rgba(255,79,109,.86)" : "#ff4f6d";
-  ctx.lineWidth = anchored ? 4 : ratio > .86 ? 4.5 : 3;
+  const alpha = ratio < .62 ? .38 : ratio < .86 ? .7 : 1;
+  ctx.strokeStyle = `rgba(255,79,109,${alpha})`;
+  ctx.lineWidth = anchored ? 4 : 3;
   ctx.shadowColor = "#ff4f6d";
-  ctx.shadowBlur = anchored ? 14 : ratio > .86 ? 9 : 3;
+  ctx.shadowBlur = anchored ? 12 : ratio > .86 ? 7 : 0;
   ctx.beginPath();
   ctx.moveTo(x1, y1);
   ctx.quadraticCurveTo((x1 + x2) / 2, (y1 + y2) / 2 + sag, x2, y2);
@@ -925,9 +910,13 @@ function drawCharacter(c, selected) {
   const x = c.x - cameraX, y = c.y - cameraY;
   ctx.save();
   if (selected) {
-    ctx.strokeStyle = "rgba(244,184,75,.82)";
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.ellipse(x + c.w / 2, y + c.h + 5, c.w * .72, 7, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = "#f4b84b";
+    ctx.beginPath();
+    ctx.moveTo(x + c.w / 2, y - 28);
+    ctx.lineTo(x + c.w / 2 - 5, y - 36);
+    ctx.lineTo(x + c.w / 2 + 5, y - 36);
+    ctx.closePath();
+    ctx.fill();
   }
   ctx.fillStyle = c.color;
   fillRoundRect(x, y + c.h * .28, c.w, c.h * .72, c.w * .24, c.color);
@@ -939,15 +928,10 @@ function drawCharacter(c, selected) {
   ctx.font = "700 12px 'PingFang SC', sans-serif";
   ctx.fillText(c.name, x + c.w / 2, y - 10);
   if (c.anchored) {
-    ctx.strokeStyle = "#54e0a2";
-    ctx.lineWidth = 3;
-    ctx.shadowColor = "#54e0a2";
-    ctx.shadowBlur = 10;
-    ctx.beginPath(); ctx.arc(x + c.w / 2, y + c.h + 8, 10, 0, Math.PI * 2); ctx.stroke();
-    ctx.shadowBlur = 0;
+    fillRoundRect(x + c.w / 2 - 13, y + c.h + 6, 26, 5, 2.5, "#54e0a2");
     ctx.fillStyle = "#c8ffe8";
     ctx.font = "700 11px sans-serif";
-    ctx.fillText("站稳", x + c.w / 2, y + c.h + 27);
+    ctx.fillText("支点", x + c.w / 2, y + c.h + 24);
   }
   ctx.restore();
 }
@@ -973,115 +957,117 @@ function drawAreaLabels() {
 
 function actionPrompt() {
   const c = me();
-  if (phase === PHASE.A_APPROACH && c === mother && near(c, 14.8, 1.7)) return "E  站稳，成为她的支点";
-  if (phase === PHASE.A_DAUGHTER_ACROSS && c === daughter && near(c, 20.6, 1.7)) return "E  到达后，换你站稳";
-  if (phase === PHASE.B_ENTER && c === mother && near(c, 33.6, 2.4)) return "E  推动重箱";
-  if (phase === PHASE.B_DAUGHTER_TOP && c === mother) return "E  自己试一次";
-  if (phase === PHASE.B_FAILED && c === daughter) return "E  站稳，伸出手";
-  if (phase === PHASE.B_DAUGHTER_ANCHORED && c === mother) return "E  接受支撑";
-  if ([PHASE.C_ENTER, PHASE.C_DAUGHTER_1, PHASE.C_MOTHER_2, PHASE.C_DAUGHTER_3].includes(phase)) return "E  站稳";
-  if (phase === PHASE.C_TOP && c === mother) return "E  把黄伞放进箱子";
-  if ([PHASE.A_MOTHER_ANCHORED, PHASE.A_DAUGHTER_ANCHORED, PHASE.C_MOTHER_ANCHORED_1, PHASE.C_DAUGHTER_ANCHORED_1, PHASE.C_MOTHER_ANCHORED_2, PHASE.C_DAUGHTER_ANCHORED_2].includes(phase)) return "Space  借线跃迁";
-  if (phase === PHASE.B_CRATE_DONE && c === daughter) return "Space  踩上木箱";
-  if (phase === PHASE.B_TUNNEL && c === daughter) return centerX(c) > px(47.6) ? "Space  爬上高台" : "按住 S / ↓  蹲行";
-  return "";
+  const nextFor = (character, label) => c === character
+    ? { key: "E", label }
+    : { key: "Tab", label: `切换到${character.name}` };
+  if (phase === PHASE.A_APPROACH && c === mother && near(c, 14.8, 1.7)) return { key: "E", label: "站稳，成为支点" };
+  if (phase === PHASE.A_DAUGHTER_ACROSS && c === daughter && near(c, 20.6, 1.7)) return { key: "E", label: "换你站稳" };
+  if (phase === PHASE.B_ENTER && c === mother && near(c, 33.6, 2.4)) return { key: "E", label: "推动重箱" };
+  if (phase === PHASE.B_DAUGHTER_TOP) return nextFor(mother, "自己试一次");
+  if (phase === PHASE.B_FAILED) return nextFor(daughter, "站稳，伸出手");
+  if (phase === PHASE.B_DAUGHTER_ANCHORED) return nextFor(mother, "接受支撑");
+  if (phase === PHASE.C_ENTER) return nextFor(mother, "站稳");
+  if (phase === PHASE.C_DAUGHTER_1) return nextFor(daughter, "站稳");
+  if (phase === PHASE.C_MOTHER_2) return nextFor(mother, "站稳");
+  if (phase === PHASE.C_DAUGHTER_3) return nextFor(daughter, "站稳");
+  if (phase === PHASE.C_TOP) return nextFor(mother, "收好黄伞");
+  if (phase === PHASE.A_MOTHER_ANCHORED) return nextFor(daughter, "借力前进");
+  if (phase === PHASE.A_DAUGHTER_ANCHORED) return nextFor(mother, "借力前进");
+  if (phase === PHASE.C_MOTHER_ANCHORED_1) return nextFor(daughter, "借力前进");
+  if (phase === PHASE.C_DAUGHTER_ANCHORED_1) return nextFor(mother, "借力前进");
+  if (phase === PHASE.C_MOTHER_ANCHORED_2) return nextFor(daughter, "借力前进");
+  if (phase === PHASE.C_DAUGHTER_ANCHORED_2) return nextFor(mother, "借力前进");
+  if (phase === PHASE.B_CRATE_DONE) return nextFor(daughter, "进入低洞");
+  if (phase === PHASE.B_TUNNEL && c === daughter) return centerX(c) > px(47.6)
+    ? { key: "E", label: "爬上高台" }
+    : { key: "S", label: "蹲行前进" };
+  return null;
 }
 
 function drawHud() {
   if (gameState !== "play") return;
-  const ui = innerWidth < 600 ? 1.65 : 1;
+  const ui = innerWidth < 600 ? 1.25 : 1;
   const [area, objective] = phaseInfo[phase] || ["第三章", "一起走一段"];
-  const grad = ctx.createLinearGradient(0, 0, 0, 92);
-  grad.addColorStop(0, "rgba(6,13,17,.82)");
+  const grad = ctx.createLinearGradient(0, 0, 0, 78);
+  grad.addColorStop(0, "rgba(6,13,17,.76)");
   grad.addColorStop(1, "rgba(6,13,17,0)");
   ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, W, 100);
+  ctx.fillRect(0, 0, W, 82);
   ctx.textAlign = "left";
-  ctx.fillStyle = "rgba(238,244,246,.64)";
-  ctx.font = `800 ${11 * ui}px system-ui`;
-  ctx.fillText(area, 20, 25);
+  ctx.fillStyle = "rgba(238,244,246,.5)";
+  ctx.font = `700 ${10 * ui}px system-ui`;
+  ctx.fillText(area, 20, 22);
   ctx.fillStyle = "#f3f5f3";
-  ctx.font = `700 ${15 * ui}px 'PingFang SC', sans-serif`;
-  ctx.fillText(objective, 20, 49);
-  ctx.fillStyle = me().color;
-  ctx.beginPath(); ctx.arc(W - 118, 28, 6, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "rgba(238,244,246,.84)";
-  ctx.font = `700 ${12 * ui}px 'PingFang SC', sans-serif`;
-  ctx.fillText(`当前：${me().name}`, W - 104, 32);
+  ctx.font = `700 ${14 * ui}px 'PingFang SC', sans-serif`;
+  ctx.fillText(objective, 20, 45);
 
-  const progress = clamp(centerX(me()) / WORLD_W, 0, 1);
-  ctx.fillStyle = "rgba(238,244,246,.15)"; ctx.fillRect(20, 65, W - 40, 3);
-  ctx.fillStyle = "#f4b84b"; ctx.fillRect(20, 65, (W - 40) * progress, 3);
+  const activeLabel = `当前 · ${me().name}`;
+  ctx.font = `700 ${11 * ui}px 'PingFang SC', sans-serif`;
+  const activeWidth = ctx.measureText(activeLabel).width;
+  ctx.fillStyle = me().color;
+  ctx.beginPath(); ctx.arc(W - activeWidth - 31, 24, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(238,244,246,.78)";
+  ctx.fillText(activeLabel, W - activeWidth - 20, 28);
 
   const prompt = actionPrompt();
-  if (prompt) {
-    ctx.font = `800 ${13 * ui}px 'PingFang SC', sans-serif`;
-    const tw = ctx.measureText(prompt).width;
-    fillRoundRect(W / 2 - tw / 2 - 16, H - 112, tw + 32, 34, 17, "rgba(244,184,75,.93)");
-    ctx.fillStyle = "#1b2730";
-    ctx.textAlign = "center";
-    ctx.fillText(prompt, W / 2, H - 90);
-  }
-
   if (subtitle) {
-    fillRoundRect(W / 2 - 250, H - 72, 500, 48, 9, "rgba(6,13,17,.86)");
-    ctx.textAlign = "center";
+    fillRoundRect(W / 2 - 245, H - 62, 490, 38, 10, "rgba(6,13,17,.84)");
+    ctx.textAlign = "left";
     ctx.font = `800 ${12 * ui}px 'PingFang SC', sans-serif`;
     ctx.fillStyle = subtitle.who === "余念" ? daughter.color : mother.color;
-    ctx.fillText(subtitle.who, W / 2, H - 50);
+    ctx.fillText(subtitle.who, W / 2 - 222, H - 38);
     ctx.font = `500 ${14 * ui}px 'PingFang SC', sans-serif`;
     ctx.fillStyle = "#f2f4f3";
-    ctx.fillText(subtitle.text, W / 2, H - 31);
+    ctx.fillText(subtitle.text, W / 2 - 168, H - 38);
   } else if (notices.length) {
     const n = notices.at(-1);
     ctx.globalAlpha = clamp(n.t, 0, 1);
-    fillRoundRect(W / 2 - 220, H - 66, 440, 36, 8, "rgba(6,13,17,.76)");
-    ctx.textAlign = "center";
     ctx.font = `500 ${13 * ui}px 'PingFang SC', sans-serif`;
+    const noticeWidth = clamp(ctx.measureText(n.text).width + 42, 220, 520);
+    fillRoundRect(W / 2 - noticeWidth / 2, H - 59, noticeWidth, 34, 10, "rgba(6,13,17,.74)");
+    ctx.textAlign = "center";
     ctx.fillStyle = "#e8efef";
-    ctx.fillText(n.text, W / 2, H - 43);
+    ctx.fillText(n.text, W / 2, H - 37);
     ctx.globalAlpha = 1;
+  } else if (prompt) {
+    ctx.font = `700 ${13 * ui}px 'PingFang SC', sans-serif`;
+    const labelWidth = ctx.measureText(prompt.label).width;
+    const cueWidth = labelWidth + 74;
+    const cueX = W / 2 - cueWidth / 2;
+    fillRoundRect(cueX, H - 62, cueWidth, 38, 11, "rgba(6,13,17,.8)");
+    fillRoundRect(cueX + 7, H - 55, 34, 24, 7, "#f4b84b");
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#18252d";
+    ctx.font = `800 ${12 * ui}px system-ui`;
+    ctx.fillText(prompt.key, cueX + 24, H - 38);
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#edf2f2";
+    ctx.font = `700 ${13 * ui}px 'PingFang SC', sans-serif`;
+    ctx.fillText(prompt.label, cueX + 51, H - 37);
   }
 }
 
 function drawTitle() {
-  const ui = innerWidth < 600 ? 1.35 : 1;
-  ctx.fillStyle = "rgba(7,14,18,.74)";
+  const ui = innerWidth < 600 ? 1.2 : 1;
+  ctx.fillStyle = "rgba(7,14,18,.7)";
   ctx.fillRect(0, 0, W, H);
   ctx.textAlign = "center";
   ctx.fillStyle = "#f1f3f2";
-  ctx.font = `800 ${38 * ui}px 'PingFang SC', sans-serif`;
-  ctx.fillText("余响 · 牵挂", W / 2, 138);
+  ctx.font = `800 ${42 * ui}px 'PingFang SC', sans-serif`;
+  ctx.fillText("余响 · 牵挂", W / 2, 174);
   ctx.fillStyle = "#f4b84b";
-  ctx.font = `800 ${21 * ui}px 'PingFang SC', sans-serif`;
-  ctx.fillText("第三章《一起走一段》", W / 2, 176);
+  ctx.font = `700 ${18 * ui}px 'PingFang SC', sans-serif`;
+  ctx.fillText("第三章 · 一起走一段", W / 2, 211);
   ctx.fillStyle = "rgba(238,244,246,.74)";
   ctx.font = `500 ${14 * ui}px 'PingFang SC', sans-serif`;
-  ctx.fillText("楼道 → 仓库 → 天台", W / 2, 215);
-  ctx.fillText("同一根线，从单向照料变成双向支撑", W / 2, 244);
-
-  const cards = [
-    ["P1", "第一次交换支点", "#667784"],
-    ["P2", "拒绝、失败、接受", "#806b47"],
-    ["P3", "连续接力，一起到顶", "#4f7182"]
-  ];
-  cards.forEach((card, i) => {
-    const x = 205 + i * 190;
-    fillRoundRect(x, 284, 170, 70, 10, card[2]);
-    ctx.fillStyle = "rgba(255,255,255,.68)";
-    ctx.font = `800 ${11 * ui}px system-ui`;
-    ctx.fillText(card[0], x + 85, 307);
-    ctx.fillStyle = "#fff";
-    ctx.font = `700 ${13 * ui}px 'PingFang SC', sans-serif`;
-    ctx.fillText(card[1], x + 85, 333);
-  });
-  fillRoundRect(W / 2 - 108, 392, 216, 44, 22, "#f4b84b");
+  ctx.fillText("站稳 · 交换 · 一起向前", W / 2, 252);
+  fillRoundRect(W / 2 - 108, 318, 216, 44, 22, "#f4b84b");
   ctx.fillStyle = "#172630";
   ctx.font = `800 ${14 * ui}px 'PingFang SC', sans-serif`;
-  ctx.fillText("按任意键 / 点击开始", W / 2, 420);
+  ctx.fillText("按任意键 / 点击开始", W / 2, 346);
   ctx.fillStyle = "rgba(238,244,246,.48)";
   ctx.font = "500 11px system-ui";
-  ctx.fillText("Prototype v0.5 · 纯 2D 横版互动白盒", W / 2, 478);
+  ctx.fillText("移动 · 跳跃 · 行动 E · 换人", W / 2, 408);
 }
 
 function drawEnd() {
@@ -1104,9 +1090,12 @@ function drawEnd() {
 }
 
 function render() {
+  const prompt = actionPrompt();
   canvas.dataset.phase = phase;
   canvas.dataset.active = me().id;
   canvas.dataset.gameState = gameState;
+  canvas.dataset.actionKey = prompt?.key || "";
+  canvas.dataset.actionLabel = prompt?.label || "";
   canvas.dataset.daughterCrouching = String(daughter.crouching);
   canvas.dataset.daughterPosition = `${(centerX(daughter) / SCALE).toFixed(2)},${feet(daughter).toFixed(1)}`;
   canvas.dataset.motherPosition = `${(centerX(mother) / SCALE).toFixed(2)},${feet(mother).toFixed(1)}`;
