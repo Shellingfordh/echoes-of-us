@@ -56,6 +56,8 @@ func _run() -> void:
 			assert(platform.call("_uses_wood_surface"), "路面与平台必须使用木质视觉：%s" % platform.name)
 		for plank in layout.get_node("Planks").get_children():
 			assert(plank.call("_uses_wood_surface"), "木板必须使用木质视觉：%s" % plank.name)
+		for plate in layout.get_node("Plates").get_children():
+			assert(plate.call("_is_pressure_plate"), "踏板必须使用双状态贴图：%s" % plate.name)
 		if index == 1:
 			for box_name in ["HeavyBox", "StepBox"]:
 				var box := layout.get_node("Boxes/%s" % box_name) as Chapter3LayoutItem

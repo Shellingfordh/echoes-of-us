@@ -941,6 +941,7 @@ func _sync_level_plates() -> void:
 	for index in range(mini(nodes.size(), level["plates"].size())):
 		var plate_node := nodes[index] as Node2D
 		var is_on: bool = level["plates"][index]["on"]
+		plate_node.set("plate_pressed", is_on)
 		if bool(plate_node.get_meta(&"runtime_on", false)) == is_on:
 			continue
 		plate_node.set_meta(&"runtime_on", is_on)

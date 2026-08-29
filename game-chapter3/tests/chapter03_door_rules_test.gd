@@ -81,6 +81,8 @@ func _run() -> void:
 	assert(chapter.level["plates"][0]["on"])
 	assert(chapter.level["doors"][0]["open"])
 	chapter._sync_scene_nodes()
+	var entrance_plate := chapter.get_node("World/LevelMount/CurrentLevel/Plates/EntrancePlate") as Chapter3LayoutItem
+	assert(entrance_plate.plate_pressed)
 	var entrance_door := chapter.get_node("World/LevelMount/CurrentLevel/Doors/EntranceDoor") as StaticBody2D
 	assert(not entrance_door.visible)
 	assert(entrance_door.get_node("CollisionShape2D").disabled)

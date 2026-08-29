@@ -1,6 +1,6 @@
 # 第三章现有素材接入清单
 
-第三章的 22 张候选 PNG 已从 `/Users/allen/Downloads/3/` 和 `/Users/allen/Downloads/4/` 复制到 `game-chapter3/assets/`，并使用英文资源名。Godot 通过当前工程内的 `res://assets/...` 直接访问，不依赖个人 Downloads 路径、仓库根素材目录或外部软链接。当前 16 张用于游戏画面，6 张仅保留为候选参考。原有 3 张楼梯/断梯图片因透视、比例和现有关卡结构不匹配，已从工程整体移除。
+第三章的 24 张候选 PNG 已复制或处理后保存到 `game-chapter3/assets/`，并使用英文资源名。Godot 通过当前工程内的 `res://assets/...` 直接访问，不依赖个人 Downloads 路径、仓库根素材目录或外部软链接。当前 18 张用于游戏画面，6 张仅保留为候选参考。原有 3 张楼梯/断梯图片因透视、比例和现有关卡结构不匹配，已从工程整体移除。
 
 ## 当前使用范围
 
@@ -11,6 +11,8 @@
 | `v.png` | `props/chapter3/platforms/prop_ch03_wood_floor_repeat.png` | 三关长路面与大型平台的连续木板结构 |
 | `a.png` | `props/chapter3/platforms/prop_ch03_wood_platform_long.png` | 中型悬空木平台与短路面 |
 | `w.png` | `props/chapter3/platforms/prop_ch03_wood_platform_bracket.png` | 窄平台与台阶的木质斜撑结构 |
+| 用户提供的抬起踏板图 | `props/chapter3/plates/prop_ch03_pressure_plate_raised.png` | 未触发踏板状态；透明背景游戏贴图 |
+| 用户提供的压下踏板图 | `props/chapter3/plates/prop_ch03_pressure_plate_pressed.png` | 已触发踏板状态；透明背景游戏贴图 |
 | `window.png` | `props/chapter3/prop_ch03_stairwell_window.png` | 候选参考；暖夕照与当前冷灰蓝楼道冲突，运行时停用 |
 | `factory-background.png` | `environments/chapter3/warehouse/environment_ch03_warehouse_background.png` | 仓库远景 |
 | `daughter-pipe.png` | `environments/chapter3/warehouse/environment_ch03_warehouse_low_tunnel.png` | 候选参考；圆管剖面不能替代仓库梁下低洞，运行时停用 |

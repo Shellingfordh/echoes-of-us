@@ -9,9 +9,13 @@ extends Node2D
 const WOOD_FLOOR_TEXTURE: Texture2D = preload("res://assets/props/chapter3/platforms/prop_ch03_wood_floor_repeat.png")
 const WOOD_LONG_PLATFORM_TEXTURE: Texture2D = preload("res://assets/props/chapter3/platforms/prop_ch03_wood_platform_long.png")
 const WOOD_BRACKET_PLATFORM_TEXTURE: Texture2D = preload("res://assets/props/chapter3/platforms/prop_ch03_wood_platform_bracket.png")
+const PRESSURE_PLATE_RAISED_TEXTURE: Texture2D = preload("res://assets/props/chapter3/plates/prop_ch03_pressure_plate_raised.png")
+const PRESSURE_PLATE_PRESSED_TEXTURE: Texture2D = preload("res://assets/props/chapter3/plates/prop_ch03_pressure_plate_pressed.png")
 const WOOD_FLOOR_REGION := Rect2(0.0, 202.0, 2048.0, 348.0)
 const WOOD_LONG_PLATFORM_REGION := Rect2(122.0, 224.0, 1809.0, 356.0)
 const WOOD_BRACKET_PLATFORM_REGION := Rect2(136.0, 71.0, 572.0, 564.0)
+const PRESSURE_PLATE_RAISED_REGION := Rect2(0.0, 9.0, 1660.0, 908.0)
+const PRESSURE_PLATE_PRESSED_REGION := Rect2(45.0, 37.0, 1933.0, 716.0)
 
 @export var size := Vector2(100.0, 40.0):
 	set(value):
@@ -33,10 +37,16 @@ const WOOD_BRACKET_PLATFORM_REGION := Rect2(136.0, 71.0, 572.0, 564.0)
 	set(value):
 		label_text = value
 		queue_redraw()
+@export var plate_pressed := false:
+	set(value):
+		plate_pressed = value
+		queue_redraw()
 
 
 func _draw() -> void:
-	if _uses_wood_surface():
+	if _is_pressure_plate():
+		_draw_pressure_plate()
+	elif _uses_wood_surface():
 		_draw_wood_surface()
 	else:
 		draw_rect(Rect2(Vector2.ZERO, size), fill_color)
@@ -51,6 +61,25 @@ func _draw() -> void:
 func _uses_wood_surface() -> bool:
 	var parent := get_parent()
 	return parent != null and (parent.name == &"Platforms" or parent.name == &"Planks")
+
+
+func _is_pressure_plate() -> bool:
+	var parent := get_parent()
+	return parent != null and parent.name == &"Plates"
+
+
+func _draw_pressure_plate() -> void:
+	var texture := PRESSURE_PLATE_PRESSED_TEXTURE if plate_pressed else PRESSURE_PLATE_RAISED_TEXTURE
+	var source_region := PRESSURE_PLATE_PRESSED_REGION if plate_pressed else PRESSURE_PLATE_RAISED_REGION
+	var visual_width := size.x + 18.0
+	var visual_height := visual_width * source_region.size.y / source_region.size.x
+	var destination := Rect2(
+		(size.x - visual_width) * 0.5,
+		size.y - visual_height,
+		visual_width,
+		visual_height
+	)
+	draw_texture_rect_region(texture, destination, source_region, Color.WHITE)
 
 
 func _draw_wood_surface() -> void:
