@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>《不断线》主页设计提案</title>
+  <style>
+    @font-face{font-family:noto;src:url('../game2.5d/art/fonts/NotoSansCJKsc-Regular.otf') format('opentype');font-display:swap}
+    :root{color-scheme:dark;--paper:#efe8db;--ink:#171411;--red:#a4473d}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#11100f;color:var(--paper);font-family:noto,'PingFang SC',sans-serif}
+    body{padding:clamp(24px,5vw,72px)}
+    header{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin-bottom:clamp(32px,5vw,72px)}
+    h1{margin:0;font:400 clamp(36px,5vw,74px)/1 'Songti SC',serif;letter-spacing:.04em}
+    header p{max-width:430px;margin:0;color:#aaa198;line-height:1.8}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+    a{color:inherit;text-decoration:none}
+    article{position:relative;min-height:68vh;overflow:hidden;border:1px solid #393531;background:#191715;transition:transform .35s ease,border-color .35s ease}
+    article:hover{transform:translateY(-7px);border-color:#7d746b}
+    img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:.58;transition:transform .7s ease,opacity .35s ease}
+    article:hover img{transform:scale(1.025);opacity:.72}
+    .shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 24%,rgba(0,0,0,.25) 54%,rgba(0,0,0,.94))}
+    .copy{position:absolute;left:0;right:0;bottom:0;padding:28px}
+    .num{font:400 12px/1 ui-monospace,monospace;letter-spacing:.22em;color:#cabfb3}
+    h2{margin:14px 0 10px;font:400 clamp(25px,2.3vw,38px)/1.2 'Songti SC',serif}
+    .copy p{margin:0 0 22px;color:#c3bcb4;line-height:1.7}
+    .open{display:flex;justify-content:space-between;border-top:1px solid #5b544d;padding-top:16px;font-size:14px;letter-spacing:.08em}
+    @media(max-width:900px){header{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}article{min-height:72vh}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>三种方式，<br>走进同一根线。</h1>
+    <p>《不断线 / Echoes of Us》游戏主页设计提案。三版均使用当前仓库中的正式人物、道具与场景素材。</p>
+  </header>
+  <main class="grid">
+    <a href="cinematic.html"><article>
+      <img src="concepts/01-cinematic-concept.png" alt="暮色电影叙事版概念图">
+      <div class="shade"></div><div class="copy"><span class="num">DIRECTION 01</span><h2>暮色电影叙事</h2><p>场景先行，以屋顶暮色、人物距离与章节切换建立情绪。</p><div class="open"><span>打开方案</span><span>↗</span></div></div>
+    </article></a>
+    <a href="relationship-lab.html"><article>
+      <img src="concepts/02-relationship-lab-concept.png" alt="关系物理实验场版概念图">
+      <div class="shade"></div><div class="copy"><span class="num">DIRECTION 02</span><h2>关系物理实验场</h2><p>把核心机制放在首页，拖动母女角色即可感受牵挂线张力。</p><div class="open"><span>打开方案</span><span>↗</span></div></div>
+    </article></a>
+    <a href="storybook.html"><article>
+      <img src="concepts/03-storybook-concept.png" alt="绘本记忆册版概念图">
+      <div class="shade"></div><div class="copy"><span class="num">DIRECTION 03</span><h2>绘本记忆册</h2><p>纸张、旧照片与黄伞构成轻盈的叙事入口，温柔而克制。</p><div class="open"><span>打开方案</span><span>↗</span></div></div>
+    </article></a>
+  </main>
+</body>
+</html>

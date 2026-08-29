@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17110d">
+  <title>不断线｜暮色电影叙事版</title>
+  <style>
+    @font-face{font-family:noto;src:url('../game2.5d/art/fonts/NotoSansCJKsc-Regular.otf') format('opentype');font-display:swap}
+    :root{--ink:#f1e7d5;--muted:#c1b5a3;--line:rgba(236,220,194,.28);--red:#b45348;--red-deep:#78332d;--black:#100d0a;--scene:url('../game-chapter3/assets/environments/chapter3/rooftop/environment_ch03_rooftop_full_scene.png')}
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--black);color:var(--ink);font-family:noto,'PingFang SC',sans-serif}
+    button,a{font:inherit;color:inherit}
+    button{cursor:pointer}
+    .page{position:relative;min-height:100%;isolation:isolate;background:#17110d}
+    .scene{position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(10,8,7,.96) 0%,rgba(12,9,7,.7) 33%,rgba(14,10,8,.16) 68%,rgba(11,8,6,.5) 100%),linear-gradient(180deg,rgba(4,3,2,.4),transparent 35%,rgba(5,4,3,.82)),var(--scene);background-position:center;background-size:cover;transition:opacity .35s ease,background-image .8s ease;z-index:-4}
+    .grain{position:absolute;inset:0;z-index:5;pointer-events:none;opacity:.1;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");mix-blend-mode:soft-light}
+    .characters{position:absolute;inset:74px 0 90px;z-index:-1;pointer-events:none;overflow:hidden}
+    .character{position:absolute;filter:saturate(.68) sepia(.12) contrast(1.05);transform-origin:bottom center;transition:opacity .6s ease,transform .8s cubic-bezier(.22,1,.36,1)}
+    .mother{height:min(66vw,790px);right:41%;bottom:-23%;opacity:.78;mask-image:linear-gradient(#000 70%,transparent 98%)}
+    .daughter{height:min(86vw,1050px);right:-5%;bottom:-41%;opacity:.96;mask-image:linear-gradient(#000 72%,transparent 97%)}
+    .thread{position:absolute;inset:0;z-index:0;width:100%;height:100%;pointer-events:none;filter:drop-shadow(0 0 6px rgba(180,56,48,.38))}
+    .thread path{fill:none;stroke:var(--red);stroke-width:1.35;stroke-linecap:round;stroke-dasharray:12 8;animation:drift 22s linear infinite}
+    @keyframes drift{to{stroke-dashoffset:-400}}
+    header{height:80px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 clamp(26px,4.5vw,74px);border-bottom:1px solid var(--line);position:relative;z-index:8}
+    .brand{display:flex;align-items:center;gap:14px;text-decoration:none;width:max-content}
+    .mark{width:28px;height:28px;border:1px solid var(--red);border-radius:50%;position:relative}
+    .mark:before,.mark:after{content:"";position:absolute;width:17px;height:17px;border:1px solid var(--red);border-radius:50%;top:7px}
+    .mark:before{left:-8px}.mark:after{right:-8px}
+    .brand strong{font:400 15px/1 'Songti SC',serif;letter-spacing:.25em}.brand small{display:block;margin-top:5px;font:400 8px/1 ui-monospace,monospace;letter-spacing:.3em;color:var(--muted)}
+    nav{display:flex;gap:clamp(26px,4vw,62px)}nav a{text-decoration:none;color:var(--muted);font-size:13px;letter-spacing:.18em;transition:color .25s}nav a:hover{color:var(--ink)}
+    .header-actions{justify-self:end;display:flex;align-items:center;gap:24px}.sound{border:0;background:none;color:var(--muted);padding:8px;font-size:12px;letter-spacing:.12em}.enter{border:0;border-bottom:1px solid var(--red);padding:11px 0;background:none;font-family:'Songti SC',serif;letter-spacing:.16em}
+    main{height:calc(100vh - 80px);min-height:600px;display:grid;grid-template-rows:1fr auto;padding:0 clamp(26px,4.5vw,74px);position:relative;z-index:2}
+    .hero{align-self:center;max-width:650px;padding-bottom:3vh}
+    h1{font:400 clamp(76px,10.3vw,158px)/.86 'Songti SC','STSong',serif;letter-spacing:.05em;margin:0;text-shadow:0 3px 24px #000}
+    .english{display:block;margin:26px 0 28px;font:400 clamp(16px,1.7vw,25px)/1 Georgia,serif;letter-spacing:.43em}
+    .tagline{margin:0 0 30px;color:#dfd1bd;font:400 clamp(16px,1.5vw,22px)/1.7 'Songti SC',serif;letter-spacing:.15em}
+    .actions{display:flex;align-items:center;gap:28px}.primary{min-width:250px;border:1px solid #d08b80;background:linear-gradient(135deg,var(--red-deep),#934a42);padding:19px 26px;display:flex;justify-content:space-between;align-items:center;letter-spacing:.18em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.09),0 16px 40px rgba(0,0,0,.25);transition:transform .25s,filter .25s}.primary:hover{transform:translateY(-3px);filter:brightness(1.12)}
+    .secondary{border:0;background:none;padding:10px 0;border-bottom:1px solid var(--muted);color:var(--muted);letter-spacing:.14em}
+    .rail{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);height:86px}
+    .chapter{position:relative;border:0;border-right:1px solid var(--line);background:transparent;color:#b9ad9c;text-align:center;font-family:'Songti SC',serif;font-size:17px;letter-spacing:.14em;transition:color .3s}.chapter:last-child{border-right:0}.chapter:after{content:"";position:absolute;left:0;bottom:0;width:0;height:2px;background:var(--red);transition:width .5s}.chapter.active{color:var(--ink)}.chapter.active:after{width:100%}
+    .variant-nav{position:absolute;right:22px;top:50%;transform:translateY(-50%);z-index:10;display:flex;flex-direction:column;gap:8px}.variant-nav a{display:grid;place-items:center;width:30px;height:30px;border:1px solid rgba(255,255,255,.22);text-decoration:none;font:10px ui-monospace,monospace;color:#b6aa9b;background:rgba(0,0,0,.25)}.variant-nav a[aria-current=true]{border-color:var(--red);color:white}
+    dialog{border:1px solid #6d5b50;background:#17120e;color:var(--ink);padding:0;width:min(520px,calc(100vw - 40px));box-shadow:0 50px 120px #000}dialog::backdrop{background:rgba(6,4,3,.76);backdrop-filter:blur(8px)}.modal{padding:38px}.modal h2{font:400 38px/1.15 'Songti SC',serif;margin:0 0 16px}.modal p{color:var(--muted);line-height:1.9}.keys{margin:24px 0;display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line)}.keys span{padding:12px;border-right:1px solid var(--line);font-size:12px;color:#c9beae}.keys span:nth-child(even){border-right:0}.close{width:100%;padding:14px;background:var(--red-deep);color:white;border:1px solid #b76f66;letter-spacing:.16em}
+    @media(max-width:800px){header{grid-template-columns:1fr auto;height:68px;padding:0 20px}nav{display:none}.header-actions{gap:12px}.header-actions .enter{display:none}.characters{inset:68px 0 82px}.mother{height:72vh;right:8%;bottom:-22%;opacity:.36}.daughter{height:82vh;right:-43%;bottom:-31%;opacity:.7}.scene{background-position:58% center}.hero{align-self:end;padding-bottom:25vh;max-width:460px}h1{font-size:clamp(66px,22vw,108px)}.english{font-size:13px;letter-spacing:.24em}.tagline{font-size:15px;max-width:270px}.actions{align-items:flex-start;flex-direction:column;gap:8px}.primary{min-width:210px}.rail{height:70px}.chapter{font-size:14px}.variant-nav{display:none}main{padding:0 20px;min-height:540px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="scene" aria-hidden="true"></div><div class="grain" aria-hidden="true"></div>
+    <div class="characters" aria-hidden="true">
+      <img class="character mother" src="../assets/余秀兰（48）：正常状态(透).png" alt="">
+      <img class="character daughter" src="../assets/余念（23）：正常状态(透).png" alt="">
+    </div>
+    <svg class="thread" viewBox="0 0 1536 1024" preserveAspectRatio="none" aria-hidden="true"><path id="threadPath" d="M -20 520 C 250 420, 380 580, 620 500 S 940 620, 1120 620 S 1370 720, 1580 800"/></svg>
+    <header>
+      <a class="brand" href="index.html" aria-label="返回设计方案首页"><span class="mark"></span><span><strong>不断线</strong><small>ECHOES OF US</small></span></a>
+      <nav aria-label="主导航"><a href="#story">故事</a><a href="#gameplay">玩法</a><a href="#characters">角色</a></nav>
+      <div class="header-actions"><button class="sound" id="sound" type="button">声音 · 关</button><button class="enter" id="headerEnter" type="button">进入游戏　→</button></div>
+    </header>
+    <main>
+      <section class="hero" aria-labelledby="title">
+        <h1 id="title">不断线</h1><span class="english">ECHOES OF US</span>
+        <p class="tagline" id="tagline">有些距离，不会让人真正分开。</p>
+        <div class="actions"><button class="primary" id="start" type="button"><span>开始游戏</span><span>→</span></button><button class="secondary" id="trailer" type="button">观看预告　▶</button></div>
+      </section>
+      <div class="rail" aria-label="章节场景">
+        <button class="chapter" data-scene="0" type="button">旧屋</button><button class="chapter" data-scene="1" type="button">雨巷</button><button class="chapter active" data-scene="2" type="button">天台</button>
+      </div>
+    </main>
+    <aside class="variant-nav" aria-label="切换设计方案"><a href="cinematic.html" aria-current="true">01</a><a href="relationship-lab.html">02</a><a href="storybook.html">03</a></aside>
+  </div>
+  <audio id="ambience" loop preload="none" src="../game2.5d/art/House In a Forest Loop.ogg"></audio>
+  <dialog id="startDialog"><div class="modal"><h2>线还连着。</h2><p>当前仓库中的正式可玩入口为 <strong>game2.5d</strong>。从旧屋出发，在距离与记忆之间寻找答案。</p><div class="keys"><span>WASD　移动</span><span>Enter　调查</span><span>S　蹲下</span><span>Esc　退出观察</span></div><button class="close" type="button">继续留在主页</button></div></dialog>
+  <script>
+    const scenes=[
+      {image:"../game-chapter3/assets/environments/chapter3/stairwell/environment_ch03_stairwell_full_scene.png",line:"回到旧屋，拾起那些没说完的话。"},
+      {image:"../game-chapter3/assets/environments/chapter3/warehouse/environment_ch03_warehouse_full_scene.png",line:"穿过雨与旧物，记忆开始重叠。"},
+      {image:"../game-chapter3/assets/environments/chapter3/rooftop/environment_ch03_rooftop_full_scene.png",line:"有些距离，不会让人真正分开。"}
+    ];
+    const root=document.documentElement,scene=document.querySelector('.scene'),tagline=document.querySelector('#tagline'),chapters=[...document.querySelectorAll('.chapter')];
+    let active=2,previewTimer;
+    function selectScene(index){active=index;scene.style.opacity='.35';setTimeout(()=>{root.style.setProperty('--scene',`url('${scenes[index].image}')`);tagline.textContent=scenes[index].line;chapters.forEach((b,i)=>b.classList.toggle('active',i===index));scene.style.opacity='1'},230)}
+    chapters.forEach(button=>button.addEventListener('click',()=>{clearInterval(previewTimer);selectScene(Number(button.dataset.scene))}));
+    document.querySelector('#trailer').addEventListener('click',event=>{clearInterval(previewTimer);event.currentTarget.textContent='预告播放中　■';let count=0;selectScene(0);previewTimer=setInterval(()=>{count++;if(count>2){clearInterval(previewTimer);event.currentTarget.textContent='重新观看　▶';return}selectScene(count)},1800)});
+    const dialog=document.querySelector('#startDialog');document.querySelector('#start').onclick=()=>dialog.showModal();document.querySelector('#headerEnter').onclick=()=>dialog.showModal();document.querySelector('.close').onclick=()=>dialog.close();dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+    const audio=document.querySelector('#ambience'),sound=document.querySelector('#sound');sound.onclick=async()=>{if(audio.paused){try{await audio.play();sound.textContent='声音 · 开'}catch{sound.textContent='声音不可用'}}else{audio.pause();sound.textContent='声音 · 关'}};
+    const path=document.querySelector('#threadPath');window.addEventListener('pointermove',e=>{const y=470+(e.clientY/window.innerHeight-.5)*80;path.setAttribute('d',`M -20 520 C 250 ${y-50}, 390 ${y+70}, 620 ${y} S 940 ${y+120}, 1120 ${y+100} S 1370 ${y+210}, 1580 ${y+250}`)},{passive:true});
+  </script>
+</body>
+</html>
