@@ -1,2735 +1,1402 @@
-```html
 <!doctype html>
+
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#22211f">
-
-  <meta
-    name="description"
-    content="不断线｜Echoes of Us"
-  >
-
+  <meta name="format-detection" content="telephone=no">
   <title>不断线｜Echoes of Us</title>
 
   <style>
-    @font-face {
-      font-family: noto;
-      src: url("game2.5d/art/fonts/NotoSansCJKsc-Regular.otf")
-        format("opentype");
-      font-display: swap;
+    @font-face{
+      font-family:noto;
+      src:url('game2.5d/art/fonts/NotoSansCJKsc-Regular.otf') format('opentype');
+      font-display:swap
     }
 
-    :root {
-      --paper: #e2d9ca;
-      --muted: #a79e91;
-      --red: #a84c43;
-      --yellow: #c99b43;
-      --graphite: #22211f;
-      --rule: #4a4742;
-      --thread-color: #b76b4d;
-
-      --rail-width: 146px;
-      --utility-height: 80px;
+    :root{
+      --paper:#e2d9ca;
+      --muted:#a79e91;
+      --red:#a84c43;
+      --yellow:#c99b43;
+      --graphite:#22211f;
+      --rule:#4a4742;
+      --thread-color:#b76b4d
     }
 
-    * {
-      box-sizing: border-box;
+    *{
+      box-sizing:border-box
     }
 
-    html {
-      width: 100%;
-      height: 100%;
-      background: var(--graphite);
+    html,
+    body{
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background:var(--graphite);
+      color:var(--paper);
+      font-family:noto,'PingFang SC',sans-serif;
+      -webkit-text-size-adjust:100%;
     }
 
-    body {
-      margin: 0;
-      width: 100%;
-      min-height: 100%;
-      background: var(--graphite);
-      color: var(--paper);
-      font-family: noto, "PingFang SC", "Microsoft YaHei", sans-serif;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+    body{
+      overscroll-behavior:none;
     }
 
     button,
-    a,
-    input,
-    video {
-      font: inherit;
+    a{
+      color:inherit;
+      font:inherit
     }
 
-    button,
-    a {
-      color: inherit;
+    button{
+      cursor:pointer;
+      -webkit-tap-highlight-color:transparent
     }
 
-    button {
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    a {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /*
-      ============================================================
-      PAGE
-      ============================================================
-    */
-
-    .page {
-      position: relative;
-      isolation: isolate;
-
-      width: 100%;
-      min-height: 100vh;
-      min-height: 100svh;
-
-      display: grid;
-      grid-template-columns: var(--rail-width) minmax(0, 1fr);
-
-      overflow: hidden;
-
+    .page{
+      height:100%;
+      min-height:100dvh;
+      display:grid;
+      grid-template-columns:146px 1fr;
+      position:relative;
+      isolation:isolate;
       background:
-        radial-gradient(
-          circle at 56% 38%,
-          #2b2926 0,
-          transparent 42%
-        ),
-        #22211f;
+        radial-gradient(circle at 56% 38%,#2b2926 0,transparent 42%),
+        #22211f
     }
 
-    .page::after {
-      content: "";
-
-      position: absolute;
-      inset: 0;
-
-      z-index: 100;
-
-      pointer-events: none;
-
-      opacity: 0.13;
-
-      background-image:
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
-
-      mix-blend-mode: soft-light;
+    .page:after{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:12;
+      pointer-events:none;
+      opacity:.13;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+      mix-blend-mode:soft-light
     }
 
-    /*
-      ============================================================
-      TITLE RAIL
-      ============================================================
-    */
-
-    .title-rail {
-      position: relative;
-      z-index: 110;
-
-      min-width: 0;
-
-      border-right: 1px solid var(--rule);
-
-      padding:
-        42px
-        30px
-        calc(28px + env(safe-area-inset-bottom));
-
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .title-rail{
+      border-right:1px solid var(--rule);
+      padding:42px 30px 28px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      position:relative;
+      z-index:8
     }
 
-    .title-rail a {
-      text-decoration: none;
+    .title-rail a{
+      text-decoration:none
     }
 
-    .zh-title {
-      margin: 0;
-
-      writing-mode: vertical-rl;
-
-      font:
-        400
-        clamp(45px, 5.2vw, 74px)
-        / 1
-        "Songti SC",
-        "STSong",
-        serif;
-
-      letter-spacing: 0.08em;
+    .zh-title{
+      margin:0;
+      writing-mode:vertical-rl;
+      font:400 clamp(45px,5.2vw,74px)/1 'Songti SC',serif;
+      letter-spacing:.08em
     }
 
-    .red-rule {
-      width: 1px;
-      height: 92px;
-
-      background: var(--red);
-
-      margin: 22px 0;
+    .red-rule{
+      width:1px;
+      height:92px;
+      background:var(--red);
+      margin:22px 0
     }
 
-    .en-title {
-      writing-mode: vertical-rl;
-
-      font:
-        400
-        10px
-        / 1.8
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        monospace;
-
-      letter-spacing: 0.38em;
-
-      color: #c8bfb0;
+    .en-title{
+      writing-mode:vertical-rl;
+      font:400 10px/1.8 ui-monospace,monospace;
+      letter-spacing:.38em;
+      color:#c8bfb0
     }
 
-    .knot {
-      margin-top: auto;
-
-      color: var(--red);
-
-      font-size: 29px;
-
-      transform: rotate(45deg);
+    .knot{
+      margin-top:auto;
+      color:var(--red);
+      font-size:29px;
+      transform:rotate(45deg)
     }
 
-    /*
-      ============================================================
-      MAIN CANVAS
-      ============================================================
-    */
-
-    .canvas {
-      position: relative;
-
-      min-width: 0;
-      min-height: 0;
-
-      overflow: hidden;
-
-      touch-action: none;
+    .canvas{
+      position:relative;
+      min-width:0;
+      overflow:hidden;
+      touch-action:none
     }
 
-    /*
-      ============================================================
-      UTILITY
-      ============================================================
-    */
-
-    .utility {
-      position: absolute;
-
-      top: 0;
-      right: 0;
-
-      height: var(--utility-height);
-
-      z-index: 30;
-
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-
-      gap: 20px;
-
-      padding:
-        0
-        48px
-        0
-        20px;
+    .utility{
+      height:80px;
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:20px;
+      padding:0 48px;
+      position:relative;
+      z-index:8
     }
 
-    .utility button {
-      border: 0;
-      background: transparent;
-
-      color: #c8beb0;
-
-      font-size: 13px;
-      letter-spacing: 0.15em;
-
-      padding: 8px;
-
-      transition:
-        color 0.2s ease,
-        opacity 0.2s ease;
+    .utility button{
+      background:0;
+      border:0;
+      color:#c8beb0;
+      font-size:13px;
+      letter-spacing:.15em;
+      padding:8px;
+      transition:color .2s
     }
 
     .utility button:hover,
-    .utility button:focus-visible {
-      color: #fff;
+    .utility button:focus-visible{
+      color:#fff
     }
 
-    .utility .slash {
-      color: #6f6961;
-      user-select: none;
+    .utility .slash{
+      color:#6f6961
     }
 
-    /*
-      ============================================================
-      RELATION THREAD
-      ============================================================
-    */
-
-    #threadSvg {
-      position: absolute;
-
-      inset: 0;
-
-      width: 100%;
-      height: 100%;
-
-      z-index: 4;
-
-      pointer-events: none;
-
-      overflow: visible;
-
-      filter: drop-shadow(0 2px 2px #000);
-    }
-
-    #thread,
-    #threadShadow {
-      fill: none;
-
-      stroke: var(--thread-color);
-
-      stroke-linecap: round;
-
-      transition:
-        stroke 0.12s ease;
-    }
-
-    #thread {
-      stroke-width: 3;
-    }
-
-    #threadShadow {
-      stroke-width: 8;
-      opacity: 0.2;
-    }
-
-    /*
-      ============================================================
-      PORTRAITS
-      ============================================================
-    */
-
-    .portrait {
-      position: absolute;
-
-      width: clamp(205px, 20vw, 330px);
-      aspect-ratio: 1;
-
-      border-radius:
-        49%
-        51%
-        47%
-        53%;
-
-      background: #d9cfbf;
-
+    .portrait{
+      position:absolute;
+      width:clamp(205px,20vw,330px);
+      aspect-ratio:1;
+      border-radius:49% 51% 47% 53%;
+      background:#d9cfbf;
       box-shadow:
         0 2px 0 #776d61,
-        0 18px 50px rgba(0, 0, 0, 0.35);
-
-      z-index: 8;
-
-      cursor: grab;
-
-      user-select: none;
-      -webkit-user-select: none;
-
-      touch-action: none;
-
+        0 18px 50px rgba(0,0,0,.35);
+      z-index:5;
+      cursor:grab;
+      user-select:none;
+      touch-action:none;
       transition:
-        box-shadow 0.2s ease,
-        filter 0.35s ease;
+        box-shadow .2s,
+        filter .35s
     }
 
-    .portrait:active {
-      cursor: grabbing;
-
+    .portrait:active{
+      cursor:grabbing;
       box-shadow:
         0 0 0 1px var(--thread-color),
-        0 25px 70px rgba(0, 0, 0, 0.5);
+        0 25px 70px rgba(0,0,0,.5)
     }
 
-    .portrait::before {
-      content: "";
-
-      position: absolute;
-
-      inset: -8px;
-
-      border-radius:
-        48%
-        52%
-        50%
-        46%;
-
-      border: 2px solid #a29889;
-
-      filter: url(#rough);
-
-      opacity: 0.65;
-
-      pointer-events: none;
+    .portrait:before{
+      content:"";
+      position:absolute;
+      inset:-8px;
+      border-radius:48% 52% 50% 46%;
+      border:2px solid #a29889;
+      filter:url(#rough);
+      opacity:.65
     }
 
-    .portrait img {
-      width: 100%;
-      height: 100%;
-
-      object-fit: cover;
-      object-position: center 15%;
-
-      border-radius: inherit;
-
-      pointer-events: none;
-
-      filter:
-        saturate(0.75)
-        contrast(0.94);
+    .portrait img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center 15%;
+      border-radius:inherit;
+      pointer-events:none;
+      filter:saturate(.75) contrast(.94)
     }
 
-    .portrait .anchor {
-      position: absolute;
-
-      width: 28px;
-      height: 28px;
-
-      border-radius: 50%;
-
-      background: #2b2824;
-
-      border: 5px solid #8a7e6e;
-
+    .portrait .anchor{
+      position:absolute;
+      width:28px;
+      height:28px;
+      border-radius:50%;
+      background:#2b2824;
+      border:5px solid #8a7e6e;
       box-shadow:
         inset 0 0 0 3px var(--thread-color),
         0 2px 10px #000;
+      bottom:-10px;
+      left:50%;
+      transform:translateX(-50%);
+      transition:box-shadow .2s
+    }
 
-      bottom: -10px;
-      left: 50%;
+    .portrait .name{
+      position:absolute;
+      top:calc(100% + 34px);
+      left:50%;
+      transform:translateX(-50%);
+      white-space:nowrap;
+      font:400 clamp(18px,1.6vw,27px)/1 'Songti SC',serif;
+      letter-spacing:.2em
+    }
 
-      transform: translateX(-50%);
+    #daughter{
+      left:11%;
+      top:12%
+    }
 
+    #mother{
+      right:6%;
+      top:20%
+    }
+
+    #threadSvg{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:4;
+      pointer-events:none;
+      overflow:visible;
+      filter:drop-shadow(0 2px 2px #000)
+    }
+
+    #thread{
+      fill:none;
+      stroke:var(--thread-color);
+      stroke-width:3;
+      stroke-linecap:round;
+      transition:stroke .12s
+    }
+
+    #threadShadow{
+      fill:none;
+      stroke:var(--thread-color);
+      stroke-width:8;
+      stroke-linecap:round;
+      opacity:.2;
+      transition:stroke .12s
+    }
+
+    .state{
+      position:absolute;
+      z-index:6;
+      left:50%;
+      top:45%;
+      transform:translate(-50%,-50%);
+      display:flex;
+      gap:20px;
+      align-items:center;
+      color:#aaa194;
+      font-family:'Songti SC',serif;
+      letter-spacing:.18em;
+      pointer-events:none
+    }
+
+    .state span{
       transition:
-        box-shadow 0.2s ease;
+        color .2s,
+        border-color .2s
     }
 
-    .portrait .name {
-      position: absolute;
-
-      top: calc(100% + 34px);
-      left: 50%;
-
-      transform: translateX(-50%);
-
-      white-space: nowrap;
-
-      font:
-        400
-        clamp(18px, 1.6vw, 27px)
-        / 1
-        "Songti SC",
-        "STSong",
-        serif;
-
-      letter-spacing: 0.2em;
+    .state span.active{
+      color:var(--thread-color);
+      border-bottom:1px solid var(--thread-color);
+      padding-bottom:7px
     }
 
-    #daughter {
-      left: 11%;
-      top: 12%;
+    .state i{
+      font-style:normal;
+      color:#65605a
     }
 
-    #mother {
-      right: 6%;
-      top: 20%;
+    .instruction{
+      position:absolute;
+      z-index:7;
+      left:50%;
+      bottom:30%;
+      transform:translateX(-50%);
+      color:#aaa195;
+      font:400 14px/1.5 'Songti SC',serif;
+      letter-spacing:.15em;
+      white-space:nowrap
     }
 
-    /*
-      ============================================================
-      STATE
-      ============================================================
-    */
-
-    .state {
-      position: absolute;
-
-      z-index: 9;
-
-      left: 50%;
-      top: 45%;
-
-      transform: translate(-50%, -50%);
-
-      display: flex;
-      align-items: center;
-
-      gap: 20px;
-
-      color: #aaa194;
-
-      font:
-        400
-        16px
-        / 1
-        "Songti SC",
-        "STSong",
-        serif;
-
-      letter-spacing: 0.18em;
-
-      pointer-events: none;
-
-      white-space: nowrap;
+    .instruction:before,
+    .instruction:after{
+      content:"↝";
+      display:inline-block;
+      margin:0 22px;
+      color:#6d6760
     }
 
-    .state span {
+    .instruction:before{
+      transform:scaleX(-1)
+    }
+
+    .enter-wrap{
+      position:absolute;
+      z-index:7;
+      left:50%;
+      bottom:8%;
+      transform:translateX(-50%);
+      display:flex;
+      align-items:center;
+      gap:28px
+    }
+
+    .memory-button{
+      width:174px;
+      height:174px;
+      border-radius:50%;
+      border:1px solid #d1c6b7;
+      background:transparent;
+      color:var(--paper);
+      font:400 25px/1 'Songti SC',serif;
+      letter-spacing:.1em;
+      white-space:nowrap;
+      position:relative
+    }
+
+    .memory-button:before,
+    .memory-button:after{
+      content:"";
+      position:absolute;
+      border:1px solid rgba(218,205,185,.12);
+      border-radius:50%;
+      inset:-18px;
       transition:
-        color 0.2s ease,
-        border-color 0.2s ease;
+        transform .4s,
+        opacity .4s
     }
 
-    .state span.active {
-      color: var(--thread-color);
-
-      border-bottom: 1px solid var(--thread-color);
-
-      padding-bottom: 7px;
+    .memory-button:after{
+      inset:-37px;
+      opacity:.55
     }
 
-    .state i {
-      font-style: normal;
-      color: #65605a;
+    .memory-button:hover:before{
+      transform:scale(1.12);
+      opacity:0
     }
 
-    /*
-      ============================================================
-      INSTRUCTION
-      ============================================================
-    */
-
-    .instruction {
-      position: absolute;
-
-      z-index: 9;
-
-      left: 50%;
-      bottom: 30%;
-
-      transform: translateX(-50%);
-
-      margin: 0;
-
-      color: #aaa195;
-
-      font:
-        400
-        14px
-        / 1.5
-        "Songti SC",
-        "STSong",
-        serif;
-
-      letter-spacing: 0.15em;
-
-      white-space: nowrap;
-
-      pointer-events: none;
+    .memory-button:hover:after{
+      transform:scale(.9);
+      opacity:.9
     }
 
-    .instruction::before,
-    .instruction::after {
-      content: "↝";
-
-      display: inline-block;
-
-      margin: 0 22px;
-
-      color: #6d6760;
-    }
-
-    .instruction::before {
-      transform: scaleX(-1);
-    }
-
-    /*
-      ============================================================
-      ENTER AREA
-      ============================================================
-    */
-
-    .enter-wrap {
-      position: absolute;
-
-      z-index: 15;
-
-      left: 50%;
-      bottom: 8%;
-
-      transform: translateX(-50%);
-
-      display: flex;
-      align-items: center;
-
-      gap: 28px;
-
-      white-space: nowrap;
-    }
-
-    .memory-button {
-      width: 174px;
-      height: 174px;
-
-      border-radius: 50%;
-
-      border: 1px solid #d1c6b7;
-
-      background: transparent;
-
-      color: var(--paper);
-
-      font:
-        400
-        25px
-        / 1
-        "Songti SC",
-        "STSong",
-        serif;
-
-      letter-spacing: 0.1em;
-
-      position: relative;
-    }
-
-    .memory-button::before,
-    .memory-button::after {
-      content: "";
-
-      position: absolute;
-
-      border: 1px solid rgba(218, 205, 185, 0.12);
-
-      border-radius: 50%;
-
-      inset: -18px;
-
-      transition:
-        transform 0.4s ease,
-        opacity 0.4s ease;
-    }
-
-    .memory-button::after {
-      inset: -37px;
-      opacity: 0.55;
-    }
-
-    .memory-button:hover::before {
-      transform: scale(1.12);
-      opacity: 0;
-    }
-
-    .memory-button:hover::after {
-      transform: scale(0.9);
-      opacity: 0.9;
-    }
-
-    .continue {
-      border: 0;
-
-      background: none;
-
-      color: #b9afa1;
-
-      border-bottom: 1px solid var(--red);
-
-      padding: 8px 0;
-
-      letter-spacing: 0.1em;
-
-      text-decoration: none;
+    .continue{
+      border:0;
+      background:none;
+      color:#b9afa1;
+      border-bottom:1px solid var(--red);
+      padding:8px 0;
+      letter-spacing:.1em;
+      text-decoration:none;
+      white-space:nowrap
     }
 
     .continue:hover,
-    .continue:focus-visible {
-      color: #fff;
+    .continue:focus-visible{
+      color:#fff
+    }
+
+    .prop{
+      position:absolute;
+      z-index:2;
+      pointer-events:none;
+      filter:saturate(.72) sepia(.16);
+      opacity:.78
+    }
+
+    .umbrella{
+      width:min(27vw,330px);
+      left:-5%;
+      bottom:-12%;
+      transform:rotate(-28deg)
+    }
+
+    .frame{
+      width:min(25vw,330px);
+      right:-6%;
+      bottom:-14%;
+      transform:rotate(-14deg)
+    }
+
+    .memory-layer{
+      position:absolute;
+      inset:0;
+      z-index:10;
+      display:grid;
+      place-items:center;
+      background:rgba(224,215,199,.96);
+      color:#27231f;
+      clip-path:circle(0 at 50% 76%);
+      transition:clip-path 1s cubic-bezier(.7,0,.2,1);
+      pointer-events:none
+    }
+
+    .memory-layer.open{
+      clip-path:circle(110% at 50% 76%);
+      pointer-events:auto
+    }
+
+    .memory-inner{
+      text-align:center;
+      max-width:620px;
+      padding:30px
+    }
+
+    .memory-inner h2{
+      font:400 clamp(42px,6vw,82px)/1.2 'Songti SC',serif;
+      margin:0
+    }
+
+    .memory-inner p{
+      line-height:2;
+      color:#6d6257
+    }
+
+    .memory-inner button{
+      margin-top:24px;
+      padding:13px 30px;
+      border:1px solid #3a332d;
+      background:transparent;
+      letter-spacing:.15em
     }
 
     /*
-      ============================================================
-      DECORATIVE PROPS
-      ============================================================
-    */
-
-    .prop {
-      position: absolute;
-
-      z-index: 2;
-
-      pointer-events: none;
-
-      filter:
-        saturate(0.72)
-        sepia(0.16);
-
-      opacity: 0.78;
-    }
-
-    .umbrella {
-      width: min(27vw, 330px);
-
-      left: -5%;
-      bottom: -12%;
-
-      transform: rotate(-28deg);
-    }
-
-    .frame {
-      width: min(25vw, 330px);
-
-      right: -6%;
-      bottom: -14%;
-
-      transform: rotate(-14deg);
-    }
-
-    /*
-      ============================================================
-      MEMORY
-      ============================================================
-    */
-
-    .memory-layer {
-      position: absolute;
-
-      inset: 0;
-
-      z-index: 50;
-
-      display: grid;
-      place-items: center;
-
-      padding:
-        30px
-        24px
-        calc(30px + env(safe-area-inset-bottom));
-
-      background: rgba(224, 215, 199, 0.96);
-
-      color: #27231f;
-
-      clip-path:
-        circle(
-          0
-          at
-          50%
-          76%
-        );
-
-      transition:
-        clip-path 1s cubic-bezier(0.7, 0, 0.2, 1);
-
-      pointer-events: none;
-    }
-
-    .memory-layer.open {
-      clip-path:
-        circle(
-          110%
-          at
-          50%
-          76%
-        );
-
-      pointer-events: auto;
-    }
-
-    .memory-inner {
-      width: min(620px, 100%);
-
-      padding: 30px;
-
-      text-align: center;
-    }
-
-    .memory-inner h2 {
-      margin: 0;
-
-      font:
-        400
-        clamp(42px, 6vw, 82px)
-        / 1.2
-        "Songti SC",
-        "STSong",
-        serif;
-    }
-
-    .memory-inner p {
-      margin: 28px 0 0;
-
-      line-height: 2;
-
-      color: #6d6257;
-    }
-
-    .memory-inner button {
-      margin-top: 24px;
-
-      padding: 13px 30px;
-
-      border: 1px solid #3a332d;
-
-      background: transparent;
-
-      letter-spacing: 0.15em;
-    }
-
-    /*
-      ============================================================
+      ==========================
       MEDIA LAYER
-      ============================================================
+      ==========================
     */
 
-    .media-layer {
-      position: absolute;
-
-      inset: 0;
-
-      z-index: 80;
-
-      display: grid;
-      place-items: center;
-
+    .media-layer{
+      position:absolute;
+      inset:0;
+      z-index:20;
+      display:grid;
+      place-items:center;
       padding:
-        42px
-        42px
-        calc(42px + env(safe-area-inset-bottom));
-
-      background: rgba(24, 23, 21, 0.94);
-
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-
+        max(42px,env(safe-area-inset-top))
+        max(42px,env(safe-area-inset-right))
+        max(42px,env(safe-area-inset-bottom))
+        max(42px,env(safe-area-inset-left));
+      background:rgba(24,23,21,.94);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
       transition:
-        opacity 0.35s ease,
-        visibility 0.35s ease;
+        opacity .35s,
+        visibility .35s
     }
 
-    .media-layer.open {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
+    .media-layer.open{
+      opacity:1;
+      visibility:visible;
+      pointer-events:auto
     }
 
-    .media-shell {
-      width: min(1120px, 94%);
-      height: min(760px, 88%);
-
-      min-height: 0;
-
-      display: grid;
-
-      grid-template-rows:
-        auto
-        minmax(0, 1fr);
-
-      gap: 22px;
+    .media-shell{
+      width:min(1120px,94%);
+      height:min(760px,88%);
+      min-height:0;
+      display:grid;
+      grid-template-rows:auto minmax(0,1fr);
+      gap:22px
     }
 
-    .media-heading {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-
-      border-bottom: 1px solid #514b43;
-
-      padding-bottom: 18px;
-
-      gap: 20px;
+    .media-heading{
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      border-bottom:1px solid #514b43;
+      padding-bottom:18px;
+      min-width:0
     }
 
-    .media-heading p {
-      margin: 0 0 7px;
-
-      color: var(--thread-color);
-
-      font:
-        11px
-        / 1
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        monospace;
-
-      letter-spacing: 0.24em;
+    .media-heading > div{
+      min-width:0
     }
 
-    .media-heading h2 {
-      margin: 0;
-
-      font:
-        400
-        clamp(30px, 4vw, 58px)
-        / 1
-        "Songti SC",
-        "STSong",
-        serif;
-
-      letter-spacing: 0.08em;
+    .media-heading p{
+      margin:0 0 7px;
+      color:var(--thread-color);
+      font:11px/1 ui-monospace,monospace;
+      letter-spacing:.24em
     }
 
-    .media-close {
-      flex: 0 0 auto;
-
-      width: 44px;
-      height: 44px;
-
-      border: 1px solid #6a6258;
-
-      border-radius: 50%;
-
-      background: transparent;
-
-      color: #ddd2c1;
-
-      font-size: 24px;
-      line-height: 1;
+    .media-heading h2{
+      margin:0;
+      font:400 clamp(30px,4vw,58px)/1 'Songti SC',serif;
+      letter-spacing:.08em
     }
 
-    .media-panel {
-      min-height: 0;
+    .media-close{
+      width:44px;
+      height:44px;
+      flex:0 0 44px;
+      border:1px solid #6a6258;
+      border-radius:50%;
+      background:transparent;
+      color:#ddd2c1;
+      font-size:24px;
+      line-height:1;
+      margin-left:20px
     }
 
-    .media-panel[hidden] {
-      display: none;
+    .media-panel{
+      min-height:0
+    }
+
+    .media-panel[hidden]{
+      display:none
     }
 
     /*
-      ============================================================
-      VIDEO
-      ============================================================
+      Trailer:
+      Desktop = video + note
+      Mobile = video + note vertically
     */
 
-    .trailer-panel {
-      height: 100%;
-
-      display: grid;
-
-      grid-template-columns:
-        minmax(0, 1fr)
-        220px;
-
-      gap: 28px;
-
-      align-items: center;
+    .trailer-panel{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 220px;
+      gap:28px;
+      align-items:center;
+      height:100%;
+      min-height:0
     }
 
-    .video-wrap {
-      width: 100%;
-
-      min-width: 0;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      min-height: 0;
+    .trailer-panel video{
+      display:block;
+      width:100%;
+      aspect-ratio:967/544;
+      height:auto;
+      max-height:100%;
+      object-fit:contain;
+      background:#080808;
+      box-shadow:0 28px 80px rgba(0,0,0,.42);
+      border:1px solid #4b4540;
+      border-radius:2px
     }
 
-    .trailer-panel video {
-      display: block;
-
-      width: 100%;
-      height: auto;
-
-      max-width: 100%;
-      max-height: 100%;
-
-      aspect-ratio: 967 / 544;
-
-      object-fit: contain;
-
-      background: #080808;
-
-      box-shadow:
-        0 28px 80px rgba(0, 0, 0, 0.42);
-
-      border: 1px solid #4b4540;
-
-      /*
-        iOS / Safari
-      */
-      -webkit-appearance: none;
-      -webkit-tap-highlight-color: transparent;
+    .media-note{
+      align-self:end;
+      border-left:1px solid var(--thread-color);
+      padding-left:18px;
+      color:#a9a094;
+      line-height:1.8;
+      font-size:13px
     }
 
-    .media-note {
-      align-self: end;
-
-      margin: 0;
-
-      border-left: 1px solid var(--thread-color);
-
-      padding-left: 18px;
-
-      color: #a9a094;
-
-      line-height: 1.8;
-
-      font-size: 13px;
-    }
-
-    .media-note b {
-      display: block;
-
-      color: #ded4c5;
-
-      font:
-        400
-        21px
-        / 1.4
-        "Songti SC",
-        "STSong",
-        serif;
-
-      letter-spacing: 0.12em;
-
-      margin-bottom: 10px;
+    .media-note b{
+      display:block;
+      color:#ded4c5;
+      font:400 21px/1.4 'Songti SC',serif;
+      letter-spacing:.12em;
+      margin-bottom:10px
     }
 
     /*
-      ============================================================
-      GUIDE
-      ============================================================
+      Guide
     */
 
-    .guide-panel {
-      height: 100%;
-
-      display: grid;
-
-      grid-template-columns:
-        minmax(270px, 0.8fr)
-        minmax(0, 1.55fr);
-
-      gap: 44px;
-
-      overflow: auto;
-
-      padding:
-        8px
-        2px
-        4px;
+    .guide-panel{
+      height:100%;
+      display:grid;
+      grid-template-columns:minmax(270px,.8fr) minmax(0,1.55fr);
+      gap:44px;
+      overflow:auto;
+      padding:8px 2px 4px
     }
 
-    .guide-lead {
-      position: relative;
-
-      overflow: hidden;
-
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-
-      border: 1px solid #5c554c;
-
-      padding: 34px;
-
+    .guide-lead{
+      position:relative;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      border:1px solid #5c554c;
+      padding:34px;
       background:
-        radial-gradient(
-          circle at 15% 10%,
-          rgba(192, 138, 79, 0.17),
-          transparent 42%
-        ),
-        #1b1a18;
+        radial-gradient(circle at 15% 10%,rgba(192,138,79,.17),transparent 42%),
+        #1b1a18
     }
 
-    .guide-lead::after {
-      content: "";
-
-      position: absolute;
-
-      width: 130%;
-      height: 1px;
-
-      left: -15%;
-      top: 66%;
-
-      background: var(--thread-color);
-
-      transform: rotate(-8deg);
-
-      box-shadow:
-        0 0 18px var(--thread-color);
+    .guide-lead:after{
+      content:"";
+      position:absolute;
+      width:130%;
+      height:1px;
+      left:-15%;
+      top:66%;
+      background:var(--thread-color);
+      transform:rotate(-8deg);
+      box-shadow:0 0 18px var(--thread-color)
     }
 
-    .guide-index {
-      color: var(--thread-color);
-
-      font:
-        10px
-        / 1
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        monospace;
-
-      letter-spacing: 0.2em;
+    .guide-index{
+      color:var(--thread-color);
+      font:10px/1 ui-monospace,monospace;
+      letter-spacing:.2em
     }
 
-    .guide-lead h3 {
-      position: relative;
-      z-index: 1;
-
-      margin: 0;
-
-      font:
-        400
-        clamp(35px, 4vw, 56px)
-        / 1.35
-        "Songti SC",
-        "STSong",
-        serif;
-
-      letter-spacing: 0.08em;
+    .guide-lead h3{
+      position:relative;
+      z-index:1;
+      margin:0;
+      font:400 clamp(35px,4vw,56px)/1.35 'Songti SC',serif;
+      letter-spacing:.08em
     }
 
-    .guide-lead p {
-      position: relative;
-      z-index: 1;
-
-      margin: 0;
-
-      color: #b6ad9f;
-
-      font-size: 12px;
-
-      letter-spacing: 0.12em;
+    .guide-lead p{
+      position:relative;
+      z-index:1;
+      margin:0;
+      color:#b6ad9f;
+      font-size:12px;
+      letter-spacing:.12em
     }
 
-    .guide-content {
-      display: grid;
-
-      grid-template-rows:
-        auto
-        1fr
-        auto;
-
-      gap: 24px;
-
-      min-height: 0;
-
-      overflow: auto;
-
-      padding-right: 10px;
+    .guide-content{
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      gap:24px;
+      min-height:0;
+      overflow:auto;
+      padding-right:10px
     }
 
-    .guide-story {
-      border-bottom: 1px solid #4b4640;
-
-      padding:
-        4px
-        0
-        24px;
+    .guide-story{
+      border-bottom:1px solid #4b4640;
+      padding:4px 0 24px
     }
 
-    .guide-kicker {
-      display: block;
-
-      margin-bottom: 12px;
-
-      color: var(--thread-color);
-
-      font:
-        11px
-        / 1
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        monospace;
-
-      letter-spacing: 0.2em;
+    .guide-kicker{
+      display:block;
+      margin-bottom:12px;
+      color:var(--thread-color);
+      font:11px/1 ui-monospace,monospace;
+      letter-spacing:.2em
     }
 
-    .guide-story p {
-      margin: 0;
-
-      color: #d1c7b8;
-
-      font:
-        15px
-        / 2
-        "Songti SC",
-        "STSong",
-        serif;
+    .guide-story p{
+      margin:0;
+      color:#d1c7b8;
+      font:15px/2 'Songti SC',serif
     }
 
-    .guide-steps {
-      display: grid;
-
-      grid-template-columns:
-        repeat(
-          3,
-          minmax(0, 1fr)
-        );
-
-      gap: 12px;
+    .guide-steps{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px
     }
 
-    .guide-step {
-      border-top: 1px solid #6a6258;
-
-      padding: 17px 14px 14px;
-
-      background: rgba(255, 255, 255, 0.018);
+    .guide-step{
+      border-top:1px solid #6a6258;
+      padding:17px 14px 14px;
+      background:rgba(255,255,255,.018)
     }
 
-    .guide-step > span {
-      color: var(--thread-color);
-
-      font:
-        10px
-        / 1
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        monospace;
+    .guide-step span{
+      color:var(--thread-color);
+      font:10px/1 ui-monospace,monospace
     }
 
-    .guide-step h4 {
-      margin:
-        12px
-        0
-        8px;
-
-      font:
-        400
-        21px
-        / 1.2
-        "Songti SC",
-        "STSong",
-        serif;
-
-      letter-spacing: 0.1em;
+    .guide-step h4{
+      margin:12px 0 8px;
+      font:400 21px/1.2 'Songti SC',serif;
+      letter-spacing:.1em
     }
 
-    .guide-step p {
-      margin: 0;
-
-      color: #a9a094;
-
-      font-size: 12px;
-
-      line-height: 1.75;
+    .guide-step p{
+      margin:0;
+      color:#a9a094;
+      font-size:12px;
+      line-height:1.75
     }
 
-    .guide-goal {
-      margin: 0;
-
-      border-left: 1px solid var(--thread-color);
-
-      padding:
-        3px
-        0
-        3px
-        16px;
-
-      color: #b9b0a3;
-
-      font-size: 12px;
-
-      line-height: 1.75;
+    .guide-goal{
+      margin:0;
+      border-left:1px solid var(--thread-color);
+      padding:3px 0 3px 16px;
+      color:#b9b0a3;
+      font-size:12px;
+      line-height:1.75
     }
 
-    .guide-goal b {
-      color: #e2d9ca;
-
-      font-weight: 400;
-
-      letter-spacing: 0.12em;
+    .guide-goal b{
+      color:#e2d9ca;
+      font-weight:400;
+      letter-spacing:.12em
     }
 
     /*
-      ============================================================
-      TABLET
-      ============================================================
-    */
-
-    @media (max-width: 900px) and (min-width: 761px) {
-      :root {
-        --rail-width: 92px;
-      }
-
-      .title-rail {
-        padding-left: 20px;
-        padding-right: 20px;
-      }
-
-      .zh-title {
-        font-size: 48px;
-      }
-
-      .utility {
-        padding-right: 24px;
-      }
-
-      .portrait {
-        width: min(27vw, 260px);
-      }
-
-      #daughter {
-        left: 7%;
-      }
-
-      #mother {
-        right: 4%;
-      }
-
-      .trailer-panel {
-        grid-template-columns: 1fr;
-        grid-template-rows:
-          minmax(0, 1fr)
-          auto;
-      }
-
-      .media-note {
-        align-self: auto;
-      }
-    }
-
-    /*
-      ============================================================
+      ==========================
       MOBILE
-      ============================================================
+      ==========================
     */
 
-    @media (max-width: 760px) {
-
-      :root {
-        --rail-width: 58px;
-        --utility-height: 54px;
-      }
+    @media(max-width:760px){
 
       html,
-      body {
-        width: 100%;
-        min-height: 100%;
-        overflow: hidden;
+      body{
+        overflow:hidden
       }
 
-      .page {
-        width: 100%;
+      .page{
+        grid-template-columns:72px 1fr;
+        min-height:100dvh
+      }
 
-        height: 100vh;
-        height: 100svh;
-        min-height: 100svh;
+      .title-rail{
+        padding:24px 16px
+      }
 
-        grid-template-columns: var(--rail-width) minmax(0, 1fr);
+      .zh-title{
+        font-size:39px
+      }
 
-        overflow: hidden;
+      .en-title{
+        display:none
+      }
+
+      .red-rule{
+        height:60px
+      }
+
+      .utility{
+        height:58px;
+        padding:0 12px;
+        gap:4px
+      }
+
+      .utility .slash{
+        display:none
+      }
+
+      .utility button{
+        font-size:11px;
+        padding:7px 5px;
+        letter-spacing:.08em
+      }
+
+      .portrait{
+        width:44vw
+      }
+
+      .portrait .name{
+        font-size:16px;
+        top:calc(100% + 22px)
+      }
+
+      #daughter{
+        left:4%;
+        top:18%
+      }
+
+      #mother{
+        right:-4%;
+        top:32%
+      }
+
+      .state{
+        top:15%;
+        font-size:12px;
+        gap:8px
+      }
+
+      .instruction{
+        bottom:28%;
+        font-size:12px
+      }
+
+      .instruction:before,
+      .instruction:after{
+        display:none
+      }
+
+      .enter-wrap{
+        bottom:5%;
+        gap:12px
+      }
+
+      .memory-button{
+        width:124px;
+        height:124px;
+        flex:0 0 124px;
+        font-size:18px;
+        letter-spacing:.04em
+      }
+
+      .continue{
+        font-size:12px;
+        padding:7px 0
+      }
+
+      .umbrella{
+        width:220px;
+        left:-26%;
+        bottom:-7%
+      }
+
+      .frame{
+        width:210px;
+        right:-23%;
+        bottom:-7%
       }
 
       /*
-        ----------------------------------------
-        MOBILE RAIL
-        ----------------------------------------
+        Mobile media overlay
       */
 
-      .title-rail {
-        width: var(--rail-width);
-
+      .media-layer{
         padding:
-          22px
-          10px
-          calc(18px + env(safe-area-inset-bottom));
-
-        align-items: center;
-
-        overflow: hidden;
+          max(14px,env(safe-area-inset-top))
+          max(14px,env(safe-area-inset-right))
+          max(14px,env(safe-area-inset-bottom))
+          max(14px,env(safe-area-inset-left))
       }
 
-      .zh-title {
-        font-size: 35px;
-
-        letter-spacing: 0.04em;
+      .media-shell{
+        width:100%;
+        height:100%;
+        max-height:100%;
+        gap:12px
       }
 
-      .red-rule {
-        height: 54px;
-
-        margin: 17px 0;
+      .media-heading{
+        padding-bottom:11px;
+        align-items:center
       }
 
-      .en-title {
-        display: none;
+      .media-heading p{
+        font-size:8px;
+        margin-bottom:5px;
+        letter-spacing:.15em
       }
 
-      .knot {
-        font-size: 23px;
+      .media-heading h2{
+        font-size:27px;
+        line-height:1.15
       }
 
-      /*
-        ----------------------------------------
-        MOBILE CANVAS
-        ----------------------------------------
-      */
-
-      .canvas {
-        width: 100%;
-        height: 100%;
-
-        min-height: 0;
-
-        overflow: hidden;
+      .media-close{
+        width:40px;
+        height:40px;
+        flex-basis:40px;
+        margin-left:10px
       }
 
-      /*
-        ----------------------------------------
-        MOBILE UTILITY
-        ----------------------------------------
-      */
-
-      .utility {
-        position: absolute;
-
-        top: 0;
-        right: 0;
-
-        width: 100%;
-        height: var(--utility-height);
-
-        padding:
-          env(safe-area-inset-top)
-          12px
-          0
-          8px;
-
-        gap: 4px;
-
-        justify-content: flex-end;
+      .trailer-panel{
+        grid-template-columns:1fr;
+        grid-template-rows:minmax(0,1fr) auto;
+        gap:12px;
+        height:100%;
+        overflow:hidden
       }
 
-      .utility button {
-        font-size: 11px;
-
-        padding:
-          8px
-          5px;
-
-        letter-spacing: 0.07em;
+      .trailer-panel video{
+        width:100%;
+        height:auto;
+        max-height:100%;
+        min-height:0;
+        aspect-ratio:967/544;
+        object-fit:contain;
+        align-self:center
       }
 
-      .utility .slash {
-        display: none;
+      .media-note{
+        align-self:auto;
+        padding-left:12px;
+        font-size:11px;
+        line-height:1.55;
+        max-height:88px;
+        overflow:auto
       }
 
-      /*
-        ----------------------------------------
-        MOBILE PORTRAITS
-        ----------------------------------------
-
-        不再使用桌面端 11% / right 6%。
-        手机屏幕使用明确区域。
-      */
-
-      .portrait {
-        width: clamp(
-          118px,
-          34vw,
-          165px
-        );
-
-        box-shadow:
-          0 2px 0 #776d61,
-          0 12px 32px rgba(0, 0, 0, 0.38);
+      .media-note b{
+        font-size:17px;
+        margin-bottom:5px
       }
 
-      .portrait::before {
-        inset: -5px;
+      .guide-panel{
+        grid-template-columns:1fr;
+        gap:14px;
+        padding:0 2px 12px;
+        overflow:auto
       }
 
-      .portrait .anchor {
-        width: 23px;
-        height: 23px;
-
-        border-width: 4px;
-
-        bottom: -8px;
+      .guide-lead{
+        min-height:190px;
+        padding:22px
       }
 
-      .portrait .name {
-        top: calc(100% + 18px);
-
-        font-size: 15px;
-
-        letter-spacing: 0.13em;
+      .guide-lead h3{
+        font-size:32px;
+        line-height:1.25
       }
 
-      /*
-        初始位置专门针对手机。
-      */
-
-      #daughter {
-        left: 5%;
-        top: 20%;
+      .guide-content{
+        overflow:visible;
+        padding-right:0;
+        gap:16px
       }
 
-      #mother {
-        right: 5%;
-        top: 31%;
+      .guide-story{
+        padding-bottom:16px
       }
 
-      /*
-        ----------------------------------------
-        MOBILE STATE
-        ----------------------------------------
-      */
-
-      .state {
-        top: 56%;
-
-        gap: 8px;
-
-        font-size: 11px;
-
-        letter-spacing: 0.12em;
+      .guide-story p{
+        font-size:13px;
+        line-height:1.85
       }
 
-      .state span.active {
-        padding-bottom: 5px;
+      .guide-steps{
+        grid-template-columns:1fr
       }
 
-      /*
-        ----------------------------------------
-        MOBILE INSTRUCTION
-        ----------------------------------------
-      */
-
-      .instruction {
-        left: 50%;
-
-        bottom: 24%;
-
-        width: calc(100% - 24px);
-
-        text-align: center;
-
-        white-space: normal;
-
-        font-size: 11px;
-
-        line-height: 1.7;
-
-        letter-spacing: 0.1em;
+      .guide-step{
+        padding:14px
       }
 
-      .instruction::before,
-      .instruction::after {
-        display: none;
-      }
-
-      /*
-        ----------------------------------------
-        MOBILE ENTER
-        ----------------------------------------
-      */
-
-      .enter-wrap {
-        left: 50%;
-
-        bottom:
-          calc(
-            5%
-            + env(safe-area-inset-bottom)
-          );
-
-        width: 100%;
-
-        padding:
-          0
-          14px;
-
-        justify-content: center;
-
-        gap: 16px;
-
-        white-space: normal;
-      }
-
-      .memory-button {
-        flex: 0 0 auto;
-
-        width: clamp(
-          112px,
-          31vw,
-          138px
-        );
-
-        height: clamp(
-          112px,
-          31vw,
-          138px
-        );
-
-        font-size: 17px;
-
-        letter-spacing: 0.04em;
-      }
-
-      .memory-button::before {
-        inset: -12px;
-      }
-
-      .memory-button::after {
-        inset: -24px;
-      }
-
-      .continue {
-        flex: 0 0 auto;
-
-        font-size: 12px;
-
-        padding:
-          7px
-          0;
-
-        letter-spacing: 0.06em;
-      }
-
-      /*
-        ----------------------------------------
-        MOBILE PROPS
-        ----------------------------------------
-      */
-
-      .umbrella {
-        width: 190px;
-
-        left: -34%;
-        bottom: -6%;
-
-        opacity: 0.55;
-      }
-
-      .frame {
-        width: 175px;
-
-        right: -34%;
-        bottom: -6%;
-
-        opacity: 0.55;
-      }
-
-      /*
-        ----------------------------------------
-        MOBILE MEMORY
-        ----------------------------------------
-      */
-
-      .memory-layer {
-        padding:
-          24px
-          18px
-          calc(
-            24px
-            + env(safe-area-inset-bottom)
-          );
-      }
-
-      .memory-inner {
-        padding: 18px;
-      }
-
-      .memory-inner h2 {
-        font-size: clamp(
-          38px,
-          11vw,
-          58px
-        );
-
-        line-height: 1.25;
-      }
-
-      .memory-inner p {
-        margin-top: 22px;
-
-        font-size: 13px;
-
-        line-height: 1.9;
-      }
-
-      .memory-inner button {
-        margin-top: 20px;
-
-        padding:
-          12px
-          22px;
-
-        font-size: 12px;
-      }
-
-      /*
-        ----------------------------------------
-        MOBILE MEDIA LAYER
-        ----------------------------------------
-      */
-
-      .media-layer {
-        /*
-          不再依赖桌面的 42px padding。
-          手机直接占满可用空间。
-        */
-
-        padding:
-          calc(
-            12px
-            + env(safe-area-inset-top)
-          )
-          12px
-          calc(
-            12px
-            + env(safe-area-inset-bottom)
-          );
-      }
-
-      .media-shell {
-        width: 100%;
-        height: 100%;
-
-        max-height: none;
-
-        display: grid;
-
-        grid-template-rows:
-          auto
-          minmax(0, 1fr);
-
-        gap: 12px;
-      }
-
-      .media-heading {
-        min-height: 48px;
-
-        padding-bottom: 10px;
-
-        gap: 10px;
-      }
-
-      .media-heading p {
-        margin-bottom: 5px;
-
-        font-size: 8px;
-
-        letter-spacing: 0.14em;
-      }
-
-      .media-heading h2 {
-        font-size: 28px;
-
-        letter-spacing: 0.05em;
-      }
-
-      .media-close {
-        width: 40px;
-        height: 40px;
-
-        font-size: 21px;
-      }
-
-      /*
-        ----------------------------------------
-        MOBILE VIDEO
-        ----------------------------------------
-
-        视频不再被固定 height / grid 强制拉伸。
-      */
-
-      .trailer-panel {
-        width: 100%;
-        height: 100%;
-
-        min-height: 0;
-
-        display: flex;
-
-        flex-direction: column;
-
-        justify-content: center;
-
-        align-items: stretch;
-
-        gap: 16px;
-
-        overflow: auto;
-
-        -webkit-overflow-scrolling: touch;
-      }
-
-      .video-wrap {
-        flex:
-          0 0 auto;
-
-        width: 100%;
-
-        display: flex;
-
-        align-items: center;
-        justify-content: center;
-      }
-
-      .trailer-panel video {
-        display: block;
-
-        width: 100%;
-        height: auto;
-
-        max-width: 100%;
-
-        /*
-          关键：
-          手机横向视频保持比例，不超过当前可视区域。
-        */
-
-        max-height: 55svh;
-
-        aspect-ratio: 967 / 544;
-
-        object-fit: contain;
-
-        background: #080808;
-
-        border: 1px solid #4b4540;
-
-        box-shadow:
-          0 18px 45px rgba(0, 0, 0, 0.45);
-      }
-
-      .media-note {
-        width: 100%;
-
-        flex: 0 0 auto;
-
-        margin: 0;
-
-        padding:
-          10px
-          0
-          0
-          14px;
-
-        border-left: 1px solid var(--thread-color);
-
-        font-size: 11px;
-
-        line-height: 1.7;
-      }
-
-      .media-note b {
-        font-size: 18px;
-
-        line-height: 1.45;
-
-        margin-bottom: 7px;
-      }
-
-      /*
-        ----------------------------------------
-        MOBILE GUIDE
-        ----------------------------------------
-      */
-
-      .guide-panel {
-        width: 100%;
-        height: 100%;
-
-        display: block;
-
-        overflow-y: auto;
-        overflow-x: hidden;
-
-        padding:
-          2px
-          2px
-          20px;
-
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
-      }
-
-      .guide-lead {
-        min-height: 210px;
-
-        padding: 22px;
-
-        margin-bottom: 16px;
-      }
-
-      .guide-index {
-        font-size: 9px;
-      }
-
-      .guide-lead h3 {
-        font-size: 31px;
-
-        line-height: 1.28;
-      }
-
-      .guide-lead p {
-        font-size: 10px;
-      }
-
-      .guide-content {
-        display: block;
-
-        min-height: auto;
-
-        overflow: visible;
-
-        padding: 0;
-      }
-
-      .guide-story {
-        padding:
-          0
-          0
-          18px;
-
-        margin-bottom: 18px;
-      }
-
-      .guide-kicker {
-        font-size: 9px;
-
-        margin-bottom: 9px;
-      }
-
-      .guide-story p {
-        font-size: 13px;
-
-        line-height: 1.85;
-      }
-
-      .guide-steps {
-        display: grid;
-
-        grid-template-columns: 1fr;
-
-        gap: 10px;
-
-        margin-bottom: 18px;
-      }
-
-      .guide-step {
-        padding:
-          14px
-          13px;
-      }
-
-      .guide-step h4 {
-        margin:
-          8px
-          0
-          5px;
-
-        font-size: 18px;
-      }
-
-      .guide-step p {
-        font-size: 11px;
-
-        line-height: 1.75;
-      }
-
-      .guide-goal {
-        padding-left: 13px;
-
-        font-size: 11px;
-
-        line-height: 1.8;
+      .guide-step h4{
+        font-size:18px;
+        margin:8px 0 5px
       }
     }
 
     /*
-      ============================================================
-      VERY SMALL PHONES
-      ============================================================
+      Very narrow phones
     */
 
-    @media (max-width: 380px) {
+    @media(max-width:390px){
 
-      :root {
-        --rail-width: 52px;
+      .page{
+        grid-template-columns:60px 1fr
       }
 
-      .title-rail {
-        padding-left: 8px;
-        padding-right: 8px;
+      .title-rail{
+        padding-left:10px;
+        padding-right:10px
       }
 
-      .zh-title {
-        font-size: 31px;
+      .zh-title{
+        font-size:34px
       }
 
-      .red-rule {
-        height: 48px;
+      .portrait{
+        width:43vw
       }
 
-      .portrait {
-        width: 116px;
+      .memory-button{
+        width:108px;
+        height:108px;
+        flex-basis:108px;
+        font-size:16px
       }
 
-      #daughter {
-        left: 4%;
-        top: 19%;
+      .continue{
+        font-size:10px
       }
 
-      #mother {
-        right: 4%;
-        top: 30%;
+      .media-heading h2{
+        font-size:24px
       }
 
-      .state {
-        top: 55%;
+      .media-note{
+        font-size:10px
       }
 
-      .instruction {
-        bottom: 23%;
-      }
-
-      .enter-wrap {
-        gap: 11px;
-
-        padding-left: 8px;
-        padding-right: 8px;
-      }
-
-      .memory-button {
-        width: 106px;
-        height: 106px;
-
-        font-size: 15px;
-      }
-
-      .continue {
-        font-size: 11px;
-      }
-
-      .trailer-panel video {
-        max-height: 48svh;
-      }
-
-      .media-heading h2 {
-        font-size: 25px;
+      .media-note b{
+        font-size:15px
       }
     }
 
     /*
-      ============================================================
-      LANDSCAPE MOBILE
-      ============================================================
+      Landscape phone
     */
 
-    @media (max-width: 760px) and (orientation: landscape) {
+    @media(max-width:900px) and (orientation:landscape) and (max-height:520px){
 
-      .page {
-        grid-template-columns: 54px minmax(0, 1fr);
+      .media-shell{
+        height:100%;
+        width:96%
       }
 
-      .title-rail {
-        padding-top: 15px;
+      .media-heading{
+        padding-bottom:8px
       }
 
-      .zh-title {
-        font-size: 28px;
+      .media-heading h2{
+        font-size:24px
       }
 
-      .red-rule {
-        height: 35px;
-        margin: 10px 0;
+      .trailer-panel{
+        grid-template-columns:minmax(0,1fr) 170px;
+        grid-template-rows:1fr
       }
 
-      .portrait {
-        width: 110px;
-      }
-
-      #daughter {
-        left: 12%;
-        top: 18%;
-      }
-
-      #mother {
-        right: 12%;
-        top: 18%;
-      }
-
-      .state {
-        top: 48%;
-      }
-
-      .instruction {
-        bottom: 20%;
-      }
-
-      .enter-wrap {
-        bottom: 4%;
-
-        gap: 14px;
-      }
-
-      .memory-button {
-        width: 92px;
-        height: 92px;
-
-        font-size: 14px;
-      }
-
-      .media-layer {
-        padding:
-          8px
-          12px
-          8px;
-      }
-
-      .media-shell {
-        gap: 8px;
-      }
-
-      .media-heading {
-        min-height: 38px;
-
-        padding-bottom: 7px;
-      }
-
-      .media-heading h2 {
-        font-size: 23px;
-      }
-
-      .trailer-panel {
-        flex-direction: row;
-
-        align-items: center;
-
-        gap: 14px;
-
-        overflow: hidden;
-      }
-
-      .video-wrap {
-        flex: 1 1 auto;
-
-        min-width: 0;
-        min-height: 0;
-      }
-
-      .trailer-panel video {
-        max-height: 72svh;
-      }
-
-      .media-note {
-        flex: 0 0 155px;
-
-        width: 155px;
+      .media-note{
+        max-height:none
       }
     }
 
-    /*
-      ============================================================
-      ACCESSIBILITY
-      ============================================================
-    */
-
-    :focus-visible {
-      outline:
-        1px solid
-        var(--thread-color);
-
-      outline-offset: 4px;
-    }
-
-    /*
-      ============================================================
-      REDUCED MOTION
-      ============================================================
-    */
-
-    @media (prefers-reduced-motion: reduce) {
+    @media(prefers-reduced-motion:reduce){
 
       *,
-      *::before,
-      *::after {
-        animation: none !important;
-
-        transition: none !important;
-
-        scroll-behavior: auto !important;
+      *:before,
+      *:after{
+        animation:none!important;
+        transition:none!important
       }
     }
   </style>
+
 </head>
 
 <body>
 
   <div class="page" id="top">
 
-    <!-- ========================================================
-         TITLE RAIL
-         ======================================================== -->
+```
+<aside class="title-rail">
+  <a href="#top" aria-label="返回页面顶部">
+    <h1 class="zh-title">不断线</h1>
+  </a>
 
-    <aside class="title-rail">
+  <span class="red-rule"></span>
 
-      <a
-        href="#top"
-        aria-label="返回页面顶部"
-      >
-        <h1 class="zh-title">
-          不断线
-        </h1>
-      </a>
+  <span class="en-title">ECHOES OF US</span>
 
-      <span class="red-rule"></span>
+  <span class="knot">⌁</span>
+</aside>
 
-      <span class="en-title">
-        ECHOES OF US
-      </span>
+<main class="canvas" id="canvas">
 
-      <span class="knot">
-        ⌁
-      </span>
+  <div class="utility">
+    <button id="openTrailer" type="button">宣传片</button>
+    <span class="slash">/</span>
+    <button id="openGuide" type="button">游戏说明</button>
+    <span class="slash">/</span>
+    <button id="sound" type="button">声音 · 关</button>
+  </div>
 
-    </aside>
+  <svg id="threadSvg" aria-hidden="true">
+    <defs>
+      <filter id="rough">
+        <feTurbulence
+          baseFrequency="0.04"
+          numOctaves="2"
+          result="noise"
+        />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="noise"
+          scale="2"
+        />
+      </filter>
+    </defs>
 
+    <path id="threadShadow"/>
+    <path id="thread"/>
+  </svg>
 
-    <!-- ========================================================
-         MAIN CANVAS
-         ======================================================== -->
-
-    <main
-      class="canvas"
-      id="canvas"
+  <div
+    class="portrait"
+    id="daughter"
+    role="button"
+    tabindex="0"
+    aria-label="拖动余念，改变关系距离"
+  >
+    <img
+      src="assets/余念（23）：正常状态(透).png"
+      alt="余念"
     >
-
-      <!-- ======================================================
-           UTILITY
-           ====================================================== -->
-
-      <div class="utility">
-
-        <button
-          id="openTrailer"
-          type="button"
-        >
-          宣传片
-        </button>
-
-        <span class="slash">/</span>
-
-        <button
-          id="openGuide"
-          type="button"
-        >
-          游戏说明
-        </button>
-
-        <span class="slash">/</span>
-
-        <button
-          id="sound"
-          type="button"
-          aria-pressed="false"
-        >
-          声音 · 关
-        </button>
-
-      </div>
-
-
-      <!-- ======================================================
-           THREAD
-           ====================================================== -->
-
-      <svg
-        id="threadSvg"
-        aria-hidden="true"
-      >
-
-        <defs>
-
-          <filter id="rough">
-
-            <feTurbulence
-              baseFrequency="0.04"
-              numOctaves="2"
-              result="noise"
-            />
-
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="noise"
-              scale="2"
-            />
-
-          </filter>
-
-        </defs>
-
-        <path id="threadShadow"></path>
-        <path id="thread"></path>
-
-      </svg>
-
-
-      <!-- ======================================================
-           DAUGHTER
-           ====================================================== -->
-
-      <div
-        class="portrait"
-        id="daughter"
-        role="button"
-        tabindex="0"
-        aria-label="拖动余念，改变关系距离"
-      >
-
-        <img
-          src="assets/余念（23）：正常状态(透).png"
-          alt="余念"
-          draggable="false"
-        >
-
-        <span class="anchor"></span>
-
-        <span class="name">
-          余念
-        </span>
-
-      </div>
-
-
-      <!-- ======================================================
-           MOTHER
-           ====================================================== -->
-
-      <div
-        class="portrait"
-        id="mother"
-        role="button"
-        tabindex="0"
-        aria-label="拖动余秀兰，改变关系距离"
-      >
-
-        <img
-          src="assets/余秀兰（48）：正常状态(透).png"
-          alt="余秀兰"
-          draggable="false"
-        >
-
-        <span class="anchor"></span>
-
-        <span class="name">
-          余秀兰
-        </span>
-
-      </div>
-
-
-      <!-- ======================================================
-           RELATION STATE
-           ====================================================== -->
-
-      <div
-        class="state"
-        aria-live="polite"
-      >
-
-        <span data-state="close">
-          靠近
-        </span>
-
-        <i>/</i>
-
-        <span data-state="tense">
-          拉扯
-        </span>
-
-        <i>/</i>
-
-        <span
-          data-state="stable"
-          class="active"
-        >
-          稳定
-        </span>
-
-      </div>
-
-
-      <!-- ======================================================
-           INSTRUCTION
-           ====================================================== -->
-
-      <p class="instruction">
-        移动她们，感受距离。
-      </p>
-
-
-      <!-- ======================================================
-           ENTER
-           ====================================================== -->
-
-      <div class="enter-wrap">
-
-        <button
-          class="memory-button"
-          id="openMemory"
-          type="button"
-        >
-          进入记忆
-        </button>
-
-        <!-- GitHub Releases -->
-
-        <a
-          class="continue"
-          id="downloadGame"
-          href="https://github.com/Shellingfordh/echoes-of-us/releases"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          下载 macOS 版
-        </a>
-
-      </div>
-
-
-      <!-- ======================================================
-           DECORATIVE PROPS
-           ====================================================== -->
-
-      <img
-        class="prop umbrella"
-        src="game2.5d/art/cute-umbrella.png"
-        alt=""
-        aria-hidden="true"
-        draggable="false"
-      >
-
-      <img
-        class="prop frame"
-        src="game2.5d/art/photo-frame.png"
-        alt=""
-        aria-hidden="true"
-        draggable="false"
-      >
-
-
-      <!-- ======================================================
-           MEMORY LAYER
-           ====================================================== -->
-
-      <section
-        class="memory-layer"
-        id="memoryLayer"
-        aria-hidden="true"
-      >
-
-        <div class="memory-inner">
-
-          <h2>
-            距离会变，<br>
-            关系不会消失。
-          </h2>
-
-          <p>
-            线没有断。它只是从拉扯，慢慢变成了一种安静的连接。
-          </p>
-
-          <button
-            id="closeMemory"
-            type="button"
-          >
-            回到关系实验场
-          </button>
-
-        </div>
-
-      </section>
-
-
-      <!-- ======================================================
-           MEDIA LAYER
-           ====================================================== -->
-
-      <section
-        class="media-layer"
-        id="mediaLayer"
-        aria-hidden="true"
-        aria-labelledby="mediaTitle"
-      >
-
-        <div class="media-shell">
-
-          <!-- HEADER -->
-
-          <header class="media-heading">
-
-            <div>
-
-              <p id="mediaEyebrow">
-                OFFICIAL MEDIA ARCHIVE
-              </p>
-
-              <h2 id="mediaTitle">
-                游戏宣传片
-              </h2>
-
-            </div>
-
-            <button
-              class="media-close"
-              id="closeMedia"
-              type="button"
-              aria-label="关闭媒体窗口"
-            >
-              ×
-            </button>
-
-          </header>
-
-
-          <!-- ==================================================
-               TRAILER
-               ================================================== -->
-
-          <div
-            class="media-panel trailer-panel"
-            id="trailerPanel"
-          >
-
-            <div class="video-wrap">
-
-              <video
-                id="promoVideo"
-                controls
-                playsinline
-                webkit-playsinline
-                preload="metadata"
-                poster="homepage-variants/image1.png"
-              >
-
-                <source
-                  src="homepage-variants/game-video.mp4"
-                  type="video/mp4"
-                >
-
-                你的浏览器暂不支持视频播放。
-
-              </video>
-
-            </div>
-
-            <p class="media-note">
-
-              <b>
-                一根看不见的线，<br>
-                连接两段人生。
-              </b>
-
-              游戏宣传片 · 02:03<br>
-              建议佩戴耳机观看
-
-            </p>
-
-          </div>
-
-
-          <!-- ==================================================
-               GUIDE
-               ================================================== -->
-
-          <div
-            class="media-panel guide-panel"
-            id="guidePanel"
-            hidden
-          >
-
-            <aside class="guide-lead">
-
-              <span class="guide-index">
-                HOW TO PLAY · 01
-              </span>
-
-              <h3>
-                牵挂，<br>
-                既是束缚，<br>
-                也是力量。
-              </h3>
-
-              <p>
-                单人叙事解谜 · 双角色协作
-              </p>
-
-            </aside>
-
-
-            <div class="guide-content">
-
-              <section class="guide-story">
-
-                <span class="guide-kicker">
-                  STORY · 故事背景
-                </span>
-
-                <p>
-                  23岁的余念即将离开生活多年的北方小城，前往千里之外开始第一份工作。出发这天，她意外发现自己能看见连接人与人之间的“牵挂线”。而连接她与母亲的那根线，会随着距离和情绪变化而绷紧，甚至将她一次次拉回原地。
-                </p>
-
-              </section>
-
-
-              <section
-                class="guide-steps"
-                aria-label="核心玩法"
-              >
-
-                <article class="guide-step">
-
-                  <span>01</span>
-
-                  <h4>
-                    双人切换
-                  </h4>
-
-                  <p>
-                    在余念与余秀兰之间切换，利用两人的位置关系协作探索。
-                  </p>
-
-                </article>
-
-
-                <article class="guide-step">
-
-                  <span>02</span>
-
-                  <h4>
-                    牵挂线
-                  </h4>
-
-                  <p>
-                    距离改变线的状态：过远会拉回，危险时能托住彼此。
-                  </p>
-
-                </article>
-
-
-                <article class="guide-step">
-
-                  <span>03</span>
-
-                  <h4>
-                    锚定借力
-                  </h4>
-
-                  <p>
-                    通过移动、锚定与借力跨越障碍，让牵挂成为前进的支点。
-                  </p>
-
-                </article>
-
-              </section>
-
-
-              <p class="guide-goal">
-
-                <b>
-                  游戏目标：
-                </b>
-
-                在拉扯与松弛之间重新理解这根线，也重新认识一直站在线另一端的人。
-
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-    </main>
+    <span class="anchor"></span>
+    <span class="name">余念</span>
+  </div>
+
+  <div
+    class="portrait"
+    id="mother"
+    role="button"
+    tabindex="0"
+    aria-label="拖动余秀兰，改变关系距离"
+  >
+    <img
+      src="assets/余秀兰（48）：正常状态(透).png"
+      alt="余秀兰"
+    >
+    <span class="anchor"></span>
+    <span class="name">余秀兰</span>
+  </div>
+
+  <div class="state" aria-live="polite">
+    <span data-state="close">靠近</span>
+    <i>/</i>
+    <span data-state="tense">拉扯</span>
+    <i>/</i>
+    <span data-state="stable" class="active">稳定</span>
+  </div>
+
+  <p class="instruction">
+    移动她们，感受距离。
+  </p>
+
+  <div class="enter-wrap">
+
+    <button
+      class="memory-button"
+      id="openMemory"
+      type="button"
+    >
+      进入记忆
+    </button>
+
+    <!--
+      下载按钮：
+      改为 GitHub Release 页面，而不是直接下载 ZIP。
+    -->
+    <a
+      class="continue"
+      id="downloadGame"
+      href="https://github.com/Shellingfordh/echoes-of-us/releases/tag/v0.1.0"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      下载 macOS 版
+    </a>
 
   </div>
 
-
-  <!-- ==========================================================
-       AMBIENCE
-       ========================================================== -->
-
-  <audio
-    id="ambience"
-    loop
-    preload="none"
+  <img
+    class="prop umbrella"
+    src="game2.5d/art/cute-umbrella.png"
+    alt=""
   >
 
-    <source
-      src="game2.5d/art/House In a Forest Loop.ogg"
-      type="audio/ogg"
-    >
+  <img
+    class="prop frame"
+    src="game2.5d/art/photo-frame.png"
+    alt=""
+  >
 
-  </audio>
+  <section
+    class="memory-layer"
+    id="memoryLayer"
+    aria-hidden="true"
+  >
+    <div class="memory-inner">
 
+      <h2>
+        距离会变，<br>
+        关系不会消失。
+      </h2>
+
+      <p>
+        线没有断。它只是从拉扯，慢慢变成了一种安静的连接。
+      </p>
+
+      <button
+        id="closeMemory"
+        type="button"
+      >
+        回到关系实验场
+      </button>
+
+    </div>
+  </section>
+
+  <!-- =========================
+       MEDIA LAYER
+       ========================= -->
+
+  <section
+    class="media-layer"
+    id="mediaLayer"
+    aria-hidden="true"
+    aria-labelledby="mediaTitle"
+  >
+
+    <div class="media-shell">
+
+      <header class="media-heading">
+
+        <div>
+          <p id="mediaEyebrow">
+            OFFICIAL MEDIA ARCHIVE
+          </p>
+
+          <h2 id="mediaTitle">
+            游戏宣传片
+          </h2>
+        </div>
+
+        <button
+          class="media-close"
+          id="closeMedia"
+          type="button"
+          aria-label="关闭媒体窗口"
+        >
+          ×
+        </button>
+
+      </header>
+
+      <!-- =========================
+           TRAILER
+           ========================= -->
+
+      <div
+        class="media-panel trailer-panel"
+        id="trailerPanel"
+      >
+
+        <video
+          id="promoVideo"
+          controls
+          playsinline
+          webkit-playsinline
+          preload="metadata"
+          poster="homepage-variants/image1.png"
+          src="https://pub-2ebd6dec12794e68bb1e67df08102466.r2.dev/echoes_of_us.MP4"
+        >
+          你的浏览器暂不支持视频播放。
+        </video>
+
+        <p class="media-note">
+          <b>
+            一根看不见的线，<br>
+            连接两段人生。
+          </b>
+
+          游戏宣传片 · 02:03<br>
+          建议佩戴耳机观看
+        </p>
+
+      </div>
+
+      <!-- =========================
+           GUIDE
+           ========================= -->
+
+      <div
+        class="media-panel guide-panel"
+        id="guidePanel"
+        hidden
+      >
+
+        <aside class="guide-lead">
+
+          <span class="guide-index">
+            HOW TO PLAY · 01
+          </span>
+
+          <h3>
+            牵挂，<br>
+            既是束缚，<br>
+            也是力量。
+          </h3>
+
+          <p>
+            单人叙事解谜 · 双角色协作
+          </p>
+
+        </aside>
+
+        <div class="guide-content">
+
+          <section class="guide-story">
+
+            <span class="guide-kicker">
+              STORY · 故事背景
+            </span>
+
+            <p>
+              23岁的余念即将离开生活多年的北方小城，前往千里之外开始第一份工作。出发这天，她意外发现自己能看见连接人与人之间的“牵挂线”。而连接她与母亲的那根线，会随着距离和情绪变化而绷紧，甚至将她一次次拉回原地。
+            </p>
+
+          </section>
+
+          <section
+            class="guide-steps"
+            aria-label="核心玩法"
+          >
+
+            <article class="guide-step">
+
+              <span>01</span>
+
+              <h4>
+                双人切换
+              </h4>
+
+              <p>
+                在余念与余秀兰之间切换，利用两人的位置关系协作探索。
+              </p>
+
+            </article>
+
+            <article class="guide-step">
+
+              <span>02</span>
+
+              <h4>
+                牵挂线
+              </h4>
+
+              <p>
+                距离改变线的状态：过远会拉回，危险时能托住彼此。
+              </p>
+
+            </article>
+
+            <article class="guide-step">
+
+              <span>03</span>
+
+              <h4>
+                锚定借力
+              </h4>
+
+              <p>
+                通过移动、锚定与借力跨越障碍，让牵挂成为前进的支点。
+              </p>
+
+            </article>
+
+          </section>
+
+          <p class="guide-goal">
+            <b>游戏目标：</b>
+            在拉扯与松弛之间重新理解这根线，也重新认识一直站在线另一端的人。
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+```
+
+  </div>
+
+<audio
+id="ambience"
+loop
+preload="none"
+src="game2.5d/art/House In a Forest Loop.ogg"
+
+> </audio>
 
   <script>
-    /*
-      ============================================================
-      DOM
-      ============================================================
-    */
 
-    const canvas =
-      document.querySelector("#canvas");
-
-    const svg =
-      document.querySelector("#threadSvg");
-
-    const thread =
-      document.querySelector("#thread");
-
-    const shadow =
-      document.querySelector("#threadShadow");
+    const canvas = document.querySelector('#canvas');
+    const svg = document.querySelector('#threadSvg');
+    const thread = document.querySelector('#thread');
+    const shadow = document.querySelector('#threadShadow');
 
     const people = [
-      document.querySelector("#daughter"),
-      document.querySelector("#mother")
+      document.querySelector('#daughter'),
+      document.querySelector('#mother')
     ];
-
-
-    /*
-      ============================================================
-      DRAG STATE
-      ============================================================
-    */
 
     let dragging = null;
 
@@ -2738,252 +1405,151 @@
       y: 0
     };
 
+    function centerOf(el){
 
-    /*
-      ============================================================
-      CENTER
-      ============================================================
-    */
-
-    function centerOf(el) {
-
-      const r =
-        el.getBoundingClientRect();
-
-      const c =
-        canvas.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      const c = canvas.getBoundingClientRect();
 
       return {
-        x:
-          r.left -
-          c.left +
-          r.width / 2,
-
-        y:
-          r.top -
-          c.top +
-          r.height -
-          2
+        x: r.left - c.left + r.width / 2,
+        y: r.top - c.top + r.height - 2
       };
+
     }
 
-
-    /*
-      ============================================================
-      COLOR
-      ============================================================
-    */
-
-    function blend(from, to, amount) {
+    function blend(from,to,amount){
 
       const parse = hex =>
-        hex
-          .match(/\w\w/g)
-          .map(v => parseInt(v, 16));
+        hex.match(/\w\w/g)
+          .map(v => parseInt(v,16));
 
       const a = parse(from);
       const b = parse(to);
 
       return `rgb(${
-        a.map(
-          (v, i) =>
-            Math.round(
-              v +
-              (b[i] - v) *
-              amount
-            )
-        ).join(", ")
+        a.map((v,i) =>
+          Math.round(
+            v + (b[i] - v) * amount
+          )
+        ).join(', ')
       })`;
+
     }
 
+    function tensionColor(amount){
 
-    function tensionColor(amount) {
-
-      if (amount < 0.5) {
+      if(amount < .5){
 
         return blend(
-          "#7fa596",
-          "#c08a4f",
+          '#7fa596',
+          '#c08a4f',
           amount * 2
         );
 
       }
 
       return blend(
-        "#c08a4f",
-        "#d94f43",
-        (amount - 0.5) * 2
+        '#c08a4f',
+        '#d94f43',
+        (amount - .5) * 2
       );
+
     }
 
+    function updateThread(){
 
-    /*
-      ============================================================
-      THREAD
-      ============================================================
-    */
-
-    function updateThread() {
-
-      const c =
-        canvas.getBoundingClientRect();
-
-      if (
-        !c.width ||
-        !c.height
-      ) {
-        return;
-      }
+      const c = canvas.getBoundingClientRect();
 
       svg.setAttribute(
-        "viewBox",
+        'viewBox',
         `0 0 ${c.width} ${c.height}`
       );
 
-      const a =
-        centerOf(people[0]);
+      const a = centerOf(people[0]);
+      const b = centerOf(people[1]);
 
-      const b =
-        centerOf(people[1]);
+      const dist = Math.hypot(
+        b.x - a.x,
+        b.y - a.y
+      );
 
-      const dist =
-        Math.hypot(
-          b.x - a.x,
-          b.y - a.y
-        );
-
-      const sag =
-        Math.min(
-          80,
-          dist * 0.12
-        );
+      const sag = Math.min(
+        80,
+        dist * .12
+      );
 
       const d =
         `M ${a.x} ${a.y}
-         C
-         ${a.x + dist * 0.28}
-         ${a.y + sag},
-         ${b.x - dist * 0.28}
-         ${b.y + sag},
-         ${b.x}
-         ${b.y}`;
+         C ${a.x + dist * .28} ${a.y + sag},
+           ${b.x - dist * .28} ${b.y + sag},
+           ${b.x} ${b.y}`;
 
-      thread.setAttribute(
-        "d",
-        d
+      thread.setAttribute('d',d);
+      shadow.setAttribute('d',d);
+
+      const tension = Math.max(
+        0,
+        Math.min(
+          1,
+          (dist - c.width * .24) /
+          (c.width * .5)
+        )
       );
 
-      shadow.setAttribute(
-        "d",
-        d
-      );
+      const color = tensionColor(tension);
 
-      const tension =
-        Math.max(
-          0,
-          Math.min(
-            1,
-            (
-              dist -
-              c.width * 0.24
-            ) /
-            (
-              c.width * 0.5
-            )
+      const state =
+        dist < c.width * .42
+          ? 'close'
+          : dist < c.width * .58
+            ? 'tense'
+            : 'stable';
+
+      document.documentElement
+        .style
+        .setProperty(
+          '--thread-color',
+          color
+        );
+
+      canvas.dataset.relationshipState = state;
+      canvas.dataset.threadColor = color;
+
+      document
+        .querySelectorAll('[data-state]')
+        .forEach(el =>
+          el.classList.toggle(
+            'active',
+            el.dataset.state === state
           )
         );
 
-      const color =
-        tensionColor(tension);
-
-      const state =
-        dist < c.width * 0.42
-          ? "close"
-          : dist < c.width * 0.58
-            ? "tense"
-            : "stable";
-
-      document.documentElement.style.setProperty(
-        "--thread-color",
-        color
-      );
-
-      canvas.dataset.relationshipState =
-        state;
-
-      canvas.dataset.threadColor =
-        color;
-
-      document
-        .querySelectorAll("[data-state]")
-        .forEach(el => {
-
-          el.classList.toggle(
-            "active",
-            el.dataset.state === state
-          );
-
-        });
-
       thread.style.strokeWidth =
         `${3 + tension * 1.5}`;
+
     }
 
+    function begin(e){
 
-    /*
-      ============================================================
-      DRAG START
-      ============================================================
-    */
-
-    function begin(event) {
-
-      /*
-        Prevent the browser from treating the gesture
-        as scrolling/selection.
-      */
-
-      event.preventDefault();
-
-      dragging =
-        event.currentTarget;
+      dragging = e.currentTarget;
 
       const r =
         dragging.getBoundingClientRect();
 
       offset = {
-        x:
-          event.clientX -
-          r.left,
-
-        y:
-          event.clientY -
-          r.top
+        x: e.clientX - r.left,
+        y: e.clientY - r.top
       };
 
-      try {
+      dragging.setPointerCapture(
+        e.pointerId
+      );
 
-        dragging.setPointerCapture(
-          event.pointerId
-        );
-
-      } catch (_) {}
     }
 
+    function move(e){
 
-    /*
-      ============================================================
-      DRAG MOVE
-      ============================================================
-    */
-
-    function move(event) {
-
-      if (!dragging) {
-        return;
-      }
-
-      event.preventDefault();
+      if(!dragging) return;
 
       const c =
         canvas.getBoundingClientRect();
@@ -2994,467 +1560,284 @@
       const h =
         dragging.offsetHeight;
 
-      /*
-        Keep the portrait inside the canvas.
+      let x = Math.max(
+        8,
+        Math.min(
+          c.width - w - 8,
+          e.clientX -
+          c.left -
+          offset.x
+        )
+      );
 
-        Top:
-        utility area + small margin
-
-        Bottom:
-        leave room for the enter controls
-      */
-
-      const topLimit =
-        window.innerWidth <= 760
-          ? 62
-          : 70;
-
-      const bottomReserve =
-        window.innerWidth <= 760
-          ? Math.max(
-              150,
-              c.height * 0.18
-            )
-          : 72;
-
-      let x =
-        Math.max(
-          8,
-          Math.min(
-            c.width - w - 8,
-            event.clientX -
-              c.left -
-              offset.x
-          )
-        );
-
-      let y =
-        Math.max(
-          topLimit,
-          Math.min(
-            c.height -
-              h -
-              bottomReserve,
-            event.clientY -
-              c.top -
-              offset.y
-          )
-        );
+      let y = Math.max(
+        70,
+        Math.min(
+          c.height - h - 72,
+          e.clientY -
+          c.top -
+          offset.y
+        )
+      );
 
       dragging.style.left =
-        `${x}px`;
+        x + 'px';
 
       dragging.style.top =
-        `${y}px`;
+        y + 'px';
 
       dragging.style.right =
-        "auto";
+        'auto';
 
       updateThread();
+
     }
 
-
-    /*
-      ============================================================
-      DRAG END
-      ============================================================
-    */
-
-    function end() {
+    function end(){
 
       dragging = null;
+
     }
 
+    function nudge(e){
 
-    /*
-      ============================================================
-      KEYBOARD MOVE
-      ============================================================
-    */
+      if(![
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowUp',
+        'ArrowDown'
+      ].includes(e.key)) return;
 
-    function nudge(event) {
-
-      const allowed = [
-        "ArrowLeft",
-        "ArrowRight",
-        "ArrowUp",
-        "ArrowDown"
-      ];
-
-      if (
-        !allowed.includes(
-          event.key
-        )
-      ) {
-        return;
-      }
-
-      event.preventDefault();
+      e.preventDefault();
 
       const c =
         canvas.getBoundingClientRect();
 
       const r =
-        event.currentTarget.getBoundingClientRect();
+        e.currentTarget.getBoundingClientRect();
 
       const step =
-        event.shiftKey
-          ? 48
-          : 16;
+        e.shiftKey ? 48 : 16;
 
       const dx =
-        event.key === "ArrowLeft"
+        e.key === 'ArrowLeft'
           ? -step
-          : event.key === "ArrowRight"
+          : e.key === 'ArrowRight'
             ? step
             : 0;
 
       const dy =
-        event.key === "ArrowUp"
+        e.key === 'ArrowUp'
           ? -step
-          : event.key === "ArrowDown"
+          : e.key === 'ArrowDown'
             ? step
             : 0;
 
-      const x =
-        Math.max(
-          8,
-          Math.min(
-            c.width -
-              r.width -
-              8,
-            r.left -
-              c.left +
-              dx
-          )
-        );
+      const x = Math.max(
+        8,
+        Math.min(
+          c.width - r.width - 8,
+          r.left - c.left + dx
+        )
+      );
 
-      const y =
-        Math.max(
-          window.innerWidth <= 760
-            ? 62
-            : 70,
+      const y = Math.max(
+        70,
+        Math.min(
+          c.height - r.height - 72,
+          r.top - c.top + dy
+        )
+      );
 
-          Math.min(
-            c.height -
-              r.height -
-              (
-                window.innerWidth <= 760
-                  ? Math.max(
-                      150,
-                      c.height * 0.18
-                    )
-                  : 72
-              ),
+      e.currentTarget.style.left =
+        x + 'px';
 
-            r.top -
-              c.top +
-              dy
-          )
-        );
+      e.currentTarget.style.top =
+        y + 'px';
 
-      event.currentTarget.style.left =
-        `${x}px`;
-
-      event.currentTarget.style.top =
-        `${y}px`;
-
-      event.currentTarget.style.right =
-        "auto";
+      e.currentTarget.style.right =
+        'auto';
 
       updateThread();
+
     }
-
-
-    /*
-      ============================================================
-      EVENTS
-      ============================================================
-    */
 
     people.forEach(el => {
 
       el.addEventListener(
-        "pointerdown",
+        'pointerdown',
         begin
       );
 
       el.addEventListener(
-        "pointermove",
+        'pointermove',
         move
       );
 
       el.addEventListener(
-        "pointerup",
+        'pointerup',
         end
       );
 
       el.addEventListener(
-        "pointercancel",
+        'pointercancel',
         end
       );
 
       el.addEventListener(
-        "lostpointercapture",
-        end
-      );
-
-      el.addEventListener(
-        "keydown",
+        'keydown',
         nudge
       );
 
     });
 
-
-    /*
-      ============================================================
-      RESIZE
-      ============================================================
-    */
-
-    let resizeTimer = null;
-
-    function handleResize() {
-
-      clearTimeout(
-        resizeTimer
-      );
-
-      resizeTimer =
-        setTimeout(
-          updateThread,
-          80
-        );
-    }
-
     window.addEventListener(
-      "resize",
-      handleResize
+      'resize',
+      updateThread
     );
 
     window.addEventListener(
-      "orientationchange",
+      'orientationchange',
       () => {
-
         setTimeout(
           updateThread,
-          180
+          120
         );
-
       }
     );
-
-
-    /*
-      ============================================================
-      INITIAL THREAD
-      ============================================================
-    */
 
     requestAnimationFrame(
-      () => {
-
-        updateThread();
-
-        setTimeout(
-          updateThread,
-          300
-        );
-
-      }
+      updateThread
     );
 
-
     /*
-      ============================================================
+      ==========================
       MEMORY
-      ============================================================
+      ==========================
     */
 
-    const memoryLayer =
+    const layer =
       document.querySelector(
-        "#memoryLayer"
+        '#memoryLayer'
       );
 
-    const openMemory =
-      document.querySelector(
-        "#openMemory"
-      );
+    document
+      .querySelector('#openMemory')
+      .onclick = () => {
 
-    const closeMemory =
-      document.querySelector(
-        "#closeMemory"
-      );
+        layer.classList.add('open');
 
-
-    openMemory.addEventListener(
-      "click",
-      () => {
-
-        memoryLayer.classList.add(
-          "open"
+        layer.setAttribute(
+          'aria-hidden',
+          'false'
         );
 
-        memoryLayer.setAttribute(
-          "aria-hidden",
-          "false"
+      };
+
+    document
+      .querySelector('#closeMemory')
+      .onclick = () => {
+
+        layer.classList.remove('open');
+
+        layer.setAttribute(
+          'aria-hidden',
+          'true'
         );
 
-        closeMemory.focus({
-          preventScroll: true
-        });
-
-      }
-    );
-
-
-    closeMemory.addEventListener(
-      "click",
-      () => {
-
-        memoryLayer.classList.remove(
-          "open"
-        );
-
-        memoryLayer.setAttribute(
-          "aria-hidden",
-          "true"
-        );
-
-        openMemory.focus({
-          preventScroll: true
-        });
-
-      }
-    );
-
+      };
 
     /*
-      ============================================================
+      ==========================
       AUDIO
-      ============================================================
+      ==========================
     */
 
     const audio =
-      document.querySelector(
-        "#ambience"
-      );
+      document.querySelector('#ambience');
 
     const sound =
-      document.querySelector(
-        "#sound"
-      );
+      document.querySelector('#sound');
 
+    sound.onclick = async () => {
 
-    sound.addEventListener(
-      "click",
-      async () => {
+      if(audio.paused){
 
-        if (audio.paused) {
+        try{
 
-          try {
-
-            await audio.play();
-
-            sound.textContent =
-              "声音 · 开";
-
-            sound.setAttribute(
-              "aria-pressed",
-              "true"
-            );
-
-          } catch (error) {
-
-            console.warn(
-              "Audio playback failed:",
-              error
-            );
-
-            sound.textContent =
-              "声音不可用";
-
-          }
-
-        } else {
-
-          audio.pause();
+          await audio.play();
 
           sound.textContent =
-            "声音 · 关";
+            '声音 · 开';
 
-          sound.setAttribute(
-            "aria-pressed",
-            "false"
-          );
+        }catch{
+
+          sound.textContent =
+            '声音不可用';
 
         }
 
-      }
-    );
+      }else{
 
+        audio.pause();
+
+        sound.textContent =
+          '声音 · 关';
+
+      }
+
+    };
 
     /*
-      ============================================================
+      ==========================
       MEDIA
-      ============================================================
+      ==========================
     */
 
     const mediaLayer =
       document.querySelector(
-        "#mediaLayer"
+        '#mediaLayer'
       );
 
     const mediaTitle =
       document.querySelector(
-        "#mediaTitle"
+        '#mediaTitle'
       );
 
     const mediaEyebrow =
       document.querySelector(
-        "#mediaEyebrow"
+        '#mediaEyebrow'
       );
 
     const trailerPanel =
       document.querySelector(
-        "#trailerPanel"
+        '#trailerPanel'
       );
 
     const guidePanel =
       document.querySelector(
-        "#guidePanel"
+        '#guidePanel'
       );
 
     const promoVideo =
       document.querySelector(
-        "#promoVideo"
+        '#promoVideo'
       );
 
-    const closeMediaButton =
-      document.querySelector(
-        "#closeMedia"
-      );
-
-
-    /*
-      Open media.
-    */
-
-    function openMedia(type) {
+    function openMedia(type){
 
       const trailer =
-        type === "trailer";
+        type === 'trailer';
 
       mediaTitle.textContent =
         trailer
-          ? "游戏宣传片"
-          : "游戏说明";
+          ? '游戏宣传片'
+          : '游戏说明';
 
       mediaEyebrow.textContent =
         trailer
-          ? "OFFICIAL MEDIA ARCHIVE"
-          : "HOW TO PLAY · RELATION GUIDE";
+          ? 'OFFICIAL MEDIA ARCHIVE'
+          : 'HOW TO PLAY · RELATION GUIDE';
 
       trailerPanel.hidden =
         !trailer;
@@ -3463,191 +1846,110 @@
         trailer;
 
       mediaLayer.classList.add(
-        "open"
+        'open'
       );
 
       mediaLayer.setAttribute(
-        "aria-hidden",
-        "false"
+        'aria-hidden',
+        'false'
       );
 
       /*
-        When opening the trailer,
-        load the video only now.
+        手机上打开宣传片时保持
+        inline 播放，不强制全屏。
       */
+      if(trailer){
 
-      if (trailer) {
+        promoVideo.setAttribute(
+          'playsinline',
+          ''
+        );
 
-        try {
-          promoVideo.load();
-        } catch (_) {}
-
-      }
-
-      closeMediaButton.focus({
-        preventScroll: true
-      });
-
-    }
-
-
-    /*
-      Close media.
-    */
-
-    function closeMedia() {
-
-      mediaLayer.classList.remove(
-        "open"
-      );
-
-      mediaLayer.setAttribute(
-        "aria-hidden",
-        "true"
-      );
-
-      /*
-        Important:
-        stop video when closing,
-        otherwise audio can continue
-        in the background.
-      */
-
-      try {
-
-        promoVideo.pause();
-
-      } catch (_) {}
-
-    }
-
-
-    /*
-      Buttons.
-    */
-
-    document
-      .querySelector("#openTrailer")
-      .addEventListener(
-        "click",
-        () => openMedia("trailer")
-      );
-
-    document
-      .querySelector("#openGuide")
-      .addEventListener(
-        "click",
-        () => openMedia("guide")
-      );
-
-    closeMediaButton.addEventListener(
-      "click",
-      closeMedia
-    );
-
-
-    /*
-      Click backdrop to close.
-    */
-
-    mediaLayer.addEventListener(
-      "pointerdown",
-      event => {
-
-        if (
-          event.target ===
-          mediaLayer
-        ) {
-
-          closeMedia();
-
-        }
-
-      }
-    );
-
-
-    /*
-      ============================================================
-      ESC
-      ============================================================
-    */
-
-    document.addEventListener(
-      "keydown",
-      event => {
-
-        if (
-          event.key !== "Escape"
-        ) {
-          return;
-        }
-
-        if (
-          mediaLayer.classList.contains(
-            "open"
-          )
-        ) {
-
-          closeMedia();
-
-          return;
-        }
-
-        if (
-          memoryLayer.classList.contains(
-            "open"
-          )
-        ) {
-
-          closeMemory.click();
-
-        }
-
-      }
-    );
-
-
-    /*
-      ============================================================
-      VIDEO ERROR
-      ============================================================
-    */
-
-    promoVideo.addEventListener(
-      "error",
-      () => {
-
-        console.warn(
-          "Trailer could not be loaded.",
-          promoVideo.error
+        promoVideo.setAttribute(
+          'webkit-playsinline',
+          ''
         );
 
       }
+
+      document
+        .querySelector('#closeMedia')
+        .focus({
+          preventScroll:true
+        });
+
+    }
+
+    function closeMedia(){
+
+      mediaLayer.classList.remove(
+        'open'
+      );
+
+      mediaLayer.setAttribute(
+        'aria-hidden',
+        'true'
+      );
+
+      promoVideo.pause();
+
+    }
+
+    document
+      .querySelector('#openTrailer')
+      .onclick = () =>
+        openMedia('trailer');
+
+    document
+      .querySelector('#openGuide')
+      .onclick = () =>
+        openMedia('guide');
+
+    document
+      .querySelector('#closeMedia')
+      .onclick = closeMedia;
+
+    mediaLayer.addEventListener(
+      'pointerdown',
+      event => {
+
+        if(
+          event.target === mediaLayer
+        ){
+
+          closeMedia();
+
+        }
+
+      }
     );
 
-
-    /*
-      ============================================================
-      VISIBILITY
-      ============================================================
-    */
-
     document.addEventListener(
-      "visibilitychange",
-      () => {
+      'keydown',
+      event => {
 
-        /*
-          Don't keep trailer playing
-          when the browser/app is backgrounded.
-        */
+        if(event.key !== 'Escape')
+          return;
 
-        if (
-          document.hidden &&
-          !promoVideo.paused
-        ) {
+        if(
+          mediaLayer.classList.contains(
+            'open'
+          )
+        ){
 
-          promoVideo.pause();
+          closeMedia();
+
+        }else if(
+          layer.classList.contains(
+            'open'
+          )
+        ){
+
+          document
+            .querySelector(
+              '#closeMemory'
+            )
+            .click();
 
         }
 
@@ -3658,4 +1960,3 @@
 
 </body>
 </html>
-```
