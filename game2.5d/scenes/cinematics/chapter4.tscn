@@ -1,0 +1,131 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/cinematics/cinematic_player.gd" id="1_script"]
+[ext_resource type="VideoStream" path="res://art/cinematics/chapter4.ogv" id="2_video"]
+[ext_resource type="FontFile" path="res://art/fonts/NotoSansCJKsc-Regular.otf" id="3_font"]
+
+[node name="Chapter4" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+chapter_number = 4
+auto_replay = true
+skip_hint_text = ""
+complete_hint_text = ""
+fallback_title = "余响：牵挂"
+fallback_subtitle = "第四章 · 完"
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="FinalCard" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Title" type="Label" parent="FinalCard"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -54.0
+offset_right = 360.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "余响：牵挂"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.97, 0.89, 0.84, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 42
+
+[node name="Subtitle" type="Label" parent="FinalCard"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = 14.0
+offset_right = 360.0
+offset_bottom = 56.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "第四章 · 完"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.78, 0.34, 0.35, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+
+[node name="Video" type="VideoStreamPlayer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stream = ExtResource("2_video")
+expand = true
+
+[node name="SkipHint" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -280.0
+offset_top = 18.0
+offset_right = -20.0
+offset_bottom = 50.0
+grow_horizontal = 0
+mouse_filter = 2
+text = "Enter / Space 跳过第四章"
+horizontal_alignment = 2
+theme_override_colors/font_color = Color(0.92, 0.9, 0.88, 0.76)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 14
+
+[node name="CompleteHint" type="Label" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -56.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+text = "Enter / Space 重播第四章  ·  R 从序章重新开始"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.92, 0.9, 0.88, 0.88)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 14

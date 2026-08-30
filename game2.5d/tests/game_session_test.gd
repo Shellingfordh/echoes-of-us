@@ -38,6 +38,12 @@ func _run() -> void:
 	session.enter_chapter(3)
 	assert(session.current_chapter == 3)
 	assert(session.completed_chapters == [1, 2])
+	session.complete_chapter(3)
+	session.enter_chapter(4)
+	assert(session.current_chapter == 4)
+	assert(session.completed_chapters == [1, 2, 3])
+	session.complete_chapter(4)
+	assert(session.completed_chapters == [1, 2, 3, 4])
 
-	print("[GAME_SESSION] PASS chapter progress and story flags survive scene replacement")
+	print("[GAME_SESSION] PASS four-chapter progress and story flags survive scene replacement")
 	quit(0)

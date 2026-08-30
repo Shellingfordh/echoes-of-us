@@ -5,7 +5,7 @@ extends Node2D
 ## HTML 原型仅用于玩法与关卡结构；人物、场景和叙事延续第一、二章设定。
 
 enum GameState { TITLE, PLAY, LEVEL_DONE, END }
-enum EndingPhase { STORY, MOVIE, COMPLETE }
+enum EndingPhase { STORY, TRANSITIONING }
 
 const VIEW_W := 1280.0
 const VIEW_H := 720.0
@@ -19,6 +19,7 @@ const CLIMB_TRAVERSE_SPEED := 260.0
 const FALL_LIMIT := 1100.0
 const ENDING_LINE_DURATION := 2.1
 const ENDING_FINAL_HOLD_DURATION := 2.4
+const CHAPTER_FOUR_SCENE := "res://scenes/cinematics/chapter4.tscn"
 
 const END_SCRIPT := [
 	"最后一批东西搬完了。",
@@ -77,8 +78,6 @@ var level_scene_resources: Array[PackedScene] = [
 @onready var hud_controls: Label = get_node_or_null("HUD/BottomBar/Controls") as Label
 @onready var toast_container: Control = get_node_or_null("HUD/Toasts") as Control
 @onready var title_overlay: Control = get_node_or_null("HUD/TitleOverlay") as Control
-@onready var ending_video: VideoStreamPlayer = get_node_or_null("HUD/EndingVideo") as VideoStreamPlayer
-@onready var ending_controls: Label = get_node_or_null("HUD/EndingControls") as Label
 
 var current_level_layout: Node2D
 
@@ -90,8 +89,6 @@ func _ready() -> void:
 	characters = [daughter, mother]
 	levels = _create_levels()
 	_load_level(0)
-	if ending_video != null:
-		ending_video.finished.connect(_on_ending_video_finished)
 	if editor_preview != null:
 		editor_preview.visible = false
 	_sync_scene_nodes()
@@ -119,12 +116,7 @@ func _input(event: InputEvent) -> void:
 			start_game()
 			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed(&"start_game"):
-			if ending_phase == EndingPhase.STORY:
-				_begin_ending_movie()
-			elif ending_phase == EndingPhase.MOVIE:
-				_finish_ending_movie(false)
-			else:
-				_begin_ending_movie()
+			_start_chapter_four()
 			get_viewport().set_input_as_handled()
 		return
 	if game_state != GameState.PLAY:
@@ -168,7 +160,7 @@ func _physics_process(delta: float) -> void:
 					end_timer = 0.0
 					end_index += 1
 				elif end_index == END_SCRIPT.size() - 1 and end_timer > ENDING_FINAL_HOLD_DURATION:
-					_begin_ending_movie()
+					_start_chapter_four()
 			queue_redraw()
 			return
 
@@ -806,57 +798,23 @@ func _start_ending_sequence() -> void:
 	ending_phase = EndingPhase.STORY
 	end_index = 0
 	end_timer = 0.0
-	if ending_video != null:
-		ending_video.stop()
-		ending_video.stream_position = 0.0
-		ending_video.hide()
-	if ending_controls != null:
-		ending_controls.hide()
 	queue_redraw()
 
 
-func _begin_ending_movie() -> void:
+func _start_chapter_four() -> void:
 	if game_state != GameState.END:
 		return
-	ending_phase = EndingPhase.MOVIE
-	if ending_controls != null:
-		ending_controls.hide()
-	if ending_video == null or ending_video.stream == null:
-		_finish_ending_movie(false)
+	if ending_phase == EndingPhase.TRANSITIONING:
 		return
-	ending_video.stream_position = 0.0
-	ending_video.show()
-	# Headless 验证环境没有可见的视频输出；保留状态供流程测试主动结束。
-	if DisplayServer.get_name() != "headless":
-		ending_video.play()
-	queue_redraw()
-
-
-func _on_ending_video_finished() -> void:
-	if game_state == GameState.END and ending_phase == EndingPhase.MOVIE:
-		_finish_ending_movie(true)
-
-
-func _finish_ending_movie(preserve_last_frame: bool) -> void:
-	ending_phase = EndingPhase.COMPLETE
-	if ending_video != null and not preserve_last_frame:
-		ending_video.stop()
-		ending_video.hide()
-	if ending_controls != null:
-		ending_controls.show()
-	queue_redraw()
+	ending_phase = EndingPhase.TRANSITIONING
+	var error := get_tree().change_scene_to_file(CHAPTER_FOUR_SCENE)
+	assert(error == OK, "failed to open chapter four cinematic")
 
 
 func _reset_ending_sequence() -> void:
 	ending_phase = EndingPhase.STORY
 	end_index = 0
 	end_timer = 0.0
-	if ending_video != null:
-		ending_video.stop()
-		ending_video.stream_position = 0.0
-		ending_video.hide()
-	if ending_controls != null:
-		ending_controls.hide()
 
 
 func _update_camera(delta: float) -> void:
@@ -1386,12 +1344,9 @@ func _draw_ending() -> void:
 		_draw_text("Enter / Space 跳过 · R 重新开始", Vector2(VIEW_W * 0.5, VIEW_H - 35.0), 13, Color("b8c5c5"), HORIZONTAL_ALIGNMENT_CENTER, 380.0)
 		return
 
-	# 视频加载失败或被玩家跳过时仍保留完整的最终标题卡。
+	# 场景切换只会停留极短时间；黑场避免最后一帧闪回关卡。
 	draw_rect(Rect2(0, 0, VIEW_W, VIEW_H), Color.BLACK)
-	if ending_phase == EndingPhase.COMPLETE and (ending_video == null or not ending_video.visible):
-		_draw_text("余响：牵挂", Vector2(VIEW_W * 0.5, VIEW_H * 0.5 + 10.0), 42, Color("f8e5d8"), HORIZONTAL_ALIGNMENT_CENTER, 720.0)
-		draw_line(Vector2(170, VIEW_H * 0.5 + 28.0), Vector2(455, VIEW_H * 0.5 + 28.0), Color("dc2036"), 2.5, true)
-		draw_line(Vector2(825, VIEW_H * 0.5 + 28.0), Vector2(1110, VIEW_H * 0.5 + 28.0), Color("dc2036"), 2.5, true)
+	_draw_text("第四章", Vector2(VIEW_W * 0.5, VIEW_H * 0.5), 24, Color("c7b4ad"), HORIZONTAL_ALIGNMENT_CENTER, 420.0)
 
 
 func _draw_debug() -> void:

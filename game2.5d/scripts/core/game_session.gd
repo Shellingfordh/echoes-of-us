@@ -5,7 +5,7 @@ signal chapter_completed(chapter: int)
 signal flag_changed(flag_name: StringName, value: bool)
 
 const FIRST_CHAPTER := 1
-const LAST_CHAPTER := 3
+const LAST_CHAPTER := 4
 
 var current_chapter := FIRST_CHAPTER
 var completed_chapters: Array[int] = []

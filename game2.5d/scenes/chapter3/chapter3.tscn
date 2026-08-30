@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/chapter3/chapter3.gd" id="1_chapter3"]
 [ext_resource type="PackedScene" path="res://scenes/chapter3/levels/chapter3_stairwell.tscn" id="2_stairwell"]
@@ -6,7 +6,6 @@
 [ext_resource type="SpriteFrames" path="res://resources/chapter3_yuxiulan_frames.tres" id="4_mother"]
 [ext_resource type="Texture2D" path="res://art/cute-umbrella.png" id="5_umbrella"]
 [ext_resource type="Texture2D" path="res://art/suitcase.png" id="6_suitcase"]
-[ext_resource type="VideoStream" path="res://art/ending/echoes_ending.ogv" id="7_ending"]
 
 [sub_resource type="RectangleShape2D" id="Shape_daughter"]
 size = Vector2(26, 38)
@@ -344,34 +343,3 @@ text = "Tab 换人 · E 锚定 · W/↑ 爬线 · R 回检查点\n\n—— 按�
 horizontal_alignment = 1
 theme_override_colors/font_color = Color(0.78, 0.84, 0.84, 1)
 theme_override_font_sizes/font_size = 15
-
-[node name="EndingVideo" type="VideoStreamPlayer" parent="HUD"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-stream = ExtResource("7_ending")
-expand = true
-
-[node name="EndingControls" type="Label" parent="HUD"]
-visible = false
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -54.0
-offset_bottom = -20.0
-grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 2
-text = "Enter / Space 重看片尾  ·  R 重新开始"
-horizontal_alignment = 1
-vertical_alignment = 1
-theme_override_colors/font_color = Color(0.86, 0.78, 0.75, 0.9)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 14
