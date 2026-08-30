@@ -1,12 +1,12 @@
-```html
+
 <!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
-  <meta name="theme-color" content="#181817">
-  <meta name="description" content="不断线｜Echoes of Us — 单人叙事解谜 · 双角色协作">
+  <meta name="theme-color" content="#22211f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <title>不断线｜Echoes of Us</title>
 
@@ -18,27 +18,23 @@
     }
 
     :root{
-      --paper:#e8e0d3;
-      --paper-soft:#cfc5b6;
-      --muted:#9c958b;
-
-      --graphite:#181817;
-      --graphite-2:#211f1d;
-
-      --red:#b86458;
-      --red-soft:#d18a7e;
-
-      --gold:#c6a36a;
-
-      --glass-bg:rgba(255,255,255,.035);
-      --glass-bg-hover:rgba(255,255,255,.065);
-      --glass-border:rgba(255,255,255,.17);
-      --glass-highlight:rgba(255,255,255,.42);
-
+      --paper:#e2d9ca;
+      --paper-soft:#c8bfb0;
+      --muted:#a79e91;
+      --red:#a84c43;
+      --yellow:#c99b43;
+      --graphite:#22211f;
+      --graphite-2:#292724;
+      --rule:#4a4742;
       --thread-color:#b76b4d;
 
-      --safe-top:env(safe-area-inset-top);
-      --safe-bottom:env(safe-area-inset-bottom);
+      --glass-bg:rgba(255,255,255,.025);
+      --glass-bg-hover:rgba(255,255,255,.055);
+      --glass-border-top:rgba(255,255,255,.45);
+      --glass-border:rgba(255,255,255,.15);
+      --glass-shadow:inset 0 1px 1px rgba(255,255,255,.10),
+                     0 18px 50px rgba(0,0,0,.16);
+      --glass-blur:14px;
     }
 
     *{
@@ -47,13 +43,13 @@
 
     html,
     body{
+      margin:0;
       width:100%;
       height:100%;
-      margin:0;
       overflow:hidden;
       background:var(--graphite);
       color:var(--paper);
-      font-family:noto,'PingFang SC','Hiragino Sans',sans-serif;
+      font-family:noto,'PingFang SC',sans-serif;
     }
 
     body{
@@ -62,41 +58,28 @@
     }
 
     button,
-    a,
-    input,
-    video{
-      font:inherit;
-    }
-
-    button,
     a{
       color:inherit;
+      font:inherit;
     }
 
     button{
       cursor:pointer;
     }
 
-    a{
-      text-decoration:none;
-    }
-
-
-    /* =========================================================
-       LIQUID GLASS SYSTEM
-       ========================================================= */
+    /*
+      ============================================================
+      LIQUID GLASS
+      ============================================================
+    */
 
     .liquid-glass{
       background:rgba(255,255,255,.01);
       background-blend-mode:luminosity;
       backdrop-filter:blur(4px);
       -webkit-backdrop-filter:blur(4px);
-
       border:none;
-
-      box-shadow:
-        inset 0 1px 1px rgba(255,255,255,.10);
-
+      box-shadow:inset 0 1px 1px rgba(255,255,255,.1);
       position:relative;
       overflow:hidden;
     }
@@ -105,11 +88,8 @@
       content:'';
       position:absolute;
       inset:0;
-
       border-radius:inherit;
-
       padding:1.4px;
-
       background:linear-gradient(
         180deg,
         rgba(255,255,255,.45) 0%,
@@ -128,132 +108,102 @@
       mask-composite:exclude;
 
       pointer-events:none;
-      z-index:10;
+      z-index:20;
     }
 
-    .liquid-glass::after{
-      content:'';
-      position:absolute;
-      inset:-30%;
-
-      background:
-        radial-gradient(
-          circle at 20% 10%,
-          rgba(255,255,255,.08),
-          transparent 28%
-        );
-
-      opacity:.5;
-      pointer-events:none;
-      z-index:0;
-    }
-
-    .liquid-content{
-      position:relative;
-      z-index:2;
-    }
-
-
-    /* =========================================================
-       PAGE
-       ========================================================= */
+    /*
+      ============================================================
+      PAGE
+      ============================================================
+    */
 
     .page{
-      width:100%;
       height:100%;
-
       display:grid;
       grid-template-columns:146px 1fr;
-
       position:relative;
       isolation:isolate;
+      overflow:hidden;
 
       background:
         radial-gradient(
-          circle at 55% 40%,
-          rgba(73,68,62,.65) 0,
-          rgba(73,68,62,0) 42%
+          circle at 56% 38%,
+          #302d29 0,
+          rgba(48,45,41,.65) 24%,
+          transparent 46%
         ),
         radial-gradient(
-          circle at 80% 85%,
-          rgba(124,71,55,.11),
+          circle at 75% 70%,
+          rgba(168,76,67,.07),
           transparent 30%
         ),
-        var(--graphite);
+        #22211f;
     }
 
-    .page::before{
-      content:'';
-
+    .page:after{
+      content:"";
       position:absolute;
       inset:0;
-
+      z-index:50;
       pointer-events:none;
-      z-index:11;
-
-      opacity:.09;
+      opacity:.13;
 
       background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
 
       mix-blend-mode:soft-light;
     }
 
-
-    /* =========================================================
-       LEFT TITLE RAIL
-       ========================================================= */
+    /*
+      ============================================================
+      LEFT RAIL
+      ============================================================
+    */
 
     .title-rail{
-      position:relative;
-      z-index:15;
-
+      border-right:1px solid rgba(255,255,255,.08);
       padding:42px 30px 28px;
 
       display:flex;
       flex-direction:column;
       align-items:center;
 
-      border-right:1px solid rgba(255,255,255,.09);
+      position:relative;
+      z-index:80;
+
+      background:rgba(255,255,255,.015);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+
+      box-shadow:
+        inset -1px 0 rgba(255,255,255,.08),
+        inset 1px 0 rgba(255,255,255,.025);
     }
 
     .title-rail a{
-      position:relative;
-      z-index:2;
+      text-decoration:none;
     }
 
     .zh-title{
       margin:0;
-
       writing-mode:vertical-rl;
 
       font:
         400 clamp(45px,5.2vw,74px)/1
-        'Songti SC',
-        'STSong',
-        serif;
+        'Songti SC',serif;
 
       letter-spacing:.08em;
-
-      text-shadow:
-        0 1px 20px rgba(255,255,255,.04);
     }
 
     .red-rule{
       width:1px;
       height:92px;
-
+      background:linear-gradient(
+        to bottom,
+        transparent,
+        var(--red),
+        transparent
+      );
       margin:22px 0;
-
-      background:
-        linear-gradient(
-          to bottom,
-          transparent,
-          var(--red),
-          transparent
-        );
-
-      box-shadow:
-        0 0 15px rgba(184,100,88,.35);
     }
 
     .en-title{
@@ -261,50 +211,38 @@
 
       font:
         400 10px/1.8
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        monospace;
+        ui-monospace,monospace;
 
       letter-spacing:.38em;
-
       color:#c8bfb0;
-      opacity:.75;
     }
 
     .knot{
       margin-top:auto;
-
       color:var(--red);
-
       font-size:29px;
-
       transform:rotate(45deg);
-
       opacity:.8;
-
-      text-shadow:
-        0 0 20px rgba(184,100,88,.4);
     }
 
-
-    /* =========================================================
-       MAIN CANVAS
-       ========================================================= */
+    /*
+      ============================================================
+      MAIN CANVAS
+      ============================================================
+    */
 
     .canvas{
       position:relative;
-
       min-width:0;
       overflow:hidden;
-
       touch-action:none;
     }
 
-
-    /* =========================================================
-       TOP UTILITY
-       ========================================================= */
+    /*
+      ============================================================
+      TOP UTILITY
+      ============================================================
+    */
 
     .utility{
       height:80px;
@@ -312,147 +250,134 @@
       display:flex;
       justify-content:flex-end;
       align-items:center;
-
       gap:10px;
 
-      padding:
-        0 48px;
+      padding:0 48px;
 
       position:relative;
-      z-index:30;
+      z-index:80;
     }
 
     .utility button{
-      position:relative;
+      min-height:38px;
+      padding:8px 15px;
 
       border-radius:999px;
-
-      padding:10px 17px;
+      border:1px solid rgba(255,255,255,.08);
 
       background:rgba(255,255,255,.018);
-
-      border:1px solid rgba(255,255,255,.07);
-
       color:#c8beb0;
 
-      font-size:12px;
+      font-size:13px;
+      letter-spacing:.15em;
 
-      letter-spacing:.13em;
+      position:relative;
+      overflow:hidden;
+
+      backdrop-filter:blur(4px);
+      -webkit-backdrop-filter:blur(4px);
+
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.08);
 
       transition:
-        color .25s ease,
-        background .25s ease,
-        transform .25s ease,
-        border-color .25s ease;
+        color .25s,
+        background .25s,
+        transform .25s,
+        border-color .25s;
     }
 
     .utility button::before{
-      content:'';
-
+      content:"";
       position:absolute;
       inset:0;
-
-      border-radius:inherit;
-
-      background:
-        linear-gradient(
-          180deg,
-          rgba(255,255,255,.14),
-          transparent 45%
-        );
-
-      opacity:.35;
-
       pointer-events:none;
+
+      background:linear-gradient(
+        180deg,
+        rgba(255,255,255,.14),
+        transparent 45%,
+        rgba(255,255,255,.035)
+      );
+
+      opacity:.6;
     }
 
     .utility button:hover,
     .utility button:focus-visible{
       color:#fff;
-
       background:rgba(255,255,255,.055);
-
-      border-color:rgba(255,255,255,.17);
-
+      border-color:rgba(255,255,255,.18);
       transform:translateY(-1px);
+      outline:none;
     }
 
     .utility .slash{
-      color:#625e58;
-      opacity:.7;
+      color:#6f6961;
+      opacity:.65;
     }
 
-
-    /* =========================================================
-       THREAD
-       ========================================================= */
+    /*
+      ============================================================
+      THREAD
+      ============================================================
+    */
 
     #threadSvg{
       position:absolute;
       inset:0;
-
       width:100%;
       height:100%;
-
       z-index:4;
 
       pointer-events:none;
-
       overflow:visible;
 
-      filter:
-        drop-shadow(0 2px 3px rgba(0,0,0,.75));
-    }
-
-    #thread,
-    #threadShadow{
-      fill:none;
-
-      stroke:var(--thread-color);
-
-      stroke-linecap:round;
-
-      transition:
-        stroke .12s,
-        stroke-width .12s;
+      filter:drop-shadow(0 2px 2px #000);
     }
 
     #thread{
+      fill:none;
+      stroke:var(--thread-color);
       stroke-width:3;
+      stroke-linecap:round;
+      transition:stroke .12s;
     }
 
     #threadShadow{
+      fill:none;
+      stroke:var(--thread-color);
       stroke-width:8;
-      opacity:.18;
+      stroke-linecap:round;
+      opacity:.2;
+      transition:stroke .12s;
     }
 
-
-    /* =========================================================
-       PORTRAITS
-       ========================================================= */
+    /*
+      ============================================================
+      PORTRAITS
+      ============================================================
+    */
 
     .portrait{
       position:absolute;
 
       width:clamp(205px,20vw,330px);
-
       aspect-ratio:1;
 
-      border-radius:
-        49% 51% 47% 53%;
+      border-radius:49% 51% 47% 53%;
 
-      background:#d9cfbf;
+      background:rgba(217,207,191,.9);
 
       box-shadow:
-        0 2px 0 #776d61,
+        inset 0 1px 2px rgba(255,255,255,.35),
+        0 2px 0 rgba(119,109,97,.7),
         0 18px 50px rgba(0,0,0,.35);
 
       z-index:5;
 
       cursor:grab;
-
       user-select:none;
-
       touch-action:none;
 
       transition:
@@ -461,8 +386,23 @@
         transform .25s;
     }
 
-    .portrait:hover{
-      transform:translateY(-2px);
+    .portrait::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+
+      background:
+        linear-gradient(
+          135deg,
+          rgba(255,255,255,.14),
+          transparent 32%,
+          transparent 65%,
+          rgba(255,255,255,.035)
+        );
+
+      pointer-events:none;
+      z-index:4;
     }
 
     .portrait:active{
@@ -470,25 +410,25 @@
 
       box-shadow:
         0 0 0 1px var(--thread-color),
+        inset 0 1px 2px rgba(255,255,255,.35),
         0 25px 70px rgba(0,0,0,.5);
     }
 
-    .portrait::before{
-      content:'';
+    .portrait:focus-visible{
+      outline:1px solid var(--thread-color);
+      outline-offset:7px;
+    }
 
+    .portrait:before{
+      content:"";
       position:absolute;
       inset:-8px;
 
-      border-radius:
-        48% 52% 50% 46%;
-
+      border-radius:48% 52% 50% 46%;
       border:2px solid #a29889;
 
       filter:url(#rough);
-
       opacity:.65;
-
-      pointer-events:none;
     }
 
     .portrait img{
@@ -529,6 +469,7 @@
       transform:translateX(-50%);
 
       transition:box-shadow .2s;
+      z-index:10;
     }
 
     .portrait .name{
@@ -543,14 +484,13 @@
 
       font:
         400 clamp(18px,1.6vw,27px)/1
-        'Songti SC',
-        'STSong',
-        serif;
+        'Songti SC',serif;
 
       letter-spacing:.2em;
 
-      text-shadow:
-        0 2px 15px rgba(0,0,0,.7);
+      color:var(--paper);
+
+      text-shadow:0 2px 12px rgba(0,0,0,.7);
     }
 
     #daughter{
@@ -563,15 +503,16 @@
       top:20%;
     }
 
-
-    /* =========================================================
-       RELATIONSHIP STATE
-       ========================================================= */
+    /*
+      ============================================================
+      RELATION STATE
+      ============================================================
+    */
 
     .state{
       position:absolute;
 
-      z-index:7;
+      z-index:15;
 
       left:50%;
       top:45%;
@@ -579,31 +520,34 @@
       transform:translate(-50%,-50%);
 
       display:flex;
+      gap:12px;
       align-items:center;
-      gap:18px;
 
-      padding:9px 15px;
+      padding:11px 17px;
 
       border-radius:999px;
 
       color:#aaa194;
 
-      font-family:
-        'Songti SC',
-        'STSong',
-        serif;
-
+      font-family:'Songti SC',serif;
       letter-spacing:.18em;
 
       pointer-events:none;
+
+      background:rgba(255,255,255,.018);
+      border:1px solid rgba(255,255,255,.06);
+
+      backdrop-filter:blur(4px);
+      -webkit-backdrop-filter:blur(4px);
+
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.08);
     }
 
     .state span{
       transition:
         color .2s,
         border-color .2s;
-
-      padding:3px 2px;
     }
 
     .state span.active{
@@ -612,9 +556,6 @@
       border-bottom:1px solid var(--thread-color);
 
       padding-bottom:7px;
-
-      text-shadow:
-        0 0 15px rgba(183,107,77,.35);
     }
 
     .state i{
@@ -622,15 +563,16 @@
       color:#65605a;
     }
 
-
-    /* =========================================================
-       INSTRUCTION
-       ========================================================= */
+    /*
+      ============================================================
+      INSTRUCTION
+      ============================================================
+    */
 
     .instruction{
       position:absolute;
 
-      z-index:7;
+      z-index:15;
 
       left:50%;
       bottom:30%;
@@ -641,41 +583,47 @@
 
       font:
         400 14px/1.5
-        'Songti SC',
-        'STSong',
-        serif;
+        'Songti SC',serif;
 
       letter-spacing:.15em;
-
       white-space:nowrap;
 
-      opacity:.85;
+      padding:9px 18px;
+
+      border-radius:999px;
+
+      background:rgba(255,255,255,.015);
+      border:1px solid rgba(255,255,255,.055);
+
+      backdrop-filter:blur(4px);
+      -webkit-backdrop-filter:blur(4px);
+
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.06);
     }
 
-    .instruction::before,
-    .instruction::after{
-      content:'↝';
-
+    .instruction:before,
+    .instruction:after{
+      content:"↝";
       display:inline-block;
-
       margin:0 22px;
-
       color:#6d6760;
     }
 
-    .instruction::before{
+    .instruction:before{
       transform:scaleX(-1);
     }
 
-
-    /* =========================================================
-       ENTER / DOWNLOAD
-       ========================================================= */
+    /*
+      ============================================================
+      ENTER / DOWNLOAD
+      ============================================================
+    */
 
     .enter-wrap{
       position:absolute;
 
-      z-index:8;
+      z-index:20;
 
       left:50%;
       bottom:8%;
@@ -684,66 +632,58 @@
 
       display:flex;
       align-items:center;
-
-      gap:28px;
+      gap:32px;
     }
 
     .memory-button{
-      position:relative;
-
       width:174px;
       height:174px;
 
       border-radius:50%;
 
+      border:1px solid rgba(255,255,255,.4);
+
       background:rgba(255,255,255,.025);
 
       color:var(--paper);
 
-      border:1px solid rgba(255,255,255,.35);
-
       font:
         400 25px/1
-        'Songti SC',
-        'STSong',
-        serif;
+        'Songti SC',serif;
 
       letter-spacing:.1em;
-
       white-space:nowrap;
 
-      backdrop-filter:blur(4px);
-      -webkit-backdrop-filter:blur(4px);
+      position:relative;
+
+      backdrop-filter:blur(6px);
+      -webkit-backdrop-filter:blur(6px);
 
       box-shadow:
-        inset 0 1px 1px rgba(255,255,255,.1),
-        0 20px 60px rgba(0,0,0,.28);
+        inset 0 1px 1px rgba(255,255,255,.18),
+        0 20px 50px rgba(0,0,0,.2);
 
       transition:
-        transform .35s,
-        background .35s,
-        border-color .35s;
+        transform .4s,
+        background .4s,
+        border-color .4s;
     }
 
     .memory-button::before,
     .memory-button::after{
-      content:'';
+      content:"";
 
       position:absolute;
 
-      border:1px solid rgba(218,205,185,.12);
+      border:1px solid rgba(218,205,185,.14);
 
       border-radius:50%;
 
-      pointer-events:none;
+      inset:-18px;
 
       transition:
         transform .4s,
         opacity .4s;
-    }
-
-    .memory-button::before{
-      inset:-18px;
     }
 
     .memory-button::after{
@@ -753,10 +693,8 @@
 
     .memory-button:hover{
       transform:scale(1.025);
-
       background:rgba(255,255,255,.055);
-
-      border-color:rgba(255,255,255,.5);
+      border-color:rgba(255,255,255,.65);
     }
 
     .memory-button:hover::before{
@@ -770,33 +708,30 @@
     }
 
     .continue{
-      position:relative;
+      min-height:46px;
 
       display:flex;
       align-items:center;
-      justify-content:center;
 
-      min-height:48px;
-
-      padding:12px 20px;
+      padding:0 20px;
 
       border-radius:999px;
 
+      border:1px solid rgba(255,255,255,.14);
+
       background:rgba(255,255,255,.025);
 
-      border:1px solid rgba(255,255,255,.16);
+      color:#c8beb0;
 
-      color:#c7bdb0;
+      text-decoration:none;
 
       letter-spacing:.1em;
 
-      font-size:13px;
-
-      backdrop-filter:blur(4px);
-      -webkit-backdrop-filter:blur(4px);
+      backdrop-filter:blur(5px);
+      -webkit-backdrop-filter:blur(5px);
 
       box-shadow:
-        inset 0 1px 1px rgba(255,255,255,.1);
+        inset 0 1px 1px rgba(255,255,255,.09);
 
       transition:
         color .25s,
@@ -805,163 +740,54 @@
         transform .25s;
     }
 
-    .continue::after{
-      content:'';
-
-      position:absolute;
-
-      left:20px;
-      right:20px;
-      bottom:7px;
-
-      height:1px;
-
-      background:var(--red);
-
-      opacity:.8;
-    }
-
     .continue:hover,
     .continue:focus-visible{
       color:#fff;
-
-      background:rgba(255,255,255,.07);
-
+      background:rgba(255,255,255,.06);
       border-color:rgba(255,255,255,.28);
-
-      transform:translateY(-2px);
+      transform:translateY(-1px);
+      outline:none;
     }
 
-
-    /* =========================================================
-       DECORATIVE OBJECTS
-       ========================================================= */
+    /*
+      ============================================================
+      DECORATIVE PROPS
+      ============================================================
+    */
 
     .prop{
       position:absolute;
-
       z-index:2;
 
       pointer-events:none;
 
-      filter:
-        saturate(.72)
-        sepia(.16);
+      filter:saturate(.72) sepia(.16);
 
       opacity:.78;
     }
 
     .umbrella{
       width:min(27vw,330px);
-
       left:-5%;
       bottom:-12%;
-
       transform:rotate(-28deg);
     }
 
     .frame{
       width:min(25vw,330px);
-
       right:-6%;
       bottom:-14%;
-
       transform:rotate(-14deg);
     }
 
-
-    /* =========================================================
-       MEMORY LAYER
-       ========================================================= */
+    /*
+      ============================================================
+      MEMORY LAYER
+      ============================================================
+    */
 
     .memory-layer{
       position:absolute;
-
-      inset:0;
-
-      z-index:50;
-
-      display:grid;
-      place-items:center;
-
-      background:
-        rgba(224,215,199,.94);
-
-      color:#27231f;
-
-      clip-path:
-        circle(0 at 50% 76%);
-
-      transition:
-        clip-path 1s cubic-bezier(.7,0,.2,1);
-
-      pointer-events:none;
-    }
-
-    .memory-layer.open{
-      clip-path:
-        circle(110% at 50% 76%);
-
-      pointer-events:auto;
-    }
-
-    .memory-inner{
-      text-align:center;
-
-      max-width:620px;
-
-      padding:30px;
-    }
-
-    .memory-inner h2{
-      font:
-        400 clamp(42px,6vw,82px)/1.2
-        'Songti SC',
-        'STSong',
-        serif;
-
-      margin:0;
-    }
-
-    .memory-inner p{
-      line-height:2;
-      color:#6d6257;
-    }
-
-    .memory-inner button{
-      margin-top:24px;
-
-      padding:13px 30px;
-
-      border:1px solid #3a332d;
-
-      border-radius:999px;
-
-      background:rgba(255,255,255,.12);
-
-      backdrop-filter:blur(4px);
-      -webkit-backdrop-filter:blur(4px);
-
-      letter-spacing:.15em;
-
-      transition:
-        background .25s,
-        transform .25s;
-    }
-
-    .memory-inner button:hover{
-      background:rgba(255,255,255,.3);
-      transform:translateY(-1px);
-    }
-
-
-    /* =========================================================
-       MEDIA LAYER
-       ========================================================= */
-
-    .media-layer{
-      position:absolute;
-
       inset:0;
 
       z-index:100;
@@ -969,10 +795,146 @@
       display:grid;
       place-items:center;
 
+      background:rgba(224,215,199,.82);
+
+      color:#27231f;
+
+      clip-path:circle(0 at 50% 76%);
+
+      transition:
+        clip-path 1s cubic-bezier(.7,0,.2,1);
+
+      pointer-events:none;
+
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+
+    .memory-layer::before{
+      content:"";
+
+      position:absolute;
+      inset:18px;
+
+      border-radius:28px;
+
+      border:1px solid rgba(255,255,255,.5);
+
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.35);
+    }
+
+    .memory-layer.open{
+      clip-path:circle(110% at 50% 76%);
+      pointer-events:auto;
+    }
+
+    .memory-inner{
+      width:min(620px,90%);
+
+      padding:44px 36px;
+
+      border-radius:28px;
+
+      text-align:center;
+
+      background:rgba(255,255,255,.08);
+
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+
+      border:1px solid rgba(255,255,255,.3);
+
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.35),
+        0 30px 100px rgba(40,30,20,.18);
+
+      position:relative;
+      overflow:hidden;
+    }
+
+    .memory-inner::before{
+      content:"";
+
+      position:absolute;
+      inset:0;
+
+      border-radius:inherit;
+      padding:1.4px;
+
+      background:linear-gradient(
+        180deg,
+        rgba(255,255,255,.55),
+        rgba(255,255,255,.12) 25%,
+        transparent 48%,
+        transparent 70%,
+        rgba(255,255,255,.3)
+      );
+
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+
+      -webkit-mask-composite:xor;
+      mask-composite:exclude;
+
+      pointer-events:none;
+    }
+
+    .memory-inner h2{
+      position:relative;
+
+      font:
+        400 clamp(42px,6vw,82px)/1.2
+        'Songti SC',serif;
+
+      margin:0;
+    }
+
+    .memory-inner p{
+      position:relative;
+
+      line-height:2;
+      color:#6d6257;
+    }
+
+    .memory-inner button{
+      position:relative;
+
+      margin-top:24px;
+
+      padding:13px 30px;
+
+      border-radius:999px;
+
+      border:1px solid rgba(58,51,45,.35);
+
+      background:rgba(255,255,255,.16);
+
+      letter-spacing:.15em;
+
+      backdrop-filter:blur(4px);
+      -webkit-backdrop-filter:blur(4px);
+    }
+
+    /*
+      ============================================================
+      MEDIA LAYER
+      ============================================================
+    */
+
+    .media-layer{
+      position:absolute;
+      inset:0;
+
+      z-index:200;
+
+      display:grid;
+      place-items:center;
+
       padding:42px;
 
-      background:
-        rgba(18,17,16,.78);
+      background:rgba(24,23,21,.72);
 
       backdrop-filter:blur(18px);
       -webkit-backdrop-filter:blur(18px);
@@ -993,45 +955,74 @@
     }
 
     .media-shell{
-      position:relative;
-
       width:min(1120px,94%);
       height:min(760px,88%);
 
       min-height:0;
 
       display:grid;
-
       grid-template-rows:auto minmax(0,1fr);
-
       gap:22px;
+
+      padding:26px;
 
       border-radius:28px;
 
-      padding:24px;
-
       background:rgba(255,255,255,.025);
 
-      backdrop-filter:blur(4px);
-      -webkit-backdrop-filter:blur(4px);
+      border:1px solid rgba(255,255,255,.18);
+
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
 
       box-shadow:
-        inset 0 1px 1px rgba(255,255,255,.1),
-        0 40px 100px rgba(0,0,0,.5);
+        inset 0 1px 1px rgba(255,255,255,.14),
+        0 40px 120px rgba(0,0,0,.42);
+
+      position:relative;
+      overflow:hidden;
+    }
+
+    .media-shell::before{
+      content:"";
+
+      position:absolute;
+      inset:0;
+
+      border-radius:inherit;
+      padding:1.4px;
+
+      background:linear-gradient(
+        180deg,
+        rgba(255,255,255,.45),
+        rgba(255,255,255,.12) 20%,
+        transparent 42%,
+        transparent 62%,
+        rgba(255,255,255,.12) 82%,
+        rgba(255,255,255,.4)
+      );
+
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+
+      -webkit-mask-composite:xor;
+      mask-composite:exclude;
+
+      pointer-events:none;
     }
 
     .media-heading{
-      position:relative;
-      z-index:2;
-
       display:flex;
-
       align-items:end;
       justify-content:space-between;
 
-      border-bottom:1px solid rgba(255,255,255,.10);
+      border-bottom:1px solid rgba(255,255,255,.1);
 
-      padding:0 0 18px;
+      padding-bottom:18px;
+
+      position:relative;
+      z-index:2;
     }
 
     .media-heading p{
@@ -1041,10 +1032,7 @@
 
       font:
         11px/1
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        monospace;
+        ui-monospace,monospace;
 
       letter-spacing:.24em;
     }
@@ -1054,24 +1042,16 @@
 
       font:
         400 clamp(30px,4vw,58px)/1
-        'Songti SC',
-        'STSong',
-        serif;
+        'Songti SC',serif;
 
       letter-spacing:.08em;
     }
 
     .media-close{
-      position:relative;
-      z-index:3;
-
       width:44px;
       height:44px;
 
-      flex:0 0 44px;
-
-      border:1px solid rgba(255,255,255,.18);
-
+      border:1px solid rgba(255,255,255,.2);
       border-radius:50%;
 
       background:rgba(255,255,255,.025);
@@ -1081,31 +1061,36 @@
       font-size:24px;
       line-height:1;
 
-      backdrop-filter:blur(4px);
-      -webkit-backdrop-filter:blur(4px);
+      backdrop-filter:blur(5px);
+      -webkit-backdrop-filter:blur(5px);
 
       transition:
         background .25s,
+        border-color .25s,
         transform .25s;
     }
 
     .media-close:hover{
-      background:rgba(255,255,255,.09);
-      transform:rotate(8deg);
+      background:rgba(255,255,255,.08);
+      border-color:rgba(255,255,255,.35);
+      transform:rotate(5deg);
     }
 
     .media-panel{
       min-height:0;
+      position:relative;
+      z-index:2;
     }
 
     .media-panel[hidden]{
       display:none;
     }
 
-
-    /* =========================================================
-       TRAILER
-       ========================================================= */
+    /*
+      ============================================================
+      TRAILER
+      ============================================================
+    */
 
     .trailer-panel{
       display:grid;
@@ -1132,12 +1117,12 @@
 
       background:#080808;
 
+      border-radius:18px;
+
       box-shadow:
         0 28px 80px rgba(0,0,0,.42);
 
-      border:1px solid rgba(255,255,255,.14);
-
-      border-radius:18px;
+      border:1px solid rgba(255,255,255,.15);
 
       display:block;
     }
@@ -1163,19 +1148,18 @@
 
       font:
         400 21px/1.4
-        'Songti SC',
-        'STSong',
-        serif;
+        'Songti SC',serif;
 
       letter-spacing:.12em;
 
       margin-bottom:10px;
     }
 
-
-    /* =========================================================
-       GUIDE
-       ========================================================= */
+    /*
+      ============================================================
+      GUIDE
+      ============================================================
+    */
 
     .guide-panel{
       height:100%;
@@ -1204,6 +1188,8 @@
 
       border-radius:22px;
 
+      border:1px solid rgba(255,255,255,.16);
+
       padding:34px;
 
       background:
@@ -1212,19 +1198,17 @@
           rgba(192,138,79,.17),
           transparent 42%
         ),
-        rgba(255,255,255,.018);
+        rgba(255,255,255,.025);
 
-      border:1px solid rgba(255,255,255,.10);
-
-      backdrop-filter:blur(4px);
-      -webkit-backdrop-filter:blur(4px);
+      backdrop-filter:blur(5px);
+      -webkit-backdrop-filter:blur(5px);
 
       box-shadow:
-        inset 0 1px 1px rgba(255,255,255,.08);
+        inset 0 1px 1px rgba(255,255,255,.09);
     }
 
     .guide-lead::after{
-      content:'';
+      content:"";
 
       position:absolute;
 
@@ -1240,8 +1224,6 @@
 
       box-shadow:
         0 0 18px var(--thread-color);
-
-      opacity:.7;
     }
 
     .guide-index{
@@ -1249,10 +1231,7 @@
 
       font:
         10px/1
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        monospace;
+        ui-monospace,monospace;
 
       letter-spacing:.2em;
     }
@@ -1265,9 +1244,7 @@
 
       font:
         400 clamp(35px,4vw,56px)/1.35
-        'Songti SC',
-        'STSong',
-        serif;
+        'Songti SC',serif;
 
       letter-spacing:.08em;
     }
@@ -1300,7 +1277,7 @@
     }
 
     .guide-story{
-      border-bottom:1px solid rgba(255,255,255,.10);
+      border-bottom:1px solid rgba(255,255,255,.1);
 
       padding:4px 0 24px;
     }
@@ -1314,10 +1291,7 @@
 
       font:
         11px/1
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        monospace;
+        ui-monospace,monospace;
 
       letter-spacing:.2em;
     }
@@ -1329,9 +1303,7 @@
 
       font:
         15px/2
-        'Songti SC',
-        'STSong',
-        serif;
+        'Songti SC',serif;
     }
 
     .guide-steps{
@@ -1344,11 +1316,11 @@
     }
 
     .guide-step{
-      position:relative;
-
       border-radius:18px;
 
-      border:1px solid rgba(255,255,255,.09);
+      border:1px solid rgba(255,255,255,.1);
+
+      border-top:1px solid rgba(255,255,255,.28);
 
       padding:17px 14px 14px;
 
@@ -1368,10 +1340,8 @@
 
     .guide-step:hover{
       background:rgba(255,255,255,.045);
-
-      border-color:rgba(255,255,255,.16);
-
       transform:translateY(-2px);
+      border-color:rgba(255,255,255,.18);
     }
 
     .guide-step span{
@@ -1379,10 +1349,7 @@
 
       font:
         10px/1
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        monospace;
+        ui-monospace,monospace;
     }
 
     .guide-step h4{
@@ -1390,9 +1357,7 @@
 
       font:
         400 21px/1.2
-        'Songti SC',
-        'STSong',
-        serif;
+        'Songti SC',serif;
 
       letter-spacing:.1em;
     }
@@ -1403,7 +1368,6 @@
       color:#a9a094;
 
       font-size:12px;
-
       line-height:1.75;
     }
 
@@ -1412,13 +1376,11 @@
 
       border-left:1px solid var(--thread-color);
 
-      padding:
-        3px 0 3px 16px;
+      padding:3px 0 3px 16px;
 
       color:#b9b0a3;
 
       font-size:12px;
-
       line-height:1.75;
     }
 
@@ -1430,10 +1392,11 @@
       letter-spacing:.12em;
     }
 
-
-    /* =========================================================
-       MOBILE
-       ========================================================= */
+    /*
+      ============================================================
+      MOBILE
+      ============================================================
+    */
 
     @media(max-width:760px){
 
@@ -1443,18 +1406,15 @@
       }
 
       .page{
-        grid-template-columns:72px 1fr;
+        grid-template-columns:64px 1fr;
       }
 
       .title-rail{
-        padding:
-          calc(24px + var(--safe-top))
-          16px
-          calc(24px + var(--safe-bottom));
+        padding:24px 12px;
       }
 
       .zh-title{
-        font-size:39px;
+        font-size:37px;
       }
 
       .en-title{
@@ -1466,18 +1426,19 @@
       }
 
       .utility{
-        height:
-          calc(58px + var(--safe-top));
+        height:62px;
 
         padding:
-          var(--safe-top)
-          12px
-          0;
+          0 10px
+          env(safe-area-inset-right)
+          0 4px;
 
-        gap:4px;
+        gap:3px;
       }
 
       .utility button{
+        min-height:34px;
+
         font-size:10px;
 
         padding:7px 8px;
@@ -1491,13 +1452,13 @@
 
       .portrait{
         width:44vw;
+
+        max-width:240px;
       }
 
       .portrait .name{
         font-size:16px;
-
-        top:
-          calc(100% + 22px);
+        top:calc(100% + 22px);
       }
 
       #daughter{
@@ -1513,33 +1474,35 @@
       .state{
         top:15%;
 
-        font-size:12px;
+        font-size:11px;
 
-        gap:8px;
+        gap:7px;
 
-        padding:7px 10px;
+        padding:8px 12px;
       }
 
       .instruction{
         bottom:28%;
 
-        font-size:12px;
+        font-size:11px;
 
-        letter-spacing:.1em;
+        padding:8px 12px;
       }
 
-      .instruction::before,
-      .instruction::after{
+      .instruction:before,
+      .instruction:after{
         display:none;
       }
 
       .enter-wrap{
         bottom:
-          calc(5% + var(--safe-bottom));
+          calc(5% + env(safe-area-inset-bottom));
 
-        gap:12px;
+        gap:10px;
 
-        flex-direction:column;
+        width:calc(100% - 20px);
+
+        justify-content:center;
       }
 
       .memory-button{
@@ -1556,64 +1519,41 @@
       .continue{
         min-height:40px;
 
-        padding:9px 16px;
+        padding:0 13px;
 
         font-size:11px;
-      }
 
-      .continue::after{
-        left:16px;
-        right:16px;
+        white-space:nowrap;
       }
 
       .umbrella{
         width:220px;
-
         left:-26%;
         bottom:-7%;
       }
 
       .frame{
         width:210px;
-
         right:-23%;
         bottom:-7%;
       }
 
-
-      /* mobile memory */
-
-      .memory-inner{
-        max-width:90vw;
-
-        padding:24px;
-      }
-
-      .memory-inner h2{
-        font-size:42px;
-      }
-
-      .memory-inner p{
-        font-size:13px;
-        line-height:1.9;
-      }
-
-
-      /* mobile media */
+      /*
+        Mobile media window
+      */
 
       .media-layer{
         padding:
-          calc(14px + var(--safe-top))
           12px
-          calc(14px + var(--safe-bottom));
+          10px
+          calc(12px + env(safe-area-inset-bottom));
       }
 
       .media-shell{
         width:100%;
+        height:calc(100% - 4px);
 
-        height:94%;
-
-        padding:16px;
+        padding:17px;
 
         border-radius:22px;
 
@@ -1625,18 +1565,17 @@
       }
 
       .media-heading h2{
-        font-size:30px;
+        font-size:29px;
       }
 
       .media-heading p{
         font-size:9px;
+        margin-bottom:6px;
       }
 
       .media-close{
-        width:38px;
-        height:38px;
-
-        flex-basis:38px;
+        width:40px;
+        height:40px;
       }
 
       .trailer-panel{
@@ -1650,8 +1589,6 @@
       }
 
       .trailer-panel video{
-        align-self:center;
-
         width:100%;
 
         max-height:100%;
@@ -1662,19 +1599,20 @@
       .media-note{
         align-self:auto;
 
-        font-size:11px;
+        padding-left:13px;
 
+        font-size:11px;
         line-height:1.65;
       }
 
       .media-note b{
         font-size:17px;
-
         margin-bottom:5px;
       }
 
-
-      /* mobile guide */
+      /*
+        Mobile guide
+      */
 
       .guide-panel{
         grid-template-columns:1fr;
@@ -1694,7 +1632,6 @@
 
       .guide-lead h3{
         font-size:32px;
-
         line-height:1.25;
       }
 
@@ -1712,7 +1649,6 @@
 
       .guide-story p{
         font-size:13px;
-
         line-height:1.85;
       }
 
@@ -1728,42 +1664,97 @@
 
       .guide-step h4{
         font-size:18px;
-
-        margin:
-          8px 0 5px;
+        margin:8px 0 5px;
       }
 
-      .guide-goal{
-        font-size:11px;
+      /*
+        Mobile memory
+      */
+
+      .memory-layer{
+        padding:20px;
+      }
+
+      .memory-inner{
+        width:100%;
+
+        padding:34px 22px;
+
+        border-radius:22px;
+      }
+
+      .memory-inner h2{
+        font-size:40px;
+      }
+
+      .memory-inner p{
+        font-size:13px;
+        line-height:1.9;
       }
     }
 
+    /*
+      ============================================================
+      VERY SMALL PHONES
+      ============================================================
+    */
 
-    /* =========================================================
-       REDUCED MOTION
-       ========================================================= */
+    @media(max-width:390px){
+
+      .page{
+        grid-template-columns:58px 1fr;
+      }
+
+      .zh-title{
+        font-size:33px;
+      }
+
+      .portrait{
+        width:42vw;
+      }
+
+      .memory-button{
+        width:108px;
+        height:108px;
+        flex-basis:108px;
+        font-size:16px;
+      }
+
+      .continue{
+        font-size:10px;
+        padding:0 10px;
+      }
+
+      .enter-wrap{
+        gap:7px;
+      }
+    }
+
+    /*
+      ============================================================
+      REDUCED MOTION
+      ============================================================
+    */
 
     @media(prefers-reduced-motion:reduce){
 
       *,
-      *::before,
-      *::after{
+      *:before,
+      *:after{
         animation:none!important;
-
         transition:none!important;
       }
     }
   </style>
 </head>
 
-
 <body>
 
   <div class="page" id="top">
 
-    <!-- =======================================================
-         TITLE RAIL
-         ======================================================= -->
+    <!-- ========================================================
+         LEFT RAIL
+         ======================================================== -->
 
     <aside class="title-rail">
 
@@ -1771,9 +1762,7 @@
         href="#top"
         aria-label="返回页面顶部"
       >
-        <h1 class="zh-title">
-          不断线
-        </h1>
+        <h1 class="zh-title">不断线</h1>
       </a>
 
       <span class="red-rule"></span>
@@ -1782,72 +1771,57 @@
         ECHOES OF US
       </span>
 
-      <span class="knot">
-        ⌁
-      </span>
+      <span class="knot">⌁</span>
 
     </aside>
 
 
-    <!-- =======================================================
+    <!-- ========================================================
          MAIN
-         ======================================================= -->
+         ======================================================== -->
 
     <main
       class="canvas"
       id="canvas"
     >
 
-      <!-- =====================================================
+      <!-- ======================================================
            UTILITY
-           ===================================================== -->
+           ====================================================== -->
 
       <div class="utility">
 
         <button
-          class="liquid-glass"
           id="openTrailer"
           type="button"
         >
-          <span class="liquid-content">
-            宣传片
-          </span>
+          宣传片
         </button>
 
-        <span class="slash">
-          /
-        </span>
+        <span class="slash">/</span>
 
         <button
-          class="liquid-glass"
           id="openGuide"
           type="button"
         >
-          <span class="liquid-content">
-            游戏说明
-          </span>
+          游戏说明
         </button>
 
-        <span class="slash">
-          /
-        </span>
+        <span class="slash">/</span>
 
         <button
-          class="liquid-glass"
           id="sound"
           type="button"
         >
-          <span class="liquid-content">
-            声音 · 关
-          </span>
+          声音 · 关
         </button>
 
       </div>
 
 
-      <!-- =====================================================
+      <!-- ======================================================
            THREAD
-           ===================================================== -->
+           ====================================================== -->
 
       <svg
         id="threadSvg"
@@ -1880,12 +1854,12 @@
       </svg>
 
 
-      <!-- =====================================================
+      <!-- ======================================================
            DAUGHTER
-           ===================================================== -->
+           ====================================================== -->
 
       <div
-        class="portrait"
+        class="portrait liquid-glass"
         id="daughter"
         role="button"
         tabindex="0"
@@ -1906,12 +1880,12 @@
       </div>
 
 
-      <!-- =====================================================
+      <!-- ======================================================
            MOTHER
-           ===================================================== -->
+           ====================================================== -->
 
       <div
-        class="portrait"
+        class="portrait liquid-glass"
         id="mother"
         role="button"
         tabindex="0"
@@ -1932,36 +1906,30 @@
       </div>
 
 
-      <!-- =====================================================
-           STATE
-           ===================================================== -->
+      <!-- ======================================================
+           RELATION STATE
+           ====================================================== -->
 
       <div
-        class="state liquid-glass"
+        class="state"
         aria-live="polite"
       >
 
-        <span
-          class="liquid-content"
-          data-state="close"
-        >
+        <span data-state="close">
           靠近
         </span>
 
         <i>/</i>
 
-        <span
-          class="liquid-content"
-          data-state="tense"
-        >
+        <span data-state="tense">
           拉扯
         </span>
 
         <i>/</i>
 
         <span
-          class="liquid-content active"
           data-state="stable"
+          class="active"
         >
           稳定
         </span>
@@ -1969,59 +1937,45 @@
       </div>
 
 
-      <!-- =====================================================
+      <!-- ======================================================
            INSTRUCTION
-           ===================================================== -->
+           ====================================================== -->
 
       <p class="instruction">
         移动她们，感受距离。
       </p>
 
 
-      <!-- =====================================================
-           ENTER
-           ===================================================== -->
+      <!-- ======================================================
+           ENTER / DOWNLOAD
+           ====================================================== -->
 
       <div class="enter-wrap">
 
         <button
-          class="memory-button liquid-glass"
+          class="memory-button"
           id="openMemory"
           type="button"
         >
-
-          <span class="liquid-content">
-            进入记忆
-          </span>
-
+          进入记忆
         </button>
 
-
-        <!--
-          进入 Release 页面。
-          不直接暴露 ZIP。
-        -->
-
         <a
-          class="continue liquid-glass"
+          class="continue"
           id="downloadGame"
           href="https://github.com/Shellingfordh/echoes-of-us/releases/tag/v0.1.0"
           target="_blank"
           rel="noopener noreferrer"
         >
-
-          <span class="liquid-content">
-            沿着这根线，开始游戏
-          </span>
-
+          进入游戏 · macOS
         </a>
 
       </div>
 
 
-      <!-- =====================================================
-           PROPS
-           ===================================================== -->
+      <!-- ======================================================
+           DECORATION
+           ====================================================== -->
 
       <img
         class="prop umbrella"
@@ -2036,9 +1990,9 @@
       >
 
 
-      <!-- =====================================================
-           MEMORY
-           ===================================================== -->
+      <!-- ======================================================
+           MEMORY LAYER
+           ====================================================== -->
 
       <section
         class="memory-layer"
@@ -2058,15 +2012,10 @@
           </p>
 
           <button
-            class="liquid-glass"
             id="closeMemory"
             type="button"
           >
-
-            <span class="liquid-content">
-              回到关系实验场
-            </span>
-
+            回到关系实验场
           </button>
 
         </div>
@@ -2074,9 +2023,9 @@
       </section>
 
 
-      <!-- =====================================================
+      <!-- ======================================================
            MEDIA LAYER
-           ===================================================== -->
+           ====================================================== -->
 
       <section
         class="media-layer"
@@ -2085,11 +2034,7 @@
         aria-labelledby="mediaTitle"
       >
 
-        <div class="media-shell liquid-glass">
-
-          <!-- =================================================
-               MEDIA HEADER
-               ================================================= -->
+        <div class="media-shell">
 
           <header class="media-heading">
 
@@ -2106,7 +2051,7 @@
             </div>
 
             <button
-              class="media-close liquid-glass"
+              class="media-close"
               id="closeMedia"
               type="button"
               aria-label="关闭媒体窗口"
@@ -2117,9 +2062,9 @@
           </header>
 
 
-          <!-- =================================================
+          <!-- ==================================================
                TRAILER
-               ================================================= -->
+               ================================================== -->
 
           <div
             class="media-panel trailer-panel"
@@ -2138,7 +2083,6 @@
               你的浏览器暂不支持视频播放。
             </video>
 
-
             <p class="media-note">
 
               <b>
@@ -2154,9 +2098,9 @@
           </div>
 
 
-          <!-- =================================================
+          <!-- ==================================================
                GUIDE
-               ================================================= -->
+               ================================================== -->
 
           <div
             class="media-panel guide-panel"
@@ -2164,7 +2108,7 @@
             hidden
           >
 
-            <aside class="guide-lead liquid-glass">
+            <aside class="guide-lead">
 
               <span class="guide-index">
                 HOW TO PLAY · 01
@@ -2203,51 +2147,45 @@
                 aria-label="核心玩法"
               >
 
-                <article class="guide-step liquid-glass">
+                <article class="guide-step">
 
-                  <span class="liquid-content">
-                    01
-                  </span>
+                  <span>01</span>
 
-                  <h4 class="liquid-content">
+                  <h4>
                     双人切换
                   </h4>
 
-                  <p class="liquid-content">
+                  <p>
                     在余念与余秀兰之间切换，利用两人的位置关系协作探索。
                   </p>
 
                 </article>
 
 
-                <article class="guide-step liquid-glass">
+                <article class="guide-step">
 
-                  <span class="liquid-content">
-                    02
-                  </span>
+                  <span>02</span>
 
-                  <h4 class="liquid-content">
+                  <h4>
                     牵挂线
                   </h4>
 
-                  <p class="liquid-content">
+                  <p>
                     距离改变线的状态：过远会拉回，危险时能托住彼此。
                   </p>
 
                 </article>
 
 
-                <article class="guide-step liquid-glass">
+                <article class="guide-step">
 
-                  <span class="liquid-content">
-                    03
-                  </span>
+                  <span>03</span>
 
-                  <h4 class="liquid-content">
+                  <h4>
                     锚定借力
                   </h4>
 
-                  <p class="liquid-content">
+                  <p>
                     通过移动、锚定与借力跨越障碍，让牵挂成为前进的支点。
                   </p>
 
@@ -2279,9 +2217,9 @@
   </div>
 
 
-  <!-- =========================================================
+  <!-- ==========================================================
        AMBIENCE
-       ========================================================= -->
+       ========================================================== -->
 
   <audio
     id="ambience"
@@ -2293,9 +2231,11 @@
 
   <script>
 
-    /* =========================================================
-       THREAD SYSTEM
-       ========================================================= */
+    /*
+      ============================================================
+      RELATION / THREAD
+      ============================================================
+    */
 
     const canvas =
       document.querySelector('#canvas');
@@ -2331,29 +2271,47 @@
         canvas.getBoundingClientRect();
 
       return {
-        x:r.left - c.left + r.width / 2,
-        y:r.top - c.top + r.height - 2
-      };
+        x:
+          r.left -
+          c.left +
+          r.width / 2,
 
+        y:
+          r.top -
+          c.top +
+          r.height -
+          2
+      };
     }
 
 
-    function blend(from,to,amount){
+    function blend(
+      from,
+      to,
+      amount
+    ){
 
       const parse =
         hex =>
           hex
             .match(/\w\w/g)
-            .map(v => parseInt(v,16));
+            .map(v =>
+              parseInt(v,16)
+            );
 
-      const a = parse(from);
-      const b = parse(to);
+      const a =
+        parse(from);
+
+      const b =
+        parse(to);
 
       return `rgb(${
         a.map(
           (v,i) =>
             Math.round(
-              v + (b[i]-v) * amount
+              v +
+              (b[i]-v) *
+              amount
             )
         ).join(', ')
       })`;
@@ -2375,9 +2333,8 @@
       return blend(
         '#c08a4f',
         '#d94f43',
-        (amount-.5) * 2
+        (amount - .5) * 2
       );
-
     }
 
 
@@ -2406,17 +2363,17 @@
       const sag =
         Math.min(
           80,
-          dist*.12
+          dist * .12
         );
 
       const d =
-        `
-        M ${a.x} ${a.y}
-        C
-        ${a.x+dist*.28} ${a.y+sag},
-        ${b.x-dist*.28} ${b.y+sag},
-        ${b.x} ${b.y}
-        `;
+        `M ${a.x} ${a.y}
+         C
+         ${a.x+dist*.28}
+         ${a.y+sag},
+         ${b.x-dist*.28}
+         ${b.y+sag},
+         ${b.x} ${b.y}`;
 
       thread.setAttribute(
         'd',
@@ -2434,13 +2391,18 @@
           0,
           Math.min(
             1,
-            (dist-c.width*.24)/(c.width*.5)
+            (
+              dist -
+              c.width*.24
+            ) /
+            (c.width*.5)
           )
         );
 
 
       const color =
         tensionColor(tension);
+
 
       const state =
         dist < c.width*.42
@@ -2467,25 +2429,19 @@
 
       document
         .querySelectorAll('[data-state]')
-        .forEach(el => {
-
-          el.classList.toggle(
-            'active',
-            el.dataset.state === state
-          );
-
-        });
+        .forEach(
+          el =>
+            el.classList.toggle(
+              'active',
+              el.dataset.state === state
+            )
+        );
 
 
       thread.style.strokeWidth =
-        `${3+tension*1.5}`;
-
+        `${3 + tension*1.5}`;
     }
 
-
-    /* =========================================================
-       DRAG
-       ========================================================= */
 
     function begin(e){
 
@@ -2496,21 +2452,26 @@
         dragging.getBoundingClientRect();
 
       offset = {
-        x:e.clientX-r.left,
-        y:e.clientY-r.top
+        x:
+          e.clientX -
+          r.left,
+
+        y:
+          e.clientY -
+          r.top
       };
 
       dragging.setPointerCapture(
         e.pointerId
       );
-
     }
 
 
     function move(e){
 
-      if(!dragging)
+      if(!dragging){
         return;
+      }
 
       const c =
         canvas.getBoundingClientRect();
@@ -2527,7 +2488,9 @@
           8,
           Math.min(
             c.width-w-8,
-            e.clientX-c.left-offset.x
+            e.clientX -
+            c.left -
+            offset.x
           )
         );
 
@@ -2537,30 +2500,30 @@
           70,
           Math.min(
             c.height-h-72,
-            e.clientY-c.top-offset.y
+            e.clientY -
+            c.top -
+            offset.y
           )
         );
 
 
       dragging.style.left =
-        x+'px';
+        x + 'px';
 
       dragging.style.top =
-        y+'px';
+        y + 'px';
 
       dragging.style.right =
         'auto';
 
 
       updateThread();
-
     }
 
 
     function end(){
 
       dragging = null;
-
     }
 
 
@@ -2573,9 +2536,9 @@
           'ArrowUp',
           'ArrowDown'
         ].includes(e.key)
-      )
+      ){
         return;
-
+      }
 
       e.preventDefault();
 
@@ -2629,17 +2592,16 @@
 
 
       e.currentTarget.style.left =
-        x+'px';
+        x + 'px';
 
       e.currentTarget.style.top =
-        y+'px';
+        y + 'px';
 
       e.currentTarget.style.right =
         'auto';
 
 
       updateThread();
-
     }
 
 
@@ -2684,113 +2646,129 @@
     );
 
 
-    /* =========================================================
-       MEMORY
-       ========================================================= */
+    /*
+      ============================================================
+      MEMORY
+      ============================================================
+    */
 
-    const memoryLayer =
-      document.querySelector('#memoryLayer');
-
-    const openMemory =
-      document.querySelector('#openMemory');
-
-    const closeMemory =
-      document.querySelector('#closeMemory');
-
-
-    openMemory.onclick = () => {
-
-      memoryLayer.classList.add(
-        'open'
+    const layer =
+      document.querySelector(
+        '#memoryLayer'
       );
 
-      memoryLayer.setAttribute(
-        'aria-hidden',
-        'false'
-      );
 
-    };
+    document
+      .querySelector('#openMemory')
+      .onclick = () => {
 
+        layer.classList.add(
+          'open'
+        );
 
-    closeMemory.onclick = () => {
-
-      memoryLayer.classList.remove(
-        'open'
-      );
-
-      memoryLayer.setAttribute(
-        'aria-hidden',
-        'true'
-      );
-
-    };
+        layer.setAttribute(
+          'aria-hidden',
+          'false'
+        );
+      };
 
 
-    /* =========================================================
-       AUDIO
-       ========================================================= */
+    document
+      .querySelector('#closeMemory')
+      .onclick = () => {
+
+        layer.classList.remove(
+          'open'
+        );
+
+        layer.setAttribute(
+          'aria-hidden',
+          'true'
+        );
+      };
+
+
+    /*
+      ============================================================
+      AMBIENCE
+      ============================================================
+    */
 
     const audio =
-      document.querySelector('#ambience');
+      document.querySelector(
+        '#ambience'
+      );
 
     const sound =
-      document.querySelector('#sound');
+      document.querySelector(
+        '#sound'
+      );
 
 
-    sound.onclick = async () => {
+    sound.onclick =
+      async () => {
 
-      if(audio.paused){
+        if(audio.paused){
 
-        try{
+          try{
 
-          await audio.play();
+            await audio.play();
+
+            sound.textContent =
+              '声音 · 开';
+
+          }catch{
+
+            sound.textContent =
+              '声音不可用';
+          }
+
+        }else{
+
+          audio.pause();
 
           sound.textContent =
-            '声音 · 开';
-
-        }catch{
-
-          sound.textContent =
-            '声音不可用';
-
+            '声音 · 关';
         }
 
-      }else{
-
-        audio.pause();
-
-        sound.textContent =
-          '声音 · 关';
-
-      }
-
-    };
+      };
 
 
-    /* =========================================================
-       MEDIA
-       ========================================================= */
+    /*
+      ============================================================
+      MEDIA
+      ============================================================
+    */
 
     const mediaLayer =
-      document.querySelector('#mediaLayer');
+      document.querySelector(
+        '#mediaLayer'
+      );
 
     const mediaTitle =
-      document.querySelector('#mediaTitle');
+      document.querySelector(
+        '#mediaTitle'
+      );
 
     const mediaEyebrow =
-      document.querySelector('#mediaEyebrow');
+      document.querySelector(
+        '#mediaEyebrow'
+      );
 
     const trailerPanel =
-      document.querySelector('#trailerPanel');
+      document.querySelector(
+        '#trailerPanel'
+      );
 
     const guidePanel =
-      document.querySelector('#guidePanel');
+      document.querySelector(
+        '#guidePanel'
+      );
 
     const promoVideo =
-      document.querySelector('#promoVideo');
-
-    const closeMedia =
-      document.querySelector('#closeMedia');
+      document.querySelector(
+        '#promoVideo'
+      );
 
 
     function openMedia(type){
@@ -2828,14 +2806,15 @@
       );
 
 
-      closeMedia.focus({
-        preventScroll:true
-      });
-
+      document
+        .querySelector('#closeMedia')
+        .focus({
+          preventScroll:true
+        });
     }
 
 
-    function closeMediaLayer(){
+    function closeMedia(){
 
       mediaLayer.classList.remove(
         'open'
@@ -2846,26 +2825,28 @@
         'true'
       );
 
-
       promoVideo.pause();
-
     }
 
 
     document
       .querySelector('#openTrailer')
       .onclick =
-        () => openMedia('trailer');
+      () =>
+        openMedia('trailer');
 
 
     document
       .querySelector('#openGuide')
       .onclick =
-        () => openMedia('guide');
+      () =>
+        openMedia('guide');
 
 
-    closeMedia.onclick =
-      closeMediaLayer;
+    document
+      .querySelector('#closeMedia')
+      .onclick =
+      closeMedia;
 
 
     mediaLayer.addEventListener(
@@ -2873,27 +2854,32 @@
       event => {
 
         if(
-          event.target === mediaLayer
+          event.target ===
+          mediaLayer
         ){
 
-          closeMediaLayer();
-
+          closeMedia();
         }
 
       }
     );
 
 
-    /* =========================================================
-       ESC
-       ========================================================= */
+    /*
+      ============================================================
+      ESC
+      ============================================================
+    */
 
     document.addEventListener(
       'keydown',
       event => {
 
-        if(event.key !== 'Escape')
+        if(
+          event.key !== 'Escape'
+        ){
           return;
+        }
 
 
         if(
@@ -2902,15 +2888,19 @@
           )
         ){
 
-          closeMediaLayer();
+          closeMedia();
 
         }else if(
-          memoryLayer.classList.contains(
+          layer.classList.contains(
             'open'
           )
         ){
 
-          closeMemory.click();
+          document
+            .querySelector(
+              '#closeMemory'
+            )
+            .click();
 
         }
 
@@ -2921,4 +2911,3 @@
 
 </body>
 </html>
-```
