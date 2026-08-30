@@ -13,8 +13,9 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 chapter_number = 4
-skip_hint_text = "Enter / Space 跳过第四章"
-complete_hint_text = "Enter / Space 重播第四章  ·  R 从序章重新开始"
+auto_replay = true
+skip_hint_text = ""
+complete_hint_text = ""
 fallback_title = "余响：牵挂"
 fallback_subtitle = "第四章 · 完"
 

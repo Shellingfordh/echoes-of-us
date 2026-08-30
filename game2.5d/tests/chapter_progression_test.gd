@@ -52,13 +52,15 @@ func _run() -> void:
 	var chapter_four := current_scene as CinematicPlayer
 	assert(chapter_four != null, "third chapter did not load the fourth chapter cinematic")
 	assert(session.current_chapter == 4, "fourth chapter entry was not persisted")
-	chapter_four._finish_cinematic(false)
+	assert(chapter_four.auto_replay)
+	chapter_four._on_video_finished()
 	assert(session.is_chapter_completed(4), "fourth chapter completion was not persisted")
-	assert(chapter_four.playback_state == CinematicPlayer.PlaybackState.COMPLETE)
+	assert(chapter_four.playback_state == CinematicPlayer.PlaybackState.PLAYING)
+	assert(not chapter_four.complete_hint.visible)
 
 	var main_script := FileAccess.get_file_as_string("res://scripts/main/main.gd")
 	assert(main_script.contains("complete_chapter(1)"))
 	assert(main_script.contains("change_scene_to_file(\"res://scenes/chapter2/chapter2.tscn\")"))
 
-	print("[CHAPTER_PROGRESSION] PASS chapters 1-4 share one session and scene chain")
+	print("[CHAPTER_PROGRESSION] PASS chapters 1-4 share one session, scene chain and looping finale")
 	quit(0)

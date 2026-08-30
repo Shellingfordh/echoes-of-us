@@ -47,33 +47,46 @@ func _run() -> void:
 	assert(chapter_four.video_player.stream != null)
 	assert(chapter_four.video_player.get_stream_length() > 50.0)
 	assert(session.current_chapter == 4)
+	assert(chapter_four.auto_replay)
 
 	if DisplayServer.get_name() == "headless":
-		chapter_four._finish_cinematic(false)
+		chapter_four._on_video_finished()
 	else:
-		await _seek_to_video_end(chapter_four)
+		await _seek_to_video_end(chapter_four, true)
 	assert(session.is_chapter_completed(4))
-	assert(chapter_four.playback_state == CinematicPlayer.PlaybackState.COMPLETE)
-	assert(chapter_four.complete_hint.visible)
-
-	chapter_four._play_video()
 	assert(chapter_four.playback_state == CinematicPlayer.PlaybackState.PLAYING)
 	assert(not chapter_four.complete_hint.visible)
+	assert(not chapter_four.final_card.visible)
+	assert(chapter_four.video_player.visible)
 
-	print("[CINEMATIC_FLOW] PASS prologue, first-chapter transition, chapter four ending and replay")
+	print("[CINEMATIC_FLOW] PASS prologue, first-chapter transition and automatic chapter four replay")
 	quit(0)
 
 
-func _seek_to_video_end(cinematic: CinematicPlayer) -> void:
+func _seek_to_video_end(cinematic: CinematicPlayer, expect_replay := false) -> void:
 	var stream_length := cinematic.video_player.get_stream_length()
 	assert(stream_length > 1.0)
 	cinematic.video_player.stream_position = stream_length - 1.5
 	if not cinematic.video_player.is_playing():
 		cinematic.video_player.play()
 	var deadline := Time.get_ticks_msec() + 8000
-	while is_instance_valid(cinematic) and cinematic.playback_state == CinematicPlayer.PlaybackState.PLAYING and Time.get_ticks_msec() < deadline:
+	while Time.get_ticks_msec() < deadline:
+		if not is_instance_valid(cinematic):
+			break
+		if expect_replay:
+			var session := root.get_node("GameSession")
+			if session.is_chapter_completed(cinematic.chapter_number) and cinematic.video_player.stream_position < 5.0:
+				break
+		elif cinematic.playback_state != CinematicPlayer.PlaybackState.PLAYING:
+			break
 		await process_frame
-	assert(
-		not is_instance_valid(cinematic) or cinematic.playback_state != CinematicPlayer.PlaybackState.PLAYING,
-		"cinematic did not reach its real finished signal"
-	)
+	if expect_replay:
+		assert(is_instance_valid(cinematic), "replaying cinematic was freed")
+		assert(root.get_node("GameSession").is_chapter_completed(cinematic.chapter_number))
+		assert(cinematic.playback_state == CinematicPlayer.PlaybackState.PLAYING)
+		assert(cinematic.video_player.stream_position < 5.0, "cinematic did not restart from the beginning")
+	else:
+		assert(
+			not is_instance_valid(cinematic) or cinematic.playback_state != CinematicPlayer.PlaybackState.PLAYING,
+			"cinematic did not reach its real finished signal"
+		)

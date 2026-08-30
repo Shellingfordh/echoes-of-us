@@ -2,7 +2,7 @@ class_name CinematicPlayer
 extends Control
 
 ## 序章与第四章共用的全屏视频播放器。
-## 序章播放完进入第一章；第四章播放完停在最终画面，可重播或从序章重开。
+## 序章播放完进入第一章；第四章播放完自动从头循环，可从序章重开。
 
 enum PlaybackState { PLAYING, COMPLETE, TRANSITIONING }
 
@@ -10,6 +10,7 @@ enum PlaybackState { PLAYING, COMPLETE, TRANSITIONING }
 @export_file("*.tscn") var next_scene_path := ""
 @export_file("*.tscn") var restart_scene_path := "res://scenes/cinematics/prologue.tscn"
 @export var reset_session_on_ready := false
+@export var auto_replay := false
 @export var skip_hint_text := "Enter / Space 跳过"
 @export var complete_hint_text := "Enter / Space 重播  ·  R 从序章重新开始"
 @export var fallback_title := "余响：牵挂"
@@ -41,14 +42,17 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
-	if event.is_action_pressed(&"reset_checkpoint") and playback_state == PlaybackState.COMPLETE:
+	if event.is_action_pressed(&"reset_checkpoint") and (playback_state == PlaybackState.COMPLETE or auto_replay):
 		_restart_game()
 		get_viewport().set_input_as_handled()
 		return
 	if not event.is_action_pressed(&"start_game"):
 		return
 	if playback_state == PlaybackState.PLAYING:
-		_finish_cinematic(false)
+		if auto_replay:
+			_play_video()
+		else:
+			_finish_cinematic(false)
 	elif playback_state == PlaybackState.COMPLETE:
 		_play_video()
 	get_viewport().set_input_as_handled()
@@ -67,8 +71,14 @@ func _play_video() -> void:
 
 
 func _on_video_finished() -> void:
-	if playback_state == PlaybackState.PLAYING:
-		_finish_cinematic(true)
+	if playback_state != PlaybackState.PLAYING:
+		return
+	if auto_replay:
+		if chapter_number > 0:
+			get_node("/root/GameSession").complete_chapter(chapter_number)
+		_play_video()
+		return
+	_finish_cinematic(true)
 
 
 func _finish_cinematic(preserve_last_frame: bool) -> void:
