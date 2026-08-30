@@ -43,11 +43,12 @@ func _input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
 	if event.is_action_pressed(&"reset_checkpoint") and (playback_state == PlaybackState.COMPLETE or auto_replay):
-		_restart_game()
 		get_viewport().set_input_as_handled()
+		_restart_game()
 		return
 	if not event.is_action_pressed(&"start_game"):
 		return
+	get_viewport().set_input_as_handled()
 	if playback_state == PlaybackState.PLAYING:
 		if auto_replay:
 			_play_video()
@@ -55,7 +56,6 @@ func _input(event: InputEvent) -> void:
 			_finish_cinematic(false)
 	elif playback_state == PlaybackState.COMPLETE:
 		_play_video()
-	get_viewport().set_input_as_handled()
 
 
 func _play_video() -> void:

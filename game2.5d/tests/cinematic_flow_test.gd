@@ -58,6 +58,8 @@ func _run() -> void:
 	assert(not chapter_four.complete_hint.visible)
 	assert(not chapter_four.final_card.visible)
 	assert(chapter_four.video_player.visible)
+	assert(chapter_four.skip_hint.visible)
+	assert(chapter_four.skip_hint.text == "Enter / Space：从头播放第四章\nR：返回序章")
 
 	print("[CINEMATIC_FLOW] PASS prologue, first-chapter transition and automatic chapter four replay")
 	quit(0)
