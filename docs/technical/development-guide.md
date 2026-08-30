@@ -9,9 +9,9 @@
 启动方式：
 
 1. 打开项目；
-2. 确认并导入 `game/project.godot`；
+2. 确认并导入 `game2.5d/project.godot`；
 3. 运行 Main Scene；
-4. 确认 Level 01 可以进入。
+4. 确认序章结束后可以进入第一章。
 
 ---
 

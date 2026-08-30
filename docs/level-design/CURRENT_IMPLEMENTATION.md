@@ -2,7 +2,7 @@
 
 > 状态：当前执行版本  
 > 剧情依据：`docs/narrative/04_剧情需求 - 副本.md`  
-> 运行工程：`game/`
+> 运行工程：`game2.5d/`
 
 本文件用于锁定当前 Godot 原型与剧情需求的对应关系。目录中仍保留的“路人失物”“向外跑”“无限延伸”等文档属于历史方案，不再指导当前制作。
 
@@ -21,7 +21,7 @@
 
 | 需求 | 当前实现证据 |
 | --- | --- |
-| SR-001 序章红线 | `FullDemoWorld.Layout.PROLOGUE` 的两阶段无对白演出 |
+| SR-001 序章红线 | `game2.5d/scenes/cinematics/prologue.tscn` 的全屏序章演出 |
 | SR-002 固定观察与信息差 | 序章固定观察；第一幕成年女儿、第二幕年轻母亲的角色视角切换 |
 | SR-003 黄色旧雨伞 | 第一幕冲突与记忆入口、第三幕主动锚定、尾声门后保留 |
 | SR-004 第一次显线 | 距离达到阈值后从 Hidden 进入 Tense |
@@ -41,9 +41,12 @@
 ## 运行与验证
 
 ```bash
-godot --path game
-godot --headless --path game --script res://scripts/tests/smoke_test.gd
+godot --path game2.5d
+godot --headless --path game2.5d --script res://tests/smoke_25d.gd
+godot --headless --path game2.5d --script res://tests/chapter01_flow_test.gd
+godot --headless --path game2.5d --script res://tests/chapter02_flow_test.gd
+godot --headless --path game2.5d --script res://tests/chapter03_playability_test.gd
+godot --headless --path game2.5d --script res://tests/cinematic_flow_test.gd
 ```
 
-自动化流程会从序章一直推进到尾声，并验证暂停、静音、减少动态效果、`D001–D040` 对白目录、牵挂线状态转换和关键剧情检查点。
-
+自动化测试分别覆盖工程加载、第一至第三章玩法流程、章节衔接和序章/第四章演出，并验证牵挂线状态转换与关键剧情检查点。

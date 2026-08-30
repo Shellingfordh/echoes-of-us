@@ -87,8 +87,6 @@ Relationship Physics / 关系物理
 - 第一章场景美术、角色立绘、中文字体与对话 UI；
 - 第一章、第二章的无界面流程测试。
 
-`game/` 保留早期四幕原型，`game-x/` 保留第一章开发实验版本；二者均不是当前主工程入口。
-
 开发验证版本：
 
 > Godot 4.7.2（工程保持 Godot 4.x Compatibility Renderer 配置）
@@ -145,9 +143,6 @@ echoes-of-us/
 │   ├── scripts/
 │   ├── tests/
 │   └── ui/
-
-├── game/                     # 早期四幕原型（保留）
-├── game-x/                   # 第一章开发实验版本（保留）
 
 └── _artwork/
 ```
