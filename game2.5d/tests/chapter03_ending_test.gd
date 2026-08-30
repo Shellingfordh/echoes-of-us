@@ -10,13 +10,8 @@ func _run() -> void:
 	assert(packed != null)
 	var chapter := packed.instantiate() as Chapter3Game
 	root.add_child(chapter)
+	current_scene = chapter
 	await process_frame
-
-	var ending_video := chapter.get_node("HUD/EndingVideo") as VideoStreamPlayer
-	var ending_controls := chapter.get_node("HUD/EndingControls") as Label
-	assert(ending_video != null and ending_video.stream != null, "ending video must be embedded in the project")
-	assert(not ending_video.visible)
-	assert(not ending_controls.visible)
 
 	chapter.start_game()
 	chapter.debug_load_level(2)
@@ -29,31 +24,21 @@ func _run() -> void:
 	assert(chapter.ending_phase == Chapter3Game.EndingPhase.STORY)
 	assert(chapter.end_index == 0)
 
-	var automatic_movie_steps := ceili(
+	var automatic_transition_steps := ceili(
 		((Chapter3Game.END_SCRIPT.size() - 1) * Chapter3Game.ENDING_LINE_DURATION + Chapter3Game.ENDING_FINAL_HOLD_DURATION + 0.2)
 		/ (1.0 / 30.0)
 	)
-	for _step in range(automatic_movie_steps):
+	for _step in range(automatic_transition_steps):
 		chapter._physics_process(1.0 / 30.0)
-	assert(chapter.ending_phase == Chapter3Game.EndingPhase.MOVIE)
-	assert(ending_video.visible)
-	assert(not ending_controls.visible)
+	assert(chapter.ending_phase == Chapter3Game.EndingPhase.TRANSITIONING)
+	await process_frame
+	await process_frame
 
-	if DisplayServer.get_name() == "headless":
-		chapter._finish_ending_movie(false)
-	else:
-		var playback_deadline := Time.get_ticks_msec() + 10000
-		while chapter.ending_phase == Chapter3Game.EndingPhase.MOVIE and Time.get_ticks_msec() < playback_deadline:
-			await process_frame
-	assert(chapter.ending_phase == Chapter3Game.EndingPhase.COMPLETE)
-	assert(ending_video.visible == (DisplayServer.get_name() != "headless"))
-	assert(ending_controls.visible)
+	var chapter_four := current_scene as CinematicPlayer
+	assert(chapter_four != null, "third chapter did not load the fourth chapter cinematic")
+	assert(chapter_four.chapter_number == 4)
+	assert(chapter_four.video_player.stream != null)
+	assert(root.get_node("GameSession").is_chapter_completed(3))
 
-	chapter.start_game()
-	assert(chapter.game_state == Chapter3Game.GameState.PLAY)
-	assert(chapter.ending_phase == Chapter3Game.EndingPhase.STORY)
-	assert(not ending_video.visible)
-	assert(not ending_controls.visible)
-
-	print("[CHAPTER03_ENDING] PASS story, movie, final card and restart flow")
+	print("[CHAPTER03_ENDING] PASS story close and automatic chapter four transition")
 	quit(0)

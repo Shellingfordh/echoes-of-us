@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="余响：牵挂"
-run/main_scene="uid://b7rb68tyh0wsk"
+run/main_scene="res://scenes/cinematics/prologue.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 

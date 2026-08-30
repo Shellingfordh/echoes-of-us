@@ -45,10 +45,20 @@ func _run() -> void:
 	chapter_three.mother["x"] = chapter_three.level["exit_x"] + 100.0
 	chapter_three._check_level_complete()
 	assert(session.is_chapter_completed(3), "third chapter completion was not persisted")
+	chapter_three._start_chapter_four()
+	await process_frame
+	await process_frame
+
+	var chapter_four := current_scene as CinematicPlayer
+	assert(chapter_four != null, "third chapter did not load the fourth chapter cinematic")
+	assert(session.current_chapter == 4, "fourth chapter entry was not persisted")
+	chapter_four._finish_cinematic(false)
+	assert(session.is_chapter_completed(4), "fourth chapter completion was not persisted")
+	assert(chapter_four.playback_state == CinematicPlayer.PlaybackState.COMPLETE)
 
 	var main_script := FileAccess.get_file_as_string("res://scripts/main/main.gd")
 	assert(main_script.contains("complete_chapter(1)"))
 	assert(main_script.contains("change_scene_to_file(\"res://scenes/chapter2/chapter2.tscn\")"))
 
-	print("[CHAPTER_PROGRESSION] PASS chapter 1, chapter 2 and chapter 3 share one session and scene chain")
+	print("[CHAPTER_PROGRESSION] PASS chapters 1-4 share one session and scene chain")
 	quit(0)
