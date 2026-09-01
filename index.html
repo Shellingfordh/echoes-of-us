@@ -1544,20 +1544,19 @@
 
       .media-layer{
         padding:
-          12px
+          max(10px, env(safe-area-inset-top))
           10px
-          calc(12px + env(safe-area-inset-bottom));
+          max(10px, env(safe-area-inset-bottom))
+          10px;
       }
 
       .media-shell{
         width:100%;
-        height:calc(100% - 4px);
-
-        padding:17px;
-
+        height:100%;
+        max-height:100%;
+        padding:14px;
         border-radius:22px;
-
-        gap:14px;
+        gap:12px;
       }
 
       .media-heading{
@@ -1580,19 +1579,19 @@
 
       .trailer-panel{
         grid-template-columns:1fr;
-
-        grid-template-rows:
-          minmax(0,1fr)
-          auto;
-
-        gap:14px;
+        grid-template-rows:minmax(0,1fr) auto;
+        gap:12px;
+        min-height:0;
+        height:100%;
       }
 
       .trailer-panel video{
         width:100%;
-
+        height:100%;
         max-height:100%;
-
+        min-height:0;
+        aspect-ratio:auto;
+        object-fit:contain;
         border-radius:14px;
       }
 
@@ -1693,6 +1692,39 @@
       }
     }
 
+    /* Mobile landscape / short-height protection */
+    @media(max-width:760px) and (max-height:520px){
+      .media-shell{
+        padding:10px;
+        gap:8px;
+      }
+
+      .media-heading{
+        padding-bottom:8px;
+      }
+
+      .media-heading h2{
+        font-size:23px;
+      }
+
+      .media-heading p{
+        margin-bottom:3px;
+      }
+
+      .trailer-panel{
+        gap:8px;
+      }
+
+      .media-note{
+        display:none;
+      }
+
+      .media-close{
+        width:36px;
+        height:36px;
+      }
+    }
+
     /*
       ============================================================
       VERY SMALL PHONES
@@ -1746,7 +1778,7 @@
       }
     }
   </style>
-</head>
+<script type="text/javascript" nonce="e7d262a1f44d41cf8fa46fdbca2" src="//injections.adguard.org?ts=1788227164709&amp;type=content-script&amp;dmn=chatgpt.com&amp;url=https%3A%2F%2Fchatgpt.com%2Fbackend-api%2Festuary%2Fcontent%3Fid%3Dfile_0000000019a08209b91be99e666444b0%26ts%3D496730%26p%3Dfs%26cid%3D1%26sig%3Dc6df33e05539f3d5418d2c190ecff19cbf2e66e2ef266b7198c621b0a263ab54%26v%3D0&amp;app=com.google.Chrome&amp;css=2&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-push&amp;st-loc&amp;st-java&amp;st-dnt"></script><script type="text/javascript" nonce="e7d262a1f44d41cf8fa46fdbca2" src="//injections.adguard.org?ts=1788227164709&amp;name=Image%20Downloader&amp;name=m3u8%E8%A7%86%E9%A2%91%E4%BE%A6%E6%B5%8B%E4%B8%8B%E8%BD%BD%E5%99%A8%E3%80%90%E8%87%AA%E5%8A%A8%E5%97%85%E6%8E%A2%E3%80%91&amp;name=AdGuard%20Assistant&amp;name=AdGuard%20Extra&amp;type=user-script"></script></head>
 
 <body>
 
@@ -1812,8 +1844,9 @@
         <button
           id="sound"
           type="button"
+          aria-pressed="true"
         >
-          声音 · 关
+          声音 · 开
         </button>
 
       </div>
@@ -2224,7 +2257,8 @@
   <audio
     id="ambience"
     loop
-    preload="none"
+    autoplay
+    preload="auto"
     src="game2.5d/art/House In a Forest Loop.ogg"
   ></audio>
 
@@ -2662,14 +2696,10 @@
       .querySelector('#openMemory')
       .onclick = () => {
 
-        layer.classList.add(
-          'open'
-        );
-
-        layer.setAttribute(
-          'aria-hidden',
-          'false'
-        );
+        // “进入记忆”直接进入记忆影像。
+        // 点击本身属于用户手势，因此移动端 Safari / Chrome
+        // 可以正常尝试播放视频。
+        openMemoryVideo();
       };
 
 
@@ -2705,33 +2735,70 @@
       );
 
 
+    // 默认开启声音。浏览器若因自动播放策略拦截，
+    // 第一次用户交互时会再次尝试播放。
+    let soundEnabled = true;
+
+    function updateSoundButton(){
+      sound.textContent =
+        soundEnabled ? '声音 · 开' : '声音 · 关';
+
+      sound.setAttribute(
+        'aria-pressed',
+        String(soundEnabled)
+      );
+    }
+
+    async function startAmbience(){
+      if(!soundEnabled){
+        return;
+      }
+
+      try{
+        await audio.play();
+        updateSoundButton();
+      }catch{
+        // 自动播放被浏览器拦截时保持“开”状态；
+        // 用户第一次点击页面后再尝试。
+        updateSoundButton();
+      }
+    }
+
     sound.onclick =
       async () => {
 
         if(audio.paused){
 
-          try{
-
-            await audio.play();
-
-            sound.textContent =
-              '声音 · 开';
-
-          }catch{
-
-            sound.textContent =
-              '声音不可用';
-          }
+          soundEnabled = true;
+          await startAmbience();
 
         }else{
 
+          soundEnabled = false;
           audio.pause();
-
-          sound.textContent =
-            '声音 · 关';
+          updateSoundButton();
         }
 
       };
+
+    // 页面加载时默认尝试播放
+    startAmbience();
+
+    // iOS / Safari / Chrome 对带声音的 autoplay 有限制。
+    // 任意首次用户交互后重新尝试，不改变默认“开”的状态。
+    ['pointerdown','touchstart','keydown'].forEach(eventName => {
+      document.addEventListener(
+        eventName,
+        () => {
+          if(soundEnabled && audio.paused){
+            startAmbience();
+          }
+        },
+        {once:true, passive:true}
+      );
+    });
+
+    updateSoundButton();
 
 
     /*
@@ -2769,6 +2836,57 @@
       document.querySelector(
         '#promoVideo'
       );
+
+
+    const MEMORY_VIDEO_URL =
+      'https://pub-2ebd6dec12794e68bb1e67df08102466.r2.dev/prologue.mp4';
+
+    function openMemoryVideo(){
+
+      mediaTitle.textContent =
+        '进入记忆';
+
+      mediaEyebrow.textContent =
+        'MEMORY · PROLOGUE';
+
+      trailerPanel.hidden =
+        false;
+
+      guidePanel.hidden =
+        true;
+
+      // 切换到记忆视频
+      if(promoVideo.src !== MEMORY_VIDEO_URL){
+        promoVideo.src = MEMORY_VIDEO_URL;
+      }
+
+      mediaLayer.classList.add(
+        'open'
+      );
+
+      mediaLayer.setAttribute(
+        'aria-hidden',
+        'false'
+      );
+
+      // 进入记忆是明确的点击手势，立即播放
+      promoVideo.currentTime = 0;
+
+      const playPromise =
+        promoVideo.play();
+
+      if(playPromise && typeof playPromise.catch === 'function'){
+        playPromise.catch(() => {
+          // 某些浏览器仍可能阻止自动播放，此时 controls 保持可用。
+        });
+      }
+
+      document
+        .querySelector('#closeMedia')
+        .focus({
+          preventScroll:true
+        });
+    }
 
 
     function openMedia(type){
