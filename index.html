@@ -1778,7 +1778,7 @@
       }
     }
   </style>
-<script type="text/javascript" nonce="e7d262a1f44d41cf8fa46fdbca2" src="//injections.adguard.org?ts=1788227164709&amp;type=content-script&amp;dmn=chatgpt.com&amp;url=https%3A%2F%2Fchatgpt.com%2Fbackend-api%2Festuary%2Fcontent%3Fid%3Dfile_0000000019a08209b91be99e666444b0%26ts%3D496730%26p%3Dfs%26cid%3D1%26sig%3Dc6df33e05539f3d5418d2c190ecff19cbf2e66e2ef266b7198c621b0a263ab54%26v%3D0&amp;app=com.google.Chrome&amp;css=2&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-push&amp;st-loc&amp;st-java&amp;st-dnt"></script><script type="text/javascript" nonce="e7d262a1f44d41cf8fa46fdbca2" src="//injections.adguard.org?ts=1788227164709&amp;name=Image%20Downloader&amp;name=m3u8%E8%A7%86%E9%A2%91%E4%BE%A6%E6%B5%8B%E4%B8%8B%E8%BD%BD%E5%99%A8%E3%80%90%E8%87%AA%E5%8A%A8%E5%97%85%E6%8E%A2%E3%80%91&amp;name=AdGuard%20Assistant&amp;name=AdGuard%20Extra&amp;type=user-script"></script></head>
+<script type="text/javascript" nonce="e7d262a1f44d41cf8fa46fdbca2" src="//injections.adguard.org?ts=1788230764758&amp;type=content-script&amp;dmn=chatgpt.com&amp;url=https%3A%2F%2Fchatgpt.com%2Fbackend-api%2Festuary%2Fcontent%3Fid%3Dfile_0000000032d081fda1af0ec50fd08807%26ts%3D496730%26p%3Dfs%26cid%3D1%26sig%3D267d1cc39a0490ae552e3ec2a529b25c1ef3b40d137c607335f7f26927a6d027%26v%3D0&amp;app=com.google.Chrome&amp;css=2&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-push&amp;st-loc&amp;st-java&amp;st-dnt"></script><script type="text/javascript" nonce="e7d262a1f44d41cf8fa46fdbca2" src="//injections.adguard.org?ts=1788230764758&amp;name=Image%20Downloader&amp;name=m3u8%E8%A7%86%E9%A2%91%E4%BE%A6%E6%B5%8B%E4%B8%8B%E8%BD%BD%E5%99%A8%E3%80%90%E8%87%AA%E5%8A%A8%E5%97%85%E6%8E%A2%E3%80%91&amp;name=AdGuard%20Assistant&amp;name=AdGuard%20Extra&amp;type=user-script"></script></head>
 
 <body>
 
@@ -2000,7 +2000,7 @@
           target="_blank"
           rel="noopener noreferrer"
         >
-          进入游戏
+          进入游戏 · macOS
         </a>
 
       </div>
@@ -2696,9 +2696,8 @@
       .querySelector('#openMemory')
       .onclick = () => {
 
-        // “进入记忆”直接进入记忆影像。
-        // 点击本身属于用户手势，因此移动端 Safari / Chrome
-        // 可以正常尝试播放视频。
+        // “进入记忆”直接打开序章视频。
+        // 视频打开期间会暂停页面背景音。
         openMemoryVideo();
       };
 
@@ -2720,8 +2719,19 @@
 
     /*
       ============================================================
-      AMBIENCE
+      AUDIO STATE
       ============================================================
+      soundEnabled = 用户是否允许页面背景音。
+      videoWasPlayingAudio = 打开视频前，背景音是否确实正在播放。
+
+      规则：
+      1. 默认“声音 · 开”。
+      2. 视频播放时，背景音强制暂停。
+      3. 视频播放结束/关闭后：
+         - 如果用户之前是“开”，恢复背景音；
+         - 如果用户之前手动关了声音，则绝不自动恢复。
+      4. 视频播放期间点击“声音 · 开/关”只改变用户偏好，
+         不会让背景音盖住视频。
     */
 
     const audio =
@@ -2735,13 +2745,18 @@
       );
 
 
-    // 默认开启声音。浏览器若因自动播放策略拦截，
-    // 第一次用户交互时会再次尝试播放。
     let soundEnabled = true;
 
+    // 打开视频前记录背景音当时是否真的在播放。
+    let videoWasPlayingAudio = false;
+
+
     function updateSoundButton(){
+
       sound.textContent =
-        soundEnabled ? '声音 · 开' : '声音 · 关';
+        soundEnabled
+          ? '声音 · 开'
+          : '声音 · 关';
 
       sound.setAttribute(
         'aria-pressed',
@@ -2749,56 +2764,94 @@
       );
     }
 
+
     async function startAmbience(){
+
       if(!soundEnabled){
         return;
       }
 
       try{
+
         await audio.play();
-        updateSoundButton();
+
       }catch{
-        // 自动播放被浏览器拦截时保持“开”状态；
-        // 用户第一次点击页面后再尝试。
-        updateSoundButton();
+        // 浏览器 autoplay policy 拦截时保持“开”状态。
+        // 后续用户手势会再次尝试。
       }
+
+      updateSoundButton();
     }
+
+
+    function stopAmbienceForVideo(){
+
+      // 只记录“打开视频这一刻”背景音是否真的在播放。
+      // 如果它本来就是暂停状态，就不要在视频结束后擅自播放。
+      videoWasPlayingAudio =
+        !audio.paused &&
+        !audio.ended;
+
+      audio.pause();
+    }
+
+
+    function restoreAmbienceAfterVideo(){
+
+      // 用户已经手动关闭声音：
+      // 无论视频播放前是什么状态，都不能自动打开。
+      if(!soundEnabled){
+        return;
+      }
+
+      // 只有打开视频前背景音确实在播放，才恢复。
+      if(!videoWasPlayingAudio){
+        return;
+      }
+
+      startAmbience();
+    }
+
 
     sound.onclick =
       async () => {
 
-        if(audio.paused){
+        if(soundEnabled){
 
-          soundEnabled = true;
-          await startAmbience();
+          // 用户明确关闭声音。
+          soundEnabled = false;
+
+          audio.pause();
 
         }else{
 
-          soundEnabled = false;
-          audio.pause();
-          updateSoundButton();
+          // 用户明确重新开启声音。
+          soundEnabled = true;
+
+          // 如果当前视频正在播放，仍然不能让背景音播放。
+          if(
+            promoVideo &&
+            !promoVideo.paused &&
+            !promoVideo.ended
+          ){
+
+            updateSoundButton();
+            return;
+          }
+
+          await startAmbience();
         }
 
+        updateSoundButton();
       };
 
-    // 页面加载时默认尝试播放
-    startAmbience();
 
-    // iOS / Safari / Chrome 对带声音的 autoplay 有限制。
-    // 任意首次用户交互后重新尝试，不改变默认“开”的状态。
-    ['pointerdown','touchstart','keydown'].forEach(eventName => {
-      document.addEventListener(
-        eventName,
-        () => {
-          if(soundEnabled && audio.paused){
-            startAmbience();
-          }
-        },
-        {once:true, passive:true}
-      );
-    });
-
+    /*
+      页面加载时默认尝试播放。
+      浏览器如果拦截 autoplay，会在首次用户交互后重试。
+    */
     updateSoundButton();
+    startAmbience();
 
 
     /*
@@ -2841,6 +2894,20 @@
     const MEMORY_VIDEO_URL =
       'https://pub-2ebd6dec12794e68bb1e67df08102466.r2.dev/prologue.mp4';
 
+    const TRAILER_VIDEO_URL =
+      'https://pub-2ebd6dec12794e68bb1e67df08102466.r2.dev/echoes_of_us.MP4';
+
+
+    function pauseVideo(){
+
+      if(!promoVideo){
+        return;
+      }
+
+      promoVideo.pause();
+    }
+
+
     function openMemoryVideo(){
 
       mediaTitle.textContent =
@@ -2855,10 +2922,23 @@
       guidePanel.hidden =
         true;
 
-      // 切换到记忆视频
-      if(promoVideo.src !== MEMORY_VIDEO_URL){
-        promoVideo.src = MEMORY_VIDEO_URL;
+
+      // 视频播放期间关闭页面背景音。
+      stopAmbienceForVideo();
+
+
+      // 切换到序章视频。
+      if(
+        promoVideo.src !==
+        MEMORY_VIDEO_URL
+      ){
+
+        promoVideo.src =
+          MEMORY_VIDEO_URL;
+
+        promoVideo.load();
       }
+
 
       mediaLayer.classList.add(
         'open'
@@ -2869,17 +2949,25 @@
         'false'
       );
 
-      // 进入记忆是明确的点击手势，立即播放
+
+      // 点击“进入记忆”本身是用户手势，
+      // 因此直接尝试播放。
       promoVideo.currentTime = 0;
 
       const playPromise =
         promoVideo.play();
 
-      if(playPromise && typeof playPromise.catch === 'function'){
+      if(
+        playPromise &&
+        typeof playPromise.catch ===
+          'function'
+      ){
+
         playPromise.catch(() => {
-          // 某些浏览器仍可能阻止自动播放，此时 controls 保持可用。
+          // 保留 controls，用户可手动点击播放。
         });
       }
+
 
       document
         .querySelector('#closeMedia')
@@ -2914,6 +3002,30 @@
         trailer;
 
 
+      if(trailer){
+
+        // 宣传片同样属于视频媒体：
+        // 打开时关闭页面背景音。
+        stopAmbienceForVideo();
+
+        if(
+          promoVideo.src !==
+          TRAILER_VIDEO_URL
+        ){
+
+          promoVideo.src =
+            TRAILER_VIDEO_URL;
+
+          promoVideo.load();
+        }
+
+      }else{
+
+        // 游戏说明不是视频，不需要关闭背景音。
+        pauseVideo();
+      }
+
+
       mediaLayer.classList.add(
         'open'
       );
@@ -2922,6 +3034,26 @@
         'aria-hidden',
         'false'
       );
+
+
+      if(trailer){
+
+        promoVideo.currentTime = 0;
+
+        const playPromise =
+          promoVideo.play();
+
+        if(
+          playPromise &&
+          typeof playPromise.catch ===
+            'function'
+        ){
+
+          playPromise.catch(() => {
+            // 浏览器阻止自动播放时由 controls 接管。
+          });
+        }
+      }
 
 
       document
@@ -2934,6 +3066,9 @@
 
     function closeMedia(){
 
+      // 先停止视频，避免关闭弹窗后视频继续产生声音。
+      pauseVideo();
+
       mediaLayer.classList.remove(
         'open'
       );
@@ -2943,8 +3078,41 @@
         'true'
       );
 
-      promoVideo.pause();
+
+      // 如果用户没有手动关闭背景音，并且视频打开前背景音
+      // 确实正在播放，则恢复背景音。
+      restoreAmbienceAfterVideo();
+
+      // 本轮视频状态已经处理完。
+      videoWasPlayingAudio = false;
     }
+
+
+    /*
+      视频自然播放结束：
+      自动恢复背景音，但遵守用户的“声音 · 关”状态。
+    */
+    promoVideo.addEventListener(
+      'ended',
+      () => {
+
+        restoreAmbienceAfterVideo();
+
+        videoWasPlayingAudio = false;
+      }
+    );
+
+
+    /*
+      视频开始真正播放时，再次确保背景音处于暂停状态。
+      这可以覆盖移动端浏览器延迟加载/延迟 play 的情况。
+    */
+    promoVideo.addEventListener(
+      'play',
+      () => {
+        audio.pause();
+      }
+    );
 
 
     document
@@ -2979,6 +3147,50 @@
           closeMedia();
         }
 
+      }
+    );
+
+
+    /*
+      ============================================================
+      FIRST USER INTERACTION / AUTOPLAY RETRY
+      ============================================================
+    */
+
+    let firstInteractionHandled =
+      false;
+
+    function retryAmbienceAfterInteraction(){
+
+      if(firstInteractionHandled){
+        return;
+      }
+
+      firstInteractionHandled = true;
+
+      if(
+        soundEnabled &&
+        !mediaLayer.classList.contains('open')
+      ){
+
+        startAmbience();
+      }
+    }
+
+
+    document.addEventListener(
+      'pointerdown',
+      retryAmbienceAfterInteraction,
+      {
+        passive:true
+      }
+    );
+
+    document.addEventListener(
+      'keydown',
+      retryAmbienceAfterInteraction,
+      {
+        passive:true
       }
     );
 
